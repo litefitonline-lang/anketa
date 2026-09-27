@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05090B">
+<meta name="robots" content="noindex">
+<title>Анкета Lite Fit — первый шаг к тренировкам</title>
+<link rel="icon" href="data:image/png;base64,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">
+<style>html,body{margin:0;background:#05090B;min-height:100%}body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap&subset=cyrillic" rel="stylesheet">
+
+<style>
+#lf-anketa{--bg:#05090B;--card:#0C1618;--line:#1E3A3C;--line2:#2A4B4D;--accent:#3ED6CE;--on-accent:#04211F;--text:#F2F7F7;--muted:#8FA5A7;--badge:#FF9A52;--badge-bg:#3A2210;--err:#FF8B7B;box-sizing:border-box!important;width:100%!important;max-width:480px!important;margin:0 auto!important;padding:28px 20px 36px!important;background:#05090B!important;color:#F2F7F7!important;font-family:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif!important;font-size:16px!important;line-height:1.5!important;text-align:left!important;-webkit-font-smoothing:antialiased!important;scroll-margin-top:16px!important}
+#lf-anketa.in-taplink{padding:8px 0 16px!important;background:transparent!important}
+#lf-anketa *,#lf-anketa *::before,#lf-anketa *::after{box-sizing:border-box!important}
+#lf-anketa *{color:inherit!important;font-family:inherit!important;letter-spacing:normal;text-transform:none!important;text-shadow:none!important}
+#lf-anketa p,#lf-anketa h2{margin:0!important}
+
+/* демо-плашка */
+#lf-anketa .lf-home{display:inline-flex!important;align-items:center!important;gap:4px!important;margin:0 0 18px -6px!important;padding:6px!important;font-size:14px!important;color:#8FA5A7!important;text-decoration:none!important}
+#lf-anketa .lf-home svg{width:18px!important;height:18px!important}
+#lf-anketa .lf-demo{margin:0 0 20px!important;padding:10px 14px!important;border-radius:12px!important;background:#3A2210!important;color:#FF9A52!important;font-size:13px!important;line-height:1.4!important}
+
+/* прогресс */
+#lf-anketa .lf-progress{display:flex!important;align-items:center!important;margin-bottom:14px!important;padding:4px 2px!important}
+#lf-anketa .lf-dot{flex:none!important;width:44px!important;height:36px!important;background-color:transparent!important;background-position:center!important;background-size:contain!important;background-repeat:no-repeat!important;filter:grayscale(1) brightness(.7)!important;opacity:.28!important;transition:filter .4s,opacity .4s,transform .4s!important}
+#lf-anketa .lf-dot.done{filter:none!important;opacity:.8!important}
+#lf-anketa .lf-dot.now{filter:drop-shadow(0 0 6px rgba(62,214,206,.75)) drop-shadow(0 0 14px rgba(62,214,206,.35))!important;opacity:1!important;transform:scale(1.08)!important}
+#lf-anketa .lf-link{flex:1!important;height:2px!important;min-width:4px!important;margin:0 4px!important;border-radius:2px!important;background:#1E3A3C!important;transition:background .4s!important}
+#lf-anketa .lf-link.done{background:#3ED6CE!important}
+#lf-anketa .lf-stepnum{font-size:13px!important;color:#8FA5A7!important;margin-bottom:22px!important}
+@media (max-width:360px){#lf-anketa .lf-dot{width:38px!important;height:31px!important}#lf-anketa .lf-link{margin:0 3px!important}}
+#lf-anketa .lf-note{margin:-8px 0 20px!important;padding:14px 16px!important;border-radius:16px!important;border:1px solid #2A4B4D!important;background:rgba(62,214,206,.05)!important;font-size:14px!important;line-height:1.5!important}
+#lf-anketa .lf-note b{color:#3ED6CE!important;font-weight:700!important}
+
+/* заголовок шага */
+#lf-anketa .lf-title{font-size:clamp(26px,7.4vw,32px)!important;line-height:1.15!important;font-weight:800!important;letter-spacing:-.02em!important;margin-bottom:10px!important}
+#lf-anketa .lf-lead{color:#8FA5A7!important;font-size:16px!important;margin-bottom:28px!important;max-width:40ch!important}
+
+/* вопрос */
+#lf-anketa .lf-q{margin-bottom:28px!important}
+#lf-anketa .lf-label{display:block!important;font-size:17px!important;font-weight:700!important;line-height:1.35!important;margin-bottom:4px!important}
+#lf-anketa .lf-opt-mark{display:block!important;font-weight:500!important;font-size:13px!important;color:#8FA5A7!important;margin-top:2px!important}
+#lf-anketa .lf-hint{font-size:13px!important;color:#8FA5A7!important;margin-bottom:12px!important}
+#lf-anketa .lf-label + .lf-control{margin-top:12px!important}
+#lf-anketa .lf-err{display:none!important;font-size:13px!important;color:#FF8B7B!important;margin-top:8px!important}
+#lf-anketa .lf-q.invalid .lf-err{display:block!important}
+#lf-anketa .lf-q.invalid .lf-input,#lf-anketa .lf-q.invalid .lf-choice{border-color:rgba(255,139,123,.55)!important}
+
+/* поля ввода */
+#lf-anketa .lf-input{display:block!important;width:100%!important;min-height:54px!important;margin:0!important;padding:14px 16px!important;background:#0C1618!important;border:1px solid #1E3A3C!important;border-radius:16px!important;color:#F2F7F7!important;font:inherit!important;font-size:16px!important;line-height:1.4!important;outline:none!important;-webkit-appearance:none!important;appearance:none!important;box-shadow:none!important;transition:border-color .2s!important}
+#lf-anketa textarea.lf-input{min-height:108px!important;resize:vertical!important}
+#lf-anketa .lf-input::placeholder{color:#5E7577!important;opacity:1!important}
+#lf-anketa .lf-input:focus{border-color:#3ED6CE!important}
+#lf-anketa .lf-params{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+#lf-anketa .lf-param{position:relative!important}
+#lf-anketa .lf-param .lf-input{padding-top:24px!important;padding-bottom:8px!important}
+#lf-anketa .lf-param small{position:absolute!important;left:17px!important;top:8px!important;font-size:12px!important;color:#8FA5A7!important;pointer-events:none!important}
+
+/* варианты ответа */
+#lf-anketa .lf-choices{display:flex!important;flex-direction:column!important;gap:8px!important}
+#lf-anketa .lf-choice{position:relative!important;display:flex!important;align-items:flex-start!important;gap:14px!important;width:100%!important;min-height:54px!important;margin:0!important;padding:15px 16px!important;background:#0C1618!important;border:1px solid #1E3A3C!important;border-radius:16px!important;color:#F2F7F7!important;font:inherit!important;font-size:16px!important;line-height:1.4!important;text-align:left!important;cursor:pointer!important;-webkit-appearance:none!important;appearance:none!important;transition:border-color .2s,background-color .2s!important}
+#lf-anketa .lf-choice:hover{border-color:#2A4B4D!important}
+#lf-anketa .lf-choice:focus-visible{outline:2px solid #3ED6CE!important;outline-offset:2px!important}
+#lf-anketa .lf-choice.sel{border-color:#3ED6CE!important;background:rgba(62,214,206,.06)!important}
+#lf-anketa .lf-ind{flex:none!important;width:22px!important;height:22px!important;margin-top:0!important;border:2px solid #2A4B4D!important;border-radius:50%!important;display:grid!important;place-items:center!important;transition:all .2s!important}
+#lf-anketa .lf-choice[role="checkbox"] .lf-ind{border-radius:7px!important}
+#lf-anketa .lf-choice.sel .lf-ind{border-color:#3ED6CE!important}
+#lf-anketa .lf-choice[role="radio"].sel .lf-ind::after{content:""!important;width:10px!important;height:10px!important;border-radius:50%!important;background:#3ED6CE!important}
+#lf-anketa .lf-choice[role="checkbox"].sel .lf-ind{background:#3ED6CE!important}
+#lf-anketa .lf-choice[role="checkbox"].sel .lf-ind::after{content:""!important;width:10px!important;height:6px!important;border-left:2.5px solid #04211F!important;border-bottom:2.5px solid #04211F!important;transform:translateY(-1px) rotate(-45deg)!important}
+#lf-anketa .lf-ctext{flex:1!important;min-width:0!important}
+#lf-anketa .lf-csub{display:block!important;font-size:13px!important;color:#8FA5A7!important;margin-top:2px!important}
+#lf-anketa .lf-other{margin-top:8px!important;display:none!important}
+#lf-anketa .lf-other.show{display:block!important}
+
+/* карточки тарифов */
+#lf-anketa .lf-plan{padding:18px 18px!important}
+#lf-anketa .lf-plan .lf-ind{margin-top:2px!important}
+#lf-anketa .lf-tagrow{display:flex!important;align-items:center!important;gap:8px!important;margin-bottom:4px!important}
+#lf-anketa .lf-tag{font-size:13px!important;font-weight:700!important;letter-spacing:.06em!important;color:#3ED6CE!important}
+#lf-anketa .lf-badge{font-size:12px!important;font-weight:600!important;color:#FF9A52!important;background:#3A2210!important;padding:3px 9px!important;border-radius:99px!important}
+#lf-anketa .lf-ptitle{display:block!important;font-size:18px!important;font-weight:700!important;line-height:1.3!important}
+
+/* согласие */
+#lf-anketa .lf-consent{font-size:15px!important}
+#lf-anketa .lf-consent a{color:#F2F7F7!important;text-decoration:underline!important;text-underline-offset:3px!important;text-decoration-color:#2A4B4D!important}
+
+/* кнопки */
+#lf-anketa .lf-nav{display:flex!important;gap:10px!important;margin-top:8px!important}
+#lf-anketa .lf-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;height:54px!important;margin:0!important;padding:0 22px!important;border-radius:16px!important;border:1px solid transparent!important;font:inherit!important;font-size:16px!important;font-weight:700!important;text-decoration:none!important;cursor:pointer!important;-webkit-appearance:none!important;appearance:none!important;transition:filter .2s,border-color .2s,opacity .2s!important}
+#lf-anketa .lf-btn:focus-visible{outline:2px solid #3ED6CE!important;outline-offset:3px!important}
+#lf-anketa .lf-primary{flex:1!important;background:#3ED6CE!important;color:#04211F!important}
+#lf-anketa .lf-primary:hover{filter:brightness(1.06)!important}
+#lf-anketa .lf-primary[disabled]{opacity:.6!important;cursor:progress!important}
+#lf-anketa .lf-secondary{background:transparent!important;color:#F2F7F7!important;border-color:#2A4B4D!important}
+#lf-anketa .lf-secondary:hover{border-color:#3ED6CE!important}
+#lf-anketa .lf-btn svg{width:20px!important;height:20px!important;flex:none!important}
+#lf-anketa .lf-back{width:54px!important;padding:0!important}
+#lf-anketa .lf-senderr{display:none!important;margin-top:14px!important;font-size:14px!important;color:#FF8B7B!important}
+#lf-anketa .lf-senderr.show{display:block!important}
+#lf-anketa .lf-senderr a{color:#F2F7F7!important}
+
+/* экран «отправлено» */
+#lf-anketa .lf-done{text-align:center!important;padding-top:12px!important}
+#lf-anketa .lf-done-ico{width:72px!important;height:72px!important;margin:0 auto 24px!important;border-radius:50%!important;border:1px solid #2A4B4D!important;background:#0C1618!important;display:grid!important;place-items:center!important}
+#lf-anketa .lf-done-ico svg{width:32px!important;height:32px!important}
+#lf-anketa .lf-done .lf-lead{margin:0 auto 28px!important}
+#lf-anketa .lf-done .lf-btn{width:100%!important;margin-bottom:10px!important}
+
+/* смена шага */
+#lf-anketa .lf-step{animation:lfIn .35s ease both!important}
+@keyframes lfIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#lf-anketa .lf-step{animation:none!important}#lf-anketa *{transition:none!important}}
+</style>
+
+<div id="lf-anketa" aria-live="polite"></div>
+
+<script>
+function lfInit(root){
+/* =================== НАСТРОЙКИ =================== */
+var CONFIG = {
+  // адрес отправки в существующую Google Форму (не менять)
+  action: "https://docs.google.com/forms/d/e/1FAIpQLSfhvtSZhU6-XRil7FNdhCZH4iX0bYnLe7leWR7elrKH5EBuFA/formResponse",
+  // запасная ссылка на обычную форму, если что-то пошло не так
+  fallback: "https://docs.google.com/forms/d/e/1FAIpQLSfhvtSZhU6-XRil7FNdhCZH4iX0bYnLe7leWR7elrKH5EBuFA/viewform",
+  // номера разделов Google Формы: 0,1,2… по числу разделов
+  pageHistory: "0,1,2,3,4,5",
+  siteUrl: "https://taplink.cc/litefit",
+  offerUrl: "https://docs.google.com/document/d/1ggdsTyFEWn8hu0T_QIp7G2aGGpUUXIeEM2ktiq1x2Dc/view",
+  // каналы на экране «Анкета отправлена» (пусто — кнопка скрыта)
+  tgUrl: "https://t.me/lite_fit_online",
+  maxUrl: "https://max.ru/join/BkXc82YgFe0TWviNnV1Nksk87Oi8FGVYEr8cqrwchjc",
+  // ID полей Google Формы (entry.…)
+  ids: {
+    email:        "emailAddress",
+    name:         "entry.469247190",
+    phone:        "entry.2026180074",
+    source:       "entry.1037143947",
+    format:       "entry.89533628",
+    goal:         "entry.1778098919",
+    level:        "entry.604193126",
+    expect:       "entry.1077031843",
+    obstacles:    "entry.1707841660",
+    time:         "entry.2110839459",
+    equipment:    "entry.1576651915",
+    health:       "entry.1997187910",
+    age:          "entry.1487021161",
+    height:       "entry.1048435966",
+    weight:       "entry.1656484063",
+    targetWeight: "entry.542155565",
+    consult:      "entry.364933439",
+    offer:        "entry.601355959"
+  }
+};
+/* ================================================= */
+
+var DEMO = Object.keys(CONFIG.ids).some(function(k){ return CONFIG.ids[k].indexOf("XXXX") !== -1; });
+
+// value — точный текст варианта в Google Форме (не менять без правки формы)
+var NUTRITION = "Контроль и план питания: рекомендации, КБЖУ, чек-листы (входит в формат PRO).";
+var STEPS = [
+  { title:"Давайте знакомиться",
+    lead:"Артём и Андрей на связи. Ответьте на несколько вопросов — тренер изучит вашу цель и подберёт формат. Это займёт 3–4 минуты.",
+    fields:[
+      {key:"name",  type:"text",  label:"Как вас зовут?", req:true, ac:"given-name", ph:"Имя"},
+      {key:"phone", type:"tel",   label:"Телефон для связи в Telegram или MAX", hint:"Сюда пришлём персональные рекомендации", req:true, ac:"tel", ph:"+7 900 000-00-00"},
+      {key:"email", type:"email", label:"Электронная почта", req:true, ac:"email", ph:"name@mail.ru"},
+      {key:"source",type:"radio", label:"Откуда вы о нас узнали?", other:true, options:[
+        {value:"Я ваш текущий/бывший офлайн-клиент из зала", label:"Я ваш клиент из зала — сейчас или раньше"},
+        {value:"Рекомендация от друга/знакомого", label:"Рекомендация друга или знакомого"},
+        {value:"Соцсети (Instagram/VK/Telegram)", label:"Соцсети — Instagram, VK, Telegram"}
+      ]}
+    ]},
+  { title:"Цели и опыт",
+    lead:"Чтобы программа подходила именно вам, а не «среднему человеку».",
+    fields:[
+      {key:"goal", type:"radio", label:"Какая у вас основная цель сейчас?", req:true, other:true, options:[
+        {value:"Не бросать тренировки и продолжить прогресс под контролем"},
+        {value:"Снизить вес и улучшить композицию тела"},
+        {value:"Набрать мышечную массу, стать сильнее"},
+        {value:"Прийти в тонус и укрепить здоровье"},
+        {value:"Выйти на новый уровень, преодолеть «плато»"},
+        {value:"Подготовиться к конкретному событию"}
+      ]},
+      {key:"level", type:"radio", label:"Как оцениваете свой уровень подготовки?", options:[
+        {value:"🔰 Начинающий (только планирую начать / занимаюсь менее месяца)", label:"Начинающий", sub:"Только планирую начать или занимаюсь меньше месяца"},
+        {value:"🟢 Любитель (занимаюсь периодически, есть базовое понимание)", label:"Любитель", sub:"Занимаюсь периодически, есть базовое понимание"},
+        {value:"🟡 Продвинутый (регулярно тренируюсь 6+ месяцев, знаю технику)", label:"Продвинутый", sub:"Регулярно тренируюсь 6+ месяцев, знаю технику"},
+        {value:"🔴 Опытный (глубокие знания, опыт работы с циклами и планами)", label:"Опытный", sub:"Глубокие знания, опыт работы с циклами и планами"}
+      ]}
+    ]},
+  { title:"Что для вас важно",
+    lead:"Отметьте всё, что откликается, — так мы поймём, какой формат сопровождения вам нужен.",
+    fields:[
+      {key:"expect", type:"checkbox", label:"Что вы ожидаете от сопровождения Lite Fit?", hint:"Можно выбрать несколько", req:true, other:true, options:[
+        {value:"Готовую программу тренировок, которой я буду следовать.", label:"Готовую программу, которой я буду следовать"},
+        {value:"Корректировку программы под мои ощущения и прогресс от недели к неделе.", label:"Корректировку программы под мои ощущения и прогресс"},
+        {value:NUTRITION, label:"Питание: план рациона, КБЖУ, чек-листы", sub:"Входит в формат PRO"},
+        {value:"Обратная связь по технике (с возможностью отправить видео упражнения).", label:"Обратную связь по технике", sub:"Можно отправить видео упражнения"},
+        {value:"Регулярная поддержка и мотивация в личном чате с тренером.", label:"Поддержку и мотивацию в личном чате с тренером"},
+        {value:"Финансовая экономия при сохранении качества программы.", label:"Экономию без потери качества программы"}
+      ]},
+      {key:"obstacles", type:"checkbox", label:"Что сейчас больше всего мешает тренироваться регулярно?", hint:"Можно выбрать несколько", req:true, other:true, options:[
+        {value:"Не хватает времени"},
+        {value:"Не знаю, что и как делать, с чего начать"},
+        {value:"Сложно заставить себя тренироваться регулярно"},
+        {value:"Не понимаю, как подбирать нагрузку"},
+        {value:"Есть страх сделать что-то неправильно"},
+        {value:"Начинаю и вскоре бросаю"}
+      ]}
+    ]},
+  { title:"Какой формат вам интересен?",
+    lead:"Если пока не определились — ничего страшного, поможем выбрать на консультации.",
+    fields:[
+      {key:"nutritionNote", type:"note", when:function(){ return (state.expect||[]).indexOf(NUTRITION)!==-1; },
+       html:"Вы отметили питание — оно входит в формат <b>PRO</b>. Можно начать сразу с него, а можно пройти START и перейти в PRO после финального разбора. Сомневаетесь — выберите «Не знаю», подскажем на консультации."},
+      {key:"format", type:"radio", plan:true, aria:"Формат ведения", req:true, options:[
+        {value:"Lite Fit START - первый шаг на 14 дней", tag:"START", badge:"14 дней", label:"Первый шаг к тренировкам"},
+        {value:"BASIC - полноценное сопровождение тренировок", tag:"BASIC", label:"Полноценное сопровождение тренировок"},
+        {value:"PRO - тренировки + питание + расширенное сопровождение", tag:"PRO", label:"Тренировки, питание и расширенное сопровождение"},
+        {value:"Не знаю, какой формат мне подходит. Нужна консультация", label:"Не знаю, что мне подходит", sub:"Подскажем на бесплатной консультации"}
+      ]}
+    ]},
+  { title:"Время, инвентарь и здоровье",
+    lead:"Подстроим нагрузку под ваш график и условия.",
+    fields:[
+      {key:"time", type:"radio", label:"Сколько времени в неделю готовы уделять тренировкам?", req:true, options:[
+        {value:"До 3 часов (2-3 тренировки)", label:"До 3 часов", sub:"2–3 тренировки"},
+        {value:"3-4 часа (3-4 тренировки)", label:"3–4 часа", sub:"3–4 тренировки"},
+        {value:"Более 4 часов", label:"Больше 4 часов"},
+        {value:"Пока не знаю, нужна ваша рекомендация.", label:"Пока не знаю — нужна ваша рекомендация"}
+      ]},
+      {key:"equipment", type:"checkbox", label:"Где и с чем будете заниматься?", hint:"Можно выбрать несколько", req:true, options:[
+        {value:"Доступ в тренажерный зал", label:"Есть доступ в тренажёрный зал"},
+        {value:"Только собственный вес"},
+        {value:"Гантели / гири / утяжелители", label:"Гантели, гири, утяжелители"},
+        {value:"Резиновые эспандеры / петли TRX", label:"Резиновые эспандеры, петли TRX"},
+        {value:"Турник / брусья", label:"Турник, брусья"},
+        {value:"Кардио-тренажёр (беговая, велотренажёр)", label:"Кардиотренажёр", sub:"Беговая дорожка, велотренажёр"}
+      ]},
+      {key:"health", type:"textarea", label:"Есть ли особенности здоровья, травмы или ограничения?", hint:"Если нет — так и напишите. Если есть — коротко опишите: это важно для безопасной программы.", req:true, ph:"Например: нет / беспокоит поясница после долгого сидения"},
+      {key:"params", type:"params", label:"Ваши параметры", optional:true, hint:"Помогут с первичной оценкой", items:[
+        {key:"age", label:"Возраст, лет"},
+        {key:"height", label:"Рост, см"},
+        {key:"weight", label:"Вес, кг"},
+        {key:"targetWeight", label:"Желаемый вес, кг"}
+      ]}
+    ]},
+  { title:"Бесплатная консультация",
+    lead:"15 минут онлайн: познакомимся, обсудим цель и подберём формат.",
+    fields:[
+      {key:"consult", type:"text", label:"Когда вам удобно созвониться?", req:true, ph:"Например: будни после 19:00"},
+      {key:"offer", type:"consent", req:true, value:"Ознакомлен"}
+    ]}
+];
+
+var LOGO = "data:image/png;base64,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";
+var state = {}; var step = 0;
+
+// на отдельном просмотре (не в Taplink) — тёмный фон страницы
+if (/taplink/.test(location.hostname)) root.classList.add("in-taplink");
+else { document.body.style.margin = "0"; document.body.style.background = "#05090B"; }
+
+// переход по кнопкам сайта: #anketa, #anketa-start, #anketa-basic, #anketa-pro
+var PRESET = {start:"Lite Fit START - первый шаг на 14 дней", basic:"BASIC - полноценное сопровождение тренировок", pro:"PRO - тренировки + питание + расширенное сопровождение"};
+function readHash(){ var h=""; try { h = window.top.location.hash; } catch(e){} return h || location.hash || ""; }
+function openFromHash(){
+  var q = /[?&]format=(start|basic|pro)/i.exec(location.search);
+  var m = q ? [null, q[1]] : /^#anketa(?:-(start|basic|pro))?$/i.exec(readHash()); if (!m) return;
+  if (m[1] && !root.querySelector(".lf-done")) { state.format = PRESET[m[1].toLowerCase()]; render(); }
+  if (!q) setTimeout(function(){ root.scrollIntoView({behavior:"smooth", block:"start"}); }, 150);
+}
+window.addEventListener("hashchange", openFromHash);
+try { if (window.top !== window) window.top.addEventListener("hashchange", openFromHash); } catch(e){}
+
+function el(tag, attrs, html){
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs){ if (k === "class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+  if (html != null) e.innerHTML = html;
+  return e;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+var ICON = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="#3ED6CE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  tg:'<svg viewBox="0 0 24 24" fill="none" stroke="#3ED6CE" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 4.5L2.8 11.3c-.8.3-.8 1.4 0 1.7l4.6 1.5 1.8 5.4c.2.7 1.1.9 1.6.4l2.6-2.5 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3z"/><path d="M7.4 14.5l10-6.5-7.6 7.6"/></svg>',
+  max:'<svg viewBox="0 0 24 24" fill="none" stroke="#3ED6CE" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5c4.7 0 8.5 3.4 8.5 7.7s-3.8 7.7-8.5 7.7c-1 0-2-.2-2.9-.4L4.5 20.5l1.2-3.7c-1.4-1.4-2.2-3.3-2.2-5.4 0-4.4 3.8-7.9 8.5-7.9z"/></svg>'
+};
+
+function render(){
+  root.innerHTML = "";
+  if (DEMO) root.appendChild(el("p",{class:"lf-demo"},"Демо-режим: поля ещё не связаны с Google Формой, ответы никуда не отправляются."));
+  var s = STEPS[step];
+  var wrap = el("div",{class:"lf-step"});
+  if (step === 0 && CONFIG.siteUrl) wrap.appendChild(el("a",{class:"lf-home",href:CONFIG.siteUrl}, ICON.back+"На сайт Lite Fit"));
+
+  var prog = el("div",{class:"lf-progress","aria-hidden":"true"});
+  STEPS.forEach(function(_,i){
+    if (i>0) prog.appendChild(el("span",{class:"lf-link"+(i<=step?" done":"")}));
+    var d = el("span",{class:"lf-dot"+(i<step?" done":(i===step?" now":""))});
+    d.style.backgroundImage = "url("+LOGO+")";
+    prog.appendChild(d);
+  });
+  wrap.appendChild(prog);
+  wrap.appendChild(el("p",{class:"lf-stepnum"},"Шаг "+(step+1)+" из "+STEPS.length));
+  wrap.appendChild(el("h2",{class:"lf-title"}, esc(s.title)));
+  if (s.lead) wrap.appendChild(el("p",{class:"lf-lead"}, esc(s.lead)));
+
+  s.fields.forEach(function(f){ wrap.appendChild(renderField(f)); });
+
+  var nav = el("div",{class:"lf-nav"});
+  if (step > 0){
+    var back = el("button",{type:"button",class:"lf-btn lf-secondary lf-back","aria-label":"Назад"}, ICON.back);
+    back.onclick = function(){ step--; render(); scrollTop(); };
+    nav.appendChild(back);
+  }
+  var last = step === STEPS.length-1;
+  var next = el("button",{type:"button",class:"lf-btn lf-primary"}, last ? "Отправить анкету" : "Далее");
+  next.onclick = function(){ if (validate()) { if (last) submit(next); else { step++; render(); scrollTop(); } } };
+  nav.appendChild(next);
+  wrap.appendChild(nav);
+  if (last) wrap.appendChild(el("p",{class:"lf-senderr"},'Не получилось отправить. Проверьте интернет и попробуйте ещё раз или <a href="'+CONFIG.fallback+'" target="_blank" rel="noopener">заполните анкету здесь</a>.'));
+
+  root.appendChild(wrap);
+}
+
+function qWrap(f){
+  var q = el("div",{class:"lf-q","data-key":f.key});
+  if (f.label){
+    var lab = el("span",{class:"lf-label",id:"lf-l-"+f.key}, esc(f.label) + ((!f.req) ? '<span class="lf-opt-mark">необязательно</span>' : ""));
+    q.appendChild(lab);
+  }
+  if (f.hint) q.appendChild(el("p",{class:"lf-hint"}, esc(f.hint)));
+  return q;
+}
+
+function renderField(f){
+  if (f.type==="note"){ return (f.when && !f.when()) ? document.createDocumentFragment() : el("p",{class:"lf-note"}, f.html); }
+  var q = qWrap(f);
+  var err = el("p",{class:"lf-err"});
+
+  if (f.type==="text" || f.type==="tel" || f.type==="email" || f.type==="textarea"){
+    var inp = f.type==="textarea" ? el("textarea",{class:"lf-input lf-control",rows:"3"}) : el("input",{class:"lf-input lf-control",type:f.type});
+    inp.setAttribute("aria-labelledby","lf-l-"+f.key);
+    if (f.ph) inp.setAttribute("placeholder", f.ph);
+    if (f.ac) inp.setAttribute("autocomplete", f.ac);
+    if (f.type==="tel") inp.setAttribute("inputmode","tel");
+    inp.value = state[f.key] || "";
+    inp.oninput = function(){ state[f.key] = inp.value; q.classList.remove("invalid"); };
+    if (f.type!=="textarea") inp.onkeydown = function(e){ if (e.key==="Enter"){ e.preventDefault(); root.querySelector(".lf-primary").click(); } };
+    q.appendChild(inp);
+  }
+
+  if (f.type==="radio" || f.type==="checkbox"){
+    var multi = f.type==="checkbox";
+    var list = el("div",{class:"lf-choices lf-control",role: multi ? "group" : "radiogroup"});
+    list.setAttribute(f.label ? "aria-labelledby" : "aria-label", f.label ? "lf-l-"+f.key : (f.aria||""));
+    var opts = f.options.slice();
+    if (f.other) opts.push({value:"__other__", label:"Другое"});
+    var otherInp;
+
+    opts.forEach(function(o){
+      var b = el("button",{type:"button",class:"lf-choice"+(f.plan?" lf-plan":""),role: multi ? "checkbox" : "radio"});
+      var inner = '<span class="lf-ind"></span><span class="lf-ctext">';
+      if (f.plan && o.tag) inner += '<span class="lf-tagrow"><span class="lf-tag">'+esc(o.tag)+'</span>'+(o.badge?'<span class="lf-badge">'+esc(o.badge)+'</span>':'')+'</span>';
+      inner += '<span class="'+(f.plan?"lf-ptitle":"")+'">'+esc(o.label || o.value)+'</span>';
+      if (o.sub) inner += '<span class="lf-csub">'+esc(o.sub)+'</span>';
+      inner += '</span>';
+      b.innerHTML = inner;
+
+      function isSel(){ return multi ? (state[f.key]||[]).indexOf(o.value)!==-1 : state[f.key]===o.value; }
+      function paint(){ var on = isSel(); b.classList.toggle("sel", on); b.setAttribute("aria-checked", on ? "true" : "false"); }
+      paint();
+      b.onclick = function(){
+        if (multi){
+          var arr = (state[f.key]||[]).slice(); var i = arr.indexOf(o.value);
+          if (i===-1) arr.push(o.value); else arr.splice(i,1);
+          state[f.key] = arr;
+        } else state[f.key] = o.value;
+        [].forEach.call(list.querySelectorAll(".lf-choice"), function(x){ x._paint && x._paint(); });
+        if (otherInp){ var show = multi ? state[f.key].indexOf("__other__")!==-1 : state[f.key]==="__other__"; otherInp.classList.toggle("show", show); if (show && o.value==="__other__") otherInp.focus(); }
+        q.classList.remove("invalid");
+      };
+      b._paint = paint;
+      list.appendChild(b);
+    });
+    q.appendChild(list);
+
+    if (f.other){
+      otherInp = el("input",{class:"lf-input lf-other",type:"text",placeholder:"Напишите свой вариант","aria-label":"Свой вариант"});
+      otherInp.value = state[f.key+"_other"] || "";
+      var showNow = multi ? (state[f.key]||[]).indexOf("__other__")!==-1 : state[f.key]==="__other__";
+      if (showNow) otherInp.classList.add("show");
+      otherInp.oninput = function(){ state[f.key+"_other"] = otherInp.value; q.classList.remove("invalid"); };
+      q.appendChild(otherInp);
+    }
+  }
+
+  if (f.type==="params"){
+    var grid = el("div",{class:"lf-params lf-control"});
+    f.items.forEach(function(it){
+      var box = el("label",{class:"lf-param"});
+      var inp = el("input",{class:"lf-input",type:"text",inputmode:"decimal",maxlength:"6"});
+      inp.value = state[it.key] || "";
+      inp.oninput = function(){ inp.value = inp.value.replace(/[^\d.,]/g,""); state[it.key] = inp.value; };
+      box.appendChild(inp);
+      box.appendChild(el("small",null, esc(it.label)));
+      grid.appendChild(box);
+    });
+    q.appendChild(grid);
+  }
+
+  if (f.type==="consent"){
+    var list2 = el("div",{class:"lf-choices"});
+    var c = el("button",{type:"button",class:"lf-choice lf-consent",role:"checkbox"},
+      '<span class="lf-ind"></span><span class="lf-ctext">Я ознакомлен(а) и согласен(на) с условиями <a href="'+CONFIG.offerUrl+'" target="_blank" rel="noopener">договора оферты</a></span>');
+    function paintC(){ c.classList.toggle("sel", !!state.offer); c.setAttribute("aria-checked", state.offer ? "true":"false"); }
+    paintC();
+    c.onclick = function(e){ if (e.target.tagName==="A") return; state.offer = !state.offer; paintC(); q.classList.remove("invalid"); };
+    list2.appendChild(c); q.appendChild(list2);
+  }
+
+  q.appendChild(err);
+  return q;
+}
+
+function validate(){
+  var ok = true, first = null;
+  STEPS[step].fields.forEach(function(f){
+    if (f.type==="note") return;
+    var q = root.querySelector('.lf-q[data-key="'+f.key+'"]'); var msg = "";
+    var v = state[f.key];
+    if (f.req){
+      if (f.type==="checkbox" && !(v && v.length)) msg = "Выберите хотя бы один вариант";
+      else if (f.type==="radio" && !v) msg = "Выберите вариант";
+      else if (f.type==="consent" && !v) msg = "Нужно ваше согласие с условиями оферты";
+      else if (/text|tel|email|textarea/.test(f.type) && !(v && v.trim())) msg = "Заполните это поле";
+    }
+    if (!msg && f.type==="email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())) msg = "Проверьте адрес почты — похоже, в нём опечатка";
+    if (!msg && f.type==="tel" && v && v.replace(/\D/g,"").length < 10) msg = "Проверьте номер — в нём меньше 10 цифр";
+    if (!msg && f.other){
+      var picked = f.type==="checkbox" ? (v||[]).indexOf("__other__")!==-1 : v==="__other__";
+      if (picked && !(state[f.key+"_other"]||"").trim()) msg = "Напишите свой вариант или снимите «Другое»";
+    }
+    if (q){ q.classList.toggle("invalid", !!msg); q.querySelector(".lf-err").textContent = msg; }
+    if (msg){ ok = false; if (!first) first = q; }
+  });
+  if (first) first.scrollIntoView({behavior:"smooth", block:"center"});
+  return ok;
+}
+
+function buildPayload(){
+  var p = new URLSearchParams(), ids = CONFIG.ids;
+  STEPS.forEach(function(s){ s.fields.forEach(function(f){
+    if (f.type==="note") return;
+    if (f.type==="params"){ f.items.forEach(function(it){ var v=(state[it.key]||"").trim(); if (v && ids[it.key]) p.append(ids[it.key], v); }); return; }
+    var id = ids[f.key], v = state[f.key]; if (!id || v==null || v==="") return;
+    if (f.type==="consent"){ if (v) p.append(id, f.value); return; }
+    if (f.type==="checkbox"){
+      v.forEach(function(x){ p.append(id, x==="__other__" ? "__other_option__" : x); });
+      if (v.indexOf("__other__")!==-1) p.append(id+".other_option_response", state[f.key+"_other"].trim());
+      return;
+    }
+    if (f.type==="radio" && v==="__other__"){ p.append(id,"__other_option__"); p.append(id+".other_option_response", state[f.key+"_other"].trim()); return; }
+    p.append(id, String(v).trim());
+  }); });
+  p.append("fvv","1");
+  p.append("pageHistory", CONFIG.pageHistory);
+  return p;
+}
+
+function submit(btn){
+  btn.disabled = true; btn.textContent = "Отправляем…";
+  var errBox = root.querySelector(".lf-senderr"); errBox.classList.remove("show");
+  var payload = buildPayload();
+  if (DEMO){ console.info("Lite Fit анкета (демо), данные к отправке:", payload.toString()); setTimeout(done, 600); return; }
+  fetch(CONFIG.action, {method:"POST", mode:"no-cors", body:payload})
+    .then(done)
+    .catch(function(){ btn.disabled = false; btn.textContent = "Отправить анкету"; errBox.classList.add("show"); });
+}
+
+function done(){
+  root.innerHTML = "";
+  var name = (state.name||"").trim();
+  var w = el("div",{class:"lf-step lf-done"});
+  w.appendChild(el("div",{class:"lf-done-ico"}, ICON.check));
+  w.appendChild(el("h2",{class:"lf-title"}, "Анкета отправлена"));
+  w.appendChild(el("p",{class:"lf-lead"}, (name ? esc(name)+", спасибо! " : "Спасибо! ") + "Тренер изучит ваши ответы и свяжется с вами, чтобы договориться о консультации. А пока загляните в наши каналы — там полезное о тренировках."));
+  if (CONFIG.tgUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.tgUrl,target:"_blank",rel:"noopener"}, ICON.tg+"Канал в Telegram"));
+  if (CONFIG.maxUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.maxUrl,target:"_blank",rel:"noopener"}, ICON.max+"Канал в MAX"));
+  if (CONFIG.siteUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.siteUrl}, "Вернуться на сайт"));
+  root.appendChild(w); scrollTop();
+}
+
+function scrollTop(){
+  var r = root.getBoundingClientRect();
+  if (r.top < 0) root.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+render();
+openFromHash();
+}
+
+// Taplink может вставить блок позже скрипта — ждём появления #lf-anketa
+(function(){
+  function start(){
+    var r = document.getElementById("lf-anketa");
+    if (r && !r.getAttribute("data-lf-ready")) { r.setAttribute("data-lf-ready","1"); lfInit(r); }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+  var n = 0, t = setInterval(function(){ start(); if (++n > 60) clearInterval(t); }, 250);
+  if (window.MutationObserver) new MutationObserver(start).observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
+
+</body>
+</html>
