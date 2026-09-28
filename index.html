@@ -168,7 +168,7 @@ var STEPS = [
   { title:"Давайте знакомиться",
     lead:"Артём и Андрей на связи. Ответьте на несколько вопросов — тренер изучит вашу цель и подберёт формат. Это займёт 3–4 минуты.",
     fields:[
-      {key:"name",  type:"text",  label:"Как вас зовут?", req:true, ac:"given-name", ph:"Имя"},
+      {key:"name",  type:"text",  label:"Имя и фамилия", hint:"Фамилию — по желанию", req:true, ac:"name", ph:"Например: Анна Смирнова"},
       {key:"phone", type:"tel",   label:"Телефон для связи в Telegram или MAX", hint:"Сюда пришлём персональные рекомендации", req:true, ac:"tel", ph:"+7 900 000-00-00"},
       {key:"email", type:"email", label:"Электронная почта", req:true, ac:"email", ph:"name@mail.ru"},
       {key:"source",type:"radio", label:"Откуда вы о нас узнали?", other:true, options:[
@@ -487,7 +487,7 @@ function submit(btn){
 
 function done(){
   root.innerHTML = "";
-  var name = (state.name||"").trim();
+  var name = (state.name||"").trim().split(/\s+/)[0];
   var w = el("div",{class:"lf-step lf-done"});
   w.appendChild(el("div",{class:"lf-done-ico"}, ICON.check));
   w.appendChild(el("h2",{class:"lf-title"}, "Анкета отправлена"));
