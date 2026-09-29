@@ -90,7 +90,19 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .lg.over{border-color:rgba(255,154,82,.45)}
 .lg.over .k i{background:var(--warm);box-shadow:0 0 8px rgba(255,154,82,.6)}
 .lg.over .v{color:var(--warm)}
-.rings .st.over{stroke:var(--warm);opacity:.85}
+.rings .st.low{stroke:var(--warm);opacity:.85}
+.rings .st.ok{stroke:var(--accent);opacity:1;filter:drop-shadow(0 0 6px var(--glow))}
+.rings .st.high{stroke:#FFFFFF;opacity:1;filter:drop-shadow(0 0 7px rgba(255,255,255,.55))}
+.lg .note{font-size:11.5px;font-weight:700;margin-top:3px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg.over .note,.lg.st-low .note{color:var(--warm)}
+.lg.st-low .k i{background:var(--warm);box-shadow:0 0 8px rgba(255,154,82,.6)}
+.lg.st-low .v{color:var(--warm)}
+.lg.st-ok{border-color:rgba(62,214,206,.5)}
+.lg.st-ok .k i{background:var(--accent);box-shadow:0 0 8px var(--glow)}
+.lg.st-ok .v,.lg.st-ok .note{color:var(--accent)}
+.lg.st-high{border-color:rgba(255,255,255,.4);box-shadow:0 0 16px -6px rgba(255,255,255,.5)}
+.lg.st-high .k i{background:#fff;box-shadow:0 0 8px rgba(255,255,255,.7)}
+.lg.st-high .v,.lg.st-high .note{color:#fff;text-shadow:0 0 10px rgba(255,255,255,.35)}
 .lg .v{font-size:18px;font-weight:800;margin-top:2px}
 .lg .v small{font-size:12px;font-weight:600;color:var(--muted)}
 .macros{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
@@ -286,7 +298,7 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 'use strict';
 
 /* ================= НАСТРОЙКИ ================= */
-var VERSION = '2.3.1';
+var VERSION = '2.3.2';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var LIM = { w: [30, 250, 'Вес'], kcal: [0, 10000, 'Калории'], p: [0, 1000, 'Белки'], f: [0, 1000, 'Жиры'], c: [0, 1500, 'Углеводы'], steps: [0, 100000, 'Шаги'] };
@@ -508,20 +520,24 @@ function viewToday() {
   var kc = v.kcal, st = v.steps;
   var kp = kNorm && kc != null ? kc / kNorm : 0, sp = sNorm && st != null ? st / sNorm : 0;
   var over = kNorm && kc != null && kc > kNorm * 1.03;
-  var sOver = sNorm && st != null && st > sNorm;
+  // шаги: меньше нормы – оранжевый, норма (до +10%) – бирюзовый, сверх нормы – белый
+  var sState = !sNorm || st == null ? '' : st < sNorm ? 'low' : st <= sNorm * 1.1 ? 'ok' : 'high';
+  var sNote = sState === 'low' ? 'до нормы ' + fmt(sNorm - st) : sState === 'ok' ? 'норма выполнена' : sState === 'high' ? '+' + fmt(st - sNorm) + ' сверх нормы' : '';
   var left = kNorm != null && kc != null ? kNorm - kc : null;
   h += '<div class="card hero"><div class="rings">' +
     '<svg viewBox="0 0 236 236" aria-hidden="true">' +
     '<circle class="trk" cx="118" cy="118" r="104" stroke-width="14"/>' +
     '<circle class="arc kc' + (over ? ' over' : '') + '" cx="118" cy="118" r="104" stroke-width="14" stroke-dasharray="' + dash(kp, 104) + '"' + (kp > 0 ? '' : ' opacity="0"') + '/>' +
     '<circle class="trk" cx="118" cy="118" r="82" stroke-width="9"/>' +
-    '<circle class="arc st' + (sOver ? ' over' : '') + '" cx="118" cy="118" r="82" stroke-width="9" stroke-dasharray="' + dash(sp, 82) + '"' + (sp > 0 ? '' : ' opacity="0"') + '/>' +
+    '<circle class="arc st ' + sState + '" cx="118" cy="118" r="82" stroke-width="9" stroke-dasharray="' + dash(sp, 82) + '"' + (sp > 0 ? '' : ' opacity="0"') + '/>' +
     '</svg><div class="ctr"><div class="big num">' + (kc != null ? fmt(kc) : '0') + '</div>' +
     '<div class="of">из <span class="num">' + fmt(kNorm) + '</span> ккал</div>' +
     (left != null ? '<div class="left num' + (over ? ' over' : '') + '">' + (left >= 0 ? 'осталось ' + fmt(left) : 'сверх нормы ' + fmt(-left)) + '</div>' : '<div class="left" style="color:var(--dim)">ещё не внесено</div>') +
     '</div></div>' +
-    '<div class="legend"><div class="lg' + (over ? ' over' : '') + '"><div class="k"><i></i>Калории</div><div class="v num">' + fmt(kc) + ' <small>/ ' + fmt(kNorm) + '</small></div></div>' +
-    '<div class="lg' + (sOver ? ' over' : '') + '"><div class="k"><i class="s"></i>Шаги</div><div class="v num">' + fmt(st) + ' <small>/ ' + fmt(sNorm) + '</small></div></div></div>' +
+    '<div class="legend"><div class="lg' + (over ? ' over' : '') + '"><div class="k"><i></i>Калории</div><div class="v num">' + fmt(kc) + ' <small>/ ' + fmt(kNorm) + '</small></div>' +
+    (over ? '<div class="note">выше нормы</div>' : '') + '</div>' +
+    '<div class="lg st-' + (sState || 'none') + '"><div class="k"><i class="s"></i>Шаги</div><div class="v num">' + fmt(st) + ' <small>/ ' + fmt(sNorm) + '</small></div>' +
+    (sNote ? '<div class="note">' + sNote + '</div>' : '') + '</div></div>' +
     '<div class="macros">' + [['p', 'Белки'], ['f', 'Жиры'], ['c', 'Углеводы']].map(function (m) {
       var val = v[m[0]], nm = norm[m[0]], pc = nm && val != null ? Math.min(val / nm, 1) * 100 : 0, ov = nm && val != null && val > nm * 1.1;
       return '<div class="mac"><div class="k"><span>' + m[1] + '</span></div><div class="bar"><i class="' + (ov ? 'over' : '') + '" style="width:' + pc.toFixed(1) + '%"></i></div>' +
@@ -859,22 +875,25 @@ var CONSENT = [
   ['public', 'Можно публиковать', 'Фото «до и после» в соцсетях и на сайте Lite Fit, без фамилии.']
 ];
 function consentCard() {
-  var c = (D.consent && D.consent.value) || 'private', busy = S.consentBusy;
-  return '<div class="card"><h3>Публикация ваших фото</h3><p class="sub">Решение можно поменять в любой момент. Если передумаете – уберём и то, что уже опубликовано.</p>' +
+  var c = (D.consent && D.consent.value) || 'private';
+  return '<div class="card"><h3>Публикация ваших фото</h3><p class="sub">Решение можно поменять в любой момент.</p>' +
     '<div class="consent">' + CONSENT.map(function (o) {
-      return '<button class="copt' + (c === o[0] ? ' on' : '') + '" data-consent="' + o[0] + '" role="radio" aria-checked="' + (c === o[0]) + '"' + (D.closed || busy ? ' disabled' : '') + '>' +
+      return '<button class="copt' + (c === o[0] ? ' on' : '') + '" data-consent="' + o[0] + '" role="radio" aria-checked="' + (c === o[0]) + '"' + (D.closed ? ' disabled' : '') + '>' +
         '<span class="rad"></span><span><b>' + o[1] + '</b><small>' + o[2] + '</small></span></button>';
     }).join('') + '</div>' + (D.consent && D.consent.at && c !== 'private' ? '<p class="muted" style="font-size:12px;margin:10px 0 0">Согласие дано ' + esc(D.consent.at) + '</p>' : '') + '</div>';
 }
 function setConsent(v) {
   var prev = D.consent || { value: 'private' };
   if (prev.value === v) return;
-  D.consent = { value: v, at: null }; S.consentBusy = true; render();
+  // выбор меняется сразу, сервер подтверждает в фоне; ответ учитываем только для последнего нажатия
+  var seq = S.consentSeq = (S.consentSeq || 0) + 1;
+  if (!S.consentOk) S.consentOk = prev;
+  D.consent = { value: v, at: null }; render();
   api(null, { k: KEY, a: 'consent', value: v }).then(function (res) {
-    S.consentBusy = false;
-    if (res && res.ok) { D.consent = { value: res.value, at: res.at }; toast('Сохранено', 'ok'); }
-    else { D.consent = prev; toast(errText(res), 'bad'); }
-    render();
+    if (seq !== S.consentSeq) return;
+    if (res && res.ok) { S.consentOk = null; D.consent = { value: res.value, at: res.at }; toast('Сохранено', 'ok'); }
+    else { D.consent = S.consentOk; S.consentOk = null; toast(errText(res), 'bad'); }
+    if (S.tab === 'photo') render();
   });
 }
 
