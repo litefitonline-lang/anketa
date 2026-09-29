@@ -87,6 +87,10 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .lg .k{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
 .lg .k i{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--glow)}
 .lg .k i.s{background:#9FF5EF;box-shadow:none}
+.lg.over{border-color:rgba(255,154,82,.45)}
+.lg.over .k i{background:var(--warm);box-shadow:0 0 8px rgba(255,154,82,.6)}
+.lg.over .v{color:var(--warm)}
+.rings .st.over{stroke:var(--warm);opacity:.85}
 .lg .v{font-size:18px;font-weight:800;margin-top:2px}
 .lg .v small{font-size:12px;font-weight:600;color:var(--muted)}
 .macros{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
@@ -218,6 +222,20 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .collage img{width:100%;height:100%;object-fit:cover;display:block}
 .collage figcaption{position:absolute;left:8px;bottom:8px;font-size:12px;font-weight:700;background:rgba(5,9,11,.8);padding:3px 9px;border-radius:99px}
 .collage .ph{position:absolute;inset:0;display:grid;place-items:center;color:var(--dim);font-size:13px}
+.slot .pose{width:44px;height:auto}
+.poses{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.poses figure{margin:0;border:1px solid var(--line);border-radius:14px;padding:10px 6px 8px;text-align:center;background:var(--bg)}
+.poses .pose{width:100%;max-width:92px;height:auto;display:block;margin:0 auto}
+.poses figcaption{font-size:13px;font-weight:700;margin-top:6px}
+.consent{display:flex;flex-direction:column;gap:8px}
+.copt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);transition:border-color .2s}
+.copt b{display:block;font-size:15px}
+.copt small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.copt .rad{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line2);margin-top:1px;display:grid;place-items:center}
+.copt.on{border-color:var(--accent);background:rgba(62,214,206,.06)}
+.copt.on .rad{border-color:var(--accent)}
+.copt.on .rad::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.copt[disabled]{opacity:.6;cursor:default}
 .tips{font-size:13px;color:var(--muted);margin:12px 0 0;padding-left:18px}
 .tips li{margin-bottom:4px}
 
@@ -268,7 +286,7 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 'use strict';
 
 /* ================= НАСТРОЙКИ ================= */
-var VERSION = '2.3.0';
+var VERSION = '2.3.1';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var LIM = { w: [30, 250, 'Вес'], kcal: [0, 10000, 'Калории'], p: [0, 1000, 'Белки'], f: [0, 1000, 'Жиры'], c: [0, 1500, 'Углеводы'], steps: [0, 100000, 'Шаги'] };
@@ -490,23 +508,24 @@ function viewToday() {
   var kc = v.kcal, st = v.steps;
   var kp = kNorm && kc != null ? kc / kNorm : 0, sp = sNorm && st != null ? st / sNorm : 0;
   var over = kNorm && kc != null && kc > kNorm * 1.03;
+  var sOver = sNorm && st != null && st > sNorm;
   var left = kNorm != null && kc != null ? kNorm - kc : null;
   h += '<div class="card hero"><div class="rings">' +
     '<svg viewBox="0 0 236 236" aria-hidden="true">' +
     '<circle class="trk" cx="118" cy="118" r="104" stroke-width="14"/>' +
     '<circle class="arc kc' + (over ? ' over' : '') + '" cx="118" cy="118" r="104" stroke-width="14" stroke-dasharray="' + dash(kp, 104) + '"' + (kp > 0 ? '' : ' opacity="0"') + '/>' +
     '<circle class="trk" cx="118" cy="118" r="82" stroke-width="9"/>' +
-    '<circle class="arc st" cx="118" cy="118" r="82" stroke-width="9" stroke-dasharray="' + dash(sp, 82) + '"' + (sp > 0 ? '' : ' opacity="0"') + '/>' +
+    '<circle class="arc st' + (sOver ? ' over' : '') + '" cx="118" cy="118" r="82" stroke-width="9" stroke-dasharray="' + dash(sp, 82) + '"' + (sp > 0 ? '' : ' opacity="0"') + '/>' +
     '</svg><div class="ctr"><div class="big num">' + (kc != null ? fmt(kc) : '0') + '</div>' +
     '<div class="of">из <span class="num">' + fmt(kNorm) + '</span> ккал</div>' +
     (left != null ? '<div class="left num' + (over ? ' over' : '') + '">' + (left >= 0 ? 'осталось ' + fmt(left) : 'сверх нормы ' + fmt(-left)) + '</div>' : '<div class="left" style="color:var(--dim)">ещё не внесено</div>') +
     '</div></div>' +
-    '<div class="legend"><div class="lg"><div class="k"><i></i>Калории</div><div class="v num">' + fmt(kc) + ' <small>/ ' + fmt(kNorm) + '</small></div></div>' +
-    '<div class="lg"><div class="k"><i class="s"></i>Шаги</div><div class="v num">' + fmt(st) + ' <small>/ ' + fmt(sNorm) + '</small></div></div></div>' +
+    '<div class="legend"><div class="lg' + (over ? ' over' : '') + '"><div class="k"><i></i>Калории</div><div class="v num">' + fmt(kc) + ' <small>/ ' + fmt(kNorm) + '</small></div></div>' +
+    '<div class="lg' + (sOver ? ' over' : '') + '"><div class="k"><i class="s"></i>Шаги</div><div class="v num">' + fmt(st) + ' <small>/ ' + fmt(sNorm) + '</small></div></div></div>' +
     '<div class="macros">' + [['p', 'Белки'], ['f', 'Жиры'], ['c', 'Углеводы']].map(function (m) {
       var val = v[m[0]], nm = norm[m[0]], pc = nm && val != null ? Math.min(val / nm, 1) * 100 : 0, ov = nm && val != null && val > nm * 1.1;
       return '<div class="mac"><div class="k"><span>' + m[1] + '</span></div><div class="bar"><i class="' + (ov ? 'over' : '') + '" style="width:' + pc.toFixed(1) + '%"></i></div>' +
-        '<div class="v num">' + fmt(val, 1) + ' <small>/ ' + fmt(nm) + ' г</small></div></div>';
+        '<div class="v num"' + (ov ? ' style="color:var(--warm)"' : '') + '>' + fmt(val, 1) + ' <small>/ ' + fmt(nm) + ' г</small></div></div>';
     }).join('') + '</div></div>';
 
   // форма
@@ -538,16 +557,16 @@ function fld(k, label, val, dec, mode, on) {
 }
 
 function disciplineCard() {
-  var p = period(), cells = [], full = 0, any = 0;
+  var p = period(), cells = [], full = 0, any = 0, days = 0;
   for (var i = 6; i >= 0; i--) {
     var n = p.t - i, y = ymd(n), v = byDate[y];
     var inP = p.s != null && n >= p.s && n <= p.e;
     var cnt = v ? [v.kcal, v.w, v.steps].filter(function (x) { return x != null; }).length : 0;
     var cls = !inP ? '' : cnt === 3 ? 'full' : cnt ? 'part' : '';
-    if (inP && cnt === 3) full++; if (inP && cnt) any++;
+    if (inP) days++; if (inP && cnt === 3) full++; if (inP && cnt) any++;
     cells.push('<div class="d ' + cls + (i === 0 ? ' today' : '') + '" style="' + (inP ? '' : 'opacity:.35') + '"><i></i>' + WD[new Date(n * 864e5).getUTCDay()] + '</div>');
   }
-  return '<div class="card"><h3>Последние 7 дней</h3><p class="sub">Полностью внесено: <b class="num" style="color:var(--text)">' + full + ' из 7</b>' + (any > full ? ', частично – ' + (any - full) : '') + '. Полный день – вес, калории и шаги.</p><div class="strip">' + cells.join('') + '</div></div>';
+  return '<div class="card"><h3>' + (days < 7 ? 'Дни ведения' : 'Последние 7 дней') + '</h3><p class="sub">Полностью внесено: <b class="num" style="color:var(--text)">' + full + ' из ' + days + '</b>' + (any > full ? ', частично – ' + (any - full) : '') + '. Полный день – вес, калории и шаги.</p><div class="strip">' + cells.join('') + '</div></div>';
 }
 
 var deferredInstall = null;
@@ -638,13 +657,19 @@ function viewTrain() {
 function toggleDone(btn) {
   var row = +btn.getAttribute('data-done'), date = btn.getAttribute('data-date');
   var x = (D.plan || []).filter(function (p) { return p.row === row && p.date === date; })[0];
-  if (!x || btn.classList.contains('wait')) return;
+  if (!x) return;
+  // отметка меняется сразу, сервер подтверждает в фоне; при ошибке возвращаем как было
   var want = !x.done;
-  btn.classList.add('wait');
+  x.done = want; x.pending = (x.pending || 0) + 1;
+  render();
   api(null, { k: KEY, a: 'done', row: row, date: date, done: want }).then(function (res) {
-    btn.classList.remove('wait');
-    if (res && res.ok) { x.done = want; toast(want ? 'Отмечено: выполнено' : 'Отметка снята', 'ok'); render(); }
-    else { toast(errText(res), 'bad'); if (res && /план изменился/.test(res.error || '')) refresh(false); }
+    x.pending--;
+    if (res && res.ok) { if (!x.pending) toast(want ? 'Отмечено: выполнено' : 'Отметка снята', 'ok'); }
+    else {
+      if (!x.pending) { x.done = !want; render(); }
+      toast(errText(res), 'bad');
+      if (res && /план изменился/.test(res.error || '')) refresh(false);
+    }
   });
 }
 
@@ -811,6 +836,48 @@ function photosOf(code) { return (D.photos || []).filter(function (p) { return (
 function codeOf(kindRu) { var k = KINDS.filter(function (x) { return x[1] === kindRu; })[0]; return k ? k[0] : ''; }
 function monthOf(p) { return p.n || (D.start ? Math.floor((dn(p.date) - dn(D.start)) / 30) + 1 : null); }
 
+function pose(kind, big) {
+  var f = '<g fill="currentColor" stroke="currentColor" stroke-linecap="round">';
+  if (kind === 'side') {
+    f += '<circle cx="40" cy="15" r="8.5" stroke="none"/><path d="M47.5 14l3 2.5-3 1" stroke-width="1.6" fill="none"/>' +
+      '<rect x="33.5" y="26" width="14" height="36" rx="7" stroke="none"/>' +
+      '<path d="M40 31l1.5 30" stroke-width="7" fill="none"/><path d="M39 60l-1 52M42 60l1 52" stroke-width="8.5" fill="none"/>';
+  } else {
+    f += '<circle cx="40" cy="15" r="8.5" stroke="none"/><rect x="29.5" y="26" width="21" height="36" rx="9" stroke="none"/>' +
+      '<path d="M31 30l-10 30M49 30l10 30" stroke-width="6.5" fill="none"/><path d="M35.5 60l-3.5 52M44.5 60l3.5 52" stroke-width="8.5" fill="none"/>';
+    if (kind === 'back') f += '<path d="M40 30v26" stroke="var(--bg)" stroke-width="1.6" stroke-dasharray="3 3" fill="none"/>';
+  }
+  f += '</g>';
+  var guide = big ? '<path d="M2 42h76" stroke="var(--warm)" stroke-width="1" stroke-dasharray="3 3" opacity=".8"/><text x="1" y="38" font-size="6.5" fill="var(--warm)">камера</text>' +
+    '<path d="M10 118h60" stroke="var(--line2)" stroke-width="1.5"/>' : '';
+  return '<svg class="pose" viewBox="0 0 80 122" aria-hidden="true" style="color:' + (big ? 'var(--accent)' : 'var(--dim)') + '">' + guide + f + '</svg>';
+}
+
+var CONSENT = [
+  ['private', 'Только для тренера', 'Фото видит только ваш тренер. Никуда не публикуем.'],
+  ['anon', 'Можно публиковать анонимно', 'Без лица и без имени: лицо закрываем или обрезаем.'],
+  ['public', 'Можно публиковать', 'Фото «до и после» в соцсетях и на сайте Lite Fit, без фамилии.']
+];
+function consentCard() {
+  var c = (D.consent && D.consent.value) || 'private', busy = S.consentBusy;
+  return '<div class="card"><h3>Публикация ваших фото</h3><p class="sub">Решение можно поменять в любой момент. Если передумаете – уберём и то, что уже опубликовано.</p>' +
+    '<div class="consent">' + CONSENT.map(function (o) {
+      return '<button class="copt' + (c === o[0] ? ' on' : '') + '" data-consent="' + o[0] + '" role="radio" aria-checked="' + (c === o[0]) + '"' + (D.closed || busy ? ' disabled' : '') + '>' +
+        '<span class="rad"></span><span><b>' + o[1] + '</b><small>' + o[2] + '</small></span></button>';
+    }).join('') + '</div>' + (D.consent && D.consent.at && c !== 'private' ? '<p class="muted" style="font-size:12px;margin:10px 0 0">Согласие дано ' + esc(D.consent.at) + '</p>' : '') + '</div>';
+}
+function setConsent(v) {
+  var prev = D.consent || { value: 'private' };
+  if (prev.value === v) return;
+  D.consent = { value: v, at: null }; S.consentBusy = true; render();
+  api(null, { k: KEY, a: 'consent', value: v }).then(function (res) {
+    S.consentBusy = false;
+    if (res && res.ok) { D.consent = { value: res.value, at: res.at }; toast('Сохранено', 'ok'); }
+    else { D.consent = prev; toast(errText(res), 'bad'); }
+    render();
+  });
+}
+
 function viewPhoto() {
   var n = photoMonth(), h = '<h2 class="sec-title">Фото</h2>';
   var canUp = !D.closed && !period().before && !period().after;
@@ -820,11 +887,17 @@ function viewPhoto() {
       var key = cur ? cur.date + '|' + k[0] : '', src = key && thumbs[key];
       return '<button class="slot' + (cur ? ' has' : '') + '" data-up="' + k[0] + '"' + (canUp ? '' : ' disabled') + ' aria-label="' + k[2] + (cur ? ': загружено ' + dm(cur.date) + ', нажмите, чтобы заменить' : ': добавить фото') + '">' +
         (src ? '<img src="' + src + '" alt="">' : '') +
-        (cur ? '<span class="ok">' + IC.check + '</span><span class="cap"><b>' + k[2] + '</b>' + dm(cur.date) + ' · заменить</span>' + (src ? '' : IC.body)
-          : IC.body + '<b>' + k[2] + '</b><span>' + (canUp ? 'добавить' : '—') + '</span>') +
+        (cur ? '<span class="ok">' + IC.check + '</span><span class="cap"><b>' + k[2] + '</b>' + dm(cur.date) + ' · заменить</span>' + (src ? '' : pose(k[0]))
+          : pose(k[0]) + '<b>' + k[2] + '</b><span>' + (canUp ? 'добавить' : '—') + '</span>') +
         (S.up[k[0]] ? '<span class="prog">' + S.up[k[0]] + '</span>' : '') + '</button>';
     }).join('') + '</div>' +
-    '<ul class="tips"><li>Одно и то же место и свет, утром до еды.</li><li>Та же одежда, телефон на уровне груди, в полный рост.</li><li>Можно попросить кого-то сфотографировать или поставить таймер.</li></ul></div>';
+    '</div>';
+  h += '<div class="card"><h3>Как сфотографироваться</h3><p class="sub">Так фото разных месяцев можно честно сравнить.</p>' +
+    '<div class="poses">' + KINDS.map(function (k) { return '<figure>' + pose(k[0], true) + '<figcaption>' + k[2] + '</figcaption></figure>'; }).join('') + '</div>' +
+    '<ul class="tips"><li>Фас и спина: стопы на ширине таза, руки немного в стороны. Профиль: руки вдоль тела, стоите боком к камере.</li>' +
+    '<li>В полный рост, телефон на уровне груди, прямо, без наклона. Можно попросить кого-то или поставить таймер.</li>' +
+    '<li>Каждый раз одно и то же место, свет и одежда (облегающая), утром до еды.</li></ul></div>';
+  h += consentCard();
 
   // коллаж
   var list = photosOf(S.kind), a = list[0], b = list[list.length - 1];
@@ -959,6 +1032,7 @@ document.addEventListener('click', function (e) {
   if (t.hasAttribute('data-done') && !t.disabled) { toggleDone(t); return; }
   if (t.hasAttribute('data-up') && !t.disabled) { pickPhoto(t.getAttribute('data-up')); return; }
   if (t.hasAttribute('data-kind')) { S.kind = t.getAttribute('data-kind'); render(); return; }
+  if (t.hasAttribute('data-consent') && !t.disabled) { setConsent(t.getAttribute('data-consent')); return; }
   var act = t.getAttribute('data-act');
   if (act === 'refresh') refresh(false);
   else if (act === 'retry') { app.innerHTML = '<div class="center"><img class="pulse" src="' + LOGO + '" alt="Lite Fit"><p>Загружаем ваш кабинет…</p></div>'; refresh(true); }
@@ -1020,6 +1094,7 @@ if (DEMO) (function () {
   var DB = {
     ok: true, v: VERSION, name: 'Анна Демо', trainer: 'Дарья', closed: false, today: ymd(t), editDays: 2, start: ymd(s), end: ymd(e),
     hist: hist, weight: { start: hist[0][2], now: null }, norm: { kcal: 1825, p: 137, f: 57, c: 191, steps: 8000 },
+    consent: { value: 'private', at: null },
     plan: plan, measures: { names: names, units: units, cols: cols, next: ymd(s + 40) },
     photos: [['front', 'фас', s], ['side', 'профиль', s], ['back', 'спина', s], ['front', 'фас', t - 3]].map(function (p) {
       var n = Math.floor((p[2] - s) / 30) + 1; return { date: ymd(p[2]), kind: p[1], code: p[0], month: ymd(p[2]).slice(0, 7) + ' месяц ' + n, n: n };
@@ -1049,6 +1124,7 @@ if (DEMO) (function () {
         Object.keys(map).forEach(function (k) { if (k in body) { h[map[k]] = body[k] === '' ? null : Number(body[k]); saved[k] = body[k]; } });
         return { ok: true, saved: saved, date: body.date };
       }
+      if (body.a === 'consent') { var at = new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ''); DB.consent = { value: body.value, at: at }; return { ok: true, value: body.value, at: at }; }
       if (body.a === 'done') { DB.plan.forEach(function (p) { if (p.row === body.row) p.done = body.done; }); return { ok: true, row: body.row, done: body.done }; }
       if (body.a === 'measure') {
         var col = DB.measures.cols.filter(function (c) { return Math.abs(dn(c.date) - ed) <= 5 && !c.values.some(function (v) { return v != null; }); })[0];
