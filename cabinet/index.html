@@ -262,6 +262,62 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .tips{font-size:13px;color:var(--muted);margin:12px 0 0;padding-left:18px}
 .tips li{margin-bottom:4px}
 
+/* замеры: схема и форма */
+.scheme{margin:4px 0 14px}
+.scheme svg{width:100%;max-width:260px;height:auto;display:block;margin:0 auto 14px}
+.scheme .fig{fill:var(--card2);stroke:var(--line2);stroke-width:1.2}
+.scheme .ml{stroke:var(--accent);stroke-width:1.6;stroke-dasharray:3 2.5;fill:none}
+.scheme .mb circle{fill:var(--accent)}
+.scheme .mb text{font-size:9.5px;font-weight:800;fill:var(--on-accent);text-anchor:middle;font-family:inherit}
+.scheme .side{font-size:9px;font-weight:700;fill:var(--dim);text-anchor:middle;font-family:inherit}
+.scheme ul{margin:0;padding-left:16px;font-size:13px;color:var(--muted)}
+.scheme li{margin-bottom:6px}
+.scheme li b{color:var(--text);font-weight:700}
+.mlist{display:flex;flex-direction:column}
+.mrow{display:grid;grid-template-columns:26px 1fr 104px;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.mrow:first-child{border-top:0}
+.mnum{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:800;display:grid;place-items:center}
+.mnum.w{background:transparent;border:1.5px solid var(--accent);color:var(--accent)}
+.mlab{min-width:0}
+.mlab b{display:block;font-size:15px;font-weight:700;line-height:1.25}
+.mlab small{display:block;font-size:12px;color:var(--muted);line-height:1.3;margin-top:2px}
+.mlab .req{color:var(--warm);font-weight:700}
+.minp{position:relative}
+.minp input{width:100%;height:46px;padding:0 34px 0 12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:17px;font-weight:700;outline:none;-webkit-appearance:none;appearance:none;font-variant-numeric:tabular-nums;text-align:right}
+.minp input:focus{border-color:var(--accent)}
+.minp span{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);pointer-events:none}
+.minp.bad input{border-color:rgba(255,139,123,.7)}
+details.card>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:800}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 0;transition:transform .2s}
+details.card[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
+details.card[open]>summary{margin-bottom:12px}
+.chips{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin:0 -2px 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+.chips button.on{border-color:var(--accent);color:var(--accent);background:rgba(62,214,206,.08)}
+.chart .wl{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 5px var(--glow))}
+.chart .wp{fill:var(--bg);stroke:var(--accent);stroke-width:2}
+.chart .wp.last{fill:var(--accent)}
+.chart .vl{font-size:10.5px;fill:var(--muted);font-weight:700}
+.dur{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
+.dur .tsel{width:auto;min-width:118px;padding:7px 28px 7px 10px;font-size:14px}
+
+/* гайды */
+.guide{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 0;border-top:1px solid var(--line)}
+.guide:first-of-type{border-top:0;padding-top:2px}
+.guide .ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;color:var(--accent)}
+.guide .ic svg{width:20px;height:20px}
+.guide b{display:block;font-size:15px}
+.guide small{display:block;font-size:12px;color:var(--muted)}
+.viewer{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;padding-top:var(--safe-t)}
+.viewer .vh{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 18px;border-bottom:1px solid var(--line)}
+.viewer .vh b{flex:1;font-size:16px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viewer .vh a{font-size:13px;color:var(--accent);font-weight:700;text-decoration:none;white-space:nowrap}
+.viewer iframe{flex:1;width:100%;border:0;background:#fff}
+.sync.pend{color:var(--warm)}
+.sync.pend svg{color:var(--warm)}
+
 /* установка на экран */
 .install{display:flex;gap:12px;align-items:flex-start}
 .install .ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;color:var(--accent)}
@@ -309,7 +365,7 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 'use strict';
 
 /* ================= НАСТРОЙКИ ================= */
-var VERSION = '2.4.2';
+var VERSION = '2.4.5';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var LIM = { w: [30, 250, 'Вес'], kcal: [0, 10000, 'Калории'], p: [0, 1000, 'Белки'], f: [0, 1000, 'Жиры'], c: [0, 1500, 'Углеводы'], steps: [0, 100000, 'Шаги'] };
@@ -332,7 +388,7 @@ var CACHE = 'lf_d_' + KEY.slice(0, 8);
 
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 var D = null;            // данные с сервера
-var byDate = {};         // дата → {kcal,p,f,c,w,avgW,steps,norm}
+var byDate = {};         // дата → {kcal,p,f,c,w,steps,norm}
 var S = { tab: 'today', day: null, kind: 'front', busy: false, loadedAt: 0, measureFix: false, up: {} };
 var thumbs = {};         // 'дата|front' → dataURL
 var thumbWait = {};
@@ -377,7 +433,8 @@ var IC = {
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>',
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   tg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21.5 4.5L2.8 11.3c-.8.3-.8 1.4 0 1.7l4.6 1.5 1.8 5.4c.2.7 1.1.9 1.6.4l2.6-2.5 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3z"/><path d="M7.4 14.5l10-6.5-7.6 7.6"/></svg>',
-  save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>'
+  save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7.5h8M8 11h6"/></svg>'
 };
 
 /* ---------- связь с приёмником ---------- */
@@ -400,6 +457,60 @@ function api(params, body) {
 }
 function errText(r) { return cap((r && r.error) || 'не получилось сохранить'); }
 
+/* ---------- отправка без ожидания: очередь «не отправлено» ----------
+ * Всё, что клиент сохраняет (день, замеры, тренировки), сразу видно на экране, а на сервер уходит в фоне по очереди.
+ * Нет связи – запись ждёт в телефоне и уходит сама, как только интернет вернётся. */
+var OB_KEY = 'lf_ob_' + KEY.slice(0, 8);
+var OB = [];
+try { OB = JSON.parse(LS.get(OB_KEY) || '[]') || []; } catch (e) { OB = []; }
+var obBusy = false, obTimer = null;
+function obSave() { if (!DEMO) LS.set(OB_KEY, JSON.stringify(OB)); }
+function send(body) {
+  OB.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 6), body: body });
+  obSave(); paintSync(); obFlush();
+}
+function obFlush() {
+  if (obBusy || !OB.length) return;
+  obBusy = true; paintSync();
+  var it = OB[0];
+  api(null, it.body).then(function (res) {
+    obBusy = false;
+    if (res && res.net) { paintSync(); clearTimeout(obTimer); obTimer = setTimeout(obFlush, 20000); return; }
+    OB.shift(); obSave();
+    if (res && res.ok) obDone(it.body, res);
+    else {
+      toast(errText(res), 'bad');
+      if (res && res.closed) D.closed = true;
+      S.busy = false; refresh(false);                       // сервер не принял – показываем то, что реально в таблице
+    }
+    paintSync();
+    if (OB.length) obFlush();
+  });
+}
+window.addEventListener('online', obFlush);
+/* принятую запись вносим и в сохранённую копию данных */
+function obDone(b, res) {
+  if (!D) return;
+  if (b.a === 'day') {
+    (D.hist || []).forEach(function (h) { if (h[0] === b.date) { if ('kcal' in b) h[1] = numOrNull(b.kcal); if ('w' in b) h[2] = numOrNull(b.w); if ('steps' in b) h[4] = numOrNull(b.steps); if ('p' in b) h[6] = numOrNull(b.p); if ('f' in b) h[7] = numOrNull(b.f); if ('c' in b) h[8] = numOrNull(b.c); } });
+    (D.days || []).forEach(function (d) { if (d.date === b.date) ['kcal', 'w', 'steps', 'p', 'f', 'c'].forEach(function (k) { if (k in b) d[k] = numOrNull(b[k]); }); });
+  }
+  if (!DEMO) LS.set(CACHE, JSON.stringify(D));
+}
+function numOrNull(x) { return x === '' || x == null ? null : Number(x); }
+/* пока запись в очереди – показываем её поверх данных сервера */
+function obOverlay() {
+  OB.forEach(function (it) {
+    var b = it.body;
+    if (b.a === 'day') { var v = byDate[b.date] = byDate[b.date] || {}; ['kcal', 'w', 'steps', 'p', 'f', 'c'].forEach(function (k) { if (k in b) v[k] = numOrNull(b[k]); }); }
+    if (b.a === 'done') (D.plan || []).forEach(function (x) { if (x.row === b.row && x.date === b.date) { if ('done' in b) x.done = b.done; if ('min' in b) x.min = numOrNull(b.min); } });
+    if (b.a === 'measure') {
+      var m = D.measures || {}, col = (m.cols || []).filter(function (c) { return c.date === b.date; })[0];
+      if (col) { (b.values || []).forEach(function (v, i) { if (v != null) col.values[i] = v; }); if (m.open && m.open.date === b.date) m.open.filled = true; }
+    }
+  });
+}
+
 /* ---------- загрузка ---------- */
 function start() {
   if (!DEMO && (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(API))) return screen('Кабинет ещё не настроен', 'Не указан адрес приёмника в файле config.js.');
@@ -408,7 +519,9 @@ function start() {
   if (cached) { try { setData(JSON.parse(cached), true); } catch (e) { LS.del(CACHE); } }
   if (!D) app.innerHTML = '<div class="center"><img class="pulse" src="' + LOGO + '" alt="Lite Fit"><p>Загружаем ваш кабинет…</p></div>';
   refresh(true);
+  obFlush();
   document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') obFlush();
     if (document.visibilityState === 'visible' && (Date.now() - S.loadedAt > 5 * 60e3 || (S.tgGo && D && D.bot && !D.bot.linked))) {
       if (S.tgGo) setTimeout(function () { refresh(false); }, 45000);
       refresh(false);
@@ -445,10 +558,11 @@ function refresh(first) {
 function setData(r, fromCache) {
   D = r; S.loadedAt = fromCache ? 0 : Date.now();
   byDate = {};
-  (r.days || []).forEach(function (d) { byDate[d.date] = { kcal: d.kcal, p: d.p, f: d.f, c: d.c, w: d.w, avgW: d.avgW, steps: d.steps, norm: d.norm }; });
+  (r.days || []).forEach(function (d) { byDate[d.date] = { kcal: d.kcal, p: d.p, f: d.f, c: d.c, w: d.w, steps: d.steps, norm: d.norm }; });
   (r.hist || []).forEach(function (h) {
-    byDate[h[0]] = { kcal: h[1], w: h[2], avgW: h[3], steps: h[4], norm: h[5], p: h[6], f: h[7], c: h[8] };
+    byDate[h[0]] = { kcal: h[1], w: h[2], steps: h[4], norm: h[5], p: h[6], f: h[7], c: h[8] };
   });
+  obOverlay();
   if (fromCache) render();
 }
 
@@ -479,13 +593,17 @@ function header() {
   if (D.closed) ban = '<div class="banner warn">Ведение завершено. Все ваши данные сохранены, вносить новые уже нельзя.</div>';
   else if (p.after) ban = '<div class="banner warn">Период ведения закончился ' + longDate(D.end) + '. Если продолжаем – тренер продлит дневник, и здесь снова можно будет вносить данные.</div>';
   else if (p.before) ban = '<div class="banner">Ведение начнётся ' + longDate(D.start) + '. Пока можно посмотреть кабинет.</div>';
-  return '<div class="top"><img src="' + LOGO + '" alt="Lite Fit"><button class="sync' + (S.busy ? ' busy' : '') + '" data-act="refresh" aria-label="Обновить данные">' +
+  return '<div class="top"><img src="' + LOGO + '" alt="Lite Fit"><button class="sync' + (S.busy || obBusy ? ' busy' : '') + (OB.length && !obBusy ? ' pend' : '') + '" data-act="refresh" aria-label="Обновить данные">' +
     '<span class="sync-t">' + syncText() + '</span>' + IC.sync + '</button></div>' +
     '<h1 class="hello">' + greet() + (firstName() ? ', ' + esc(firstName()) : '') + '</h1>' +
     '<div class="meta">' + pills.join('') + '</div>' + ban;
 }
-function syncText() { if (S.busy) return 'обновляем'; if (!S.loadedAt) return 'сохранённые данные'; return 'обновлено ' + new Date(S.loadedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
-function paintSync() { var b = $('.sync'); if (!b) return; b.classList.toggle('busy', S.busy); $('.sync-t', b).textContent = syncText(); }
+function syncText() {
+  if (OB.length && !obBusy) return 'не отправлено: ' + OB.length;
+  if (OB.length) return 'отправляем';
+  if (S.busy) return 'обновляем'; if (!S.loadedAt) return 'сохранённые данные'; return 'обновлено ' + new Date(S.loadedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+}
+function paintSync() { var b = $('.sync'); if (!b) return; b.classList.toggle('busy', S.busy || obBusy); b.classList.toggle('pend', OB.length > 0 && !obBusy); $('.sync-t', b).textContent = syncText(); }
 
 var TABS = [['today', 'Сегодня', IC.today], ['train', 'Тренировки', IC.train], ['prog', 'Прогресс', IC.prog], ['meas', 'Замеры', IC.tape], ['photo', 'Фото', IC.photo]];
 function paintTabs() {
@@ -502,6 +620,7 @@ function render() {
   paintTabs();
   var body = S.tab === 'train' ? viewTrain() : S.tab === 'prog' ? viewProg() : S.tab === 'meas' ? viewMeas() : S.tab === 'photo' ? viewPhoto() : viewToday();
   app.innerHTML = header() + '<div class="view">' + body + '</div>';
+  var chip = $('.chips .on'); if (chip) chip.parentNode.scrollLeft = Math.max(chip.offsetLeft - chip.parentNode.offsetLeft - 24, 0);
   if (S.tab === 'photo') loadPhotoThumbs();
 }
 
@@ -559,10 +678,19 @@ function viewToday() {
         '<div class="v num"' + (ov ? ' style="color:var(--warm)"' : '') + '>' + fmt(val, 1) + ' <small>/ ' + fmt(nm) + ' г</small></div></div>';
     }).join('') + '</div></div>';
 
+  // день контрольных замеров – напоминание и переход
+  var mo = measOpenDue();
+  if (mo && day === D.today) {
+    h += '<div class="card next-m"><div class="ic">' + IC.tape + '</div><div style="flex:1"><h3>' + (dn(mo.date) === dn(D.today) ? 'Сегодня контрольные замеры' : 'Замеры ' + dm(mo.date) + ' ждут вас') + '</h3>' +
+      '<p class="sub" style="margin:0">Вес и обхваты – утром натощак. Займёт 5 минут.</p>' +
+      '<button class="btn pri mt" data-tab="meas" style="height:44px">Внести замеры</button></div></div>';
+  }
+
   // форма
+  var mDay = mo && mo.date === day;
   var title = day === D.today ? 'Внести за сегодня' : 'Внести за ' + longDate(day);
-  h += '<div class="card"><h3>' + title + '</h3><p class="sub">' + (canEdit ? 'Можно внести и поправить данные за сегодня и два прошлых дня.' : 'Эту дату изменить уже нельзя.') + '</p>' +
-    '<div class="grid2">' + fld('w', 'Вес, кг', v.w, 1, 'decimal', canEdit) + fld('steps', 'Шаги', v.steps, 0, 'numeric', canEdit) + '</div><div class="gap"></div>' +
+  h += '<div class="card"><h3>' + title + '</h3><p class="sub">' + (canEdit ? 'Можно внести и поправить данные за сегодня и два прошлых дня. Вес – по желанию, хоть каждый день.' : 'Эту дату изменить уже нельзя.') + '</p>' +
+    '<div class="grid2">' + fld('w', mDay ? 'Вес, кг · день замеров' : 'Вес, кг · по желанию', v.w, 1, 'decimal', canEdit) + fld('steps', 'Шаги', v.steps, 0, 'numeric', canEdit) + '</div><div class="gap"></div>' +
     fld('kcal', 'Калории, ккал', v.kcal, 0, 'numeric', canEdit) + '<div class="gap"></div>' +
     '<div class="grid3">' + fld('p', 'Белки, г', v.p, 1, 'decimal', canEdit) + fld('f', 'Жиры, г', v.f, 1, 'decimal', canEdit) + fld('c', 'Углеводы, г', v.c, 1, 'decimal', canEdit) + '</div>' +
     '<p class="ferr" id="dayErr"></p>' +
@@ -572,9 +700,10 @@ function viewToday() {
   var pl = (D.plan || []).filter(function (x) { return x.date === day; });
   if (pl.length) {
     h += '<div class="card"><h3>' + (day === D.today ? 'Сегодня по плану' : 'По плану ' + longDate(day)) + '</h3>' +
-      pl.map(function (x) { return '<div class="today-plan mt">' + planBody(x) + doneBtn(x) + '</div>'; }).join('') + '</div>';
+      pl.map(function (x) { return '<div class="today-plan mt">' + planBody(x) + doneBtn(x) + '</div>' + durRow(x); }).join('') + '</div>';
   }
 
+  h += guidesCard();
   h += tgCard();
   // дисциплина за 7 дней
   h += disciplineCard();
@@ -593,12 +722,12 @@ function disciplineCard() {
   for (var i = 6; i >= 0; i--) {
     var n = p.t - i, y = ymd(n), v = byDate[y];
     var inP = p.s != null && n >= p.s && n <= p.e;
-    var cnt = v ? [v.kcal, v.w, v.steps].filter(function (x) { return x != null; }).length : 0;
-    var cls = !inP ? '' : cnt === 3 ? 'full' : cnt ? 'part' : '';
-    if (inP) days++; if (inP && cnt === 3) full++; if (inP && cnt) any++;
+    var cnt = v ? [v.kcal, v.steps].filter(function (x) { return x != null; }).length : 0;
+    var cls = !inP ? '' : cnt === 2 ? 'full' : cnt ? 'part' : '';
+    if (inP) days++; if (inP && cnt === 2) full++; if (inP && cnt) any++;
     cells.push('<div class="d ' + cls + (i === 0 ? ' today' : '') + '" style="' + (inP ? '' : 'opacity:.35') + '"><i></i>' + WD[new Date(n * 864e5).getUTCDay()] + '</div>');
   }
-  return '<div class="card"><h3>' + (days < 7 ? 'Дни ведения' : 'Последние 7 дней') + '</h3><p class="sub">Полностью внесено: <b class="num" style="color:var(--text)">' + full + ' из ' + days + '</b>' + (any > full ? ', частично – ' + (any - full) : '') + '. Полный день – вес, калории и шаги.</p><div class="strip">' + cells.join('') + '</div></div>';
+  return '<div class="card"><h3>' + (days < 7 ? 'Дни ведения' : 'Последние 7 дней') + '</h3><p class="sub">Полностью внесено: <b class="num" style="color:var(--text)">' + full + ' из ' + days + '</b>' + (any > full ? ', частично – ' + (any - full) : '') + '. Полный день – калории и шаги, вес по желанию.</p><div class="strip">' + cells.join('') + '</div></div>';
 }
 
 var MORNING = ['06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00'];
@@ -701,22 +830,17 @@ function saveDay(btn) {
   var r = readDayForm(), err = $('#dayErr');
   if (r.errs.length) { err.textContent = 'Проверьте: ' + r.errs.join('; '); return; }
   if (!Object.keys(r.set).length) return;
-  var day = S.day, body = { k: KEY, a: 'day', date: day };
-  Object.keys(r.set).forEach(function (k) { body[k] = r.set[k]; });
-  btn.disabled = true; btn.textContent = 'Сохраняем…'; err.textContent = '';
-  api(null, body).then(function (res) {
-    if (res && res.ok) {
-      var v = byDate[day] = byDate[day] || {};
-      Object.keys(r.set).forEach(function (k) { v[k] = r.set[k] === '' ? null : (res.saved && res.saved[k] !== undefined && res.saved[k] !== '' ? res.saved[k] : r.set[k]); });
-      toast('Сохранено', 'ok');
-      render();
-      S.busy = false; refresh(false);
-    } else {
-      btn.disabled = false; btn.textContent = 'Сохранить';
-      err.textContent = errText(res);
-      if (res && res.closed) { D.closed = true; render(); }
-    }
+  if (D.closed) { err.textContent = 'Ведение завершено – вносить данные уже нельзя.'; return; }
+  // сразу на экране, на сервер – в фоне (если связи нет – уйдёт сам, когда появится)
+  var day = S.day, body = { k: KEY, a: 'day', date: day }, v = byDate[day] = byDate[day] || {};
+  Object.keys(r.set).forEach(function (k) {
+    var x = r.set[k];
+    if (x !== '') { var dec = k === 'kcal' || k === 'steps' ? 0 : 1; x = Math.round(x * Math.pow(10, dec)) / Math.pow(10, dec); }
+    body[k] = x; v[k] = x === '' ? null : x;
   });
+  toast('Сохранено', 'ok');
+  render();
+  send(body);
 }
 
 /* ================= ТРЕНИРОВКИ ================= */
@@ -746,47 +870,64 @@ function viewTrain() {
     if (!g[1].length) return;
     h += '<div class="card"><h3>' + g[0] + '</h3>' + g[1].map(function (x) {
       var n = dn(x.date);
-      return '<div class="plan-item"><div class="pdate' + (n === t ? ' today' : '') + '"><b class="num">' + (+x.date.slice(8)) + '</b><small>' + wd(x.date) + '</small></div>' + planBody(x) + doneBtn(x) + '</div>';
+      return '<div class="plan-item"><div class="pdate' + (n === t ? ' today' : '') + '"><b class="num">' + (+x.date.slice(8)) + '</b><small>' + wd(x.date) + '</small></div>' +
+        '<div style="flex:1;min-width:0">' + planBody(x) + durRow(x) + '</div>' + doneBtn(x) + '</div>';
     }).join('') + '</div>';
   });
-  h += '<p class="muted" style="font-size:13px;margin:4px 2px 0">Отметить выполнение можно в день тренировки и в течение 7 дней после.</p>';
+  h += '<p class="muted" style="font-size:13px;margin:4px 2px 14px">Отметить выполнение можно в день тренировки и в течение 7 дней после. Длительность – по желанию.</p>';
+  h += guidesCard();
   return h;
+}
+
+/* длительность тренировки (по желанию) – появляется, когда тренировка отмечена */
+var DUR = [15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 75, 80, 90, 100, 105, 120, 135, 150, 180];
+function durRow(x) {
+  if (!x.done || x.type === 'Созвон') return '';
+  var t = dn(D.today), n = dn(x.date), can = !D.closed && n <= t && n >= t - 7;
+  var list = DUR.slice(); if (x.min && list.indexOf(x.min) < 0) { list.push(x.min); list.sort(function (a, b) { return a - b; }); }
+  return '<div class="dur">Длительность<select class="tsel" data-dur="' + x.row + '" data-date="' + x.date + '" aria-label="Длительность тренировки"' + (can ? '' : ' disabled') + '>' +
+    '<option value="">не указано</option>' + list.map(function (m) { return '<option value="' + m + '"' + (m === x.min ? ' selected' : '') + '>' + fmtMin(m) + '</option>'; }).join('') + '</select></div>';
+}
+function fmtMin(m) { return m < 60 ? m + ' мин' : Math.floor(m / 60) + ' ч' + (m % 60 ? ' ' + (m % 60) + ' мин' : ''); }
+function setDur(sel) {
+  var row = +sel.getAttribute('data-dur'), date = sel.getAttribute('data-date');
+  var x = (D.plan || []).filter(function (p) { return p.row === row && p.date === date; })[0];
+  if (!x) return;
+  x.min = sel.value === '' ? null : +sel.value;
+  toast(x.min ? 'Длительность: ' + fmtMin(x.min) : 'Длительность убрана', 'ok');
+  send({ k: KEY, a: 'done', row: row, date: date, min: sel.value === '' ? '' : +sel.value });
 }
 function toggleDone(btn) {
   var row = +btn.getAttribute('data-done'), date = btn.getAttribute('data-date');
   var x = (D.plan || []).filter(function (p) { return p.row === row && p.date === date; })[0];
   if (!x) return;
-  // отметка меняется сразу, сервер подтверждает в фоне; при ошибке возвращаем как было
-  var want = !x.done;
-  x.done = want; x.pending = (x.pending || 0) + 1;
+  // отметка меняется сразу, на сервер уходит в фоне
+  x.done = !x.done;
   render();
-  api(null, { k: KEY, a: 'done', row: row, date: date, done: want }).then(function (res) {
-    x.pending--;
-    if (res && res.ok) { if (!x.pending) toast(want ? 'Отмечено: выполнено' : 'Отметка снята', 'ok'); }
-    else {
-      if (!x.pending) { x.done = !want; render(); }
-      toast(errText(res), 'bad');
-      if (res && /план изменился/.test(res.error || '')) refresh(false);
-    }
-  });
+  toast(x.done ? 'Отмечено: выполнено' : 'Отметка снята', 'ok');
+  send({ k: KEY, a: 'done', row: row, date: date, done: x.done });
 }
 
 /* ================= ПРОГРЕСС ================= */
 function histRows() {
   var t = dn(D.today);
-  return Object.keys(byDate).filter(function (y) { return dn(y) <= t && (D.start == null || dn(y) >= dn(D.start)); }).sort().map(function (y) { var v = byDate[y]; return { d: y, n: dn(y), w: v.w, a: v.avgW, k: v.kcal, s: v.steps, nm: v.norm }; });
+  return Object.keys(byDate).filter(function (y) { return dn(y) <= t && (D.start == null || dn(y) >= dn(D.start)); }).sort().map(function (y) { var v = byDate[y]; return { d: y, n: dn(y), w: v.w, k: v.kcal, s: v.steps, nm: v.norm }; });
 }
 function viewProg() {
-  var rows = histRows(), ws = D.weight || {};
+  var rows = histRows(), t = dn(D.today);
+  var wr = rows.filter(function (r) { return r.w != null; });
   var h = '<h2 class="sec-title">Прогресс</h2>';
-  var wStart = ws.start, wNow = ws.now, diff = wStart != null && wNow != null ? wNow - wStart : null;
-  var lastAvg = null; for (var i = rows.length - 1; i >= 0; i--) if (rows[i].a != null) { lastAvg = rows[i].a; break; }
+  var wStart = wr.length ? wr[0].w : (D.weight || {}).start, wNow = wr.length ? wr[wr.length - 1].w : (D.weight || {}).now;
+  var diff = wStart != null && wNow != null ? wNow - wStart : null;
   h += '<div class="stats"><div class="stat"><div class="k">Старт</div><div class="v num">' + fx(wStart) + ' <small>кг</small></div></div>' +
     '<div class="stat"><div class="k">Сейчас</div><div class="v num">' + fx(wNow) + ' <small>кг</small></div></div>' +
     '<div class="stat hl"><div class="k">Итого</div><div class="v num">' + (diff != null ? signed(diff, 1) : '—') + ' <small>кг</small></div></div></div>';
-  var wr = rows.filter(function (r) { return r.w != null || r.a != null; });
-  h += '<div class="card"><h3>Вес</h3><p class="sub">Каждый день вес колеблется из-за воды и соли – смотрите на линию среднего за 7 дней' + (lastAvg != null ? ', сейчас <b class="num" style="color:var(--text)">' + fx(lastAvg) + ' кг</b>' : '') + '.</p>' +
-    (wr.length >= 2 ? weightChart(rows) + '<div class="chart-leg"><span><i></i>Среднее за 7 дней</span><span><i class="dot"></i>Вес за день</span></div>' : '<p class="muted" style="margin:0">График появится, когда будет вес хотя бы за два дня.</p>') + '</div>';
+  // за 7 дней – по факту: последнее взвешивание минус последнее взвешивание неделю назад или раньше
+  var last = wr[wr.length - 1], prev = wr.filter(function (r) { return r.n <= t - 7; }).pop();
+  var wk = last && prev && last.n > prev.n ? '<b class="num" style="color:var(--text)">' + signed(last.w - prev.w, 1) + ' кг</b> за неделю (с ' + dm(prev.d) + ')' : '';
+  h += '<div class="card"><h3>Вес</h3><p class="sub">Каждое ваше взвешивание – точка на линии, пропущенные дни линию не прерывают.' + (wk ? ' ' + wk + '.' : '') + '</p>' +
+    (wr.length >= 2 ? weightChart(wr) : '<p class="muted" style="margin:0">График появится, когда будет вес хотя бы за два дня. Взвешиваться можно когда удобно – обязательно только в дни замеров.</p>') + '</div>';
+  h += measProgCard();
   var kr = rows.slice(-14);
   if (kr.some(function (r) { return r.k != null; })) h += '<div class="card"><h3>Калории за 14 дней</h3><p class="sub">Столбцы – сколько съедено, пунктир – ваша норма.</p>' + kcalChart(kr) +
     '<div class="chart-leg"><span><i style="background:var(--accent)"></i>В пределах нормы</span><span><i style="background:var(--warm)"></i>Выше нормы</span><span><i class="dash"></i>Норма</span></div></div>';
@@ -794,22 +935,28 @@ function viewProg() {
   return h;
 }
 
-function weightChart(rows) {
-  var W = 340, H = 180, L = 34, R = 8, T = 10, B = 24;
-  var n0 = rows[0].n, n1 = Math.max(rows[rows.length - 1].n, n0 + 6);
-  var vals = []; rows.forEach(function (r) { if (r.w != null) vals.push(r.w); if (r.a != null) vals.push(r.a); });
+/* линия по фактическим значениям: pts = [{n, v, d}] */
+function lineChart(pts, unit, label, dec) {
+  var W = 340, H = 180, L = 36, R = 14, T = 16, B = 24;
+  var n0 = pts[0].n, n1 = Math.max(pts[pts.length - 1].n, n0 + 6);
+  var vals = pts.map(function (p) { return p.v; });
   var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-  var pad0 = Math.max((mx - mn) * 0.15, 0.4); mn -= pad0; mx += pad0;
+  var pad0 = Math.max((mx - mn) * 0.18, unit === 'кг' ? 0.4 : 0.8); mn -= pad0; mx += pad0;
   var X = function (n) { return L + (n - n0) / (n1 - n0) * (W - L - R); };
   var Y = function (v) { return T + (mx - v) / (mx - mn) * (H - T - B); };
-  var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="График веса">';
-  for (var g = 0; g <= 3; g++) { var v = mn + (mx - mn) * g / 3, y = Y(v); s += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"/><text x="' + (L - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end">' + fx(v) + '</text>'; }
-  var pts = rows.filter(function (r) { return r.a != null; }).map(function (r) { return X(r.n).toFixed(1) + ',' + Y(r.a).toFixed(1); });
-  rows.forEach(function (r) { if (r.w != null) s += '<circle class="pt" cx="' + X(r.n).toFixed(1) + '" cy="' + Y(r.w).toFixed(1) + '" r="3"/>'; });
-  if (pts.length > 1) s += '<polyline class="avg" points="' + pts.join(' ') + '"/>';
+  var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(label) + '">';
+  for (var g = 0; g <= 3; g++) { var v = mn + (mx - mn) * g / 3, y = Y(v); s += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"/><text x="' + (L - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end">' + fmt(v, 1, true) + '</text>'; }
+  s += '<polyline class="wl" points="' + pts.map(function (p) { return X(p.n).toFixed(1) + ',' + Y(p.v).toFixed(1); }).join(' ') + '"/>';
+  var few = pts.length <= 8;
+  pts.forEach(function (p, i) {
+    var lastP = i === pts.length - 1, x = X(p.n), y = Y(p.v);
+    s += '<circle class="wp' + (lastP ? ' last' : '') + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (lastP ? 4 : 3) + '"/>';
+    if (lastP || (few && i === 0)) s += '<text class="vl" x="' + Math.min(Math.max(x, L + 12), W - R - 12).toFixed(1) + '" y="' + (y - 8).toFixed(1) + '" text-anchor="middle">' + fmt(p.v, dec == null ? 1 : dec) + '</text>';
+  });
   s += '<text x="' + L + '" y="' + (H - 6) + '">' + dm(ymd(n0)) + '</text><text x="' + (W - R) + '" y="' + (H - 6) + '" text-anchor="end">' + dm(ymd(n1)) + '</text>';
   return s + '</svg>';
 }
+function weightChart(wr) { return lineChart(wr.map(function (r) { return { n: r.n, v: r.w, d: r.d }; }), 'кг', 'График веса'); }
 
 function kcalChart(rows) {
   var W = 340, H = 160, L = 34, R = 8, T = 10, B = 24, n = rows.length;
@@ -835,98 +982,228 @@ function weeksCard(rows) {
   var out = [], prevW = null;
   weeks.forEach(function (wk, i) {
     if (!wk) return;
-    var aw = avg(wk.map(function (r) { return r.w; })), ak = avg(wk.map(function (r) { return r.k; })), an = avg(wk.map(function (r) { return r.nm; }));
-    var as = avg(wk.map(function (r) { return r.s; })), filled = wk.filter(function (r) { return r.k != null || r.w != null || r.s != null; }).length;
-    var dw = aw != null && prevW != null ? aw - prevW : null;
+    var ws = wk.filter(function (r) { return r.w != null; }), lw = ws.length ? ws[ws.length - 1].w : null;   // вес – последнее взвешивание недели
+    var ak = avg(wk.map(function (r) { return r.k; })), an = avg(wk.map(function (r) { return r.nm; }));
+    var as = avg(wk.map(function (r) { return r.s; })), filled = wk.filter(function (r) { return r.k != null || r.s != null; }).length;
+    var dw = lw != null && prevW != null ? lw - prevW : null;
     out.push('<div class="week"><div class="wh"><b>Неделя ' + (i + 1) + '</b><span class="num">' + dm(ymd(s + i * 7)) + '–' + dm(ymd(s + i * 7 + 6)) + '</span></div><div class="wg">' +
-      '<div>Вес, кг<b class="num">' + fx(aw) + '</b></div>' +
+      '<div>Вес, кг<b class="num">' + fx(lw) + '</b>' + (ws.length ? '<span class="num">' + dm(ws[ws.length - 1].d) + '</span>' : '') + '</div>' +
       '<div>К прошлой<b class="num ' + (dw == null ? '' : dw < 0 ? 'dn' : dw > 0 ? 'up' : '') + '">' + (dw == null ? '—' : signed(dw, 1)) + '</b></div>' +
       '<div>Ккал<b class="num">' + fmt(ak) + '</b>' + (ak != null && an ? '<span class="num">' + Math.round(ak / an * 100) + '% нормы</span>' : '') + '</div>' +
       '<div>Шаги<b class="num">' + fmt(as) + '</b>' + (as != null && D.norm && D.norm.steps ? '<span class="num">' + Math.round(as / D.norm.steps * 100) + '% нормы</span>' : '') + '</div></div>' +
       '<div class="muted" style="font-size:12px;margin-top:6px">Внесено дней: <span class="num">' + filled + ' из ' + wk.length + '</span></div></div>');
-    if (aw != null) prevW = aw;
+    if (lw != null) prevW = lw;
   });
-  return '<div class="card"><h3>Неделя к неделе</h3><p class="sub">Средние за каждую неделю ведения – так виден настоящий тренд, без скачков отдельных дней.</p>' + out.reverse().join('') + '</div>';
+  return '<div class="card"><h3>Неделя к неделе</h3><p class="sub">Вес – последнее взвешивание недели, без усреднения. Калории и шаги – в среднем за день.</p>' + out.reverse().join('') + '</div>';
+}
+
+/* замеры на «Прогрессе»: график выбранного обхвата и итог по сантиметрам */
+function measProgCard() {
+  var m = D.measures; if (!m || !m.names || !m.names.length) return '';
+  var filled = (m.cols || []).filter(function (c) { return c.values.some(function (v) { return v != null; }); });
+  if (!filled.length) return '';
+  var cm = [], total = 0, any = false;
+  m.names.forEach(function (nm, i) {
+    if (/кг/i.test(m.units[i] || '') || mKind(nm) === 'w') return;
+    var pts = filled.filter(function (c) { return c.values[i] != null; }).map(function (c) { return { n: dn(c.date), v: c.values[i], d: c.date }; });
+    cm.push({ i: i, pts: pts });
+    if (pts.length >= 2) { total += pts[pts.length - 1].v - pts[0].v; any = true; }
+  });
+  var h = '<div class="card"><h3>Замеры</h3>';
+  if (filled.length < 2) {
+    var nx = m.next ? ' – ' + longDate(m.next) : '';
+    return h + '<p class="sub" style="margin:0">Стартовые замеры есть (' + dm(filled[0].date) + '). График появится после следующих замеров' + nx + '.</p></div>';
+  }
+  if (any) h += '<div class="stats" style="grid-template-columns:1fr 1fr;margin-bottom:12px"><div class="stat hl"><div class="k">Всего по обхватам</div><div class="v num">' + signed(total, 1) + ' <small>см</small></div></div>' +
+    '<div class="stat"><div class="k">Замеров сделано</div><div class="v num">' + filled.length + '</div></div></div>';
+  var withData = cm.filter(function (x) { return x.pts.length >= 2; });
+  if (!withData.length) return h + '</div>';
+  if (S.mSel == null || !withData.some(function (x) { return x.i === S.mSel; })) {
+    var pref = withData.filter(function (x) { return mKind(m.names[x.i]) === 'waist'; })[0];
+    S.mSel = (pref || withData[0]).i;
+  }
+  var cur = withData.filter(function (x) { return x.i === S.mSel; })[0], p = cur.pts;
+  var d0 = p[p.length - 1].v - p[0].v, d1 = p[p.length - 1].v - p[p.length - 2].v;
+  h += '<div class="chips" role="tablist">' + withData.map(function (x) {
+    return '<button data-msel="' + x.i + '" class="' + (x.i === S.mSel ? 'on' : '') + '">' + esc(mShort(m.names[x.i]).label) + '</button>';
+  }).join('') + '</div>' + lineChart(p, 'см', mShort(m.names[cur.i]).label, 1) +
+    '<p class="sub" style="margin:10px 0 0">С начала: <b class="num ' + (d0 < 0 ? 'dn' : d0 > 0 ? 'up' : '') + '">' + signed(d0, 1) + ' см</b> · к прошлому замеру: <b class="num">' + signed(d1, 1) + ' см</b></p></div>';
+  return h;
 }
 
 /* ================= ЗАМЕРЫ ================= */
-function measureDue() {
-  var m = D && D.measures; if (!m || !m.next) return null;
-  var diff = dn(m.next) - dn(D.today);
-  return diff <= 5 ? m.next : null;
+/* день замеров открыт и ещё не заполнен */
+function measOpenDue() {
+  var m = D && D.measures; if (!m || !m.open || m.open.filled || D.closed) return null;
+  return m.open;
 }
-function measureFixCol() {
-  var m = D.measures || {}, t = dn(D.today), best = null;
-  (m.cols || []).forEach(function (c) {
-    var d = t - dn(c.date);
-    if (d >= 0 && d <= (D.editDays || 2) && c.values.some(function (v) { return v != null; })) best = c;
+function measureDue() { return measOpenDue(); }
+function measCol(date) { return ((D.measures || {}).cols || []).filter(function (c) { return c.date === date; })[0] || null; }
+
+/* вид замера по названию из таблицы – для схемы и коротких подписей */
+function mKind(name) {
+  var n = String(name || '').toLowerCase().replace(/ё/g, 'е');
+  if (/^вес/.test(n)) return 'w';
+  if (/груд/.test(n)) return 'chest';
+  if (/тали/.test(n)) return /широк|бок|пуп/.test(n) ? 'belly' : 'waist';
+  if (/живот/.test(n)) return 'belly';
+  if (/ягод/.test(n) && !/бедер|бедр/.test(n.replace(/\(.*\)/, ''))) return 'glutes';
+  if (/бедер/.test(n) && !/лев|прав/.test(n)) return 'hips';
+  if (/бедр/.test(n)) return /лев/.test(n) ? 'thighL' : /прав/.test(n) ? 'thighR' : 'thighL';
+  if (/голен|икр/.test(n)) return /лев/.test(n) ? 'calfL' : /прав/.test(n) ? 'calfR' : 'calfL';
+  if (/рук|плеч|бицеп/.test(n)) return /лев/.test(n) ? 'armL' : /прав/.test(n) ? 'armR' : 'armL';
+  if (/ше[яи]/.test(n)) return 'neck';
+  return '';
+}
+function mShort(name) {
+  var raw = String(name || '').trim(), base = raw.replace(/^обхват\s+/i, ''), i = base.indexOf('(');
+  var main = (i >= 0 ? base.slice(0, i) : base).trim(), par = i >= 0 ? base.slice(i + 1).replace(/\)\s*$/, '').trim() : '';
+  var k = mKind(raw), lo = raw.toLowerCase();
+  var L = {
+    w: 'Вес', glutes: 'Ягодицы', hips: 'Бёдра под ягодицами', neck: 'Шея',
+    thighL: 'Бедро левое', thighR: 'Бедро правое', calfL: 'Голень левая', calfR: 'Голень правая', armL: 'Рука левая', armR: 'Рука правая',
+    waist: 'Талия – самая узкая', belly: 'Талия – самая широкая'
+  };
+  var label = L[k] || cap(main), hint = par;
+  if (k === 'chest') { label = 'Грудь' + (/выдох/.test(lo) ? ' на выдохе' : /вдох/.test(lo) ? ' на вдохе' : ''); hint = /вдох|выдох/.test(par) ? '' : par; }
+  if (k === 'waist' || k === 'belly') hint = par || '';
+  if (k === 'w') hint = '';
+  hint = hint.replace(/^\s+/, '').replace(/\s+/g, ' ');
+  return { label: label, hint: hint ? cap(hint) : '' };
+}
+
+/* схема: фигура спереди, линии замеров и номера строк из таблицы */
+function measScheme(m) {
+  var at = {};
+  m.names.forEach(function (nm, i) { var k = mKind(nm); if (k && k !== 'w') (at[k] = at[k] || []).push(i + 1); });
+  var P = {   // линия [x1, x2, y], сторона бейджа: l / r
+    neck: [90, 110, 40, 'r'], chest: [61, 139, 70, 'l'], armR: [49, 67, 92, 'l'], armL: [133, 151, 92, 'r'],
+    waist: [79, 121, 114, 'l'], belly: [76, 124, 130, 'r'], glutes: [69, 131, 152, 'l'], hips: [71, 129, 170, 'r'],
+    thighR: [71, 99, 197, 'l'], thighL: [101, 129, 197, 'r'], calfR: [73, 96, 242, 'l'], calfL: [104, 127, 242, 'r']
+  };
+  var limb = function (d, w) { return '<path d="' + d + '" stroke="var(--line2)" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '<path d="' + d + '" stroke="var(--card2)" stroke-width="' + (w - 2.6) + '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'; };
+  var s = '<svg viewBox="0 0 200 304" aria-hidden="true">' +
+    limb('M67 58 L56 108 L51 156', 15) + limb('M133 58 L144 108 L149 156', 15) +
+    limb('M86 158 L84 226 L85 286', 24) + limb('M114 158 L116 226 L115 286', 24) +
+    '<rect class="fig" x="93" y="34" width="14" height="12" rx="4"/>' +
+    '<path class="fig" d="M70 50 L130 50 Q138 54 136 70 Q132 96 120 116 Q118 128 125 145 Q130 156 128 166 L72 166 Q70 156 75 145 Q82 128 80 116 Q68 96 64 70 Q62 54 70 50 Z"/>' +
+    '<circle class="fig" cx="100" cy="23" r="13"/>' +
+    '<text class="side" x="85" y="301">П</text><text class="side" x="115" y="301">Л</text>';
+  Object.keys(P).forEach(function (k) {
+    if (!at[k]) return;
+    var p = P[k], lbl = at[k].join('·'), w = lbl.length > 2 ? 26 : 18, bx = p[3] === 'l' ? 15 : 185;
+    s += '<line class="ml" x1="' + p[0] + '" x2="' + p[1] + '" y1="' + p[2] + '" y2="' + p[2] + '"/>' +
+      '<line x1="' + (p[3] === 'l' ? bx + w / 2 : p[1]) + '" x2="' + (p[3] === 'l' ? p[0] : bx - w / 2) + '" y1="' + p[2] + '" y2="' + p[2] + '" stroke="var(--line2)" stroke-width="1"/>' +
+      '<g class="mb"><rect x="' + (bx - w / 2) + '" y="' + (p[2] - 8.5) + '" width="' + w + '" height="17" rx="8.5" fill="var(--accent)"/>' +
+      '<text x="' + bx + '" y="' + (p[2] + 3.4) + '">' + lbl + '</text></g>';
   });
-  return best;
+  return s + '</svg>';
 }
+function schemeBlock(m) {
+  return '<div class="scheme">' + measScheme(m) + '<ul>' +
+    '<li><b>Утром натощак</b>, после туалета – до еды и тренировки.</li>' +
+    '<li><b>Лента прилегает к коже</b>: не перетягивайте и не оставляйте слабины. Держите её параллельно полу.</li>' +
+    '<li>Стойте ровно и расслабленно. Талию меряем при напряжённом прессе.</li>' +
+    '<li>Номера на схеме – как в списке ниже. <b>Л</b> и <b>П</b> – ваши левая и правая стороны: на схеме вы стоите лицом к нам.</li></ul></div>';
+}
+
 function viewMeas() {
   var m = D.measures || { names: [], units: [], cols: [] }, t = dn(D.today);
   var h = '<h2 class="sec-title">Замеры</h2>';
-  var due = measureDue(), fix = !due ? measureFixCol() : null;
   if (!m.names.length) return h + '<div class="card"><p class="muted" style="margin:0">Тренер ещё не настроил замеры.</p></div>';
-  if (due && !D.closed) {
-    var dd = dn(due) - t;
-    h += '<div class="card"><h3>Замер по графику – ' + longDate(due) + '</h3><p class="sub">' + (dd > 0 ? 'Можно внести уже сейчас или в день замера.' : dd === 0 ? 'Сегодня день замера.' : 'Замер ещё ждёт вас – внесите, как будет возможность.') +
-      ' Меряйте утром до еды, лента горизонтально и без натяжения. Можно заполнить не всё.</p>' + measForm(m, null) + '</div>';
-  } else if (fix && S.measureFix && !D.closed) {
-    h += '<div class="card"><h3>Исправить замер ' + dm(fix.date) + '</h3><p class="sub">Поправить можно в течение двух дней после замера.</p>' + measForm(m, fix) + '</div>';
+  var op = m.open, every = m.every || 10, late = m.late != null ? m.late : 2;
+  var everyTxt = 'Замеры каждые ' + every + ' ' + plural(every, 'день', 'дня', 'дней') + ' – интервал ставит тренер.';
+  var schemeShown = false;
+  if (op && !D.closed && (!op.filled || S.measureFix)) {
+    var col = measCol(op.date), today = dn(op.date) === t, until = longDate(ymd(dn(op.date) + late));
+    h += '<div class="card"><h3>' + (S.measureFix ? 'Исправить замеры ' + dm(op.date) : today ? 'Сегодня контрольные замеры' : 'Замеры ' + longDate(op.date)) + '</h3>' +
+      '<p class="sub">' + (S.measureFix ? 'Поправить можно до ' + until + '.' : (today ? '' : 'День замеров прошёл, внести можно до ' + until + '. ') + 'Вес – обязательно, обхваты – сколько получится.') + '</p>' +
+      schemeBlock(m) + measForm(m, col, op.date) + '</div>';
+    schemeShown = true;
+  } else if (op && op.filled && !D.closed) {
+    h += '<div class="card next-m"><div class="ic">' + IC.check + '</div><div style="flex:1"><h3>Замеры ' + dm(op.date) + ' внесены</h3>' +
+      '<p class="sub" style="margin:0">Исправить можно до ' + longDate(ymd(dn(op.date) + late)) + '.' + (m.next ? ' Следующие – ' + longDate(m.next) + '.' : '') + '</p>' +
+      '<button class="btn sec mt" data-act="measFix" style="height:44px">Исправить замеры</button></div></div>';
   } else {
-    var nx = (m.cols || []).filter(function (c) { return dn(c.date) > t && !c.values.some(function (v) { return v != null; }); })[0];
-    var nd = nx ? dn(nx.date) - t : null;
-    h += '<div class="card next-m"><div class="ic">' + IC.tape + '</div><div style="flex:1"><h3>' + (nx ? 'Следующий замер – ' + longDate(nx.date) : 'Замеры по графику закончились') + '</h3>' +
-      '<p class="sub" style="margin:0">' + (nx ? 'Через ' + nd + ' ' + plural(nd, 'день', 'дня', 'дней') + '. Форма появится здесь за 5 дней до даты.' : 'Все плановые замеры этого периода внесены.') + '</p>' +
-      (fix && !D.closed ? '<button class="btn sec mt" data-act="measFix" style="height:44px">Исправить замер ' + dm(fix.date) + '</button>' : '') + '</div></div>';
+    var nd = m.next ? dn(m.next) - t : null;
+    h += '<div class="card next-m"><div class="ic">' + IC.tape + '</div><div style="flex:1"><h3>' + (m.next ? 'Следующие замеры – ' + longDate(m.next) : 'Замеры по графику закончились') + '</h3>' +
+      '<p class="sub" style="margin:0">' + (m.next ? 'Через ' + nd + ' ' + plural(nd, 'день', 'дня', 'дней') + '. Форма откроется в этот день. ' + everyTxt : 'Все плановые замеры этого периода позади.') + '</p></div></div>';
   }
+  if (!schemeShown) h += '<details class="card"><summary>Как делать замеры</summary>' + schemeBlock(m) + '</details>';
+
   var filled = (m.cols || []).filter(function (c) { return c.values.some(function (v) { return v != null; }); });
   if (filled.length) {
     var first = filled[0], last = filled[filled.length - 1], prev = filled.length >= 3 ? filled[filled.length - 2] : null;
-    h += '<div class="card"><h3>История</h3><p class="sub">Разница – от первого замера до последнего.</p><div class="mwrap"><table class="mtable"><thead><tr><th></th><th>' + dm(first.date) + '</th>' +
+    h += '<div class="card"><h3>История</h3><p class="sub">Разница – от первого замера до последнего. График – на вкладке «Прогресс».</p><div class="mwrap"><table class="mtable"><thead><tr><th></th><th>' + dm(first.date) + '</th>' +
       (prev ? '<th>' + dm(prev.date) + '</th>' : '') + (last !== first ? '<th>' + dm(last.date) + '</th><th>Разница</th>' : '') + '</tr></thead><tbody>' +
       m.names.map(function (nm, i) {
         var a = first.values[i], b = last.values[i], d = a != null && b != null && last !== first ? b - a : null;
-        return '<tr><td>' + esc(nm) + (m.units[i] ? ' <span class="muted" style="font-size:12px">' + esc(m.units[i]) + '</span>' : '') + '</td><td>' + fx(a) + '</td>' +
+        return '<tr><td>' + (i + 1) + '. ' + esc(mShort(nm).label) + (m.units[i] ? ' <span class="muted" style="font-size:12px">' + esc(m.units[i]) + '</span>' : '') + '</td><td>' + fx(a) + '</td>' +
           (prev ? '<td>' + fx(prev.values[i]) + '</td>' : '') +
           (last !== first ? '<td>' + fx(b) + '</td><td class="t ' + (d == null ? '' : d < 0 ? 'dn' : d > 0 ? 'up' : '') + '">' + (d == null ? '—' : signed(d, 1)) + '</td>' : '') + '</tr>';
       }).join('') + '</tbody></table></div></div>';
   }
   return h;
 }
-function measForm(m, fix) {
-  return '<div class="mform">' + m.names.map(function (nm, i) {
-    var v = fix ? fix.values[i] : null;
-    return '<label class="fld" data-mi="' + i + '"><input type="text" inputmode="decimal" autocomplete="off" data-m="' + i + '" value="' + esc(inputVal(v, 1)) + '" placeholder="—"><span>' + esc(nm) + (m.units[i] ? ', ' + esc(m.units[i]) : '') + '</span></label>';
-  }).join('') + '</div><p class="ferr" id="measErr"></p><button class="btn pri mt" data-act="saveMeas">Сохранить замеры</button>' +
-    (fix ? '<button class="btn sec mt" data-act="measFixCancel">Отмена</button>' : '');
+function measForm(m, col, date) {
+  var wDay = (byDate[date] || {}).w;
+  return '<div class="mlist">' + m.names.map(function (nm, i) {
+    var sh = mShort(nm), isW = mKind(nm) === 'w' || /кг/i.test(m.units[i] || '');
+    var v = col && col.values[i] != null ? col.values[i] : (isW && wDay != null ? wDay : null);
+    return '<div class="mrow"><span class="mnum' + (isW ? ' w' : '') + '">' + (i + 1) + '</span><div class="mlab"><b>' + esc(sh.label) + '</b>' +
+      (isW ? '<small class="req">обязательно в день замеров</small>' : sh.hint ? '<small>' + esc(sh.hint) + '</small>' : '') + '</div>' +
+      '<label class="minp"><input type="text" inputmode="decimal" autocomplete="off" data-m="' + i + '" value="' + esc(inputVal(v, 1)) + '" placeholder="—" aria-label="' + esc(sh.label) + '"><span>' + esc(m.units[i] || '') + '</span></label></div>';
+  }).join('') + '</div><p class="ferr" id="measErr"></p><button class="btn pri mt" data-act="saveMeas" data-date="' + date + '">Сохранить замеры</button>' +
+    (S.measureFix ? '<button class="btn sec mt" data-act="measFixCancel">Отмена</button>' : '');
 }
 function saveMeas(btn) {
-  var m = D.measures, vals = [], errs = [], any = false;
+  var m = D.measures, date = btn.getAttribute('data-date'), col = measCol(date), vals = [], errs = [], any = false, wMiss = false;
   Array.prototype.forEach.call(app.querySelectorAll('[data-m]'), function (inp) {
     var i = +inp.getAttribute('data-m'), x = parseNum(inp.value), box = inp.parentNode;
+    var isW = mKind(m.names[i]) === 'w' || /кг/i.test(m.units[i] || '');
     box.classList.remove('bad');
-    if (x === '') { vals[i] = null; return; }
+    if (x === '') { vals[i] = null; if (isW && !(col && col.values[i] != null)) { wMiss = true; box.classList.add('bad'); } return; }
     var lim = /кг/i.test(m.units[i] || '') ? [30, 250] : [1, 300];
-    if (isNaN(x) || x < lim[0] || x > lim[1]) { box.classList.add('bad'); errs.push(m.names[i] + ': от ' + lim[0] + ' до ' + lim[1]); vals[i] = null; return; }
-    vals[i] = x; any = true;
+    if (isNaN(x) || x < lim[0] || x > lim[1]) { box.classList.add('bad'); errs.push(mShort(m.names[i]).label + ': от ' + lim[0] + ' до ' + lim[1]); vals[i] = null; return; }
+    vals[i] = Math.round(x * 10) / 10; any = true;
   });
   var err = $('#measErr');
   if (errs.length) { err.textContent = 'Проверьте: ' + errs.join('; '); return; }
+  if (wMiss) { err.textContent = 'Внесите вес – в день замеров он обязателен.'; return; }
   if (!any) { err.textContent = 'Заполните хотя бы один замер.'; return; }
-  btn.disabled = true; btn.textContent = 'Сохраняем…'; err.textContent = '';
-  api(null, { k: KEY, a: 'measure', date: D.today, values: vals }).then(function (res) {
-    if (res && res.ok) {
-      var col = (m.cols || []).filter(function (c) { return c.date === res.column; })[0];
-      if (col) vals.forEach(function (v, i) { if (v != null) col.values[i] = Math.round(v * 10) / 10; });
-      var nx = (m.cols || []).filter(function (c) { return dn(c.date) >= dn(D.today) - 5 && !c.values.some(function (v) { return v != null; }); })[0];
-      m.next = nx ? nx.date : null;
-      S.measureFix = false;
-      toast('Замеры сохранены', 'ok'); render(); refresh(false);
-    } else { btn.disabled = false; btn.textContent = 'Сохранить замеры'; err.textContent = errText(res); }
-  });
+  // сразу на экране, на сервер – в фоне
+  if (col) vals.forEach(function (v, i) { if (v != null) col.values[i] = v; });
+  if (m.open && m.open.date === date) m.open.filled = true;
+  var wi = -1; m.names.forEach(function (nm, i) { if (wi < 0 && (mKind(nm) === 'w' || /кг/i.test(m.units[i] || ''))) wi = i; });
+  if (wi >= 0 && vals[wi] != null) { var bd = byDate[date] = byDate[date] || {}; if (bd.w == null) bd.w = vals[wi]; }
+  S.measureFix = false;
+  toast('Замеры сохранены', 'ok'); render(); window.scrollTo(0, 0);
+  send({ k: KEY, a: 'measure', date: date, values: vals });
 }
+
+/* ================= ГАЙДЫ ================= */
+function guidesCard() {
+  var g = D.guides || [];
+  if (!g.length) return '';
+  return '<div class="card"><h3>Ваши гайды</h3><p class="sub">Откройте в кабинете – или сохраните себе на телефон.</p>' +
+    g.map(function (x, i) {
+      return '<button class="guide" data-guide="' + i + '"><span class="ic">' + IC.book + '</span><span style="flex:1;min-width:0"><b>' + esc(x.name) + '</b><small>гайд Lite Fit · PDF</small></span></button>';
+    }).join('') + '</div>';
+}
+function openGuide(i) {
+  var g = (D.guides || [])[i]; if (!g) return;
+  if (!g.view) { window.open(g.url, '_blank', 'noopener'); return; }
+  closeGuide();
+  var v = document.createElement('div');
+  v.className = 'viewer'; v.id = 'viewer';
+  v.innerHTML = '<div class="vh"><b>' + esc(g.name) + '</b><a href="' + esc(g.url) + '" target="_blank" rel="noopener">открыть отдельно</a>' +
+    '<button class="x" data-act="closeGuide" aria-label="Закрыть" style="margin:0">' + IC.x + '</button></div>' +
+    '<iframe src="' + esc(g.view) + '" title="' + esc(g.name) + '" allow="autoplay"></iframe>';
+  document.body.appendChild(v);
+  document.body.style.overflow = 'hidden';
+}
+function closeGuide() { var v = document.getElementById('viewer'); if (v) v.remove(); document.body.style.overflow = ''; }
 
 /* ================= ФОТО ================= */
 function photoMonth() { return D.start ? Math.max(Math.floor((dn(D.today) - dn(D.start)) / 30) + 1, 1) : 1; }
@@ -1130,14 +1407,17 @@ document.addEventListener('click', function (e) {
   if (e.target.closest('[data-act="tgGo"]')) { S.tgGo = true; return; }
   if (e.target.closest('[data-act="tzFix"]')) { S.tzManual = true; setRemind({ tz: deviceTz() }); return; }
   var t = e.target.closest('button'); if (!t) return;
-  if (t.hasAttribute('data-tab')) { S.tab = t.getAttribute('data-tab'); S.measureFix = false; render(); window.scrollTo(0, 0); return; }
+  if (t.hasAttribute('data-tab')) { S.tab = t.getAttribute('data-tab'); S.measureFix = false; closeGuide(); render(); window.scrollTo(0, 0); return; }
   if (t.hasAttribute('data-day') && !t.disabled) { S.day = t.getAttribute('data-day'); render(); return; }
   if (t.hasAttribute('data-done') && !t.disabled) { toggleDone(t); return; }
   if (t.hasAttribute('data-up') && !t.disabled) { pickPhoto(t.getAttribute('data-up')); return; }
   if (t.hasAttribute('data-kind')) { S.kind = t.getAttribute('data-kind'); render(); return; }
   if (t.hasAttribute('data-consent') && !t.disabled) { setConsent(t.getAttribute('data-consent')); return; }
+  if (t.hasAttribute('data-guide')) { openGuide(+t.getAttribute('data-guide')); return; }
+  if (t.hasAttribute('data-msel')) { S.mSel = +t.getAttribute('data-msel'); render(); return; }
   var act = t.getAttribute('data-act');
-  if (act === 'refresh') refresh(false);
+  if (act === 'closeGuide') closeGuide();
+  else if (act === 'refresh') { obFlush(); refresh(false); }
   else if (act === 'retry') { app.innerHTML = '<div class="center"><img class="pulse" src="' + LOGO + '" alt="Lite Fit"><p>Загружаем ваш кабинет…</p></div>'; refresh(true); }
   else if (act === 'saveDay') saveDay(t);
   else if (act === 'saveMeas') saveMeas(t);
@@ -1150,6 +1430,7 @@ document.addEventListener('click', function (e) {
 document.addEventListener('change', function (e) {
   var k = e.target.getAttribute && e.target.getAttribute('data-remind');
   if (k) { var p = {}; p[k] = e.target.value; setRemind(p); }
+  if (e.target.hasAttribute && e.target.hasAttribute('data-dur')) setDur(e.target);
 });
 document.addEventListener('input', function (e) {
   if (e.target.hasAttribute('data-k')) {
@@ -1159,6 +1440,7 @@ document.addEventListener('input', function (e) {
   }
 });
 document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeGuide();
   if (e.key === 'Enter' && e.target.hasAttribute && e.target.hasAttribute('data-k')) { e.preventDefault(); var b = app.querySelector('[data-act="saveDay"]'); if (b && !b.disabled) saveDay(b); }
 });
 
@@ -1177,17 +1459,21 @@ if (DEMO) (function () {
       kc ? Math.round(kc * 0.3 / 4) : null, kc ? Math.round(kc * 0.28 / 9) : null, kc ? Math.round(kc * 0.42 / 4) : null]);
   }
   hist[hist.length - 1][2] = null; hist[hist.length - 1][4] = 3120; hist[hist.length - 1][1] = 640; hist[hist.length - 1][6] = 48; hist[hist.length - 1][7] = 21; hist[hist.length - 1][8] = 62;
-  hist.forEach(function (h, i) {
-    var a = hist.slice(Math.max(0, i - 6), i + 1).map(function (x) { return x[2]; }).filter(function (x) { return x != null; });
-    h[3] = a.length ? Math.round(a.reduce(function (p, x) { return p + x; }, 0) / a.length * 10) / 10 : null;
-  });
-  var names = ['Вес', 'Шея', 'Грудь', 'Талия', 'Живот', 'Бёдра', 'Бедро правое', 'Бедро левое', 'Плечо правое', 'Плечо левое', 'Голень правая', 'Голень левая', 'Предплечье'];
+  var names = ['Вес', 'Обхват груди (на вдох)', 'Обхват груди (на выдохе)', 'Обхват талии в самой узкой точке (при напряжённых мышцах пресса)',
+    'Обхват талии в самой широкой точке/бока (при напряжённых мышцах пресса)', 'Обхват ягодиц (при сведённых бедрах)', 'Обхват бёдер (под ягодицами)',
+    'Обхват левого бедра (средняя точка между коленом и тазобедренным суставом)', 'Обхват правого бедра (средняя точка между коленом и тазобедренным суставом)',
+    'Обхват левой голени ( точка в верхней трети между коленом и голеностопом)', 'Обхват правой голени ( точка в верхней трети между коленом и голеностопом)',
+    'Обхват левой руки (средняя точка между локтем и плечом)', 'Обхват правой руки (средняя точка между локтем и плечом)'];
   var units = ['кг', 'см', 'см', 'см', 'см', 'см', 'см', 'см', 'см', 'см', 'см', 'см', 'см'];
-  var base = [72.4, 34, 96, 78, 88, 104, 60, 59.5, 30, 29.5, 37, 36.8, 25];
+  var base = [72.4, 104, 100, 80, 97, 101, 98, 53, 53, 38, 38, 30, 30.5];
   var cols = [];
-  for (var c = 0; c < 6; c++) {
-    var d = s + c * 10;
-    cols.push({ date: ymd(d), values: d < t - 5 ? base.map(function (b, i) { return Math.round((b - c * (i === 0 ? 0.6 : 0.4 + rnd() * 0.5)) * 10) / 10; }) : names.map(function () { return null; }) });
+  for (var c = 0; s + c * 7 <= e; c++) {
+    var d = s + c * 7;
+    cols.push({ date: ymd(d), values: d < t ? base.map(function (b, i) { return Math.round((b - c * (i === 0 ? 0.5 : 0.3 + rnd() * 0.4)) * 10) / 10; }) : names.map(function () { return null; }) });
+  }
+  function openOf() {
+    var tc = cols.filter(function (x) { return dn(x.date) === t; })[0] || cols.filter(function (x) { return dn(x.date) < t && dn(x.date) >= t - 2; }).pop();
+    return tc ? { date: tc.date, filled: tc.values.some(function (v) { return v != null; }) } : null;
   }
   var plan = [
     [-6, '19:00', 'Тренировка', 'Ноги и ягодицы: присед с гантелью 4×12, румынская тяга 3×12, выпады назад 3×10 на каждую', true, 'Держите спину ровной в тяге, вес можно поднять на 2 кг'],
@@ -1197,14 +1483,15 @@ if (DEMO) (function () {
     [1, '20:00', 'Созвон', 'Разбор недели: питание, самочувствие, план на следующую', false, ''],
     [3, '19:00', 'Тренировка', 'Ноги и ягодицы, как в прошлый раз, +1 подход в приседе', false, ''],
     [5, '09:00', 'Кардио', 'Велотренажёр 40 минут в спокойном темпе', false, '']
-  ].map(function (p, i) { return { row: 10 + i, date: ymd(t + p[0]), time: p[1], type: p[2], desc: p[3], done: p[4], comment: p[5] }; });
+  ].map(function (p, i) { return { row: 10 + i, date: ymd(t + p[0]), time: p[1], type: p[2], desc: p[3], done: p[4], comment: p[5], min: p[4] && i === 0 ? 55 : null }; });
   var DB = {
     ok: true, v: VERSION, name: 'Анна Демо', trainer: 'Дарья', closed: false, today: ymd(t), editDays: 2, start: ymd(s), end: ymd(e),
     hist: hist, weight: { start: hist[0][2], now: null }, norm: { kcal: 1825, p: 137, f: 57, c: 191, steps: 8000 },
     consent: { value: 'private', at: null },
     bot: { user: 'LiteFitDemoBot', link: 'https://t.me/LiteFitDemoBot?start=demo', linked: true },
     remind: { morning: '08:00', evening: '21:00', tz: '' },
-    plan: plan, measures: { names: names, units: units, cols: cols, next: ymd(s + 40) },
+    plan: plan, measures: { names: names, units: units, cols: cols, every: 7, late: 2, open: openOf(), next: (cols.filter(function (x) { return dn(x.date) > t; })[0] || {}).date || null },
+    guides: [{ name: 'Питание', url: 'https://litefitonline-lang.github.io/anketa/', view: '' }, { name: 'Разминка', url: 'https://litefitonline-lang.github.io/anketa/', view: '' }],
     photos: [['front', 'фас', s], ['side', 'профиль', s], ['back', 'спина', s], ['front', 'фас', t - 3]].map(function (p) {
       var n = Math.floor((p[2] - s) / 30) + 1; return { date: ymd(p[2]), kind: p[1], code: p[0], month: ymd(p[2]).slice(0, 7) + ' месяц ' + n, n: n };
     })
@@ -1235,13 +1522,13 @@ if (DEMO) (function () {
       }
       if (body.a === 'remind') { ['morning', 'evening', 'tz'].forEach(function (k) { if (k in body) DB.remind[k] = body[k]; }); return { ok: true, remind: JSON.parse(JSON.stringify(DB.remind)) }; }
       if (body.a === 'consent') { var at = new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ''); DB.consent = { value: body.value, at: at }; return { ok: true, value: body.value, at: at }; }
-      if (body.a === 'done') { DB.plan.forEach(function (p) { if (p.row === body.row) p.done = body.done; }); return { ok: true, row: body.row, done: body.done }; }
+      if (body.a === 'done') { DB.plan.forEach(function (p) { if (p.row === body.row) { if ('done' in body) p.done = body.done; if ('min' in body) p.min = body.min === '' ? null : body.min; } }); return { ok: true, row: body.row, done: body.done }; }
       if (body.a === 'measure') {
-        var col = DB.measures.cols.filter(function (c) { return Math.abs(dn(c.date) - ed) <= 5 && !c.values.some(function (v) { return v != null; }); })[0];
-        if (!col) return { ok: false, error: 'сейчас нет замера по графику' };
+        var col = DB.measures.cols.filter(function (c) { return c.date === body.date; })[0];
+        if (!col || ed > t) return { ok: false, error: 'замеры вносятся в день замеров' };
+        if (ed < t - 2) return { ok: false, error: 'эти замеры уже нельзя изменить – напишите тренеру' };
         body.values.forEach(function (v, i) { if (v != null) col.values[i] = v; });
-        var nx = DB.measures.cols.filter(function (c) { return dn(c.date) >= t - 5 && !c.values.some(function (v) { return v != null; }); })[0];
-        DB.measures.next = nx ? nx.date : null;
+        DB.measures.open = openOf();
         return { ok: true, saved: body.values.filter(function (v) { return v != null; }).length, column: col.date };
       }
       if (body.a === 'photo') {
