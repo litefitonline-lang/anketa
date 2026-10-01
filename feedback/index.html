@@ -194,12 +194,26 @@ var ICON = {
 };
 
 /* ---------- загрузка: адрес веб-приложения и вопросы ---------- */
+function findApi(t){
+  var m = t.match(/https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/);
+  if (m) return m[0];
+  var d = t.match(/AKfyc[\w-]{30,}/);                          // адрес может быть записан по частям
+  return d ? "https://script.google.com/macros/s/" + d[0] + "/exec" : "";
+}
 function apiFromCabinet(){
   return fetch(CONFIG.cabinet, {cache:"no-store"}).then(function(r){ return r.text(); }).then(function(t){
-    var m = t.match(/https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/);
-    if (!m) throw new Error("нет адреса");
-    try { localStorage.setItem("lf_api", m[0]); } catch(e){}
-    return m[0];
+    var api = findApi(t);
+    if (api) return api;
+    // кабинет может держать код в отдельных файлах – смотрим и их
+    var srcs = [], re = /<script[^>]+src=["']([^"']+)["']/gi, m;
+    while ((m = re.exec(t))) if (!/^https?:/i.test(m[1]) || m[1].indexOf(location.host) !== -1) srcs.push(new URL(m[1], new URL(CONFIG.cabinet, location.href)).href);
+    return srcs.reduce(function(p, u){
+      return p.then(function(found){ return found || fetch(u, {cache:"no-store"}).then(function(r){ return r.text(); }).then(findApi).catch(function(){ return ""; }); });
+    }, Promise.resolve(""));
+  }).then(function(api){
+    if (!api) throw new Error("нет адреса");
+    try { localStorage.setItem("lf_api", api); } catch(e){}
+    return api;
   });
 }
 function getInfo(api){
