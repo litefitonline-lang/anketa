@@ -118,7 +118,7 @@ a.btn{text-decoration:none}
 .rings .st{stroke:#9FF5EF;opacity:.9}
 .rings .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .ctr .big{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1}
-.ctr .of{font-size:13px;color:var(--muted);margin-top:6px}
+.ctr .of{font-size:13px;color:var(--muted);margin-top:6px;white-space:nowrap}
 .ctr .left{font-size:13px;font-weight:700;color:var(--accent);margin-top:8px}
 .ctr .left.over{color:var(--warm)}
 .legend{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
@@ -354,6 +354,24 @@ details.card[open]>summary{margin-bottom:12px}
 .viewer .vh b{flex:1;font-size:16px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .viewer .vh a{font-size:13px;color:var(--accent);font-weight:700;text-decoration:none;white-space:nowrap}
 .viewer iframe{flex:1;width:100%;border:0;background:#fff}
+.viewer .vb{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 18px calc(var(--safe-b) + 28px)}
+/* 2.8.2: инструкция «Как считать питание» */
+.how{max-width:444px;margin:0 auto}
+.how h2{margin:0 0 10px;font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.how .lead{margin:0 0 24px;font-size:15px;color:var(--muted)}
+.how ol{list-style:none;margin:0;padding:0;counter-reset:st}
+.how li{position:relative;padding:0 0 22px 48px;counter-increment:st}
+.how li::before{content:counter(st);position:absolute;left:0;top:0;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:15px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 14px -4px var(--glow)}
+.how li::after{content:"";position:absolute;left:15px;top:38px;bottom:4px;width:2px;border-radius:2px;background:var(--line)}
+.how li:last-child{padding-bottom:6px}
+.how li:last-child::after{display:none}
+.how li b{display:block;font-size:17px;font-weight:800;letter-spacing:-.01em;line-height:1.25;padding-top:5px;margin-bottom:5px}
+.how li p{margin:0;font-size:14px;color:var(--muted)}
+.how li p em{font-style:normal;color:var(--text);font-weight:700}
+.how .banner{margin:18px 0 0}
+.how .banner b{color:var(--text)}
+.how-l{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:-10px 0 4px;font-size:14px;font-weight:700;color:var(--accent)}
+.how-l::before{content:"?";flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--accent);display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1}
 .sync.pend{color:var(--warm)}
 .sync.pend svg{color:var(--warm)}
 
@@ -391,7 +409,7 @@ details.card[open]>summary{margin-bottom:12px}
 .view{animation:vin .3s ease both}
 @keyframes vin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:360px){.app{padding-left:14px;padding-right:14px}.rings{width:210px;height:210px}.ctr .big{font-size:38px}.grid3{gap:8px}.week .wg{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:360px){.app{padding-left:14px;padding-right:14px}.rings{width:210px;height:210px}.ctr .big{font-size:38px}.ctr .of{font-size:11.5px}.grid3{gap:8px}.week .wg{grid-template-columns:repeat(2,1fr)}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -404,7 +422,7 @@ details.card[open]>summary{margin-bottom:12px}
 'use strict';
 
 /* ================= НАСТРОЙКИ ================= */
-var VERSION = '2.8.1';
+var VERSION = '2.8.2';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var LIM = { w: [30, 250, 'Вес'], kcal: [0, 10000, 'Калории'], p: [0, 1000, 'Белки'], f: [0, 1000, 'Жиры'], c: [0, 1500, 'Углеводы'], steps: [0, 100000, 'Шаги'] };
@@ -737,9 +755,10 @@ function viewToday() {
   var norm = D.norm || {};
   var kNorm = v.norm || norm.kcal || null, sNorm = norm.steps || null;
   var noSteps = locked('steps');                              // пробный кабинет: шаги – в PRO
-  var h = '';
-  h += '<div class="days" role="tablist">' + list.map(function (x) {
-    var lab = x.i === 0 ? 'Сегодня' : x.i === 1 ? 'Вчера' : cap(wd(x.ymd));
+  var h = howCard(list.some(function (x) { return x.ok; }));
+  // 2.8.2: дни идут как в календаре, слева направо: позавчера – вчера – сегодня (сегодня выбран по умолчанию)
+  h += '<div class="days" role="tablist">' + list.slice().reverse().map(function (x) {
+    var lab = x.i === 0 ? 'Сегодня' : x.i === 1 ? 'Вчера' : x.i === 2 ? 'Позавчера' : cap(wd(x.ymd));
     return '<button role="tab" data-day="' + x.ymd + '" class="' + (x.ymd === day ? 'on' : '') + '"' + (x.ok || x.i === 0 ? '' : ' disabled') + '>' + lab + '<small>' + dm(x.ymd) + '</small></button>';
   }).join('') + '</div>';
 
@@ -758,7 +777,7 @@ function viewToday() {
     (noSteps ? '' : '<circle class="trk" cx="118" cy="118" r="82" stroke-width="9"/>' +
     '<circle class="arc st ' + sState + '" cx="118" cy="118" r="82" stroke-width="9" stroke-dasharray="' + dash(sp, 82) + '"' + (sp > 0 ? '' : ' opacity="0"') + '/>') +
     '</svg><div class="ctr"><div class="big num">' + (kc != null ? fmt(kc) : '0') + '</div>' +
-    '<div class="of">из <span class="num">' + fmt(kNorm) + '</span> ккал</div>' +
+    '<div class="of">' + (kNorm != null ? 'при норме <span class="num">' + fmt(kNorm) + '</span> ккал' : 'ккал') + '</div>' +
     (left != null ? '<div class="left num' + (over ? ' over' : '') + '">' + (left >= 0 ? 'осталось ' + fmt(left) : 'сверх нормы ' + fmt(-left)) + '</div>' : '<div class="left" style="color:var(--dim)">ещё не внесено</div>') +
     '</div></div>' +
     '<div class="legend"><div class="lg' + (over ? ' over' : '') + '"><div class="k"><i></i>Калории</div><div class="v num">' + fmt(kc) + ' <small>/ ' + fmt(kNorm) + '</small></div>' +
@@ -786,6 +805,7 @@ function viewToday() {
   var mDay = mo && mo.date === day;
   var title = day === D.today ? 'Внести за сегодня' : 'Внести за ' + longDate(day);
   h += '<div class="card"><h3>' + title + '</h3><p class="sub">' + (canEdit ? 'Можно внести и поправить данные за сегодня и два прошлых дня. Вес – по желанию, хоть каждый день.' : fzNow() ? 'Идёт заморозка – данные сейчас не вносятся.' : fzOf(day) ? 'Этот день – заморозка, данные не вносятся.' : 'Эту дату изменить уже нельзя.') + '</p>' +
+    '<button class="how-l" data-act="howto">Как считать питание</button>' +
     '<div class="grid2">' + fld('w', mDay ? 'Вес, кг · день замеров' : 'Вес, кг · по желанию', v.w, 1, 'decimal', canEdit) + (noSteps ? '<div class="fld-lk"><b>' + IC.lock + 'Шаги</b>назначает тренер · в PRO</div>' : fld('steps', 'Шаги', v.steps, 0, 'numeric', canEdit)) + '</div><div class="gap"></div>' +
     fld('kcal', 'Калории, ккал', v.kcal, 0, 'numeric', canEdit) + '<div class="gap"></div>' +
     '<div class="grid3">' + fld('p', 'Белки, г', v.p, 1, 'decimal', canEdit) + fld('f', 'Жиры, г', v.f, 1, 'decimal', canEdit) + fld('c', 'Углеводы, г', v.c, 1, 'decimal', canEdit) + '</div>' +
@@ -1339,6 +1359,37 @@ function openDoc(g) {
 }
 function closeGuide() { var v = document.getElementById('viewer'); if (v) v.remove(); document.body.style.overflow = ''; }
 
+/* ================= ИНСТРУКЦИЯ «КАК СЧИТАТЬ ПИТАНИЕ» (2.8.2) =================
+ * Открыта всем – и в пробном кабинете, и в PRO: это не гайд, а механика учёта.
+ * Ссылка стоит в форме дня всегда. Карточка наверху «Сегодня» видна, пока у клиента нет ни одной записи о калориях. */
+var HOW_STEPS = [
+  ['Поставьте счётчик калорий', 'Подойдёт <em>FatSecret</em>: бесплатный, с большой базой продуктов и сканером штрихкодов. Уже считаете в другом приложении – оставайтесь в нём.'],
+  ['Записывайте еду сразу', 'Поели – внесли. Вечером по памяти часть теряется: масло, соусы, перекусы, сладкие напитки.'],
+  ['Первое время взвешивайте', 'Первые две недели – на кухонных весах. Крупы, макароны и мясо взвешивайте сухими и сырыми, до готовки.'],
+  ['Вечером перенесите итог', 'Откройте в приложении сводку за день и впишите в кабинет четыре числа: <em>калории, белки, жиры, углеводы</em>. Не успели – день можно внести в течение двух следующих.']
+];
+function howCard(canEdit) {
+  if (!canEdit || LS.get('lf_how_hide')) return '';
+  if (Object.keys(byDate).some(function (y) { return byDate[y] && byDate[y].kcal != null; })) return '';
+  return '<div class="card install"><div class="ic">' + IC.book + '</div><div style="flex:1"><p><b>С чего начать</b></p>' +
+    '<p>Еду считает приложение-счётчик, в кабинет вы вносите итог дня. Как это наладить – четыре шага.</p>' +
+    '<button class="btn pri mt" data-act="howto" style="height:44px">Как считать питание</button></div>' +
+    '<button class="x" data-act="hideHow" aria-label="Скрыть">' + IC.x + '</button></div>';
+}
+function openHow() {
+  closeGuide();
+  var v = document.createElement('div');
+  v.className = 'viewer'; v.id = 'viewer';
+  v.innerHTML = '<div class="vh"><b>Инструкция</b><button class="x" data-act="closeGuide" aria-label="Закрыть" style="margin:0">' + IC.x + '</button></div>' +
+    '<div class="vb"><div class="how"><h2>Как считать питание</h2>' +
+    '<p class="lead">Кабинет не считает калории за вас – он хранит итог дня и показывает его тренеру. Считать удобнее в приложении-счётчике, это 5–7 минут в день.</p>' +
+    '<ol>' + HOW_STEPS.map(function (x) { return '<li><b>' + x[0] + '</b><p>' + x[1] + '</p></li>'; }).join('') + '</ol>' +
+    '<div class="banner"><b>Ели не дома?</b> Найдите в приложении похожее блюдо и внесите примерно. Примерная запись полезнее пропуска.</div>' +
+    '<button class="btn pri mt" data-act="closeGuide">Понятно</button></div></div>';
+  document.body.appendChild(v);
+  document.body.style.overflow = 'hidden';
+}
+
 /* ================= ФОТО ================= */
 /* 2.8.1: после пробного кабинета месяцы фото считаются от старта PRO (D.pro); фото пробного – это месяц 1, точка «до» */
 function photoBase() { return D.pro && D.start && dn(D.pro) > dn(D.start) ? D.pro : D.start; }
@@ -1564,6 +1615,8 @@ document.addEventListener('click', function (e) {
   else if (act === 'measFixCancel') { S.measureFix = false; render(); }
   else if (act === 'collage') makeCollage();
   else if (act === 'hideInstall') { LS.set('lf_inst_hide', '1'); render(); }
+  else if (act === 'howto') openHow();
+  else if (act === 'hideHow') { LS.set('lf_how_hide', '1'); render(); }
   else if (act === 'install' && deferredInstall) { deferredInstall.prompt(); deferredInstall = null; }
 });
 document.addEventListener('change', function (e) {
