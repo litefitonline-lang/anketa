@@ -653,6 +653,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.2.1 (09.10.2026). Запрос на чтение, на который нет ответа 6 секунд, отправляется второй раз (берётся тот ответ, что придёт
+ * раньше). Секундомер: ожидание ответа и его загрузка отдельно, пустой запрос одновременно со списком, прошлые замеры.
  * 1.2 (09.10.2026). Нужные карточки сервер присылает вместе со списком (одним запросом вместо нескольких); внизу главной —
  * на что сервер потратил время и сколько занимает пустой запрос к Google.
  * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
@@ -664,6 +666,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.2';
+var PATCH = '.1';                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 var qs = new URLSearchParams(location.search);
@@ -727,7 +730,7 @@ var AS = '';                     // владелец: «как видит тре
 
 var D = null;                    // { trainer, admin, as, trainers, today, clients, fresh, tasks, lists, botUser }
 var S = { tab: 'home', cid: null, sub: 'over', filter: 'all', q: '', day: null, mSel: null, busy: 0, loadedAt: 0, pinName: '', listY: 0, sending: false, allPhotos: false, more: false,
-  unsure: false, offline: false, diag: { list: null, listSrv: null, st: null, inl: 0, n: 0, ms: 0, srv: 0, kept: 0, ping: null } };
+  unsure: false, offline: false, diag: { list: null, listSrv: null, st: null, inl: 0, n: 0, ms: 0, srv: 0, kept: 0, ping: null, ping0: null, w: null, d: null, kb: null, k: 1, tries: 1 } };
 var T = 0, TODAY = '';           // сегодня по серверу: номер дня и ГГГГ-ММ-ДД
 var NAV = [];                    // что открыто поверх списка: 'client', 'sheet' — для кнопки «Назад» телефона
 var thumbs = {}, thumbWait = {};
@@ -758,11 +761,29 @@ var WRITE = { norm: 1, normf: 1, calc: 1, steps: 1, plan: 1, plandel: 1, plancop
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 function post(body) {
-  return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { return r.text(); }).then(function (t) {
+  var t0 = Date.now(), t1 = 0;
+  return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { t1 = Date.now(); return r.text(); }).then(function (t) {
     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('bad'); }
+    if (j && typeof j === 'object') { j._w = t1 - t0; j._d = Date.now() - t1; j._kb = Math.round(t.length / 1024); }   // ожидание ответа, его загрузка, размер
     return j;
   });
 }
+/**
+ * Чтение с подстраховкой: если ответа нет after мс, тот же запрос уходит второй раз, берётся первый пришедший ответ.
+ * Запросы к Google иногда «зависают» на 10–15 секунд, хотя сам сервер отвечает за секунду.
+ */
+function postHedged(body, after) {
+  return new Promise(function (resolve, reject) {
+    var done = false, fails = 0, sent = 1, timer = null;
+    var one = function (k) {
+      post(body).then(function (j) { if (done) return; done = true; clearTimeout(timer); if (j && typeof j === 'object') j._k = k; resolve(j); },
+        function (e) { fails++; if (!done && fails >= sent) { done = true; clearTimeout(timer); reject(e); } });
+    };
+    one(1);
+    timer = setTimeout(function () { if (!done) { sent = 2; one(2); } }, after);
+  });
+}
+var HEDGE = { list: 6000, client: 6000 };
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
 /**
  * Запрос к серверу. Чтение при сбое связи повторяется до трёх раз. Запись не повторяется: если ответ не пришёл,
@@ -777,8 +798,8 @@ function call(op, body, quiet) {
   var p;
   if (!WRITE[op]) {
     var n = 0;
-    var go = function () { n++; return post(b).catch(function () { return n < 3 ? sleep(1500 * n).then(go) : net; }); };
-    p = go();
+    var go = function () { n++; return (HEDGE[op] ? postHedged(b, HEDGE[op]) : post(b)).catch(function () { return n < 3 ? sleep(1500 * n).then(go) : net; }); };
+    p = go().then(function (r) { if (r && typeof r === 'object') r._n = n; return r; });
   } else {
     b.jid = newJid();
     var asked = 0;
@@ -1173,23 +1194,32 @@ function viewHome() {
   var mine = D.tasks.slice(0, 3);
   h += '<div class="card"><h3>Задачи</h3>' + (mine.length ? '<div class="rows">' + mine.map(taskRow).join('') + '</div>' : '<p class="sub" style="margin:0">Задач нет.</p>') +
     '<button class="btn sec sm mt" data-tab="tasks">Все задачи</button></div>';
-  h += '<p class="muted" style="font-size:12px;text-align:center;margin:18px 0 0">Кабинет тренера · версия ' + VERSION + diagText() + '</p>';
+  h += '<p class="muted" style="font-size:12px;text-align:center;margin:18px 0 0">Кабинет тренера · версия ' + VERSION + PATCH + diagText() + '</p>';
   return h;
 }
 
-/** Секундомер: сколько занял список, на что сервер потратил время, откуда взялись карточки и сколько длится пустой запрос. */
+/** Секундомер: сколько занял список (ожидание ответа + загрузка), на что сервер потратил время, карточки, пустой запрос, прошлые замеры. */
 function diagText() {
   var g = S.diag, st = g.st, s1 = function (ms) { return (ms / 1000).toFixed(1).replace('.', ','); };
   if (g.list == null) return '';
-  var srv = '';
+  var srv = '', hist = [];
+  try { hist = JSON.parse(LS.get('lf_tr_h_' + KEY.slice(0, 10)) || '[]') || []; } catch (e) {}
   if (g.listSrv != null) {
-    srv = ' · сервер ' + s1(g.listSrv) + ' с';
+    srv = '<br>сервер ' + s1(g.listSrv) + ' с';
     if (st) srv += ' (главная таблица ' + (st.snap === 'hit' ? 'из памяти' : 'прочитана') + ' ' + s1(st.main || 0) + (st.props != null ? ' · свойства ' + s1(st.props) : '') +
       (st.drive != null ? ' · Диск ' + s1(st.drive) : '') + (st.cards != null ? ' · карточки ' + s1(st.cards) : '') + ')';
   }
-  return '<br>список ' + s1(g.list) + ' с' + srv +
+  return '<br>список ' + s1(g.list) + ' с' + (g.w != null ? ' (ожидание ответа ' + s1(g.w) + ' · загрузка ' + s1(g.d) + (g.kb != null ? ' · ' + g.kb + ' КБ' : '') + ')' : '') +
+    (g.k > 1 ? ' · ответил повторный запрос' : '') + (g.tries > 1 ? ' · попыток ' + g.tries : '') + srv +
     '<br>карточки: из памяти ' + g.kept + ', со списком ' + g.inl + ', отдельно ' + g.n + (g.n ? ' (в среднем ' + s1(g.ms / g.n) + ' с, сервер ' + s1(g.srv / g.n) + ')' : '') +
-    (g.ping > 0 ? ' · пустой запрос ' + s1(g.ping) + ' с' : '');
+    '<br>пустой запрос: ' + (g.ping0 > 0 ? 'вместе со списком ' + s1(g.ping0) + ' с' : g.ping0 === -1 ? 'вместе со списком – сбой' : '') + (g.ping > 0 ? (g.ping0 ? ', ' : '') + 'после ' + s1(g.ping) + ' с' : '') +
+    (hist.length > 1 ? '<br>прошлые списки, с: ' + hist.slice(0, 8).map(function (x) { return s1(x * 100); }).join(' · ') : '');
+}
+/** Версия a новее версии b? («1.10» новее «1.9») */
+function verGt(a, b) {
+  var x = String(a).split('.').map(Number), y = String(b).split('.').map(Number);
+  for (var i = 0; i < Math.max(x.length, y.length); i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); }
+  return false;
 }
 
 /* ================= КЛИЕНТЫ ================= */
@@ -2203,6 +2233,10 @@ function loadList(first, manual) {
   if (listBusy) return Promise.resolve();
   listBusy = true;
   var have = haveMap(), t0 = Date.now();
+  if (S.diag.ping0 == null) {                                             // один раз: пустой запрос одновременно со списком — видно, медлит связь или сам список
+    S.diag.ping0 = 0;
+    post({ a: 'tr', op: 'ping' }).then(function () { S.diag.ping0 = Date.now() - t0; }, function () { S.diag.ping0 = -1; });
+  }
   return call('list', { have: have, inline: 1 }).then(function (r) {
     listBusy = false;
     if (!r.ok) {
@@ -2214,9 +2248,11 @@ function loadList(first, manual) {
       if (!S.unsure || manual) toast(errText(r), 'bad');
       return;
     }
-    S.stale = r.page && r.page !== VERSION ? r.page : '';
+    S.stale = r.page && verGt(r.page, VERSION) ? r.page : '';
     S.diag.list = Date.now() - t0; S.diag.listSrv = r.ms != null ? r.ms : null; S.diag.st = r.st || null;
     S.diag.n = 0; S.diag.ms = 0; S.diag.srv = 0; S.diag.inl = 0;
+    S.diag.w = r._w != null ? r._w : null; S.diag.d = r._d != null ? r._d : null; S.diag.kb = r._kb != null ? r._kb : null; S.diag.k = r._k || 1; S.diag.tries = r._n || 1;
+    try { var hk = 'lf_tr_h_' + KEY.slice(0, 10), hh = JSON.parse(LS.get(hk) || '[]') || []; hh.unshift(Math.round(S.diag.list / 100)); LS.set(hk, JSON.stringify(hh.slice(0, 8))); } catch (e) {}
     var raw = null;
     try { if (!AS) raw = JSON.stringify(r); } catch (e) {}
     var draft = val('tText'), was = S.unsure;
