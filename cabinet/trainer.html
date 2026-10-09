@@ -653,6 +653,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.2 (09.10.2026). Нужные карточки сервер присылает вместе со списком (одним запросом вместо нескольких); внизу главной —
+ * на что сервер потратил время и сколько занимает пустой запрос к Google.
  * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
  * сервер сообщает, какие карточки устарели, и перечитываются только они (до шести запросов одновременно). Внизу главной —
  * сколько секунд заняли список и карточки. Фото в памяти не хранятся. Закрыли доступ или сменили ПИН-код — память стирается.
@@ -661,7 +663,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '1.1';
+var VERSION = '1.2';
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 var qs = new URLSearchParams(location.search);
@@ -725,7 +727,7 @@ var AS = '';                     // владелец: «как видит тре
 
 var D = null;                    // { trainer, admin, as, trainers, today, clients, fresh, tasks, lists, botUser }
 var S = { tab: 'home', cid: null, sub: 'over', filter: 'all', q: '', day: null, mSel: null, busy: 0, loadedAt: 0, pinName: '', listY: 0, sending: false, allPhotos: false, more: false,
-  unsure: false, offline: false, diag: { list: null, listSrv: null, check: null, n: 0, ms: 0, srv: 0, kept: 0 } };
+  unsure: false, offline: false, diag: { list: null, listSrv: null, st: null, inl: 0, n: 0, ms: 0, srv: 0, kept: 0, ping: null } };
 var T = 0, TODAY = '';           // сегодня по серверу: номер дня и ГГГГ-ММ-ДД
 var NAV = [];                    // что открыто поверх списка: 'client', 'sheet' — для кнопки «Назад» телефона
 var thumbs = {}, thumbWait = {};
@@ -1175,12 +1177,19 @@ function viewHome() {
   return h;
 }
 
-/** Секундомер: сколько заняли список и карточки (в скобках — сколько из этого работал сервер). */
+/** Секундомер: сколько занял список, на что сервер потратил время, откуда взялись карточки и сколько длится пустой запрос. */
 function diagText() {
-  var g = S.diag, s1 = function (ms) { return (ms / 1000).toFixed(1).replace('.', ','); };
+  var g = S.diag, st = g.st, s1 = function (ms) { return (ms / 1000).toFixed(1).replace('.', ','); };
   if (g.list == null) return '';
-  return '<br>список ' + s1(g.list) + ' с' + (g.listSrv != null ? ' (сервер ' + s1(g.listSrv) + ')' : '') +
-    ' · карточки: из памяти ' + g.kept + ', обновлено ' + g.n + (g.n ? ', в среднем ' + s1(g.ms / g.n) + ' с (сервер ' + s1(g.srv / g.n) + ')' : '');
+  var srv = '';
+  if (g.listSrv != null) {
+    srv = ' · сервер ' + s1(g.listSrv) + ' с';
+    if (st) srv += ' (главная таблица ' + (st.snap === 'hit' ? 'из памяти' : 'прочитана') + ' ' + s1(st.main || 0) + (st.props != null ? ' · свойства ' + s1(st.props) : '') +
+      (st.drive != null ? ' · Диск ' + s1(st.drive) : '') + (st.cards != null ? ' · карточки ' + s1(st.cards) : '') + ')';
+  }
+  return '<br>список ' + s1(g.list) + ' с' + srv +
+    '<br>карточки: из памяти ' + g.kept + ', со списком ' + g.inl + ', отдельно ' + g.n + (g.n ? ' (в среднем ' + s1(g.ms / g.n) + ' с, сервер ' + s1(g.srv / g.n) + ')' : '') +
+    (g.ping > 0 ? ' · пустой запрос ' + s1(g.ping) + ' с' : '');
 }
 
 /* ================= КЛИЕНТЫ ================= */
@@ -2194,7 +2203,7 @@ function loadList(first, manual) {
   if (listBusy) return Promise.resolve();
   listBusy = true;
   var have = haveMap(), t0 = Date.now();
-  return call('list', { have: have }).then(function (r) {
+  return call('list', { have: have, inline: 1 }).then(function (r) {
     listBusy = false;
     if (!r.ok) {
       if (r.auth) return;
@@ -2206,13 +2215,16 @@ function loadList(first, manual) {
       return;
     }
     S.stale = r.page && r.page !== VERSION ? r.page : '';
-    S.diag.list = Date.now() - t0; S.diag.listSrv = r.ms != null ? r.ms : null; S.diag.check = r.msCheck != null ? r.msCheck : null;
-    S.diag.n = 0; S.diag.ms = 0; S.diag.srv = 0;
+    S.diag.list = Date.now() - t0; S.diag.listSrv = r.ms != null ? r.ms : null; S.diag.st = r.st || null;
+    S.diag.n = 0; S.diag.ms = 0; S.diag.srv = 0; S.diag.inl = 0;
     var raw = null;
     try { if (!AS) raw = JSON.stringify(r); } catch (e) {}
     var draft = val('tText'), was = S.unsure;
     S.unsure = false; S.offline = false;
+    var cards = r.cards || [];
+    if (raw && cards.length) { try { r.cards = []; raw = JSON.stringify(r); } catch (e) {} }          // карточки хранятся отдельно, не внутри списка
     setList(r, have);
+    cards.forEach(function (d) { if (putDetail(d)) S.diag.inl++; });
     if (raw) memSet('list|', { at: Date.now(), raw: raw });
     if (!document.getElementById('viewer')) { render(first && !was); if (draft && document.getElementById('tText')) document.getElementById('tText').value = draft; }
     var c = cur();
@@ -2220,6 +2232,10 @@ function loadList(first, manual) {
     loadAll();
     if (c && wantCard(c) && !loading[c.id]) loadClient(c.id);
     if (manual) toast('Обновлено', 'ok');
+    if (S.diag.ping == null) {                                             // один раз за открытие: сколько длится запрос, в котором сервер ничего не делает
+      var tp = Date.now(); S.diag.ping = 0;
+      sleep(1500).then(function () { tp = Date.now(); return call('ping', {}, true); }).then(function (p) { S.diag.ping = p && p.ok ? Date.now() - tp : 0; if (!S.cid && S.tab === 'home' && !document.getElementById('viewer')) render(); });
+    }
   });
 }
 function refresh(manual) {
