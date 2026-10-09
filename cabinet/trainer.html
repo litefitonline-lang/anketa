@@ -653,6 +653,9 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.2.2 (09.10.2026). По замерам на телефоне: пустой запрос к Google – около 3 секунд, список – 4–8. Чтобы не ждать их, пока
+ * идёт сверка, страница показывает статусы клиентов по данным из памяти (если прошлой сверке меньше трёх часов); изменится
+ * что-то – поправит. Повторный запрос уходит через 7 секунд, а не через 6.
  * 1.2.1 (09.10.2026). Запрос на чтение, на который нет ответа 6 секунд, отправляется второй раз (берётся тот ответ, что придёт
  * раньше). Секундомер: ожидание ответа и его загрузка отдельно, пустой запрос одновременно со списком, прошлые замеры.
  * 1.2 (09.10.2026). Нужные карточки сервер присылает вместе со списком (одним запросом вместо нескольких); внизу главной —
@@ -666,7 +669,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.2';
-var PATCH = '.1';                // правка страницы без смены версии сервера
+var PATCH = '.2';                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 var qs = new URLSearchParams(location.search);
@@ -730,7 +733,7 @@ var AS = '';                     // владелец: «как видит тре
 
 var D = null;                    // { trainer, admin, as, trainers, today, clients, fresh, tasks, lists, botUser }
 var S = { tab: 'home', cid: null, sub: 'over', filter: 'all', q: '', day: null, mSel: null, busy: 0, loadedAt: 0, pinName: '', listY: 0, sending: false, allPhotos: false, more: false,
-  unsure: false, offline: false, diag: { list: null, listSrv: null, st: null, inl: 0, n: 0, ms: 0, srv: 0, kept: 0, ping: null, ping0: null, w: null, d: null, kb: null, k: 1, tries: 1 } };
+  unsure: false, memFresh: false, offline: false, diag: { list: null, listSrv: null, st: null, inl: 0, n: 0, ms: 0, srv: 0, kept: 0, ping: null, ping0: null, w: null, d: null, kb: null, k: 1, tries: 1 } };
 var T = 0, TODAY = '';           // сегодня по серверу: номер дня и ГГГГ-ММ-ДД
 var NAV = [];                    // что открыто поверх списка: 'client', 'sheet' — для кнопки «Назад» телефона
 var thumbs = {}, thumbWait = {};
@@ -783,7 +786,7 @@ function postHedged(body, after) {
     timer = setTimeout(function () { if (!done) { sent = 2; one(2); } }, after);
   });
 }
-var HEDGE = { list: 6000, client: 6000 };
+var HEDGE = { list: 7000, client: 7000 };
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
 /**
  * Запрос к серверу. Чтение при сбое связи повторяется до трёх раз. Запись не повторяется: если ответ не пришёл,
@@ -989,7 +992,7 @@ function summ(c) {
   if (tr && tr.ended) { o.alerts.push({ text: 'Пробный кабинет закончился ' + dm(c.trial.to) + ' – время предложить PRO', sub: 'care' }); o.state = 'off'; o.text = 'пробный закончился'; o.cls = 'dim'; return o; }
   var fz = frzOn(c, T);
   if (fz) { o.state = 'frz'; o.text = 'заморозка до ' + dm(fz.to); o.cls = 'frz'; return o; }
-  if (!c.loaded || c.stale || S.unsure) { o.state = 'load'; o.text = c.err ? (c.loaded ? 'не обновилось' : 'не загрузилось') : c.loaded ? (S.offline ? 'нет связи' : 'обновляю…') : 'загружается…'; o.cls = 'dim'; return o; }
+  if (!c.loaded || (c.stale && !(S.unsure && S.memFresh))) { o.state = 'load'; o.text = c.err ? (c.loaded ? 'не обновилось' : 'не загрузилось') : c.loaded ? (S.offline ? 'нет связи' : 'обновляю…') : 'загружается…'; o.cls = 'dim'; return o; }
   if (!c.start) { o.state = 'off'; o.text = 'в дневнике нет дат'; o.cls = 'warm'; return o; }
   if (T < dn(c.start)) { o.state = 'off'; o.text = 'старт ' + dm(c.start); o.cls = 'dim'; return o; }
   if (T > dn(c.end)) { o.alerts.unshift({ text: 'Дневник закончился ' + dm(c.end) + ' – внесите оплату или продлите', sub: 'care' }); o.state = 'off'; o.text = 'дневник закончился'; o.cls = 'warm'; return o; }
@@ -2289,6 +2292,7 @@ function bootFromMem() {
     S.unsure = true;
     setList(r);
     S.loadedAt = L0.at || Date.now();
+    S.memFresh = Date.now() - S.loadedAt < 3 * 3600000;                  // прошлой сверке меньше трёх часов — статусы из памяти можно показывать сразу
     Object.keys(m).forEach(function (k) { if (k.indexOf('card|') === 0 && !(m[k] && putDetail(m[k], true))) memDel(k); });
     render(true);
     return true;
