@@ -653,12 +653,15 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
+ * сервер сообщает, какие карточки устарели, и перечитываются только они (до шести запросов одновременно). Внизу главной —
+ * сколько секунд заняли список и карточки. Фото в памяти не хранятся. Закрыли доступ или сменили ПИН-код — память стирается.
  * 1.0 (08.10.2026). Страница работает через то же веб-приложение, что и кабинет клиента: запросы { a:'tr', op, t, d }.
  * t — личный ключ тренера из ссылки, d — отметка устройства, на котором уже введён ПИН-код (ПИН-код спрашивается один раз).
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '1.0';
+var VERSION = '1.1';
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 var qs = new URLSearchParams(location.search);
@@ -671,10 +674,58 @@ var KEY = (qs.get('t') || '').trim().toLowerCase();
 if (KEY) LS.set('lf_tr_k', KEY); else KEY = LS.get('lf_tr_k') || '';
 var DEV_KEY = 'lf_tr_d_' + KEY.slice(0, 10);
 var DEV = LS.get(DEV_KEY) || '';
+
+/* ---------- память на устройстве: список и карточки (IndexedDB). Недоступна — страница работает как раньше, без неё ---------- */
+var MEMP = null, KP = 'lf|' + KEY.slice(0, 12) + '|';
+function memDb() {
+  if (MEMP) return MEMP;
+  MEMP = new Promise(function (res) {
+    try {
+      var rq = window.indexedDB.open('lf_trainer', 1);
+      rq.onupgradeneeded = function () { try { rq.result.createObjectStore('kv'); } catch (e) {} };
+      rq.onsuccess = function () { res(rq.result); };
+      rq.onerror = rq.onblocked = function () { res(null); };
+    } catch (e) { res(null); }
+    setTimeout(function () { res(null); }, 1500);
+  });
+  return MEMP;
+}
+function memTx(mode, fn, empty) {
+  return memDb().then(function (db) {
+    if (!db) return empty;
+    return new Promise(function (res) {
+      try {
+        var tx = db.transaction('kv', mode), out = fn(tx.objectStore('kv'));
+        tx.oncomplete = function () { res(out ? out() : empty); };
+        tx.onerror = tx.onabort = function () { res(empty); };
+      } catch (e) { res(empty); }
+    });
+  });
+}
+function memRange() { return window.IDBKeyRange.bound(KP, KP + '￿'); }
+function memSet(k, v) { return memTx('readwrite', function (s) { s.put(v, KP + k); }, null); }
+function memDel(k) { return memTx('readwrite', function (s) { s['delete'](KP + k); }, null); }
+function memWipe() { return memTx('readwrite', function (s) { s['delete'](memRange()); }, null); }
+function memAll() {
+  return memTx('readonly', function (s) {
+    var keys = s.getAllKeys(memRange()), vals = s.getAll(memRange());
+    return function () { var o = {}; keys.result.forEach(function (k, i) { o[String(k).slice(KP.length)] = vals.result[i]; }); return o; };
+  }, {});
+}
+function mskToday() {
+  try { var p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); if (/^\d{4}-\d{2}-\d{2}$/.test(p)) return p; } catch (e) {}
+  return '';
+}
+function whenTxt(ms) {
+  if (!ms) return '';
+  var d = new Date(ms), hm = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  return (new Date().toDateString() === d.toDateString() ? '' : pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ' ') + hm;
+}
 var AS = '';                     // владелец: «как видит тренер» (имя) или '' — все клиенты
 
 var D = null;                    // { trainer, admin, as, trainers, today, clients, fresh, tasks, lists, botUser }
-var S = { tab: 'home', cid: null, sub: 'over', filter: 'all', q: '', day: null, mSel: null, busy: 0, loadedAt: 0, pinName: '', listY: 0, sending: false, allPhotos: false, more: false };
+var S = { tab: 'home', cid: null, sub: 'over', filter: 'all', q: '', day: null, mSel: null, busy: 0, loadedAt: 0, pinName: '', listY: 0, sending: false, allPhotos: false, more: false,
+  unsure: false, offline: false, diag: { list: null, listSrv: null, check: null, n: 0, ms: 0, srv: 0, kept: 0 } };
 var T = 0, TODAY = '';           // сегодня по серверу: номер дня и ГГГГ-ММ-ДД
 var NAV = [];                    // что открыто поверх списка: 'client', 'sheet' — для кнопки «Назад» телефона
 var thumbs = {}, thumbWait = {};
@@ -742,8 +793,8 @@ function call(op, body, quiet) {
   return p.then(function (r) {
     if (!quiet) busy(-1);
     r = r || net;
-    if (r.auth === 'pin') { S.pinName = r.name || S.pinName; DEV = ''; LS.del(DEV_KEY); if (op !== 'pin') { closeSheetNow(); viewPin(''); } }
-    else if (r.auth === 'key') { D = null; closeSheetNow(); screen('Ссылка не работает', cap(r.error || 'Попросите у Артёма новую ссылку.')); }
+    if (r.auth === 'pin') { S.pinName = r.name || S.pinName; DEV = ''; LS.del(DEV_KEY); if (op !== 'pin') { memWipe(); D = null; closeSheetNow(); viewPin(''); } }
+    else if (r.auth === 'key') { memWipe(); D = null; closeSheetNow(); screen('Ссылка не работает', cap(r.error || 'Попросите у Артёма новую ссылку.')); }
     return r;
   });
 }
@@ -760,19 +811,38 @@ function fixDetail(c) {
   c.hist.forEach(function (h) { c.byDay[h.d] = h; });
 }
 function fixLight(c) { c.frz = c.frz || []; c.reports = c.reports || []; c.fb = c.fb || { state: 'none' }; c.an = c.an || null; }
-function setList(r) {
+/** Карточку нужно запросить: её нет или она устарела. Клиенту без таблицы карточка не нужна (оплаты приходят со списком). */
+function wantCard(c) { return c.table ? !c.loaded || !!c.stale : !c.loaded && !c.pays; }
+/**
+ * Список с сервера (или из памяти устройства) — в данные страницы. Карточки, которые уже есть, остаются.
+ * have — что страница отправляла серверу ({ ID: когда собрана карточка }); r.stale — какие из них устарели.
+ */
+function setList(r, have) {
   var old = {};
   if (D) D.clients.forEach(function (c) { if (c.loaded) old[c.id] = c; });
   D = { trainer: r.trainer, admin: !!r.admin, as: r.as || '', trainers: r.trainers || [], today: r.today, clients: r.clients || [], fresh: r.fresh || [], tasks: r.tasks || [], lists: r.lists || {}, botUser: r.botUser || '' };
   TODAY = D.today; T = dn(TODAY);
+  var st = null;
+  if (r.stale instanceof Array) { st = {}; r.stale.forEach(function (id) { st[id] = true; }); }
+  S.diag.kept = 0;
   D.clients.forEach(function (c) {
     fixLight(c);
     var o = old[c.id];
-    if (o && (o.last || '') === (c.last || '')) { DETAIL.forEach(function (k) { c[k] = o[k]; }); c.loaded = true; c.byDay = o.byDay; }   // клиент ничего не вносил — карточка та же
-    else c.loaded = false;
+    if (!o) { c.loaded = false; return; }
+    DETAIL.forEach(function (k) { if (!(k in c)) c[k] = o[k]; });         // оплаты и заморозки — из свежего списка, остальное — из карточки
+    c.loaded = true; c.byDay = o.byDay;
+    if (st) c.stale = !!st[c.id] || !have || have[c.id] === undefined;     // сервер 3.9.1: он знает, что менялось
+    else c.stale = !!o.stale || S.unsure || (o.last || '') !== (c.last || '');
+    if (!c.stale && c.table) S.diag.kept++;
   });
   D.fresh.forEach(fixLight);
   S.loadedAt = Date.now();
+}
+/** Что есть у страницы: { ID клиента: когда собрана его карточка }. */
+function haveMap() {
+  var h = {};
+  if (D) D.clients.forEach(function (c) { if (c.loaded && c.table && c.at && !c.err) h[c.id] = c.at; });
+  return h;
 }
 function putLight(l) {
   if (!l || !D) return null;
@@ -782,12 +852,13 @@ function putLight(l) {
   Object.keys(l).forEach(function (k) { c[k] = l[k]; });
   return c;
 }
-function putDetail(d) {
+function putDetail(d, fromMem) {
   var c = d && clientOf(d.id);
   if (!c) return null;
-  DETAIL.forEach(function (k) { if (k in d) c[k] = d[k]; });
-  c.loaded = true; c.err = ''; c.stale = false;
+  DETAIL.forEach(function (k) { if (k in d && !((k === 'pays' || k === 'frzRows') && c[k] && fromMem)) c[k] = d[k]; });
+  c.loaded = true; c.err = ''; c.stale = !!fromMem;
   fixDetail(c);
+  if (!fromMem && d.table) memSet('card|' + d.id, d);
   return c;
 }
 /** Ответ сервера на запись — в данные страницы. */
@@ -806,18 +877,20 @@ function loadClient(id, force) {
   var c = clientOf(id);
   if (!c) return Promise.resolve(null);
   if (loading[id]) return loading[id];
-  loading[id] = call('client', { id: id, force: force ? 1 : 0 }, true).then(function (r) {
+  var t0 = Date.now(), f = force || (c.loaded && c.stale);              // устаревшую — мимо кэша сервера
+  loading[id] = call('client', { id: id, force: f ? 1 : 0 }, true).then(function (r) {
     delete loading[id];
     var x = clientOf(id);
     if (!x) return null;
-    if (r && r.ok) putDetail(r.c); else if (!(r && r.auth)) x.err = errText(r);
+    if (r && r.ok) { S.diag.n++; S.diag.ms += Date.now() - t0; S.diag.srv += r.ms || 0; putDetail(r.c); }
+    else if (!(r && r.auth)) x.err = errText(r);
     softRender(id);
     return x;
   });
   return loading[id];
 }
 function pump() {
-  while (active < 3 && queue.length) {
+  while (active < 6 && queue.length) {
     var id = queue.shift(), c = clientOf(id);
     if (!c || !needsDetail(c) || loading[id]) continue;
     active++;
@@ -831,7 +904,7 @@ function loadAll() {
   pump();
 }
 function loadState() {
-  var need = D.clients.filter(function (c) { return !c.arch && c.table; }), got = need.filter(function (c) { return c.loaded || c.err; }).length;
+  var need = D.clients.filter(function (c) { return !c.arch && c.table; }), got = need.filter(function (c) { return (c.loaded && !c.stale) || c.err; }).length;
   return { n: need.length, got: got, done: got >= need.length };
 }
 
@@ -893,7 +966,7 @@ function summ(c) {
   if (tr && tr.ended) { o.alerts.push({ text: 'Пробный кабинет закончился ' + dm(c.trial.to) + ' – время предложить PRO', sub: 'care' }); o.state = 'off'; o.text = 'пробный закончился'; o.cls = 'dim'; return o; }
   var fz = frzOn(c, T);
   if (fz) { o.state = 'frz'; o.text = 'заморозка до ' + dm(fz.to); o.cls = 'frz'; return o; }
-  if (!c.loaded) { o.state = 'load'; o.text = c.err ? 'не загрузилось' : 'загружается…'; o.cls = 'dim'; return o; }
+  if (!c.loaded || c.stale || S.unsure) { o.state = 'load'; o.text = c.err ? (c.loaded ? 'не обновилось' : 'не загрузилось') : c.loaded ? (S.offline ? 'нет связи' : 'обновляю…') : 'загружается…'; o.cls = 'dim'; return o; }
   if (!c.start) { o.state = 'off'; o.text = 'в дневнике нет дат'; o.cls = 'warm'; return o; }
   if (T < dn(c.start)) { o.state = 'off'; o.text = 'старт ' + dm(c.start); o.cls = 'dim'; return o; }
   if (T > dn(c.end)) { o.alerts.unshift({ text: 'Дневник закончился ' + dm(c.end) + ' – внесите оплату или продлите', sub: 'care' }); o.state = 'off'; o.text = 'дневник закончился'; o.cls = 'warm'; return o; }
@@ -934,6 +1007,7 @@ function screen(title, text, retry) {
 }
 function syncText() {
   if (!D) return '';
+  if (S.unsure) return 'данные на ' + whenTxt(S.loadedAt) + (S.offline ? ' · нет связи' : ' · обновляю');
   var ls = loadState();
   if (!ls.done) return 'клиенты: ' + ls.got + ' из ' + ls.n;
   if (S.busy) return 'обновляем';
@@ -941,7 +1015,7 @@ function syncText() {
 }
 function paintSync() {
   var b = $('.sync'); if (!b) return;
-  b.classList.toggle('busy', S.busy > 0 || active > 0 || (D && !loadState().done && queue.length > 0));
+  b.classList.toggle('busy', S.busy > 0 || active > 0 || (S.unsure && !S.offline) || (D && !loadState().done && queue.length > 0));
   var t = $('.sync-t', b); if (t) t.textContent = syncText();
 }
 var TABS = [['home', 'Сегодня', IC.today], ['clients', 'Клиенты', IC.people], ['fresh', 'Новые', IC.add], ['tasks', 'Задачи', IC.list]];
@@ -1049,7 +1123,8 @@ function viewPin(err) {
 /* ================= СЕГОДНЯ ================= */
 function viewHome() {
   var al = allAlerts(), h = '', ls = loadState();
-  if (!ls.done) h += '<div class="banner">Загружаю данные клиентов: <b class="num">' + ls.got + ' из ' + ls.n + '</b>. Список уже можно смотреть – поводы для внимания дополняются.</div>';
+  if (S.unsure) h += '<div class="banner' + (S.offline ? ' warn' : '') + '">' + (S.offline ? 'Нет связи с сервером. ' : '') + 'Показаны данные на <b class="num">' + whenTxt(S.loadedAt) + '</b>' + (S.offline ? '. Изменения сохранить не получится, пока связь не вернётся.' : ' – сверяю, что изменилось.') + '</div>';
+  else if (!ls.done) h += '<div class="banner">Обновляю данные клиентов: <b class="num">' + ls.got + ' из ' + ls.n + '</b>. Список уже можно смотреть – поводы для внимания дополняются.</div>';
   h += '<div class="card"><h3>Требуют внимания</h3>';
   if (!al.length && !D.fresh.length) h += '<p class="sub" style="margin:0">' + (ls.done ? 'Сегодня всё спокойно.' : 'Пока ничего. Данные ещё загружаются.') + '</p>';
   else {
@@ -1091,13 +1166,21 @@ function viewHome() {
     grp('Ещё не внесли', G.wait, 'warm', function (c, s) { return s.state === 'miss' ? s.text + ', сегодня тоже пусто' : s.miss.join(', '); }) +
     grp('На заморозке', G.frz, 'frz', function (c, s) { return s.text; }) +
     grp('Пробный кабинет', G.trial, 'dim', function (c, s) { var tr = trialSt(c); return 'день ' + tr.day + ' из ' + tr.total + ' – ' + (s.state === 'ok' ? 'всё внесено' : s.text); }) +
-    grp('Загружаются', G.load, 'dim', function (c, s) { return s.text; }) + '</div>';
+    grp('Обновляются', G.load, 'dim', function (c, s) { return s.text; }) + '</div>';
 
   var mine = D.tasks.slice(0, 3);
   h += '<div class="card"><h3>Задачи</h3>' + (mine.length ? '<div class="rows">' + mine.map(taskRow).join('') + '</div>' : '<p class="sub" style="margin:0">Задач нет.</p>') +
     '<button class="btn sec sm mt" data-tab="tasks">Все задачи</button></div>';
-  h += '<p class="muted" style="font-size:12px;text-align:center;margin:18px 0 0">Кабинет тренера · версия ' + VERSION + '</p>';
+  h += '<p class="muted" style="font-size:12px;text-align:center;margin:18px 0 0">Кабинет тренера · версия ' + VERSION + diagText() + '</p>';
   return h;
+}
+
+/** Секундомер: сколько заняли список и карточки (в скобках — сколько из этого работал сервер). */
+function diagText() {
+  var g = S.diag, s1 = function (ms) { return (ms / 1000).toFixed(1).replace('.', ','); };
+  if (g.list == null) return '';
+  return '<br>список ' + s1(g.list) + ' с' + (g.listSrv != null ? ' (сервер ' + s1(g.listSrv) + ')' : '') +
+    ' · карточки: из памяти ' + g.kept + ', обновлено ' + g.n + (g.n ? ', в среднем ' + s1(g.ms / g.n) + ' с (сервер ' + s1(g.srv / g.n) + ')' : '');
 }
 
 /* ================= КЛИЕНТЫ ================= */
@@ -1189,6 +1272,8 @@ function viewClient(c) {
   else if (tr && tr.before) ban = '<div class="banner trial"><b>Пробный кабинет</b> начнётся ' + longDate(c.trial.from) + ' и продлится до ' + longDate(c.trial.to) + '.</div>';
   else if (tr && !tr.ended) ban = '<div class="banner trial"><b>Пробный кабинет</b> – до ' + longDate(c.trial.to) + ' включительно. Клиент ведёт питание и вес; шаги, план тренировок и контрольные замеры откроются в PRO.</div>';
   else if (tr) ban = '<div class="banner warn"><b>Пробный кабинет закончился ' + longDate(c.trial.to) + '.</b> Кабинет открыт клиенту только для просмотра. Перевод на PRO – в разделе «Ведение».</div>';
+  if (c.table && c.loaded && (c.stale || S.unsure)) ban += '<div class="banner' + (c.err ? ' warn' : '') + '">' + (c.err ? 'Не получилось обновить: ' + esc(c.err) + '. ' : '') +
+    'Показаны данные на <b class="num">' + whenTxt(c.at) + '</b>' + (c.err ? '. <button class="btn sec sm" data-act="reload">Повторить</button>' : ' – обновляю.') + '</div>';
   var subs = c.table ? SUBS : [SUBS[0], SUBS[4]];
   if (!subs.some(function (x) { return x[0] === S.sub; })) S.sub = 'over';
   var needTable = c.table && S.sub !== 'care', body;
@@ -1444,13 +1529,13 @@ function subCare(c) {
     (c.trial.want ? ' Клиент нажимал «Перейти на PRO» ' + dm(c.trial.want) + '.' : '') + '</p><button class="btn pri" data-act="proForm" style="height:48px">Перевести на PRO</button></div>';
   else if (!c.table && !c.arch) h += noCabCard(c);
 
-  if (!c.loaded) h += (c.err ? loadingCard(c) : '<div class="card"><p class="muted" style="margin:0">Оплаты и заморозки загружаются…</p></div>');
+  if (!c.pays) h += (c.err ? loadingCard(c) : '<div class="card"><p class="muted" style="margin:0">Оплаты и заморозки загружаются…</p></div>');
   else {
     h += '<div class="card"><h3>Оплаты</h3>' + (c.pays.length ? '<div class="rows">' + c.pays.map(function (p) {
       return '<div class="row"><span class="mn"><b class="num">' + fmt(p.sum) + ' ₽ · ' + (p.days ? p.days + ' дн.' : 'без пакета') + '</b><small>' + (p.date ? 'оплата ' + dm(p.date) : '') + (p.how ? ' · ' + esc(p.how) : '') +
         (p.sess ? ' · тренировок: ' + esc(p.sess) : '') + '<br>' + (p.start ? 'период ' + dm(p.start) + (p.next ? ' – ' + dm(ymd(dn(p.next) - 1)) : '') : 'без даты начала (аванс)') + (p.note ? ' · ' + esc(p.note) : '') + '</small></span></div>';
     }).join('') + '</div>' : '<p class="sub" style="margin:0">Оплат пока нет.</p>') + '</div>';
-    h += '<div class="card"><h3>Заморозки</h3>' + (c.frzRows.length ? '<div class="rows">' + c.frzRows.map(function (z) {
+    h += '<div class="card"><h3>Заморозки</h3>' + ((c.frzRows || []).length ? '<div class="rows">' + c.frzRows.map(function (z) {
       var now = dn(z.from) <= T && dn(z.to) >= T, bad = z.check && z.check.indexOf('⚠') === 0;
       return '<div class="row"><span class="dot ' + (now ? 'frz' : 'dim') + '"></span><span class="mn"><b class="num">' + dm(z.from) + ' – ' + dm(z.to) + ' · ' + days(z.days) + '</b><small>' + (now ? 'идёт сейчас' : dn(z.from) > T ? 'впереди' : 'прошла') +
         (z.note ? ' · ' + esc(z.note) : '') + (bad ? '<br><span style="color:var(--warm)">' + esc(z.check) + '</span>' : '') + '</small></span>' +
@@ -1709,7 +1794,7 @@ var ACT = {
   close: function () { closeSheet(); render(); },
   retry: function () { boot(); },
   refresh: function () { refresh(true); },
-  reload: function () { var c = cur(); if (!c) return; c.err = ''; loadClient(c.id, true); render(); },
+  reload: function () { var c = cur(); if (!c) return; c.err = ''; loadClient(c.id, true); render(); paintSync(); },
   sw: function (t) {
     var on = t.getAttribute('aria-pressed') !== 'true';
     t.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -2039,7 +2124,7 @@ function openClient(id, sub) {
   if (!S.cid) { S.listY = window.scrollY || 0; pushNavClient(); }
   S.cid = String(id); S.sub = sub || 'over'; S.day = null; S.mSel = null; S.more = false; S.allPhotos = false;
   render(true);
-  if (!c.loaded && !loading[c.id]) { c.err = ''; loadClient(c.id); }
+  if (wantCard(c) && !loading[c.id] && !S.unsure) { c.err = ''; loadClient(c.id); }
 }
 function goTab(tab) {
   closeSheet();
@@ -2100,40 +2185,65 @@ function bootScreen() {
   tabsEl.classList.add('hidden');
   app.innerHTML = '<div class="center"><img class="pulse" src="' + LOGO + '" alt="Lite Fit"><p>Загружаю клиентов…</p></div>';
 }
-/** Список клиентов с сервера. first — первая загрузка (ошибка показывается на весь экран). */
-function loadList(first) {
-  return call('list', {}).then(function (r) {
+/**
+ * Список с сервера. Страница сообщает, какие карточки у неё есть; сервер отвечает, какие устарели, — перечитываются только они.
+ * first — первая загрузка (нет данных — ошибка на весь экран); manual — нажали «обновить» (открытая карточка перечитывается в любом случае).
+ */
+var listBusy = false;
+function loadList(first, manual) {
+  if (listBusy) return Promise.resolve();
+  listBusy = true;
+  var have = haveMap(), t0 = Date.now();
+  return call('list', { have: have }).then(function (r) {
+    listBusy = false;
     if (!r.ok) {
       if (r.auth) return;
-      if (first || !D) screen('Не получилось загрузить', errText(r), true); else toast(errText(r), 'bad');
+      if (D && D.as !== AS) AS = D.as;                                     // «как видит» не переключилось — остаёмся в прежнем виде
+      if (!D) return screen('Не получилось загрузить', errText(r), true);
+      S.offline = !!r.net;
+      if (!document.getElementById('viewer')) render();
+      if (!S.unsure || manual) toast(errText(r), 'bad');
       return;
     }
     S.stale = r.page && r.page !== VERSION ? r.page : '';
-    var draft = val('tText');
-    setList(r);
-    if (!document.getElementById('viewer')) { render(first); if (draft && document.getElementById('tText')) document.getElementById('tText').value = draft; }
-    loadAll();
-    var c = cur(); if (c && !c.loaded && !loading[c.id]) loadClient(c.id);
-  });
-}
-/** Обновить всё: список и карточки (сервер отдаёт карточку из кэша, если клиент ничего не вносил). */
-function refresh(manual) {
-  if (!D || S.busy || S.sending) return;
-  call('list', {}).then(function (r) {
-    if (!r.ok) { if (!r.auth && manual) toast(errText(r), 'bad'); return; }
-    S.stale = r.page && r.page !== VERSION ? r.page : '';
-    var draft = val('tText');
-    setList(r);
-    if (manual) D.clients.forEach(function (c) { if (c.loaded) c.stale = true; });
-    if (!document.getElementById('viewer')) { render(); if (draft && document.getElementById('tText')) document.getElementById('tText').value = draft; }
+    S.diag.list = Date.now() - t0; S.diag.listSrv = r.ms != null ? r.ms : null; S.diag.check = r.msCheck != null ? r.msCheck : null;
+    S.diag.n = 0; S.diag.ms = 0; S.diag.srv = 0;
+    var raw = null;
+    try { if (!AS) raw = JSON.stringify(r); } catch (e) {}
+    var draft = val('tText'), was = S.unsure;
+    S.unsure = false; S.offline = false;
+    setList(r, have);
+    if (raw) memSet('list|', { at: Date.now(), raw: raw });
+    if (!document.getElementById('viewer')) { render(first && !was); if (draft && document.getElementById('tText')) document.getElementById('tText').value = draft; }
     var c = cur();
-    if (c && manual) loadClient(c.id, true);
+    if (c && manual && c.table && !loading[c.id]) loadClient(c.id, true);
     loadAll();
+    if (c && wantCard(c) && !loading[c.id]) loadClient(c.id);
     if (manual) toast('Обновлено', 'ok');
   });
 }
+function refresh(manual) {
+  if (!D || S.sending) return;
+  loadList(false, manual);
+}
+/** Показать то, что страница запомнила в прошлый раз: список и карточки. Вернёт true, если было что показать. */
+function bootFromMem() {
+  return memAll().then(function (m) {
+    var L0 = m['list|'], r = null;
+    try { r = L0 && L0.raw ? JSON.parse(L0.raw) : null; } catch (e) {}
+    if (!r || !(r.clients instanceof Array) || !r.trainer || D) return false;
+    delete r.stale;
+    r.today = mskToday() || r.today;
+    S.unsure = true;
+    setList(r);
+    S.loadedAt = L0.at || Date.now();
+    Object.keys(m).forEach(function (k) { if (k.indexOf('card|') === 0 && !(m[k] && putDetail(m[k], true))) memDel(k); });
+    render(true);
+    return true;
+  })['catch'](function () { return false; });
+}
 document.addEventListener('visibilitychange', function () {
-  if (!document.hidden && D && Date.now() - S.loadedAt > 5 * 60000 && !document.getElementById('viewer')) refresh(false);
+  if (!document.hidden && D && (S.unsure || Date.now() - S.loadedAt > 5 * 60000) && !document.getElementById('viewer')) refresh(false);
 });
 function boot() {
   var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
@@ -2141,7 +2251,7 @@ function boot() {
   if (!/^[a-z0-9]{20,64}$/.test(KEY)) return screen('Нужна личная ссылка', 'Откройте кабинет по ссылке, которую прислал Артём.');
   if (!DEV) return viewPin('');
   bootScreen();
-  loadList(true);
+  Promise.race([bootFromMem(), sleep(700).then(function () { return false; })]).then(function () { loadList(true); });   // память не ответила быстро — не ждём её
 }
 boot();
 
