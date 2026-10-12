@@ -306,6 +306,30 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .coms p{overflow-wrap:anywhere}
 .coms .cm-h small{margin:0}
 .tabs button .tb{position:absolute;top:7px;left:calc(50% + 7px);min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:var(--on-accent);font-size:10.5px;font-weight:800;font-style:normal;display:grid;place-items:center;line-height:1}
+/* база упражнений: «База» и «Видео» */
+.bseg{margin:0 0 14px}
+.vlnk{display:block;margin-top:4px;font-size:12.5px;font-weight:800;color:var(--accent);text-align:left}
+.vlnk.in{display:inline;margin:0}
+.vto .vlnk{font-size:11px;font-weight:700;color:var(--muted);text-align:right;width:100%}
+.vto .vlnk:hover{color:var(--accent)}
+.vst-b{display:flex;flex-wrap:wrap;gap:10px}
+.vst-b .btn{width:auto;flex:1 1 220px;padding:0 16px}
+.vrep{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line2);font-size:13.5px}
+.vrep p{margin:0 0 4px;overflow-wrap:anywhere}
+.vrep p:last-child{margin:0}
+.vrow{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(200px,340px) 78px;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.vrow.vh{border-top:0;padding:0 0 8px;font-size:12px;color:var(--muted)}
+.vrow.vh span:last-child{text-align:right}
+.vrow .mn b{display:block;font-size:14.5px;line-height:1.25;overflow-wrap:anywhere}
+.vrow .mn small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.vrow.on .mn b{color:var(--accent)}
+.vrow .ib{color:var(--accent)}
+.vin input{height:46px;padding:0 12px;font-size:14.5px;font-weight:600}
+.vto{font-size:15px;font-weight:800;color:var(--accent);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vto.bad{color:var(--warm)}
+.vprev{display:block;width:100%;max-height:46vh;border-radius:14px;background:#000;margin:0 0 8px}
+.vfree summary{cursor:pointer;font-size:14.5px;font-weight:700}
+.vfree p{margin:10px 0 0;font-size:13px;color:var(--muted);line-height:1.6;max-height:40vh;overflow:auto}
 .side-logo,.side-who{display:none}
 .row.sel .mn b,.row.sel .chev{color:var(--accent)}
 .md-0{display:none}
@@ -384,7 +408,13 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
   body.tr .bar .btn{width:340px}
 
   /* база упражнений: группы колонками */
-  body.tr .bctl{display:grid;grid-template-columns:minmax(260px,420px) 250px;gap:12px;align-items:center}
+  body.tr .bseg{max-width:360px}
+  body.tr .bctl{display:grid;grid-template-columns:minmax(240px,420px) 240px 220px;gap:12px;align-items:center}
+  body.tr .vst{max-width:980px}
+  body.tr .vst-b .btn{flex:0 1 auto}
+  body.tr .vd{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:start}
+  body.tr .vd .card{margin-bottom:14px}
+  body.tr .vd-r{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
   body.tr .bctl .mt{margin:0;order:-1}
   body.tr #baseList{columns:330px;column-gap:20px;margin-top:6px}
   body.tr .bgrp{break-inside:avoid;padding-top:1px}
@@ -424,6 +454,12 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 1.7 (12.10.2026). Сервер 4.4. Вкладка «База упражнений» из двух частей: «База» и «Видео». В «Видео»: папка с роликами и
+ *   кнопка «Проверить папку и подставить ссылки» (то же, что пункт меню таблицы), нумерация роликов; название не из базы
+ *   добавляется в базу одной кнопкой; ролику можно дать новый, ещё не использованный номер. В «Базе» – «Добавить списком».
+ * 1.6 (12.10.2026). «Номера для видео» (компьютер, вкладка «База упражнений»): выбираете папку с роликами, у каждого ролика
+ *   по первым буквам указываете упражнение – страница готовит файл, который переименует ролики в номера упражнений.
+ *   Уже пронумерованные ролики показаны с названием упражнения: ошибку в номере видно сразу. Сами файлы страница не трогает.
  * 1.5 (11.10.2026). Сервер 4.3. Вкладка «Комментарии»: все комментарии клиентов, свежие сверху, отбор по клиенту и «только новые».
  *   Новый комментарий остаётся новым, пока тренер сам не отметит его кружком «прочитано» (как подход у клиента); счётчик
  *   новых – на вкладке. В тренировке комментарии собраны вверху, отметить можно и там. При составлении тренировки рядом видна прошлая тренировка клиента: план, что клиент сделал, изменения и
@@ -442,7 +478,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '1.5';
+var VERSION = '1.7';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -465,6 +501,9 @@ var WQ = window.matchMedia ? window.matchMedia('(min-width:1024px)') : null;
 function wide() { return MODE === 'trainer' && !!WQ && WQ.matches; }
 function shell(on) { try { document.body.classList.toggle('tr', !!on); } catch (e) {} }
 function exNum(e) { var m = /^e(\d+)$/.exec(String(e && e.id || '')); return m ? m[1] : ''; }
+/** Каким номером называется ролик упражнения: своим («номер видео») или номером самого упражнения. */
+function vidNum(e) { return e ? (e.vn || exNum(e)) : ''; }
+function exByVidNum(n) { n = String(+n); return D.ex.filter(function (e) { return vidNum(e) === n; })[0] || null; }
 var DEV_KEY = 'lf_tr_d_' + TKEY.slice(0, 10), DEV = LS.get(DEV_KEY) || '';
 var MEM_T = 'lf_wk_tr_' + TKEY.slice(0, 10), MEM_C = 'lf_wk_my_' + CKEY.slice(0, 10), PEND_KEY = 'lf_wk_pend_' + CKEY.slice(0, 10);
 
@@ -479,6 +518,7 @@ var IC = {
   base: ic('<path d="M3 9v6M6.5 6.5v11M17.5 6.5v11M21 9v6M6.5 12h11"/>', 2), note: ic('<path d="M5 5h14v10l-4 4H5z"/><path d="M15 19v-4h4M8.5 9.5h7M8.5 13h4"/>', 1.8),
   lock: ic('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>', 1.8), cal: ic('<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>', 1.8),
   copy: ic('<rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0013.5 4h-7A2.5 2.5 0 004 6.5v7A2.5 2.5 0 006.5 16H8"/>', 1.8),
+  folder: ic('<path d="M3.5 7.5A2 2 0 015.5 5.5h4l2 2.2h7a2 2 0 012 2v7.8a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/>', 1.8),
   chat: ic('<path d="M4.5 6.5A2.5 2.5 0 017 4h10a2.5 2.5 0 012.5 2.5v7A2.5 2.5 0 0117 16h-4.5L8 20v-4H7a2.5 2.5 0 01-2.5-2.5z"/><path d="M8.5 8.5h7M8.5 11.5h4.5"/>', 1.8),
   sync: ic('<path d="M20 12a8 8 0 01-13.7 5.6M4 12a8 8 0 0113.7-5.6"/><path d="M18 3v4h-4M6 21v-4h4"/>', 1.8), link: ic('<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>', 1.8)
 };
@@ -557,7 +597,7 @@ function copyText(t) {
 
 /* ================= СВЯЗЬ С СЕРВЕРОМ ================= */
 var NET = { ok: false, net: true, error: 'нет связи с сервером – проверьте интернет и попробуйте ещё раз' };
-var S = { ref: null, coms: null, comCid: '', comF: 'all', comBusy: false, tab: 'clients', view: 'home', cid: null, draft: null, dirty: false, isNew: false, run: null, q: '', bq: '', bf: 'all', cq: '', own: '', open: {}, del: false,
+var S = { bv: '', vnew: -1, vrep: null, vbEdit: false, vfull: false, ref: null, coms: null, comCid: '', comF: 'all', comBusy: false, tab: 'clients', view: 'home', cid: null, draft: null, dirty: false, isNew: false, run: null, q: '', bq: '', bf: 'all', cq: '', own: '', open: {}, del: false,
   calM: TODAY.slice(0, 7), calDay: TODAY, ret: 'client', busy: 0, saving: false, hints: null, vid: '', loadedAt: 0, offline: false, exEdit: null, pinName: '' };
 function post(body) {
   return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { return r.text(); }).then(function (t) {
@@ -566,7 +606,7 @@ function post(body) {
   });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1 };
+var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -679,7 +719,7 @@ var D = null;                    // { trainer, admin, today, def, cats, clients,
 var FULL = {};                   // тренировки целиком: { id: { id, cid, date, note, done, doneAt, items } }
 function sumObj(a) { return { id: a[0], cid: String(a[1]), date: a[2], done: !!a[3], doneAt: a[4] || '', n: a[5] || 0, c: a[6] || 0, m: a[7] || 0, row: a[8] || 0, k: a[9] || 0, u: +a[10] || 0 }; }
 function setList(r) {
-  D = { trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj) };
+  D = { trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj), vbase: r.vbase || '' };
   TODAY = D.today || TODAY;
   (r.full || []).forEach(function (w) { FULL[w.id] = w; });
   if (D.admin && S.own === '') S.own = D.clients.some(function (c) { return c.owner === D.trainer; }) ? D.trainer : '*';
@@ -1097,12 +1137,30 @@ function saveDraft() {
 
 /* ---------- база упражнений ---------- */
 function viewBase() {
-  var withV = D.ex.filter(function (e) { return e.video; }).length, own = D.ex.filter(function (e) { return e.own; }).length;
+  var withV = D.ex.filter(function (e) { return e.video; }).length, own = D.ex.filter(function (e) { return e.own; }).length, vid = S.bv === 'vid';
   var h = '<h1 class="hello">База упражнений</h1><div class="meta"><span class="pill">Упражнений: <b class="num">' + D.ex.length + '</b></span><span class="pill' + (withV ? ' ok' : '') + '">С видео: <b class="num">' + withV + '</b> из ' + D.ex.length + '</span></div>' +
-    '<div class="bctl"><button class="btn sec" data-act="exNew">' + IC.plus + 'Добавить упражнение</button>' +
+    '<div class="seg bseg"><button data-act="bv" data-v="" class="' + (vid ? '' : 'on') + '">База</button><button data-act="bv" data-v="vid" class="' + (vid ? 'on' : '') + '">Видео</button></div>';
+  if (vid) return h + viewVid();
+  h += '<div class="bctl"><button class="btn sec" data-act="exNew">' + IC.plus + 'Добавить упражнение</button>' + (D.admin ? '<button class="btn sec" data-act="exBulk">' + IC.note + 'Добавить списком</button>' : '') +
     '<div class="mt">' + fi('bQ', 'Поиск по названию', S.bq, 'text', 'autocomplete="off" data-f="bq"') + '</div></div>' +
     '<div class="chips">' + [['all', 'Все'], ['nov', 'Без видео · ' + (D.ex.length - withV)], ['vid', 'С видео · ' + withV], ['own', 'Свои · ' + own]].map(function (c) { return '<button data-act="bf" data-v="' + c[0] + '" class="' + (S.bf === c[0] ? 'on' : '') + '">' + c[1] + '</button>'; }).join('') + '</div>';
   return h + '<div id="baseList">' + baseList() + '</div>';
+}
+/** Список упражнений из текста: строка – упражнение; через «;» или табуляцию можно дописать группу мышц и оборудование. */
+function bulkParse(t) {
+  var out = [], seen = {};
+  String(t || '').split(/\r?\n/).forEach(function (ln) {
+    var p = ln.split(/\t|;/).map(function (x) { return x.trim(); }), name = (p[0] || '').replace(/^[\s\-–—•*]*(\d{1,3}[.)]\s*)?/, '').trim();
+    if (name.length < 2 || seen[norm(name)]) return;
+    seen[norm(name)] = 1; out.push({ name: name.slice(0, 80), grp: (p[1] || '').slice(0, 60), cat: (p[2] || '').slice(0, 60) });
+  });
+  return out;
+}
+function bulkForm(done) {
+  sheet('Добавить списком', '<h2>Добавить упражнения списком</h2>' + (done ? '<p class="lead"><b>' + esc(done) + '</b></p>' : '') +
+    '<p class="lead">По одному упражнению в строке. Что уже есть в базе – пропустится, у существующих ничего не изменится. Через точку с запятой можно дописать группу мышц и оборудование: «Тяга резинки к поясу; Спина; Фитнес-резинки».</p>' +
+    '<label class="fld"><span>Названия упражнений</span><textarea id="xList" rows="12" placeholder="Тяга резинки к поясу&#10;Разведение ног с резинкой"></textarea></label>' +
+    '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="exBulkGo">Добавить в базу</button><button class="btn sec" data-act="close">Закрыть</button>');
 }
 function baseList() {
   var q = norm(S.bq), list = D.ex.filter(function (e) {
@@ -1117,7 +1175,7 @@ function baseList() {
     if (!part.length) return;
     h += '<section class="bgrp"><div class="grp-title">' + esc(cn) + ' · ' + part.length + '</div><div class="card"><div class="rows">' + part.map(function (e) {
       var no = exNum(e);
-      return '<button class="row" data-act="exEdit" data-id="' + e.id + '"><span class="dot' + (e.video ? ' on' : '') + '"></span><span class="mn"><b>' + esc(e.name) + '</b><small>' + (no ? '№ ' + no + ' · ' : '') + esc(e.grp || 'группа не указана') + (e.video ? ' · ' + esc(videoName(e.video)) : ' · видео пока нет') + '</small></span><span class="chev">›</span></button>';
+      return '<button class="row" data-act="exEdit" data-id="' + e.id + '"><span class="dot' + (e.video ? ' on' : '') + '"></span><span class="mn"><b>' + esc(e.name) + '</b><small>' + (no ? '№ ' + no + ' · ' : '') + (e.vn ? 'видео № ' + e.vn + ' · ' : '') + esc(e.grp || 'группа не указана') + (e.video ? ' · ' + esc(videoName(e.video)) : ' · видео пока нет') + '</small></span><span class="chev">›</span></button>';
     }).join('') + '</div></div></section>';
   });
   return h;
@@ -1128,9 +1186,9 @@ function exForm(id) {
   var grps = []; D.ex.forEach(function (y) { if (y.grp && grps.indexOf(y.grp) < 0) grps.push(y.grp); });
   var cats = D.cats.slice(); D.ex.forEach(function (y) { if (y.cat && cats.indexOf(y.cat) < 0) cats.push(y.cat); });
   ['Фитнес-резинки', 'Другое'].forEach(function (c) { if (cats.indexOf(c) < 0) cats.push(c); }); if (x.cat && cats.indexOf(x.cat) < 0) cats.push(x.cat);
-  var no = e ? exNum(e) : '';
+  var no = e ? exNum(e) : '', vno = e ? vidNum(e) : '';
   sheet(e ? 'Упражнение' : 'Новое упражнение', '<h2>' + (e ? 'Упражнение' + (no ? ' № ' + no : '') : 'Новое упражнение') + '</h2>' +
-    (no ? '<p class="lead">Файл видео с именем ' + no + '.mp4 в папке с видео подставляется сам: меню таблицы «Тренировки» → «Видео: подставить ссылки».</p>' : '') +
+    (vno ? '<p class="lead">Ролик этого упражнения называется ' + vno + '.mp4' + (e.vn ? ' (у ролика свой номер)' : '') + '. Ссылка подставляется сама: «База упражнений» → «Видео».</p>' : '') +
     fi('xName', 'Название', x.name, 'text', 'maxlength="80" autocomplete="off"') +
     fi('xGrp', 'Группа мышц', x.grp, 'text', 'maxlength="40" list="grpList" autocomplete="off"') + '<datalist id="grpList">' + grps.map(function (g) { return '<option value="' + esc(g) + '">'; }).join('') + '</datalist>' +
     fs('xCat', 'Оборудование', cats.map(function (c) { return [c, c]; }), x.cat || 'Другое') +
@@ -1140,6 +1198,141 @@ function exForm(id) {
     (e ? '<button class="btn danger" data-act="exDel" style="margin-top:0">Удалить из базы</button>' : ''));
 }
 function exSw() { return sw('xNoW', S.exEdit.noW, 'Без веса', 'По умолчанию графа веса убрана') + sw('xSec', S.exEdit.sec, 'Считать секунды, а не повторы', ''); }
+
+/* ---------- номера для видео: ролик -> упражнение -> файл переименования (только компьютер) ---------- */
+var VEXT = /\.(mov|mp4|m4v|avi|mkv)$/i;
+var V = null;                    // { dir, files:[{ name, base, ext, size, file, ex, src, bad, txt }], play, url, perr }
+function vidSaved() { try { return JSON.parse(LS.get('lf_wk_vidmap') || '{}') || {}; } catch (e) { return {}; } }
+function vidRemember() { if (!V) return; var m = vidSaved(); V.files.forEach(function (f) { var k = f.name + '|' + f.size; if (f.ex) m[k] = f.ex; else delete m[k]; }); try { LS.set('lf_wk_vidmap', JSON.stringify(m)); } catch (e) {} }
+function vidSize(n) { return n > 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' МБ' : Math.max(Math.round(n / 1024), 1) + ' КБ'; }
+function vidLoad(list) {
+  var saved = vidSaved(), files = [], dir = '';
+  [].forEach.call(list || [], function (f) {
+    var rp = String(f.webkitRelativePath || f.name).split('/');
+    if (rp.length > 2 || !VEXT.test(f.name)) return;                     // только ролики самой папки: «Сжатые» и вложенные папки не нужны
+    if (rp.length === 2) dir = rp[0];
+    var dot = f.name.lastIndexOf('.'), base = f.name.slice(0, dot), ext = f.name.slice(dot), m = /^0*(\d{1,5})$/.exec(base.trim()), ex = '', src = '', e;
+    if (m && (e = exByVidNum(m[1]))) { ex = e.id; src = 'num'; }             // уже назван номером
+    else if (saved[f.name + '|' + f.size] && exOf(saved[f.name + '|' + f.size])) { ex = saved[f.name + '|' + f.size]; src = 'saved'; }
+    else if ((e = exByName(base))) { ex = e.id; src = 'name'; }            // назван так же, как упражнение
+    files.push({ name: f.name, base: base, ext: ext, size: f.size, file: f, ex: ex, src: src, bad: m && !ex ? String(+m[1]) : '', txt: '' });
+  });
+  files.sort(function (a, b) { return a.name.localeCompare(b.name, 'ru', { numeric: true }); });
+  if (V && V.url) { try { URL.revokeObjectURL(V.url); } catch (e) {} }
+  V = { dir: dir, files: files, play: -1, url: '', perr: false };
+}
+/** Что и во что переименовать и что мешает: { moves, dup:{ упражнение: [ролики] }, clash:{ ролик: 1 }, n }. */
+function vidPlan() {
+  var by = {}, dup = {}, clash = {}, moves = [], stay = {}, n = 0;
+  V.files.forEach(function (f, i) { if (f.ex) { (by[f.ex] = by[f.ex] || []).push(i); n++; } });
+  Object.keys(by).forEach(function (k) { if (by[k].length > 1) dup[k] = by[k]; });
+  var stem = function (x) { return x.slice(0, x.lastIndexOf('.')).trim().toLowerCase(); };
+  V.files.forEach(function (f) { f.to = f.ex && exOf(f.ex) ? vidNum(exOf(f.ex)) + f.ext : ''; if (!f.to || f.to.toLowerCase() === f.name.toLowerCase()) stay[stem(f.name)] = 1; });
+  V.files.forEach(function (f, i) {
+    if (!f.to || f.to.toLowerCase() === f.name.toLowerCase()) return;
+    if (stay[stem(f.to)]) clash[i] = 1;                                    // этот номер уже занят роликом, который остаётся как есть (17.mov и 17.mp4 сжались бы в один файл)
+    moves.push({ i: i, from: f.name, to: f.to });
+  });
+  return { moves: moves, dup: dup, clash: clash, n: n };
+}
+function vidRowState(f, i, P) {
+  var e = f.ex ? exOf(f.ex) : null;
+  if (e && P.dup[f.ex]) return { c: 'bad', t: 'это же упражнение выбрано у ролика «' + V.files[P.dup[f.ex].filter(function (x) { return x !== i; })[0]].name + '»' };
+  if (e && P.clash[i]) return { c: 'bad', t: 'номер ' + vidNum(e) + ' уже носит другой ролик – укажите упражнение и ему' };
+  if (e && f.to.toLowerCase() === f.name.toLowerCase()) return { c: 'ok', t: 'номер уже стоит' };
+  if (e) return { c: 'ok', t: f.src === 'name' ? 'найдено по названию файла – проверьте' : 'будет ' + f.to };
+  if (f.txt) return { c: 'bad', t: 'такого упражнения в базе нет', add: 1 };
+  if (f.bad) return { c: 'bad', t: 'номер ' + f.bad + ' не принадлежит ни одному упражнению' };
+  return { c: '', t: 'упражнение не указано' };
+}
+function vidRows(P) {
+  return V.files.map(function (f, i) {
+    var e = f.ex ? exOf(f.ex) : null, st = vidRowState(f, i, P);
+    return '<div class="vrow' + (V.play === i ? ' on' : '') + '" id="vr-' + i + '"><button class="ib" data-act="vidPlay" data-i="' + i + '" aria-label="Смотреть ролик" title="Смотреть ролик">' + IC.play + '</button>' +
+      '<div class="mn"><b>' + esc(f.name) + '</b><small class="' + (st.c === 'bad' ? 'st-warn' : st.c === 'ok' ? 'st-ok' : '') + '">' + vidSize(f.size) + ' · ' + esc(st.t) + '</small>' +
+      (st.add ? '<button class="vlnk" data-act="vidAdd" data-i="' + i + '">Добавить «' + esc(cap(f.txt)) + '» в базу</button>' : '') + '</div>' +
+      '<label class="fld vin"><input id="vx-' + i + '" list="exAll" autocomplete="off" placeholder="первые буквы упражнения" value="' + esc(e ? e.name : f.txt) + '" data-f="vex" data-i="' + i + '" aria-label="Упражнение для ролика ' + esc(f.name) + '"></label>' +
+      '<span class="vto' + (st.c === 'bad' ? ' bad' : '') + '">' + (e ? '№ ' + vidNum(e) + '<button class="vlnk" data-act="vidNew" data-i="' + i + '" title="Если под этим номером уже загрузили не тот ролик: упражнение получит новый, ещё не использованный номер для видео">' + (S.vnew === i ? 'точно?' : 'другой №') + '</button>' : '–') + '</span></div>';
+  }).join('');
+}
+function vidSide(P) {
+  var bad = Object.keys(P.dup).length + Object.keys(P.clash).length, f = V.play >= 0 ? V.files[V.play] : null, used = {};
+  V.files.forEach(function (x) { if (x.ex) used[x.ex] = 1; });
+  var free = D.ex.filter(function (e) { return !used[e.id] && !e.video; });
+  var h = '<div class="card">';
+  if (f) h += '<video class="vprev" src="' + esc(V.url) + '" controls autoplay muted playsinline></video><p class="note" style="margin:0 0 14px">' + esc(f.name) + (V.perr ? ' · <span class="st-warn">браузер не показывает этот ролик – откройте его в проводнике</span>' : '') + '</p>';
+  else h += '<p class="sub" style="margin:0 0 14px">Нажмите ▶ у ролика, чтобы посмотреть его здесь.</p>';
+  h += '<div class="meta" style="margin-bottom:12px"><span class="pill">Роликов: <b class="num">' + V.files.length + '</b></span><span class="pill' + (P.n === V.files.length && V.files.length ? ' ok' : '') + '">С упражнением: <b class="num">' + P.n + '</b></span>' + (bad ? '<span class="pill warn">мешает: ' + bad + '</span>' : '') + '</div>';
+  h += '<button class="btn pri" data-act="vidBat"' + (!P.moves.length || bad ? ' disabled' : '') + '>' + (bad ? 'Сначала уберите помехи' : P.moves.length ? 'Скачать файл переименования · ' + P.moves.length : 'Переименовывать нечего') + '</button>';
+  h += '<p class="note">Файл <b>Lite-Fit-nomera.bat</b> положите в эту же папку с роликами и запустите: ролики получат номера упражнений. Браузер может спросить, сохранять ли такой файл, – сохраняйте. Потом запустите файл сжатия.</p>';
+  h += '<label class="btn sec sm" style="margin-top:12px">' + IC.folder + 'Выбрать другую папку<input type="file" id="vDir2" webkitdirectory multiple hidden data-f="vdir"></label></div>';
+  if (free.length) h += '<details class="card vfree"><summary>Упражнения без ролика · ' + free.length + '</summary><p>' + free.map(function (e) { return '№ ' + vidNum(e) + ' ' + esc(e.name); }).join('<br>') + '</p></details>';
+  return h;
+}
+/** Адрес папки на GitHub, куда загружать ролики: https://имя.github.io/репозиторий/папка -> страница загрузки. Другое хранилище – пусто. */
+function ghUpload(base) { var m = /^https:\/\/([\w-]+)\.github\.io\/([\w.-]+)\/(.+)$/.exec(base || ''); return m ? 'https://github.com/' + m[1] + '/' + m[2] + '/upload/main/' + m[3] : ''; }
+function vidStore() {
+  var up = ghUpload(D.vbase), h = '<div class="card vst"><h3>Папка с видео</h3>';
+  if (D.vbase && !S.vbEdit) h += '<p class="sub">' + esc(D.vbase) + (D.admin ? ' · <button class="vlnk in" data-act="vbEdit">изменить</button>' : '') + '</p>';
+  else if (D.admin) h += '<p class="sub">Адрес папки, куда загружаются сжатые ролики. Пример: https://litefitonline-lang.github.io/anketa/Video</p><div style="margin-bottom:12px">' + fi('vbIn', 'Адрес папки с видео', D.vbase, 'url', 'inputmode="url" autocomplete="off" autocapitalize="off"') + '</div>';
+  else h += '<p class="sub">Адрес папки с видео ещё не задан – это делает владелец.</p>';
+  h += '<div class="vst-b">' + (up ? '<a class="btn sec sm" href="' + esc(up) + '" target="_blank" rel="noopener noreferrer">' + IC.link + 'Загрузить ролики на GitHub</a>' : '') +
+    (D.admin ? '<button class="btn pri sm" data-act="vfill">' + IC.sync + 'Проверить папку и подставить ссылки</button>' : '') + '</div>';
+  if (S.vrep) h += '<div class="vrep">' + S.vrep.filter(function (l) { return l && !/^Папка: /.test(l); }).map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>';
+  h += '<p class="note">Порядок: 1) ролики получают номера (ниже); 2) файл сжатия делает папку «Сжатые»; 3) ролики из неё загружаются в папку с видео; 4) кнопка «Проверить папку» привязывает их к упражнениям.</p></div>';
+  return h;
+}
+function viewVid() {
+  var h = vidStore();
+  if (!wide()) return h + '<div class="card"><h3>Нумерация роликов – на компьютере</h3><p class="sub" style="margin:0">Откройте эту страницу на компьютере: там выбирается папка с роликами, у каждого ролика указывается упражнение, и готовый файл переименовывает ролики в номера.</p></div>';
+  var pick = function (id, pri, t) { return '<label class="btn ' + (pri ? 'pri' : 'sec sm') + '">' + IC.folder + t + '<input type="file" id="' + id + '" webkitdirectory multiple hidden data-f="vdir"></label>'; };
+  if (!V) {
+    return h + '<div class="card" style="max-width:680px"><h3>Номера для роликов</h3>' +
+      '<p class="sub" style="margin-bottom:8px">1. Выберите папку с исходными роликами. Страница их только читает и никуда не отправляет.</p><p class="sub" style="margin-bottom:8px">2. У каждого ролика начните вводить название упражнения и выберите его из подсказки. Упражнения нет в базе – добавьте его тут же одной кнопкой.</p>' +
+      '<p class="sub" style="margin-bottom:8px">3. Скачайте файл переименования, положите его в папку с роликами и запустите.</p><p class="sub">Ролики, уже названные номерами, показываются с названием упражнения – так видно ошибку в номере.</p>' + pick('vDir', true, 'Выбрать папку с роликами') + '</div>';
+  }
+  if (!V.files.length) return h + '<div class="card" style="max-width:680px"><h3>В этой папке нет видео</h3><p class="sub">Нужны файлы mov, mp4, m4v, avi или mkv прямо в выбранной папке, не во вложенных.</p>' + pick('vDir', true, 'Выбрать другую папку') + '</div>';
+  var P = vidPlan();
+  h += '<p class="lead-p" style="margin-top:6px">Папка «' + esc(V.dir || 'с роликами') + '». Укажите упражнение у каждого ролика: начните вводить название и выберите из подсказки.</p>';
+  h += '<datalist id="exAll">' + D.ex.slice().sort(function (a, b) { return a.name.localeCompare(b.name, 'ru'); }).map(function (e) { return '<option value="' + esc(e.name) + '" label="№ ' + vidNum(e) + ' · ' + esc(e.grp || '') + '">'; }).join('') + '</datalist>';
+  return h + '<div class="vd"><div class="card vd-l"><div class="vrow vh"><span></span><span>Ролик</span><span>Упражнение</span><span>Номер</span></div><div id="vRows">' + vidRows(P) + '</div></div><div class="vd-r" id="vSide">' + vidSide(P) + '</div></div>';
+}
+function vidPaint(focusNext) {
+  var r = document.getElementById('vRows'), sd = document.getElementById('vSide'), P = vidPlan();
+  if (!r || !sd || S.vfull) { S.vfull = false; return rerenderKeep(focusNext >= 0 ? 'vx-' + focusNext : ''); }
+  var y = window.scrollY; r.innerHTML = vidRows(P); sd.innerHTML = vidSide(P); window.scrollTo(0, y);
+  if (focusNext >= 0) { var el = document.getElementById('vx-' + focusNext); if (el) { try { el.focus({ preventScroll: false }); el.select(); } catch (e) {} } }
+}
+/** В поле выбрали или вписали упражнение. Точное название – назначаем и переходим к следующему ролику без упражнения. */
+function vidAssign(i, v) {
+  var f = V && V.files[i]; if (!f) return false;
+  v = String(v || '').trim();
+  var e = v ? exByName(v) : null;
+  if (v && !e) { f.ex = ''; f.txt = v; f.src = ''; vidRemember(); return false; }
+  f.ex = e ? e.id : ''; f.txt = ''; f.src = e ? 'pick' : ''; vidRemember();
+  return !!e;
+}
+function vidNextFree(i) { for (var k = 1; k <= V.files.length; k++) { var n = (i + k) % V.files.length; if (!V.files[n].ex) return n; } return -1; }
+/** Файл переименования для Windows. Два шага (сначала временные имена), чтобы ролики могли меняться номерами. */
+function vidBatText(P) {
+  var q = function (x) { return '"' + String(x).replace(/%/g, '%%') + '"'; }, L = [], n = P.moves.length;
+  var stem = function (x) { return x.slice(0, x.lastIndexOf('.')); };
+  L.push('@echo off', 'chcp 65001 >nul', 'setlocal', 'title Lite Fit - номера для видео', 'cd /d "%~dp0"', 'echo.', 'echo  LITE FIT - номера для видео', 'echo  Папка: "%CD%"', 'echo.', 'set MISS=0');
+  P.moves.forEach(function (m) { L.push('if not exist ' + q(m.from) + ' call :miss ' + q(m.from)); });
+  L.push('if %MISS%==1 goto bad');
+  P.moves.forEach(function (m, k) { L.push('ren ' + q(m.from) + ' "lf-nomer-' + (k + 1) + '.tmp"'); });
+  P.moves.forEach(function (m, k) { L.push('ren "lf-nomer-' + (k + 1) + '.tmp" ' + q(m.to)); });
+  L.push('>>"Lite-Fit-nomera-zhurnal.txt" echo --- %DATE% %TIME%');
+  P.moves.forEach(function (m) { var e = exOf(V.files[m.i].ex); L.push('>>"Lite-Fit-nomera-zhurnal.txt" echo ' + q(m.from) + ' стал ' + q(m.to) + ' - ' + q(e ? e.name : '')); });
+  L.push('rem сжатые копии под прежними и новыми именами устарели: убираем, файл сжатия сделает их заново');
+  P.moves.forEach(function (m) {
+    [stem(m.from), stem(m.to)].forEach(function (b) { L.push('if exist ' + q('Сжатые\\' + b + '.mp4') + ' del ' + q('Сжатые\\' + b + '.mp4')); });
+  });
+  L.push('echo  Готово. Роликов переименовано: ' + n + '.', 'echo  Что было и что стало - в файле Lite-Fit-nomera-zhurnal.txt', 'echo  Теперь запустите файл сжатия Lite-Fit-szhat-video.bat', 'echo.', 'pause', 'exit /b 0', '',
+    ':miss', 'echo  Нет файла: %1', 'set MISS=1', 'exit /b 0', '',
+    ':bad', 'echo.', 'echo  Файл запущен не в той папке, или ролики уже переименованы.', 'echo  Ничего не изменено.', 'echo.', 'pause', 'exit /b 1', '');
+  return L.join('\r\n');
+}
 
 /* ---------- ПИН-код ---------- */
 function viewPin(err) {
@@ -1476,6 +1669,68 @@ var ACT = {
   down: function (b) { var i = +b.getAttribute('data-i'), a = S.draft.items; if (i >= a.length - 1) return; var t = a[i]; a[i] = a[i + 1]; a[i + 1] = t; a[0].join = false; markDirty(); rerenderKeep(); scrollToEl('it-' + t.id); },
   delItem: function (b) { var a = S.draft.items; a.splice(+b.getAttribute('data-i'), 1); if (a[0]) a[0].join = false; markDirty(); rerenderKeep(); },
   bf: function (b) { S.bf = b.getAttribute('data-v'); rerenderKeep(); },
+  bv: function (b) { S.bv = b.getAttribute('data-v'); S.vnew = -1; render(); },
+  vbEdit: function () { S.vbEdit = true; rerenderKeep('vbIn'); },
+  vfill: function (b) {
+    var base = val('vbIn');
+    if (!D.vbase && !base) return toast('Впишите адрес папки с видео', 'bad');
+    b.disabled = true; b.textContent = 'Проверяю папку…';
+    call('vfill', { base: base }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { toast(errText(r), 'bad'); return rerenderKeep(); }
+      D.ex = r.ex; D.vbase = r.base; S.vrep = r.lines; S.vbEdit = false; memSave(); rerenderKeep();
+      toast('Роликов в папке: ' + r.rep.found + ', ссылок поставлено: ' + r.rep.set);
+    });
+  },
+  vidAdd: function (b) {
+    var i = +b.getAttribute('data-i'), f = V && V.files[i]; if (!f || !f.txt) return;
+    var name = cap(f.txt.trim());
+    b.disabled = true; b.textContent = 'Добавляю…';
+    call('exsave', { ex: { id: '', name: name, grp: '', cat: 'Другое', video: '', desc: '', noW: false, sec: false } }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { toast(errText(r), 'bad'); return vidPaint(-1); }
+      D.ex = r.ex; memSave();
+      var e = exByName(name);
+      if (e) { f.ex = e.id; f.txt = ''; f.src = 'pick'; vidRemember(); toast('«' + e.name + '» добавлено в базу, номер ' + vidNum(e)); }
+      S.vfull = true; vidPaint(vidNextFree(i));
+    });
+  },
+  vidNew: function (b) {
+    var i = +b.getAttribute('data-i'), f = V && V.files[i]; if (!f || !f.ex) return;
+    if (S.vnew !== i) { S.vnew = i; return vidPaint(-1); }
+    S.vnew = -1; b.disabled = true; b.textContent = '…';
+    call('vnum', { id: f.ex }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { toast(errText(r), 'bad'); return vidPaint(-1); }
+      D.ex = r.ex; memSave(); S.vfull = true; vidPaint(-1);
+      toast('Ролик этого упражнения теперь № ' + r.n + '. Прежний номер больше не используется');
+    });
+  },
+  exBulk: function () { bulkForm(''); },
+  exBulkGo: function (b) {
+    var list = bulkParse(val('xList'));
+    if (!list.length) return ferr('Впишите названия – по одному в строке.');
+    if (list.length > 400) return ferr('За один раз – не больше 400 строк. Разделите список на части.');
+    b.disabled = true; b.textContent = 'Добавляю…';
+    call('exadd', { list: list }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = 'Добавить в базу'; return ferr(errText(r)); }
+      D.ex = r.ex; memSave(); rerenderKeep();
+      bulkForm('Добавлено: ' + r.added + '. Уже были в базе: ' + (r.skipped || []).length + (r.skipped && r.skipped.length ? ' (' + r.skipped.slice(0, 8).join(', ') + (r.skipped.length > 8 ? '…' : '') + ')' : '') + '.');
+    });
+  },
+  vidPlay: function (b) {
+    var i = +b.getAttribute('data-i'), f = V && V.files[i]; if (!f) return;
+    if (V.url) { try { URL.revokeObjectURL(V.url); } catch (e) {} }
+    V.play = i; V.perr = false; V.url = URL.createObjectURL(f.file); vidPaint(-1);
+    var v = document.querySelector('#vSide video'); if (v) v.addEventListener('error', function () { if (V && V.play === i && !V.perr) { V.perr = true; var n = document.querySelector('#vSide .note'); if (n) n.innerHTML = esc(f.name) + ' · <span class="st-warn">браузер не показывает этот ролик – откройте его в проводнике</span>'; } });
+  },
+  vidBat: function () {
+    var P = vidPlan(); if (!P.moves.length || Object.keys(P.dup).length || Object.keys(P.clash).length) return;
+    var a = document.createElement('a'), u = URL.createObjectURL(new Blob([vidBatText(P)], { type: 'application/octet-stream' }));
+    a.href = u; a.download = 'Lite-Fit-nomera.bat'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
+    toast('Файл скачан. Положите его в папку с роликами и запустите');
+  },
   exNew: function () { exForm(''); },
   exEdit: function (b) { exForm(b.getAttribute('data-id')); },
   xNoW: function () { S.exEdit.noW = !S.exEdit.noW; document.getElementById('xSw').innerHTML = exSw(); },
@@ -1541,6 +1796,7 @@ document.addEventListener('input', function (e) {
   var el = e.target, f = el.getAttribute && el.getAttribute('data-f'); if (!f) return;
   var i = +el.getAttribute('data-i'), k = +el.getAttribute('data-k'), v = el.value;
   if (f === 'q') { S.q = v; var s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(); return; }
+  if (f === 'vex') { if (V && (e.inputType === 'insertReplacementText' || !e.inputType) && exByName(v)) { var vi = +el.getAttribute('data-i'); vidAssign(vi, v); vidPaint(vidNextFree(vi)); } return; }   // выбрали из подсказки
   if (f === 'comCid') { S.comCid = v; var cb = document.getElementById('comBox'); if (cb) cb.innerHTML = comsHtml(); return; }
   if (f === 'refId') { S.ref.id = v; S.ref.open = true; loadRef(); rerenderKeep(); return; }
   if (f === 'bq') { S.bq = v; var bl = document.getElementById('baseList'); if (bl) bl.innerHTML = baseList(); return; }
@@ -1575,6 +1831,8 @@ document.addEventListener('input', function (e) {
 });
 document.addEventListener('change', function (e) {
   var el = e.target, f = el.getAttribute && el.getAttribute('data-f');
+  if (f === 'vdir') { var fl = [].slice.call(el.files || []); setTimeout(function () { vidLoad(fl); S.bv = 'vid'; render(); window.scrollTo(0, 0); }, 0); return; }
+  if (f === 'vex' && V) { var vi = +el.getAttribute('data-i'), was = V.files[vi] ? V.files[vi].ex : '', hit = vidAssign(vi, el.value); if (V.files[vi] && (V.files[vi].ex !== was || !hit)) vidPaint(hit ? vidNextFree(vi) : -1); return; }
   if (f === 'comCid' && S.comCid !== el.value) { S.comCid = el.value; var cb = document.getElementById('comBox'); if (cb) cb.innerHTML = comsHtml(); return; }   // на случай браузера без события input у списка
   if (f === 'refId' && S.ref && S.ref.id !== el.value) { S.ref.id = el.value; S.ref.open = true; loadRef(); rerenderKeep(); return; }
   if (MODE !== 'trainer' || S.view !== 'client' || !D) return;
