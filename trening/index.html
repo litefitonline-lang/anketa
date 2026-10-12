@@ -455,6 +455,8 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 1.8 (12.10.2026, правка 15:30). «Видео»: плеер не перезапускается после выбора упражнения; выбрали ролику упражнение –
+ *   в плеере сам включается следующий ролик без упражнения, курсор – в его поле.
  * 1.8 (12.10.2026). Сервер 4.6. Группы мышц: над выбором упражнения – вкладки «Ноги и ягодицы», «Спина», «Грудь», «Плечи»,
  *   «Руки», «Пресс и корпус» и отдельно «Резинки и эспандер»; выбрали группу – ниже сразу все её упражнения, поиск ищет внутри
  *   группы. В «Базе упражнений» тот же отбор и «Без группы». Группа в карточке упражнения выбирается из списка.
@@ -1299,18 +1301,40 @@ function vidRows(P) {
       '<span class="vto' + (st.c === 'bad' ? ' bad' : '') + '">' + (e ? '№ ' + vidNum(e) + '<button class="vlnk" data-act="vidNew" data-i="' + i + '" title="Если под этим номером уже загрузили не тот ролик: упражнение получит новый, ещё не использованный номер для видео">' + (S.vnew === i ? 'точно?' : 'другой №') + '</button>' : '–') + '</span></div>';
   }).join('');
 }
+/** Плеер справа. Перерисовывается только когда меняется ролик – иначе он загружался бы и начинался заново после каждого выбора упражнения. */
+function vidPlayer() {
+  var f = V.play >= 0 ? V.files[V.play] : null;
+  if (!f) return '<p class="sub" style="margin:0 0 14px">Нажмите ▶ у ролика, чтобы посмотреть его здесь. Выбрали ролику упражнение – сам включится следующий ролик без упражнения.</p>';
+  return '<video class="vprev" src="' + esc(V.url) + '" controls autoplay muted playsinline></video><p class="note" id="vPlN" style="margin:0 0 14px">' + esc(f.name) + (V.perr ? ' · <span class="st-warn">браузер не показывает этот ролик – откройте его в проводнике</span>' : '') + '</p>';
+}
+/** Выбрать ролик для плеера (без перерисовки). */
+function vidSel(i) {
+  var f = V && V.files[i]; if (!f) return false;
+  if (V.url) { try { URL.revokeObjectURL(V.url); } catch (e) {} }
+  V.play = i; V.perr = false; V.url = URL.createObjectURL(f.file);
+  return true;
+}
+/** Поставить в плеер выбранный ролик и отметить его строку. */
+function vidPlPaint() {
+  var box = document.getElementById('vPl'); if (box) box.innerHTML = vidPlayer();
+  [].forEach.call(document.querySelectorAll('.vrow.on'), function (r) { r.classList.remove('on'); });
+  var r = document.getElementById('vr-' + V.play); if (r) r.classList.add('on');
+}
 function vidSide(P) {
-  var bad = Object.keys(P.dup).length + Object.keys(P.clash).length, f = V.play >= 0 ? V.files[V.play] : null, used = {};
+  return '<div class="card"><div id="vPl">' + vidPlayer() + '</div><div id="vInfo">' + vidInfo(P) + '</div></div><div id="vFree">' + vidFree() + '</div>';
+}
+function vidFree() {
+  var used = {};
   V.files.forEach(function (x) { if (x.ex) used[x.ex] = 1; });
   var free = D.ex.filter(function (e) { return !used[e.id] && !e.video; });
-  var h = '<div class="card">';
-  if (f) h += '<video class="vprev" src="' + esc(V.url) + '" controls autoplay muted playsinline></video><p class="note" style="margin:0 0 14px">' + esc(f.name) + (V.perr ? ' · <span class="st-warn">браузер не показывает этот ролик – откройте его в проводнике</span>' : '') + '</p>';
-  else h += '<p class="sub" style="margin:0 0 14px">Нажмите ▶ у ролика, чтобы посмотреть его здесь.</p>';
+  return free.length ? '<details class="card vfree"><summary>Упражнения без ролика · ' + free.length + '</summary><p>' + free.map(function (e) { return '№ ' + vidNum(e) + ' ' + esc(e.name); }).join('<br>') + '</p></details>' : '';
+}
+function vidInfo(P) {
+  var bad = Object.keys(P.dup).length + Object.keys(P.clash).length, h = '';
   h += '<div class="meta" style="margin-bottom:12px"><span class="pill">Роликов: <b class="num">' + V.files.length + '</b></span><span class="pill' + (P.n === V.files.length && V.files.length ? ' ok' : '') + '">С упражнением: <b class="num">' + P.n + '</b></span>' + (bad ? '<span class="pill warn">мешает: ' + bad + '</span>' : '') + '</div>';
   h += '<button class="btn pri" data-act="vidBat"' + (!P.moves.length || bad ? ' disabled' : '') + '>' + (bad ? 'Сначала уберите помехи' : P.moves.length ? 'Скачать файл переименования · ' + P.moves.length : 'Переименовывать нечего') + '</button>';
   h += '<p class="note">Файл <b>Lite-Fit-nomera.bat</b> положите в эту же папку с роликами и запустите: ролики получат номера упражнений. Браузер может спросить, сохранять ли такой файл, – сохраняйте. Потом запустите файл сжатия.</p>';
-  h += '<label class="btn sec sm" style="margin-top:12px">' + IC.folder + 'Выбрать другую папку<input type="file" id="vDir2" webkitdirectory multiple hidden data-f="vdir"></label></div>';
-  if (free.length) h += '<details class="card vfree"><summary>Упражнения без ролика · ' + free.length + '</summary><p>' + free.map(function (e) { return '№ ' + vidNum(e) + ' ' + esc(e.name); }).join('<br>') + '</p></details>';
+  h += '<label class="btn sec sm" style="margin-top:12px">' + IC.folder + 'Выбрать другую папку<input type="file" id="vDir2" webkitdirectory multiple hidden data-f="vdir"></label>';
   return h;
 }
 /** Адрес папки на GitHub, куда загружать ролики: https://имя.github.io/репозиторий/папка -> страница загрузки. Другое хранилище – пусто. */
@@ -1342,10 +1366,12 @@ function viewVid() {
   return h + '<div class="vd"><div class="card vd-l"><div class="vrow vh"><span></span><span>Ролик</span><span>Упражнение</span><span>Номер</span></div><div id="vRows">' + vidRows(P) + '</div></div><div class="vd-r" id="vSide">' + vidSide(P) + '</div></div>';
 }
 function vidPaint(focusNext) {
-  var r = document.getElementById('vRows'), sd = document.getElementById('vSide'), P = vidPlan();
-  if (!r || !sd || S.vfull) { S.vfull = false; return rerenderKeep(focusNext >= 0 ? 'vx-' + focusNext : ''); }
-  var y = window.scrollY; r.innerHTML = vidRows(P); sd.innerHTML = vidSide(P); window.scrollTo(0, y);
-  if (focusNext >= 0) { var el = document.getElementById('vx-' + focusNext); if (el) { try { el.focus({ preventScroll: false }); el.select(); } catch (e) {} } }
+  var moved = focusNext >= 0 && V.play >= 0 && focusNext !== V.play && vidSel(focusNext);     // упражнение выбрано – в плеер следующий ролик
+  var r = document.getElementById('vRows'), inf = document.getElementById('vInfo'), fr = document.getElementById('vFree'), P = vidPlan();
+  if (!r || !inf || !fr || S.vfull) { S.vfull = false; return rerenderKeep(focusNext >= 0 ? 'vx-' + focusNext : ''); }
+  var y = window.scrollY; r.innerHTML = vidRows(P); inf.innerHTML = vidInfo(P); fr.innerHTML = vidFree(); window.scrollTo(0, y);
+  if (moved) vidPlPaint();
+  if (focusNext >= 0) { var el = document.getElementById('vx-' + focusNext); if (el) { try { el.focus({ preventScroll: true }); el.select(); var row = document.getElementById('vr-' + focusNext), b = row && row.getBoundingClientRect(); if (b && (b.top < 80 || b.bottom > window.innerHeight - 20)) row.scrollIntoView({ block: 'center' }); } catch (e) {} } }
 }
 /** В поле выбрали или вписали упражнение. Точное название – назначаем и переходим к следующему ролику без упражнения. */
 function vidAssign(i, v) {
@@ -1776,8 +1802,7 @@ var ACT = {
   vidPlay: function (b) {
     var i = +b.getAttribute('data-i'), f = V && V.files[i]; if (!f) return;
     if (V.url) { try { URL.revokeObjectURL(V.url); } catch (e) {} }
-    V.play = i; V.perr = false; V.url = URL.createObjectURL(f.file); vidPaint(-1);
-    var v = document.querySelector('#vSide video'); if (v) v.addEventListener('error', function () { if (V && V.play === i && !V.perr) { V.perr = true; var n = document.querySelector('#vSide .note'); if (n) n.innerHTML = esc(f.name) + ' · <span class="st-warn">браузер не показывает этот ролик – откройте его в проводнике</span>'; } });
+    vidSel(i); vidPlPaint();
   },
   vidBat: function () {
     var P = vidPlan(); if (!P.moves.length || Object.keys(P.dup).length || Object.keys(P.clash).length) return;
@@ -1894,6 +1919,11 @@ document.addEventListener('change', function (e) {
   if (f === 'start') { var n = +numR(el.value); if (n > 0 && n !== +c.start) cset('start', n); else el.value = c.start || 1; }
   if (f === 'before' || f === 'after') { var x = numR(el.value), cur = accOf(c)[f === 'before' ? 'b' : 'a']; if (x !== '' && +x !== cur) cset(f, +x); else el.value = cur; }
 });
+document.addEventListener('error', function (e) {
+  var t = e.target; if (!t || !t.classList || !t.classList.contains('vprev') || !V || V.perr) return;
+  V.perr = true; var n = document.getElementById('vPlN'), f = V.files[V.play];
+  if (n && f) n.innerHTML = esc(f.name) + ' · <span class="st-warn">браузер не показывает этот ролик – откройте его в проводнике</span>';
+}, true);
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Enter' || !e.target) return;
   if (e.target.id === 'exQ') { var first = document.querySelector('#sugg [data-act]'); if (first) { e.preventDefault(); first.click(); } }
