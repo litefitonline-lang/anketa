@@ -1,13 +1,14 @@
 {
   "name": "Тренировки Lite Fit",
   "short_name": "Тренировки",
-  "description": "Тренировки Lite Fit: план от тренера, отметки подходов, сложность и комментарии",
+  "description": "Тренировки Lite Fit: план от тренера, отметки подходов, время тренировки, сложность и комментарии",
   "display": "standalone",
   "background_color": "#05090B",
   "theme_color": "#05090B",
   "lang": "ru",
   "icons": [
-    { "src": "../cabinet/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "../cabinet/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
