@@ -333,6 +333,35 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .side-logo,.side-who{display:none}
 .row.sel .mn b,.row.sel .chev{color:var(--accent)}
 .md-0{display:none}
+/* «Видео» и «Описание» у клиента – заметнее */
+.acts .btn.hl{border:1.5px solid var(--accent-d);color:var(--accent);background:rgba(62,214,206,.07)}
+/* картинка в справке */
+.demo{position:relative;border:1px solid var(--line2);border-radius:16px;background:var(--card);padding:14px 14px 16px;margin:10px 0 14px;pointer-events:none;user-select:none}
+.demo-h{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.demo-h b{display:block;font-size:15px;line-height:1.25}
+.demo-h small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.demo-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.dbtn{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;height:40px;border-radius:12px;border:1.5px solid var(--accent);color:var(--accent);font-size:13.5px;font-weight:800;background:rgba(62,214,206,.1);box-shadow:0 0 14px -6px var(--glow)}
+.dbtn svg{width:16px;height:16px}
+.demo-set{display:grid;grid-template-columns:18px minmax(0,1fr) minmax(0,1fr) 40px;gap:6px;align-items:center;margin-bottom:6px}
+.demo-sh{font-size:11px;color:var(--muted);text-align:center;margin-bottom:4px}
+.demo-set b{font-size:12px;color:var(--dim);text-align:center}
+.din{height:34px;border:1px solid var(--line);border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:15px;background:var(--bg)}
+.dok{position:relative;justify-self:center;width:34px;height:34px;border-radius:50%;border:2px solid var(--line2);display:grid;place-items:center}
+.dok.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.dok svg{width:16px;height:16px}
+.demo-lbl{font-size:12px;color:var(--muted);margin:10px 0 6px;font-weight:700}
+.demo-diff{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.demo-diff span{height:32px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--muted)}
+.demo-diff .in{border-color:var(--accent-d);color:var(--text);background:rgba(62,214,206,.1)}
+.demo-diff .on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.demo-com{position:relative;margin-top:12px;height:42px;border:1px solid var(--line);border-radius:12px;padding:0 12px;display:flex;align-items:center;font-size:12.5px;color:var(--muted);background:var(--bg)}
+.help .demo b{color:var(--text)}
+.help .demo-set b{color:var(--dim)}
+.mk{position:absolute;top:-10px;right:-10px;width:22px;height:22px;border-radius:50%;background:#fff;color:#04211F;font-size:12px;font-weight:800;font-style:normal;display:grid;place-items:center;box-shadow:0 0 0 3px var(--card)}
+.help ol.hl{list-style:none;padding:0;counter-reset:h}
+.help ol.hl li{counter-increment:h;position:relative;padding-left:32px;margin-bottom:8px}
+.help ol.hl li::before{content:counter(h);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:#fff;color:#04211F;font-size:12px;font-weight:800;display:grid;place-items:center}
 /* пакет */
 .pk-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .pk-h h3{margin:0}
@@ -495,6 +524,8 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.0 (правка 13.10.2026, днём). Справка клиента: без срока видимости тренировки; картинка карточки упражнения с цифрами –
+ *   «Видео», «Описание», кружок подхода, сложность, комментарий. Кнопки «Видео» и «Описание» в тренировке – бирюзовые.
  * 2.0 (13.10.2026). Сервер 4.8. Пакеты: у клиента «Выполнено до приложения» и пакеты (тренировок, начало, срок, заморозка, уже
  *   выполнено в пакете до приложения), «Новый пакет», история. Номер тренировки внутри пакета – «4 из 12», невыполненная номер не
  *   занимает, после окончания или сверх числа – «сверх пакета». Клиент видит «Пакет: выполнено 3 из 12, осталось 9, до 31.10» и
@@ -1683,7 +1714,6 @@ function viewMy() {
     return '<div class="row lk"><span class="dt"><b class="num">' + d.getDate() + '</b><small>' + MONS[d.getMonth()] + '</small></span><span class="mn"><b>' + titleOf(w) + '</b><small>Откроется ' + dMon(w.from) + '</small></span>' + IC.lock + '</div>';
   }).join('') + '</div></div>';
   if (past.length) h += '<h2 class="sec-title">Прошедшие</h2><div class="card"><div class="rows">' + past.map(function (w) { return wRow(w, 'runW'); }).join('') + '</div></div>';
-  h += '<p class="note">Тренировка открывается за ' + daysWord(M.acc.b) + ' до даты и доступна ещё ' + daysWord(M.acc.a) + ' после неё.</p>';
   h += '<button class="btn sec" data-act="help" style="margin-top:18px">Как пользоваться приложением</button>';
   return h;
 }
@@ -1698,22 +1728,31 @@ function installCard() {
   return '<div class="card install"><div class="ic">' + IC.home + '</div><div style="flex:1"><p><b>Добавьте тренировки на экран телефона</b></p><p>' + installHow() + '</p>' +
     (deferredInstall ? '<button class="btn sec sm mt" data-act="install">Добавить</button>' : '') + '</div><button class="x" data-act="hideInstall" aria-label="Скрыть">' + IC.x + '</button></div>';
 }
+/** Картинка в справке: карточка упражнения, цифрами отмечено, куда нажимать. Только для показа, не нажимается. */
+function demoCard() {
+  return '<div class="demo" aria-hidden="true"><div class="demo-h"><span class="ex-n num">1</span><div><b>Жим гантелей лёжа</b><small>Грудь · план: 3 подхода по 12, 14 кг</small></div></div>' +
+    '<div class="demo-acts"><span class="dbtn">' + IC.play + 'Видео<i class="mk">1</i></span><span class="dbtn">' + IC.info + 'Описание<i class="mk">2</i></span></div>' +
+    '<div class="demo-set demo-sh"><span>№</span><span>Вес, кг</span><span>Повторы</span><span>Готово</span></div>' +
+    '<div class="demo-set"><b>1</b><span class="din">14</span><span class="din">12</span><span class="dok on">' + IC.check + '<i class="mk">3</i></span></div>' +
+    '<div class="demo-set"><b>2</b><span class="din">14</span><span class="din">10</span><span class="dok"></span></div>' +
+    '<div class="demo-lbl">Сложность выполнения</div><div class="demo-diff"><span>1</span><span>2</span><span class="in">3</span><span class="on">4</span><span>5</span><i class="mk">4</i></div>' +
+    '<div class="demo-com">Комментарий тренеру<i class="mk">5</i></div></div>';
+}
 function helpHtml() {
-  var a = M ? M.acc : { b: 3, a: 2 };
   return '<div class="help"><h2>Как пользоваться</h2>' +
     '<h3>Приложение на экране телефона</h3><p>Так тренировки открываются в одно касание, как обычное приложение. Сначала откройте страницу по ссылке от тренера – так приложение Вас запомнит.</p>' +
     '<ul><li><b>iPhone</b> – в Safari нажмите «Поделиться» (квадрат со стрелкой вверх) внизу экрана → «На экран „Домой“» → «Добавить».</li>' +
     '<li><b>Android</b> – в Chrome нажмите ⋮ вверху справа → «Добавить на главный экран» или «Установить приложение».</li></ul>' +
     (deferredInstall && !standalone() ? '<button class="btn sec sm mt" data-act="install">Добавить сейчас</button>' : '') +
-    '<h3>Когда видна тренировка</h3><p>Тренировка открывается за ' + daysWord(a.b) + ' до даты и остаётся доступной ещё ' + daysWord(a.a) + ' после неё. Будущие тренировки видны с замком и датой, когда откроются.</p>' +
     '<h3>Ваш пакет</h3><p>Вверху главной – сколько тренировок пакета Вы выполнили, сколько осталось и до какой даты действует пакет. Засчитываются только выполненные тренировки, поэтому не забывайте нажимать «Завершить тренировку».</p>' +
-    '<h3>На тренировке</h3><ol>' +
-    '<li>Нажмите <b>«Начать тренировку»</b> внизу – пойдёт время тренировки.</li>' +
-    '<li>У упражнения есть кнопки «Видео» и «Описание» – посмотрите технику перед первым подходом.</li>' +
-    '<li>В подходах уже стоят вес и повторы от тренера. Сделали подход – нажмите кружок справа. Получилось по-другому – исправьте цифры, тренер увидит разницу.</li>' +
-    '<li>Сложность: 1 – очень легко, 3 – рабочая нагрузка, 5 – на пределе. Ставьте по ощущениям после упражнения.</li>' +
-    '<li>Комментарий тренеру – если что-то не получается, неудобно или нужен совет. Когда Вы допишете комментарий, тренер сразу получит уведомление.</li>' +
-    '<li>В конце нажмите <b>«Завершить тренировку»</b> – время остановится, тренер увидит результат.</li></ol>' +
+    '<h3>На тренировке</h3><p>Откройте тренировку и нажмите <b>«Начать тренировку»</b> внизу – пойдёт время. Дальше у каждого упражнения:</p>' + demoCard() +
+    '<ol class="hl">' +
+    '<li><b>«Видео»</b> – нажмите, чтобы посмотреть технику. Смотрите перед первым подходом, даже если упражнение знакомо.</li>' +
+    '<li><b>«Описание»</b> – советы тренера именно для Вас: на что обратить внимание, как дышать, где держать паузу. Кнопка есть, если тренер их добавил, – обязательно откройте.</li>' +
+    '<li><b>Кружок справа</b> – нажмите, когда сделали подход. Вес и повторы уже стоят от тренера. Получилось по-другому – исправьте цифры, тренер увидит разницу.</li>' +
+    '<li><b>Сложность</b> – 1 очень легко, 3 рабочая нагрузка, 5 на пределе. Ставьте по ощущениям после упражнения.</li>' +
+    '<li><b>Комментарий тренеру</b> – если что-то не получается, неудобно или нужен совет. Когда Вы допишете комментарий, тренер сразу получит уведомление.</li></ol>' +
+    '<p>В конце нажмите <b>«Завершить тренировку»</b> – время остановится, тренер увидит результат.</p>' +
     '<h3>Если что-то пошло не так</h3><ul>' +
     '<li>Нажали «Начать» случайно – вверху тренировки есть «Сбросить и начать заново». Отметки, время и комментарии удалятся. Это можно сделать в тот же день, пока тренировка не завершена.</li>' +
     '<li>Завершили раньше времени – внизу «Снять отметку о выполнении», и продолжайте.</li>' +
@@ -1748,9 +1787,9 @@ function runItem(w, it, i, no) {
   var url = it.video || '', k = url ? videoKind(url) : null;
   var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn"><b>' + esc(it.name) + '</b><small>' + esc((it.grp ? it.grp + ' · ' : '') + 'план: ' + planTxt(it)) + '</small></div></div>';
   var acts = '';
-  if (k && k.t === 'link') acts += '<a class="btn sec sm" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + IC.play + 'Видео</a>';
-  else if (k) acts += '<button class="btn sec sm" data-act="video" data-i="' + i + '">' + IC.play + (S.vid === it.id ? 'Скрыть видео' : 'Видео') + '</button>';
-  if (it.desc) acts += '<button class="btn sec sm" data-act="showDesc" data-i="' + i + '">' + IC.info + (S.open['d' + it.id] ? 'Скрыть описание' : 'Описание') + '</button>';
+  if (k && k.t === 'link') acts += '<a class="btn sec sm hl" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + IC.play + 'Видео</a>';
+  else if (k) acts += '<button class="btn sec sm hl" data-act="video" data-i="' + i + '">' + IC.play + (S.vid === it.id ? 'Скрыть видео' : 'Видео') + '</button>';
+  if (it.desc) acts += '<button class="btn sec sm hl" data-act="showDesc" data-i="' + i + '">' + IC.info + (S.open['d' + it.id] ? 'Скрыть описание' : 'Описание') + '</button>';
   if (acts) h += '<div class="acts">' + acts + '</div>';
   if (k && S.vid === it.id) h += playerHtml(url);
   if (it.desc && S.open['d' + it.id]) h += '<div class="desc">' + esc(it.desc) + '</div>';
@@ -1768,7 +1807,7 @@ function viewRun() {
     (w.ts && !w.done ? '<span class="pill ok">начата в ' + hm(w.ts) + '</span>' : '') + '</div>';
   if (canReset(w)) h += '<button class="rst" data-act="restart">' + IC.restart + 'Начали случайно? Сбросить и начать заново</button>';
   if (w.done) h += '<div class="banner done"><b>Тренировка выполнена ' + dm(w.doneAt || w.date) + (w.ts && w.te ? ' за ' + fmtDur((w.te - w.ts) / 60000) : '') + '.</b> Результат можно поправить до ' + dMon(w.to) + ', тренер увидит изменения.</div>';
-  else if (!w.ts && !M.closed) h += '<div class="banner">Когда будете готовы, нажмите <b>«Начать тренировку»</b> внизу – пойдёт время. В конце – «Завершить тренировку».</div>';
+  else if (!w.ts && !M.closed) h += '<div class="banner">Когда будете готовы, нажмите <b>«Начать тренировку»</b> внизу – пойдёт время. У каждого упражнения есть кнопки <b>«Видео»</b> и <b>«Описание»</b> – посмотрите технику перед первым подходом.</div>';
   if (w.note) h += '<div class="banner"><b>От тренера.</b> ' + esc(w.note) + '</div>';
   var NS = numsOf(w.items);
   groups(w.items).forEach(function (g, gi) {
