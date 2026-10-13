@@ -1711,7 +1711,7 @@ function viewMy() {
   if (next.length) h += '<h2 class="sec-title">Впереди</h2><div class="card"><div class="rows">' + next.map(function (w) {
     var d = pd(w.date);
     if (w.st === 'open') return wRow(w, 'runW');
-    return '<div class="row lk"><span class="dt"><b class="num">' + d.getDate() + '</b><small>' + MONS[d.getMonth()] + '</small></span><span class="mn"><b>' + titleOf(w) + '</b><small>Откроется ' + dMon(w.from) + '</small></span>' + IC.lock + '</div>';
+    return '<div class="row lk"><span class="dt"><b class="num">' + d.getDate() + '</b><small>' + MONS[d.getMonth()] + '</small></span><span class="mn"><b>' + titleOf(w) + '</b><small>' + cap(longDate(w.date)) + ' · тренер готовит</small></span>' + IC.lock + '</div>';
   }).join('') + '</div></div>';
   if (past.length) h += '<h2 class="sec-title">Прошедшие</h2><div class="card"><div class="rows">' + past.map(function (w) { return wRow(w, 'runW'); }).join('') + '</div></div>';
   h += '<button class="btn sec" data-act="help" style="margin-top:18px">Как пользоваться приложением</button>';
@@ -1806,7 +1806,7 @@ function viewRun() {
     '<div class="meta"><span class="pill">' + cap(longDate(w.date)) + '</span><span class="pill" id="prog">Подходов: <b class="num">' + p.ok + '</b> из ' + p.tot + '</span>' +
     (w.ts && !w.done ? '<span class="pill ok">начата в ' + hm(w.ts) + '</span>' : '') + '</div>';
   if (canReset(w)) h += '<button class="rst" data-act="restart">' + IC.restart + 'Начали случайно? Сбросить и начать заново</button>';
-  if (w.done) h += '<div class="banner done"><b>Тренировка выполнена ' + dm(w.doneAt || w.date) + (w.ts && w.te ? ' за ' + fmtDur((w.te - w.ts) / 60000) : '') + '.</b> Результат можно поправить до ' + dMon(w.to) + ', тренер увидит изменения.</div>';
+  if (w.done) h += '<div class="banner done"><b>Тренировка выполнена ' + dm(w.doneAt || w.date) + (w.ts && w.te ? ' за ' + fmtDur((w.te - w.ts) / 60000) : '') + '.</b> Результат можно поправить, тренер увидит изменения.</div>';
   else if (!w.ts && !M.closed) h += '<div class="banner">Когда будете готовы, нажмите <b>«Начать тренировку»</b> внизу – пойдёт время. У каждого упражнения есть кнопки <b>«Видео»</b> и <b>«Описание»</b> – посмотрите технику перед первым подходом.</div>';
   if (w.note) h += '<div class="banner"><b>От тренера.</b> ' + esc(w.note) + '</div>';
   var NS = numsOf(w.items);
