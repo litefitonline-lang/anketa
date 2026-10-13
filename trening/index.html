@@ -333,6 +333,10 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .side-logo,.side-who{display:none}
 .row.sel .mn b,.row.sel .chev{color:var(--accent)}
 .md-0{display:none}
+.cwait summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+.cwait summary::-webkit-details-marker{display:none}
+.cwait summary::after{content:"›";font-size:16px;transform:rotate(90deg);transition:transform .2s}
+.cwait:not([open]) summary::after{transform:rotate(0)}
 /* таймер тренировки и справка */
 .runbar{display:flex;gap:10px;align-items:stretch}
 .runbar .btn{flex:1}
@@ -477,6 +481,8 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 1.9 (правка 13.10.2026). «Клиенты»: в основном списке – кто тренируется (тренируется, пауза, заморозка, пробный); остальные
+ *   (после консультации, ждут оплату и т. п.) – в свёрнутом блоке «Ещё не тренируются».
  * 1.9 (12.10.2026). Сервер 4.7. Клиент: «Начать тренировку» – идёт время, «Завершить» – время останавливается и видно тренеру
  *   (и в плане кабинета PRO). Начали случайно – «Сбросить и начать заново» в тот же день, пока не завершили. Кнопка «?» –
  *   как пользоваться и как вынести приложение на экран телефона; карточка «Добавьте тренировки на экран телефона».
@@ -990,7 +996,12 @@ function clientRows(list, arch) {
       (miss ? ' · <span class="st-warn">не отмечено: ' + miss + '</span>' : '') + (chg ? ' · <span class="st-warn">есть изменения</span>' : '') + (nc ? ' · <span class="st-new">новый комментарий' + (nc > 1 ? ': ' + nc : '') + '</span>' : '') + '</small></span><span class="chev">›</span></button>';
   };
   if (!list.length && !arch.length) return '<div class="card"><h3>Клиентов нет</h3><p class="sub" style="margin:0">Здесь появляются клиенты из главной таблицы, у которых Вы – ответственный тренер.</p></div>';
+  // в основном списке – кто тренируется (в т. ч. пауза, заморозка, пробный); после консультации, ждут оплату и т. п. – свёрнуто ниже
+  var on = function (c) { return /тренир|пауз|замороз|пробн/i.test(c.status || ''); }, wait = list.filter(function (c) { return !on(c); });
+  list = list.filter(on);
   var h = list.length ? '<div class="card"><div class="rows">' + list.map(row).join('') + '</div></div>' : '';
+  if (wait.length) h += '<details class="cwait"' + (S.cq || wait.some(function (c) { return String(c.id) === String(S.cid); }) ? ' open' : '') + '><summary class="grp-title">Ещё не тренируются · ' + wait.length + '</summary>' +
+    '<div class="card"><div class="rows">' + wait.map(row).join('') + '</div></div></details>';
   if (arch.length) h += '<div class="grp-title">Закончили · ' + arch.length + '</div><div class="card"><div class="rows">' + arch.map(row).join('') + '</div></div>';
   return h;
 }
