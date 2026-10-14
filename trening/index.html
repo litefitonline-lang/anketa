@@ -358,8 +358,29 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .demo-com{position:relative;margin-top:12px;height:42px;border:1px solid var(--line);border-radius:12px;padding:0 12px;display:flex;align-items:center;font-size:12.5px;color:var(--muted);background:var(--bg)}
 .help .demo b{color:var(--text)}
 .help .demo-set b{color:var(--dim)}
-.mk{position:absolute;top:-10px;right:-10px;width:22px;height:22px;border-radius:50%;background:#fff;color:#04211F;font-size:12px;font-weight:800;font-style:normal;display:grid;place-items:center;box-shadow:0 0 0 3px var(--card)}
+.dmk{position:absolute;top:-10px;right:-10px;width:22px;height:22px;border-radius:50%;background:#fff;color:#04211F;font-size:12px;font-weight:800;font-style:normal;display:grid;place-items:center;box-shadow:0 0 0 3px var(--card)}
 .help ol.hl{list-style:none;padding:0;counter-reset:h}
+/* фото и видео тренеру */
+.med{margin-top:12px}
+.mthumbs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.mtile{position:relative;width:58px;height:58px;border-radius:12px;overflow:hidden;background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;color:var(--muted);padding:0}
+.mtile img{width:100%;height:100%;object-fit:cover;display:block}
+.mtile>svg{width:22px;height:22px}
+.mtile .mb{position:absolute;right:3px;bottom:3px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;background:rgba(5,9,11,.78);color:var(--text)}
+.mtile .mb svg{width:12px;height:12px}
+.mtile .mb.ok{background:var(--accent);color:var(--on-accent)}
+.mtile .mb.bad{background:var(--warm);color:#1A0D04;font-size:12px;font-weight:800}
+.mtile .mk2{position:absolute;left:4px;top:3px;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000}
+.mnote{margin:0 0 8px;font-size:12.5px;color:var(--muted)}
+.mnote.bad{color:var(--warm)}
+.mbtn{width:100%}
+.mmenu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.mmenu button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:68px;padding:8px 4px;border-radius:13px;border:1px solid var(--line2);background:var(--card2);color:var(--text);font-size:12.5px;font-weight:700;line-height:1.2;text-align:center}
+.mmenu button svg{width:22px;height:22px;color:var(--accent)}
+.mdl{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line2);font-size:13.5px}
+.mdl svg{width:17px;height:17px;flex:none;color:var(--accent)}
+.demo-med{position:relative;margin-top:12px;height:40px;border-radius:12px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:var(--text);background:var(--card2)}
+.demo-med svg{width:16px;height:16px;color:var(--accent)}
 .help ol.hl li{counter-increment:h;position:relative;padding-left:32px;margin-bottom:8px}
 .help ol.hl li::before{content:counter(h);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:#fff;color:#04211F;font-size:12px;font-weight:800;display:grid;place-items:center}
 /* пакет */
@@ -524,6 +545,12 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.1 (14.10.2026). Сервер 4.9. Фото и видео тренеру: в упражнении у клиента кнопка «Фото/видео тренеру» – снять видео, сделать
+ *   фото или выбрать из галереи, до 3 файлов на упражнение, видео до 90 секунд. Телефон сам сжимает ролик (540×960, без звука) и
+ *   отправляет его в фоне – клиент продолжает тренировку; без связи файл ждёт в памяти телефона (IndexedDB) и уходит, когда
+ *   появится интернет, в том числе после закрытия страницы. У файла – значок: часы (отправляется), галочка (тренер получил).
+ *   Тренер видит у упражнения «Клиент прислал 2 видео – в Telegram». В справке – пункт 6.
+ * 2.0 (правка 13.10.2026, вечером). Вернулись отметки тренировок в календаре (их скрывали цифры картинки справки).
  * 2.0 (правка 13.10.2026, днём). Справка клиента: без срока видимости тренировки; картинка карточки упражнения с цифрами –
  *   «Видео», «Описание», кружок подхода, сложность, комментарий. Кнопки «Видео» и «Описание» в тренировке – бирюзовые.
  * 2.0 (13.10.2026). Сервер 4.8. Пакеты: у клиента «Выполнено до приложения» и пакеты (тренировок, начало, срок, заморозка, уже
@@ -566,7 +593,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.0';
+var VERSION = '2.1';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -597,7 +624,7 @@ var DEF_GRPS = ['Ноги и ягодицы', 'Спина', 'Грудь', 'Пл�
 function grps() { return D && D.grps && D.grps.length ? D.grps : DEF_GRPS; }
 function bandCats() { return D && D.band && D.band.length ? D.band : DEF_BAND; }
 var DEV_KEY = 'lf_tr_d_' + TKEY.slice(0, 10), DEV = LS.get(DEV_KEY) || '';
-var MEM_T = 'lf_wk_tr_' + TKEY.slice(0, 10), MEM_C = 'lf_wk_my_' + CKEY.slice(0, 10), PEND_KEY = 'lf_wk_pend_' + CKEY.slice(0, 10);
+var MEM_T = 'lf_wk_tr_' + TKEY.slice(0, 10), MEM_C = 'lf_wk_my_' + CKEY.slice(0, 10), PEND_KEY = 'lf_wk_pend_' + CKEY.slice(0, 10), MQ_KEY = 'lf_wk_mq_' + CKEY.slice(0, 10);
 
 /* ---------- значки ---------- */
 function ic(d, w) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.9) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
@@ -613,6 +640,11 @@ var IC = {
   folder: ic('<path d="M3.5 7.5A2 2 0 015.5 5.5h4l2 2.2h7a2 2 0 012 2v7.8a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/>', 1.8),
   chat: ic('<path d="M4.5 6.5A2.5 2.5 0 017 4h10a2.5 2.5 0 012.5 2.5v7A2.5 2.5 0 0117 16h-4.5L8 20v-4H7a2.5 2.5 0 01-2.5-2.5z"/><path d="M8.5 8.5h7M8.5 11.5h4.5"/>', 1.8),
   home: ic('<path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/>', 1.8), restart: ic('<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/>', 1.8),
+  clip: ic('<path d="M20 11.5l-7.8 7.8a5 5 0 01-7.1-7.1l8.5-8.5a3.3 3.3 0 014.7 4.7l-8.5 8.5a1.7 1.7 0 01-2.4-2.4l7.8-7.8"/>', 1.8),
+  cam: ic('<rect x="3" y="6.5" width="13" height="11" rx="2.5"/><path d="M16 10.5l5-3v9l-5-3"/>', 1.8),
+  photo: ic('<path d="M4 8.5A2 2 0 016 6.5h2.2L9.8 4.5h4.4l1.6 2H18a2 2 0 012 2V17a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><circle cx="12" cy="12.5" r="3.4"/>', 1.8),
+  gallery: ic('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.5" r="1.7"/><path d="M20.5 15.5l-5-5L5 19.5"/>', 1.8),
+  clock: ic('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', 2.2),
   sync: ic('<path d="M20 12a8 8 0 01-13.7 5.6M4 12a8 8 0 0113.7-5.6"/><path d="M18 3v4h-4M6 21v-4h4"/>', 1.8), link: ic('<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>', 1.8)
 };
 
@@ -878,7 +910,7 @@ function mkItem(e, sets) {
   for (var i = 0; i < (sets || 3); i++) it.sets.push({ w: '', r: '', fw: '', fr: '', ok: false });
   return it;
 }
-function cloneItems(src) { return clone(src.items).map(function (it) { it.id = uid('i'); it.diff = 0; it.comment = ''; it.sets.forEach(function (s) { s.fw = ''; s.fr = ''; s.ok = false; }); return it; }); }
+function cloneItems(src) { return clone(src.items).map(function (it) { it.id = uid('i'); it.diff = 0; it.comment = ''; delete it.media; it.sets.forEach(function (s) { s.fw = ''; s.fr = ''; s.ok = false; }); return it; }); }
 function memSave() { if (!D) return; try { LS.set(MEM_T, JSON.stringify({ at: S.loadedAt, d: D })); } catch (e) {} }
 function loadList(first) {
   return call('list', {}).then(function (r) {
@@ -1222,7 +1254,7 @@ function editItem(w, it, i, n, no) {
   h += setsHtml(it, i);
   if (it.desc || S.open['d' + it.id]) h += '<div class="mt">' + ft('d-' + it.id, 'Описание и рекомендации (клиент откроет по кнопке)', it.desc, 3, 'maxlength="800" data-f="desc" data-i="' + i + '"') + '</div>';
   else h += '<button class="txtb" data-act="openDesc" data-i="' + i + '">' + IC.note + 'Добавить описание или рекомендации</button>';
-  h += resHtml(w, it);
+  h += resHtml(w, it) + medNote(it);
   if (i > 0) h += '<div class="mt">' + sw('join', it.join, 'Вместе с предыдущим (суперсет)', 'Упражнения выполняются подряд', 'data-i="' + i + '"') + '</div>';
   h += '<div class="ex-f"><button class="ib" data-act="up" data-i="' + i + '" aria-label="Выше"' + (i === 0 ? ' disabled' : '') + '>' + IC.up + '</button><button class="ib" data-act="down" data-i="' + i + '" aria-label="Ниже"' + (i === n - 1 ? ' disabled' : '') + '>' + IC.down + '</button>' +
     '<button class="ib del" data-act="delItem" data-i="' + i + '">' + IC.trash + 'Убрать</button></div></div>';
@@ -1717,6 +1749,272 @@ function viewMy() {
   h += '<button class="btn sec" data-act="help" style="margin-top:18px">Как пользоваться приложением</button>';
   return h;
 }
+/* ================= ФОТО И ВИДЕО ТРЕНЕРУ (клиент) =================
+ * Файл сначала готовится на телефоне (фото – до 1600 px, видео – пережимается в 540×960 без звука, по ходу воспроизведения),
+ * потом кладётся в память телефона (IndexedDB) и отправляется по одному, в фоне. Нет связи – ждёт события online и
+ * повторяет с паузой до 2 минут. Очередь (без самих файлов) – в localStorage: после перезапуска страницы отправка
+ * продолжается. Номер файла mid придумывает телефон: повтор отправки сервер второй раз тренеру не шлёт.
+ */
+var MED = { max: 3, sec: 90, mb: 28, small: 12 };
+var MQ = [];
+try { MQ = JSON.parse(LS.get(MQ_KEY) || '[]') || []; } catch (e) { MQ = []; }
+var MFILE = {}, MBLOB = {}, mqPrepping = false, mqSending = false, mqT = null, mqPause = 5000;
+function mqSave() {
+  try { LS.set(MQ_KEY, JSON.stringify(MQ)); }
+  catch (e) { MQ.forEach(function (j) { if (j.st === 'sent') j.th = ''; }); try { LS.set(MQ_KEY, JSON.stringify(MQ)); } catch (e2) {} }
+}
+function mqNewId() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 9); }
+function mqBusy(j) { return j.st === 'prep' || j.st === 'wait' || j.st === 'send'; }
+/* IndexedDB: файл хранится как ArrayBuffer (так надёжнее в Safari), не получилось – держим в памяти страницы */
+var IDBP = null;
+function idb() {
+  if (IDBP) return IDBP;
+  IDBP = new Promise(function (ok, no) {
+    try { var r = indexedDB.open('lf_wk_media', 1); r.onupgradeneeded = function () { r.result.createObjectStore('f'); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; }
+    catch (e) { no(e); }
+  });
+  IDBP.catch(function () { IDBP = null; });
+  return IDBP;
+}
+function idbDo(mode, fn) {
+  return idb().then(function (db) { return new Promise(function (ok, no) { var t = db.transaction('f', mode), q = fn(t.objectStore('f')); t.oncomplete = function () { ok(q && q.result); }; t.onerror = t.onabort = function () { no(t.error); }; }); });
+}
+function blobPut(mid, blob) {
+  MBLOB[mid] = blob;
+  return (blob.arrayBuffer ? blob.arrayBuffer() : new Response(blob).arrayBuffer()).then(function (ab) {
+    return idbDo('readwrite', function (st) { return st.put({ b: ab, t: blob.type || '' }, mid); });
+  }).then(function () { delete MBLOB[mid]; }, function () {});           // IndexedDB недоступна – файл останется в памяти страницы
+}
+function blobGet(mid) {
+  if (MBLOB[mid]) return Promise.resolve(MBLOB[mid]);
+  return idbDo('readonly', function (st) { return st.get(mid); }).then(function (r) { return r && r.b ? new Blob([r.b], { type: r.t || '' }) : null; }, function () { return null; });
+}
+function blobDel(mid) { delete MBLOB[mid]; return idbDo('readwrite', function (st) { return st.delete(mid); }).catch(function () {}); }
+
+/** Файлы упражнения: свои (из очереди) и уже отправленные с другого устройства (отметки с сервера). */
+function medList(w, it) {
+  var own = MQ.filter(function (j) { return j.wid === w.id && j.iid === it.id; }), ids = {};
+  own.forEach(function (j) { ids[j.mid] = true; });
+  (it.media || []).forEach(function (m) { if (!ids[m.id]) own.push({ mid: m.id, k: m.k, st: 'sent', th: '' }); });
+  return own;
+}
+function medTile(j) {
+  var b = j.st === 'sent' ? '<i class="mb ok">' + IC.check + '</i>' : j.st === 'err' || j.st === 'lost' ? '<i class="mb bad">!</i>' : '<i class="mb">' + IC.clock + '</i>';
+  var lab = j.st === 'sent' ? 'тренер получил' : j.st === 'err' || j.st === 'lost' ? 'не отправлен' : j.st === 'prep' ? 'готовится' : 'отправляется';
+  return '<button class="mtile" data-act="mTile" data-m="' + j.mid + '" aria-label="' + (j.k === 'p' ? 'Фото' : 'Видео') + ': ' + lab + '">' +
+    (j.th ? '<img src="' + j.th + '" alt="">' : (j.k === 'p' ? IC.photo : IC.cam)) + (j.k === 'v' && j.th ? '<span class="mk2">▶</span>' : '') + b + '</button>';
+}
+function medInner(w, it, i) {
+  var L = medList(w, it), h = '', busy = L.some(mqBusy), bad = L.filter(function (j) { return j.st === 'err' || j.st === 'lost'; })[0];
+  if (L.length) h += '<div class="mthumbs">' + L.map(medTile).join('') + '</div>';
+  if (bad) h += '<p class="mnote bad">' + esc(bad.st === 'lost' ? 'Файл не успел подготовиться – нажмите на него и добавьте заново.' : 'Файл не отправлен – нажмите на него.') + '</p>';
+  else if (busy) h += '<p class="mnote">' + (S.mqOff ? 'Нет интернета – файл отправится сам, когда связь появится.' : 'Отправляется тренеру – можно продолжать тренировку.') + '</p>';
+  if (L.length < MED.max && !M.closed) {
+    h += '<button class="btn sec sm mbtn" data-act="mOpen" data-i="' + i + '" aria-expanded="' + (S.open['m' + it.id] ? 'true' : 'false') + '">' + IC.clip + (L.length ? 'Добавить ещё фото или видео' : 'Фото/видео тренеру') + '</button>';
+    if (S.open['m' + it.id]) h += '<div class="mmenu"><button data-act="mPick" data-m="v" data-i="' + i + '">' + IC.cam + 'Снять видео</button><button data-act="mPick" data-m="p" data-i="' + i + '">' + IC.photo + 'Сделать фото</button><button data-act="mPick" data-m="g" data-i="' + i + '">' + IC.gallery + 'Из галереи</button></div>';
+  }
+  return h;
+}
+/** Перерисовать только блок файлов упражнения (поля ввода и видео вокруг не трогаются). */
+function medPaint(iid) {
+  if (MODE !== 'client' || S.view !== 'run' || !M) return;
+  var w = myOf(S.run); if (!w || !w.items) return;
+  w.items.forEach(function (it, i) { if (iid && it.id !== iid) return; var el = document.getElementById('md-' + it.id); if (el) el.innerHTML = medInner(w, it, i); });
+}
+function medAdd(w, it, files) {
+  var free = MED.max - medList(w, it).length, n = 0;
+  files.forEach(function (f) {
+    var isV = /^video\//i.test(f.type) || /\.(mov|mp4|m4v|webm|3gp|avi|mkv)$/i.test(f.name || ''), isP = !isV && (/^image\//i.test(f.type) || /\.(jpe?g|png|heic|heif|webp|gif)$/i.test(f.name || ''));
+    if (!isV && !isP) { toast('Можно приложить только фото или видео', 'bad'); return; }
+    if (n >= free) return;
+    n++;
+    var j = { mid: mqNewId(), wid: w.id, iid: it.id, k: isV ? 'v' : 'p', st: 'prep', th: '', at: Date.now() };
+    MFILE[j.mid] = f; MQ.push(j);
+  });
+  if (files.length > n && n < files.length) toast('К упражнению можно приложить до ' + MED.max + ' файлов' + (n ? ' – добавлено ' + n : ''), n ? 'ok' : 'bad');
+  mqSave(); medPaint(it.id); mqPrep();
+}
+/* ---------- подготовка файла ---------- */
+function mqPrep() {
+  if (mqPrepping) return;
+  var j = MQ.filter(function (x) { return x.st === 'prep' && MFILE[x.mid]; })[0];
+  if (!j) return;
+  mqPrepping = true;
+  var f = MFILE[j.mid];
+  (j.k === 'p' ? prepPhoto(f) : prepVideo(f, j)).then(function (o) {
+    j.mime = o.blob.type || o.mime || ''; j.th = o.th || j.th || ''; j.dur = o.dur || 0; j.wd = o.wd || 0; j.ht = o.ht || 0; j.size = o.blob.size;
+    return blobPut(j.mid, o.blob).then(function () { if (j.st === 'prep') j.st = 'wait'; });
+  }).catch(function (e) {
+    if (e && e.drop) { MQ = MQ.filter(function (x) { return x !== j; }); toast(e.message, 'bad'); }
+    else { j.st = 'err'; j.err = (e && e.message) || 'не получилось подготовить файл'; }
+  }).then(function () {
+    delete MFILE[j.mid]; mqPrepping = false; mqSave(); medPaint(j.iid); mqKick(); mqPrep();
+  });
+}
+function prepPhoto(f) {
+  return new Promise(function (ok, no) {
+    var u = URL.createObjectURL(f), im = new Image();
+    im.onload = function () {
+      var W = im.naturalWidth, H = im.naturalHeight, sc = Math.min(1, 1600 / Math.max(W, H)), cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round(W * sc)); cv.height = Math.max(1, Math.round(H * sc));
+      cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+      var th = thumbOf(im, W, H);
+      URL.revokeObjectURL(u);
+      cv.toBlob(function (b) {
+        if (b && b.size) return ok({ blob: b, th: th, mime: 'image/jpeg' });
+        if (f.size <= MED.mb * 1048576) return ok({ blob: f, th: th });
+        no(new Error('фото слишком большое'));
+      }, 'image/jpeg', 0.85);
+    };
+    im.onerror = function () {                                            // телефон не показывает этот формат (например, HEIC на Android) – отправим как есть
+      URL.revokeObjectURL(u);
+      if (f.size <= MED.mb * 1048576) ok({ blob: f, th: '' }); else no(new Error('фото слишком большое'));
+    };
+    im.src = u;
+  });
+}
+function thumbOf(src, W, H) {
+  try {
+    var s = 120, c = document.createElement('canvas'), k = Math.max(s / W, s / H), w = W * k, h = H * k;
+    c.width = s; c.height = s; c.getContext('2d').drawImage(src, (s - w) / 2, (s - h) / 2, w, h);
+    return c.toDataURL('image/jpeg', 0.6);
+  } catch (e) { return ''; }
+}
+function mmss(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + pad(sec % 60); }
+function recMime() {
+  if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
+  var c = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  for (var i = 0; i < c.length; i++) { try { if (MediaRecorder.isTypeSupported(c[i])) return c[i]; } catch (e) {} }
+  return '';
+}
+/**
+ * Видео: длина – не больше 90 секунд (с запасом 5 с). Маленький файл (до 12 МБ) уходит как есть; большой
+ * пережимается: ролик тихо проигрывается в невидимом плеере, кадры рисуются в 540×960 и записываются MediaRecorder.
+ * Свернули приложение – запись на паузе, вернулись – продолжается. Не вышло – уходит исходный файл, если он не больше 28 МБ.
+ */
+function prepVideo(f, j) {
+  return new Promise(function (ok, no) {
+    var u = URL.createObjectURL(f), v = document.createElement('video'), done = false;
+    v.muted = true; v.defaultMuted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+    v.style.cssText = 'position:fixed;right:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1';
+    document.body.appendChild(v);
+    var cleanup = function () { try { v.pause(); } catch (e) {} v.removeAttribute('src'); try { v.load(); } catch (e) {} if (v.parentNode) v.parentNode.removeChild(v); URL.revokeObjectURL(u); };
+    var asIs = function (why) {
+      if (done) return; done = true; cleanup();
+      if (f.size <= MED.mb * 1048576) ok({ blob: f, mime: f.type || 'video/mp4', th: j.th, dur: Math.round(v.duration || 0) });
+      else no(new Error(why || 'видео слишком большое – снимите покороче'));
+    };
+    var fin = function (o) { if (done) return; done = true; cleanup(); ok(o); };
+    v.onerror = function () { asIs('это видео не открывается на телефоне – снимите заново'); };
+    v.onloadedmetadata = function () {
+      var dur = v.duration, W = v.videoWidth, H = v.videoHeight;
+      if (isFinite(dur) && dur > MED.sec + 5) { done = true; cleanup(); return no({ drop: true, message: 'Видео ' + mmss(dur) + ' – тренеру можно отправить до 90 секунд. Обрежьте его в галерее («Изменить») и добавьте снова.' }); }
+      var mime = recMime(), canRec = !!(mime && HTMLCanvasElement.prototype.captureStream && W && H);
+      if (f.size <= MED.small * 1048576 || !canRec) {                       // маленький – как есть; здесь только картинка для значка
+        var grab = function () { if (!j.th) { j.th = thumbOf(v, W, H); medPaint(j.iid); } asIs(); };
+        try { v.currentTime = Math.min(0.5, (dur || 1) / 2); v.onseeked = grab; setTimeout(grab, 2500); } catch (e) { grab(); }
+        return;
+      }
+      var sc = Math.min(1, 960 / Math.max(W, H)), cw = Math.max(2, Math.round(W * sc / 2) * 2), ch = Math.max(2, Math.round(H * sc / 2) * 2);
+      var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+      var g = cv.getContext('2d'), stream, rec, parts = [], last = -1, still = 0, timer = null, stopped = false;
+      try { stream = cv.captureStream(30); rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 1500000 }); } catch (e) { return asIs(); }
+      var draw = function () {
+        if (stopped) return;
+        try { g.drawImage(v, 0, 0, cw, ch); } catch (e) {}
+        if (!j.th && v.currentTime > 0.3) { j.th = thumbOf(v, W, H); medPaint(j.iid); }
+        if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(draw);
+      };
+      var vis = function () {
+        if (stopped) return;
+        if (document.visibilityState === 'hidden') { try { v.pause(); if (rec.state === 'recording') rec.pause(); } catch (e) {} }
+        else { try { if (rec.state === 'paused') rec.resume(); } catch (e) {} var pp = v.play(); if (pp && pp.catch) pp.catch(function () {}); }
+      };
+      var stop = function () {
+        if (stopped) return; stopped = true; clearInterval(timer); document.removeEventListener('visibilitychange', vis);
+        try { v.pause(); } catch (e) {}
+        try { if (rec.state !== 'inactive') rec.stop(); else rec.onstop(); } catch (e) { asIs(); }
+      };
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) parts.push(e.data); };
+      rec.onstop = function () {
+        try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+        var b = new Blob(parts, { type: (rec.mimeType || mime).split(';')[0] });
+        if (b.size < 2000 || (b.size >= f.size && f.size <= MED.mb * 1048576)) return asIs();
+        if (b.size > MED.mb * 1048576) return asIs();
+        fin({ blob: b, mime: b.type, th: j.th, dur: Math.round(isFinite(v.duration) ? v.duration : 0), wd: cw, ht: ch });
+      };
+      v.onended = stop;
+      document.addEventListener('visibilitychange', vis);
+      timer = setInterval(function () {
+        if (!v.requestVideoFrameCallback) draw();
+        if (v.currentTime >= MED.sec + 5) return stop();
+        if (document.visibilityState === 'hidden') { still = 0; return; }
+        if (v.currentTime === last) { still += 40; if (still > 20000) { stopped = true; clearInterval(timer); document.removeEventListener('visibilitychange', vis); try { rec.ondataavailable = null; rec.onstop = null; rec.stop(); } catch (e) {} asIs(); } }
+        else { still = 0; last = v.currentTime; }
+      }, 40);
+      try { rec.start(1000); } catch (e) { stopped = true; clearInterval(timer); return asIs(); }
+      draw();
+      var pl = v.play(); if (pl && pl.catch) pl.catch(function () { if (document.visibilityState !== 'hidden') { stopped = true; clearInterval(timer); try { rec.ondataavailable = null; rec.onstop = null; rec.stop(); } catch (e) {} asIs(); } });
+    };
+    v.src = u;
+  });
+}
+/* ---------- отправка ---------- */
+function toB64(blob) {
+  return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { var s = String(r.result || ''); ok(s.slice(s.indexOf(',') + 1)); }; r.onerror = function () { no(r.error); }; r.readAsDataURL(blob); });
+}
+function mqKick(delay) {
+  clearTimeout(mqT);
+  if (delay) { mqT = setTimeout(function () { mqKick(); }, delay); return; }
+  if (mqSending || MODE !== 'client' || !CKEY) return;
+  var j = MQ.filter(function (x) { return x.st === 'wait'; })[0];
+  if (!j) return;
+  if (navigator.onLine === false) { if (!S.mqOff) { S.mqOff = true; medPaint(); } return; }   // ждём события online
+  mqSending = true; j.st = 'send';
+  var again = 0;
+  blobGet(j.mid).then(function (b) {
+    if (!b) return { lost: true };
+    return toB64(b).then(function (d) {
+      return post({ a: 'wk', op: 'media', k: CKEY, id: j.wid, item: j.iid, mid: j.mid, kind: j.k, mime: j.mime || b.type || '', dur: j.dur || 0, wd: j.wd || 0, ht: j.ht || 0, data: d });
+    });
+  }).then(function (r) {
+    r = r || NET;
+    if (r.lost) { j.st = 'lost'; return; }
+    if (r.ok) { j.st = 'sent'; j.sentAt = Date.now(); delete j.err; S.mqOff = false; mqPause = 5000; blobDel(j.mid); medMark(j); return; }
+    if (r.auth) { j.st = 'wait'; return; }
+    if (r.gone || r.full) { MQ = MQ.filter(function (x) { return x !== j; }); blobDel(j.mid); if (r.full) toast(cap(r.error || 'к упражнению уже приложено 3 файла'), 'bad'); return; }
+    if (r.fatal) { j.st = 'err'; j.err = r.error || 'файл не отправлен'; return; }
+    j.st = 'wait'; again = mqPause; mqPause = Math.min(mqPause * 2, 120000);   // связь, сервер или Telegram – повтор позже
+  }, function () { j.st = 'wait'; S.mqOff = true; again = mqPause; mqPause = Math.min(mqPause * 2, 120000); })
+    .then(function () {
+      mqSending = false; mqSave(); medPaint(j.iid);
+      if (again) mqKick(again); else mqKick();
+    });
+}
+/** Отправленный файл – в отметки упражнения: страница помнит, что место занято, и после обновления с сервера. */
+function medMark(j) {
+  var w = myOf(j.wid), it = w && w.items ? w.items.filter(function (x) { return x.id === j.iid; })[0] : null;
+  if (!it) return;
+  it.media = it.media || [];
+  if (!it.media.some(function (m) { return m.id === j.mid; })) it.media.push({ id: j.mid, k: j.k });
+  pendSave();
+}
+/** Запуск: незаконченная подготовка после перезапуска страницы (исходный файл потерян) – «не успел»; старые отправленные – убрать. */
+function mqBoot() {
+  var old = Date.now() - 30 * 86400000;
+  MQ = MQ.filter(function (j) { return !(j.st === 'sent' && (j.sentAt || j.at) < old); });
+  MQ.forEach(function (j) { if (j.st === 'prep' && !MFILE[j.mid]) j.st = 'lost'; if (j.st === 'send') j.st = 'wait'; });
+  mqSave(); mqKick();
+}
+window.addEventListener('online', function () { S.mqOff = false; mqPause = 5000; medPaint(); mqKick(); });
+window.addEventListener('offline', function () { S.mqOff = true; medPaint(); });
+/** Тренеру у упражнения: сколько фото и видео прислал клиент. */
+function medNote(it) {
+  var m = it.media || []; if (!m.length) return '';
+  var v = m.filter(function (x) { return x.k !== 'p'; }).length, p = m.length - v;
+  return '<div class="mdl">' + IC.clip + '<span>Клиент прислал ' + [v ? v + ' видео' : '', p ? p + ' фото' : ''].filter(String).join(' и ') + ' – смотрите в Telegram</span></div>';
+}
 /* ---------- на экран телефона и справка ---------- */
 var deferredInstall = null;
 window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; if (MODE === 'client' && M && S.view === 'home') rerenderKeep(); });
@@ -1731,12 +2029,13 @@ function installCard() {
 /** Картинка в справке: карточка упражнения, цифрами отмечено, куда нажимать. Только для показа, не нажимается. */
 function demoCard() {
   return '<div class="demo" aria-hidden="true"><div class="demo-h"><span class="ex-n num">1</span><div><b>Жим гантелей лёжа</b><small>Грудь · план: 3 подхода по 12, 14 кг</small></div></div>' +
-    '<div class="demo-acts"><span class="dbtn">' + IC.play + 'Видео<i class="mk">1</i></span><span class="dbtn">' + IC.info + 'Описание<i class="mk">2</i></span></div>' +
+    '<div class="demo-acts"><span class="dbtn">' + IC.play + 'Видео<i class="dmk">1</i></span><span class="dbtn">' + IC.info + 'Описание<i class="dmk">2</i></span></div>' +
     '<div class="demo-set demo-sh"><span>№</span><span>Вес, кг</span><span>Повторы</span><span>Готово</span></div>' +
-    '<div class="demo-set"><b>1</b><span class="din">14</span><span class="din">12</span><span class="dok on">' + IC.check + '<i class="mk">3</i></span></div>' +
+    '<div class="demo-set"><b>1</b><span class="din">14</span><span class="din">12</span><span class="dok on">' + IC.check + '<i class="dmk">3</i></span></div>' +
     '<div class="demo-set"><b>2</b><span class="din">14</span><span class="din">10</span><span class="dok"></span></div>' +
-    '<div class="demo-lbl">Сложность выполнения</div><div class="demo-diff"><span>1</span><span>2</span><span class="in">3</span><span class="on">4</span><span>5</span><i class="mk">4</i></div>' +
-    '<div class="demo-com">Комментарий тренеру<i class="mk">5</i></div></div>';
+    '<div class="demo-lbl">Сложность выполнения</div><div class="demo-diff"><span>1</span><span>2</span><span class="in">3</span><span class="on">4</span><span>5</span><i class="dmk">4</i></div>' +
+    '<div class="demo-com">Комментарий тренеру<i class="dmk">5</i></div>' +
+    '<div class="demo-med">' + IC.clip + 'Фото/видео тренеру<i class="dmk">6</i></div></div>';
 }
 function helpHtml() {
   return '<div class="help"><h2>Как пользоваться</h2>' +
@@ -1751,7 +2050,8 @@ function helpHtml() {
     '<li><b>«Описание»</b> – советы тренера именно для Вас: на что обратить внимание, как дышать, где держать паузу. Кнопка есть, если тренер их добавил, – обязательно откройте.</li>' +
     '<li><b>Кружок справа</b> – нажмите, когда сделали подход. Вес и повторы уже стоят от тренера. Получилось по-другому – исправьте цифры, тренер увидит разницу.</li>' +
     '<li><b>Сложность</b> – 1 очень легко, 3 рабочая нагрузка, 5 на пределе. Ставьте по ощущениям после упражнения.</li>' +
-    '<li><b>Комментарий тренеру</b> – если что-то не получается, неудобно или нужен совет. Когда Вы допишете комментарий, тренер сразу получит уведомление.</li></ol>' +
+    '<li><b>Комментарий тренеру</b> – если что-то не получается, неудобно или нужен совет. Когда Вы допишете комментарий, тренер сразу получит уведомление.</li>' +
+    '<li><b>«Фото/видео тренеру»</b> – чтобы тренер проверил технику: снимите подход на видео, сделайте фото или выберите из галереи. К упражнению – до 3 файлов, видео до 90 секунд. Ждать не нужно: файл отправится сам, пока Вы тренируетесь, а без интернета – когда связь появится. Галочка на файле – тренер его получил.</li></ol>' +
     '<p>В конце нажмите <b>«Завершить тренировку»</b> – время остановится, тренер увидит результат.</p>' +
     '<h3>Если что-то пошло не так</h3><ul>' +
     '<li>Нажали «Начать» случайно – вверху тренировки есть «Сбросить и начать заново». Отметки, время и комментарии удалятся. Это можно сделать в тот же день, пока тренировка не завершена.</li>' +
@@ -1794,7 +2094,8 @@ function runItem(w, it, i, no) {
   if (k && S.vid === it.id) h += playerHtml(url);
   if (it.desc && S.open['d' + it.id]) h += '<div class="desc">' + esc(it.desc) + '</div>';
   h += runSets(it, i) + diffHtml(it, i);
-  h += '<div class="mt">' + ft('c-' + it.id, 'Комментарий тренеру', it.comment, 2, 'maxlength="500" data-f="comment" data-i="' + i + '"') + '</div></div>';
+  h += '<div class="mt">' + ft('c-' + it.id, 'Комментарий тренеру', it.comment, 2, 'maxlength="500" data-f="comment" data-i="' + i + '"') + '</div>';
+  h += '<div class="med" id="md-' + it.id + '">' + medInner(w, it, i) + '</div></div>';
   return h;
 }
 /** Начать заново можно до завершения и в тот день, когда тренировка начата. */
@@ -2146,6 +2447,35 @@ var ACT = {
   video: function (b) { var it = runItemOf(b); if (!it) return; S.vid = S.vid === it.id ? '' : it.id; rerenderKeep(); },
   showDesc: function (b) { var it = runItemOf(b); if (!it) return; S.open['d' + it.id] = !S.open['d' + it.id]; rerenderKeep(); },
   help: function () { sheet('Как пользоваться', helpHtml()); },
+  mOpen: function (b) { var it = runItemOf(b); if (!it) return; S.open['m' + it.id] = !S.open['m' + it.id]; medPaint(it.id); },
+  mPick: function (b) {
+    var w = myOf(S.run), it = runItemOf(b), m = b.getAttribute('data-m'); if (!w || !it || M.closed) return;
+    [].forEach.call(document.querySelectorAll('input.mfile'), function (x) { if (x.parentNode) x.parentNode.removeChild(x); });
+    var inp = document.createElement('input'); inp.type = 'file'; inp.className = 'mfile'; inp.style.display = 'none';
+    if (m === 'v') { inp.accept = 'video/*'; inp.setAttribute('capture', 'environment'); }
+    else if (m === 'p') { inp.accept = 'image/*'; inp.setAttribute('capture', 'environment'); }
+    else { inp.accept = 'image/*,video/*'; inp.multiple = true; }
+    inp.addEventListener('change', function () {
+      var fl = [].slice.call(inp.files || []); if (inp.parentNode) inp.parentNode.removeChild(inp);
+      S.open['m' + it.id] = false;
+      if (fl.length) medAdd(w, it, fl); else medPaint(it.id);
+    });
+    document.body.appendChild(inp); inp.click();
+  },
+  mTile: function (b) {
+    var mid = b.getAttribute('data-m'), j = MQ.filter(function (x) { return x.mid === mid; })[0];
+    if (!j) return toast('Этот файл тренер уже получил');
+    var t = j.k === 'p' ? 'Фото' : 'Видео', h = '<h2>' + t + '</h2>';
+    if (j.th) h += '<img src="' + j.th + '" alt="" style="width:120px;height:120px;border-radius:16px;object-fit:cover;display:block;margin:0 0 14px">';
+    if (j.st === 'sent') h += '<p class="lead">Тренер получил ' + (j.k === 'p' ? 'фото' : 'видео') + (j.sentAt ? ' ' + new Date(j.sentAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '') + '.</p><button class="btn pri" data-act="close">Понятно</button>';
+    else if (j.st === 'err') h += '<p class="lead">Не отправлено: ' + esc(j.err || '') + '</p><button class="btn pri" data-act="mRetry" data-m="' + mid + '">Отправить ещё раз</button><button class="btn sec" data-act="mDrop" data-m="' + mid + '">Убрать</button>';
+    else if (j.st === 'lost') h += '<p class="lead">Страницу закрыли, пока ' + (j.k === 'p' ? 'фото' : 'видео') + ' готовилось к отправке, – файл не сохранился. Уберите его и добавьте заново.</p><button class="btn pri" data-act="mDrop" data-m="' + mid + '">Убрать</button>';
+    else h += '<p class="lead">' + (j.st === 'prep' ? (j.k === 'v' ? 'Видео сжимается – это занимает примерно столько, сколько длится ролик. Потом оно отправится само.' : 'Фото готовится к отправке.') : S.mqOff ? 'Нет интернета – файл отправится сам, когда связь появится. Страницу можно закрыть.' : 'Отправляется тренеру. Можно продолжать тренировку.') + '</p>' +
+      '<button class="btn pri" data-act="close">Хорошо</button>' + (j.st === 'wait' ? '<button class="btn sec" data-act="mDrop" data-m="' + mid + '">Не отправлять</button>' : '');
+    sheet(t, h);
+  },
+  mRetry: function (b) { var j = MQ.filter(function (x) { return x.mid === b.getAttribute('data-m'); })[0]; closeSheet(); if (!j) return; j.st = 'wait'; delete j.err; mqPause = 5000; mqSave(); medPaint(j.iid); mqKick(); },
+  mDrop: function (b) { var mid = b.getAttribute('data-m'), j = MQ.filter(function (x) { return x.mid === mid; })[0]; closeSheet(); if (!j || j.st === 'send' || j.st === 'sent') return; MQ = MQ.filter(function (x) { return x !== j; }); blobDel(mid); mqSave(); medPaint(j.iid); },
   install: function () { if (!deferredInstall) return; deferredInstall.prompt(); deferredInstall = null; closeSheet(); rerenderKeep(); },
   hideInstall: function () { LS.set('lf_wk_inst_hide', '1'); rerenderKeep(); },
   startW: function () {
@@ -2270,6 +2600,7 @@ document.addEventListener('keydown', function (e) {
 /* вкладку закрывают или сворачивают — несохранённые отметки клиента уходят сразу; вернулись — данные обновляются */
 document.addEventListener('visibilitychange', function () {
   if (document.visibilityState === 'hidden') { if (MODE === 'client' && pendCount() && !pushing) pushNow(true); return; }
+  if (MODE === 'client') { mqPause = 5000; mqKick(); }
   if (Date.now() - S.loadedAt < 120000 || S.busy) return;
   if (MODE === 'client' && M) loadMy();
   if (MODE === 'trainer' && D && S.view !== 'edit' && S.view !== 'load') loadList();
@@ -2297,6 +2628,7 @@ function boot() {
     try { raw = LS.get(MEM_C); j = raw ? JSON.parse(raw) : null; if (j && j.m && j.m.list) { M = j.m; S.loadedAt = j.at || 0; TODAY = mskToday(); render(); } } catch (e) { M = null; }
     if (!M) bootScreen();
     loadMy(!M);
+    mqBoot();
   }
 }
 boot();
