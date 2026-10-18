@@ -563,7 +563,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .cmq{padding:11px 13px;border-radius:13px;background:var(--card2,rgba(255,255,255,.04));border:1px solid var(--line2);font-size:14px}
 .cmq small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .cmq p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
-.cmb{margin-top:4px}
+.cmw{margin-top:4px}
 .mimg{display:block;width:100%;max-width:340px;margin:8px 0 2px;padding:0;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);min-height:90px;cursor:zoom-in}
 .mimg img{display:block;width:100%;height:auto;min-height:90px;object-fit:cover}
 .mimg.err{min-height:0;padding:10px;font-size:12.5px;color:var(--muted);cursor:default}
@@ -573,6 +573,12 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .imgpick .mn{flex:1;font-size:13.5px;color:var(--muted)}
 .imgpick label.btn{width:auto;padding:0 14px;margin:0}
 .awx{margin-top:10px;font-size:13px;color:var(--warm)}
+.cmq + .cmq,.cms + .cmq{margin-top:10px}
+.tgc{display:flex;align-items:center;gap:12px}
+.tgc .mn{flex:1;min-width:0}
+.tgc .mn small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.tgc .btn{width:auto;padding:0 16px;margin:0;flex:none}
+.grp-fmt{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 4px 8px}
 .rpt{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;font-weight:800;color:var(--accent);min-height:32px}
 .rpt svg{width:16px;height:16px}
 .msg{padding:14px 0;border-top:1px solid var(--line)}
@@ -624,6 +630,10 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.5 (18.10.2026). Сервер 4.12. К упражнению можно написать второй и следующие комментарии («Написать ещё»): каждый уходит
+ *   тренеру сразу, не меняется, у каждого свой статус и свой ответ тренера. У тренера каждый комментарий – отдельной строкой
+ *   с кнопкой «Ответить клиенту». У клиента на главной – «Уведомления в Telegram»: подключить бота «Lite Fit» (напоминание
+ *   в день тренировки и ответы тренера). У тренера во вкладке «Клиенты» – группы PRO, BASIC, START, остальные.
  * 2.4 (18.10.2026). Сервер 4.11. Комментарий тренеру – кнопкой «Написать тренеру»: окно, текст, «Отправить тренеру», окно
  *   закрывается, под упражнением – комментарий (изменить его нельзя) и «Отправлено тренеру» / «Тренер прочитал» / ответ.
  *   Пауза в 1,5 минуты убрана: комментарий уходит сразу и целиком. Ответ тренера и его сообщения – с фото (тренер прикрепляет
@@ -688,7 +698,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.4';
+var VERSION = '2.5';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -1193,21 +1203,31 @@ function viewCal() {
   return '<h1 class="hello">Календарь</h1><p class="lead-p">Тренировки клиентов по датам. Нажмите на день, чтобы открыть тренировку.</p>' + ownChips() + '<div class="card calc"><div class="calc-a">' + calHtml('') + '</div><div class="calc-b">' + dayList('') + '</div></div>';
 }
 /** Комментарии клиента к упражнениям одной тренировки: [{ no, name, text }]. */
-function comList(w) { var NS = numsOf(w.items), out = []; w.items.forEach(function (it, i) { if (it.comment) out.push({ id: it.id, no: NS[i], name: it.name, text: it.comment, u: it.cu === true, rp: it.rp || null }); }); return out; }
+function comList(w) {
+  var NS = numsOf(w.items), out = [];
+  w.items.forEach(function (it, i) {
+    if (!it.comment) return;
+    out.push({ id: it.id, c: '', no: NS[i], name: it.name, text: it.comment, u: it.cu === true, rp: it.rp || null });
+    (it.more || []).forEach(function (e) { out.push({ id: it.id, c: e.c, no: NS[i], name: it.name, text: e.t, u: it.cu === true, rp: e.rp || null, more: 1 }); });   // 2.5
+  });
+  return out;
+}
 /** «2026-10-18 12:30» → «18.10 в 12:30». */
 function stampTxt(at) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)/.exec(at || ''); return m ? m[3] + '.' + m[2] + ' в ' + m[4] : ''; }
 /** Ответ тренера под комментарием клиента и кнопка «Ответить» / «Изменить ответ». */
-function rpLine(wid, iid, rp) {
-  var b = '<button class="rpt" data-act="rpOpen" data-id="' + esc(wid) + '" data-it="' + esc(iid) + '">';
+function rpLine(wid, iid, rp, c) {
+  var b = '<button class="rpt" data-act="rpOpen" data-id="' + esc(wid) + '" data-it="' + esc(iid) + '" data-c="' + esc(c || '') + '">';
   if (!rp) return S.isNew && S.view === 'edit' ? '' : b + IC.reply + 'Ответить клиенту</button>';
   return '<div class="rpb"><small>Ответ тренера' + (rp.by && D && rp.by !== D.trainer ? ' · ' + esc(rp.by) : '') + '</small>' + (rp.t ? '<p>' + esc(rp.t) + '</p>' : '') + (rp.img && rp.mid ? imgHtml(rp.mid, rp.img) : '') +
     (rp.rd !== undefined ? '<div class="wh">' + (rp.rd ? 'Клиент прочитал ' + stampTxt(rp.rd) : 'Клиент ещё не открыл') + '</div>' : '') + '</div>' + b + IC.edit + 'Изменить ответ</button>';
 }
 /** Окно ответа на комментарий. */
-function rpForm(wid, iid) {
-  var e = (S.coms ? S.coms.list : []).filter(function (x) { return x.id === wid && x.it === iid; })[0], w = S.draft && S.draft.id === wid ? S.draft : FULL[wid], it = w ? w.items.filter(function (x) { return x.id === iid; })[0] : null;
-  var text = e ? e.text : it ? it.comment : '', name = e ? e.no + '. ' + e.name : it ? it.name : '', rp = (e && e.rp) || (it && it.rp) || null, s0 = sumOf(wid), c = s0 ? clientOf(s0.cid) : null;
-  S.rp = { id: wid, it: iid };
+function rpForm(wid, iid, cm) {
+  cm = cm || '';
+  var e = (S.coms ? S.coms.list : []).filter(function (x) { return x.id === wid && x.it === iid && (x.c || '') === cm; })[0], w = S.draft && S.draft.id === wid ? S.draft : FULL[wid], it = w ? w.items.filter(function (x) { return x.id === iid; })[0] : null;
+  var me = it && cm ? (it.more || []).filter(function (x) { return x.c === cm; })[0] : null;   // 2.5: следующий комментарий
+  var text = e ? e.text : me ? me.t : it ? it.comment : '', name = e ? e.no + '. ' + e.name : it ? it.name : '', rp = (e && e.rp) || (cm ? me && me.rp : it && it.rp) || null, s0 = sumOf(wid), c = s0 ? clientOf(s0.cid) : null;
+  S.rp = { id: wid, it: iid, c: cm };
   S.img = { had: rp && rp.img ? rp.mid : '', tok: rp && rp.img ? rp.img : '' };
   if (S.img.had) imgLoad(S.img.had, S.img.tok);
   sheet('Ответ клиенту', '<h2>' + (rp ? 'Изменить ответ' : 'Ответ клиенту') + '</h2><p class="lead">' + esc(c ? c.name : 'Клиент') + ' · ' + esc(name) + '</p>' +
@@ -1219,10 +1239,19 @@ function rpForm(wid, iid) {
 }
 /** Ответ сохранён: обновить вкладку «Комментарии», тренировку и счётчики. */
 function rpApply(r) {
-  var id = r.id, iid = r.item, rp = r.rp;
+  var id = r.id, iid = r.item, rp = r.rp, cm = r.c || '';
   comLocal[id + '|' + iid] = { u: 0, until: Infinity };
-  if (S.coms) S.coms.list.forEach(function (e) { if (e.id === id && e.it === iid) { e.rp = rp ? { t: rp.t, at: rp.at, by: rp.by, mid: rp.mid || '', img: rp.img || '', rd: '' } : null; e.u = 0; } });
-  [FULL[id], S.draft && S.draft.id === id ? S.draft : null].forEach(function (w) { if (w) w.items.forEach(function (x) { if (x.id === iid) { if (rp) x.rp = rp; else delete x.rp; delete x.cu; } }); });
+  if (S.coms) S.coms.list.forEach(function (e) {
+    if (e.id !== id || e.it !== iid) return;
+    e.u = 0;
+    if ((e.c || '') === cm) e.rp = rp ? { t: rp.t, at: rp.at, by: rp.by, mid: rp.mid || '', img: rp.img || '', rd: '' } : null;
+  });
+  [FULL[id], S.draft && S.draft.id === id ? S.draft : null].forEach(function (w) { if (w) w.items.forEach(function (x) {
+    if (x.id !== iid) return;
+    var t = cm ? (x.more || []).filter(function (m) { return m.c === cm; })[0] : x;
+    if (t) { if (rp) t.rp = rp; else delete t.rp; }
+    delete x.cu;
+  }); });
   if (r.sum) { var n = sumObj(r.sum), old = sumOf(id); if (old) D.w[D.w.indexOf(old)] = n; }
   memSave(); comPaint();
 }
@@ -1266,8 +1295,8 @@ function comsHtml() {
   h += '<div class="card"><div class="cm-h"><span>Комментарий</span><span>Прочитано</span></div><div class="rows">' + l.map(function (x) {
     var w = x.w, e = x.e, when = comWhen(e.at);
     return '<div class="row fd cm' + (e.u ? ' un' : '') + '"><div class="mn"><button class="cmb" data-act="editW" data-id="' + w.id + '" data-from="coms"><b>' + esc(x.c ? x.c.name : 'Клиент') + ' · ' + numFor(w) + ' от ' + dm(w.date) + (e.u ? '<span class="nw">новый</span>' : '') + '</b>' +
-      '<small><i>' + esc(e.no) + '. ' + esc(e.name) + ':</i> «' + esc(e.text) + '»' + (e.diff ? ' · сложность ' + e.diff + ' из 5' : '') + '</small>' +
-      (when ? '<small class="wh">' + when + '</small>' : '') + '</button>' + rpLine(w.id, e.it, e.rp) + '</div>' + readBtn(w.id, e.it, !!e.u) + '</div>';
+      '<small><i>' + esc(e.no) + '. ' + esc(e.name) + (e.c ? ', ещё' : '') + ':</i> «' + esc(e.text) + '»' + (e.diff ? ' · сложность ' + e.diff + ' из 5' : '') + '</small>' +
+      (when ? '<small class="wh">' + when + '</small>' : '') + '</button>' + rpLine(w.id, e.it, e.rp, e.c) + '</div>' + readBtn(w.id, e.it, !!e.u) + '</div>';
   }).join('') + '</div></div>';
   return h;
 }
@@ -1289,7 +1318,7 @@ function comsTop(w) {
   var cs = comList(w);
   if (!cs.length) return '';
   return '<div class="coms" id="comsTop"><div class="cm-h"><small>Комментарии клиента</small><span>Прочитано</span></div>' + cs.map(function (x) {
-    return '<div class="cmr' + (x.u ? ' un' : '') + '"><div style="flex:1;min-width:0"><p><b>' + x.no + '. ' + esc(x.name) + ':</b> «' + esc(x.text) + '»' + (x.u ? '<span class="nw">новый</span>' : '') + '</p>' + (S.isNew ? '' : rpLine(w.id, x.id, x.rp)) + '</div>' + (S.isNew ? '' : readBtn(w.id, x.id, x.u)) + '</div>';
+    return '<div class="cmr' + (x.u ? ' un' : '') + '"><div style="flex:1;min-width:0"><p><b>' + x.no + '. ' + esc(x.name) + (x.more ? ', ещё' : '') + ':</b> «' + esc(x.text) + '»' + (x.u ? '<span class="nw">новый</span>' : '') + '</p>' + (S.isNew ? '' : rpLine(w.id, x.id, x.rp, x.c)) + '</div>' + (S.isNew ? '' : readBtn(w.id, x.id, x.u)) + '</div>';
   }).join('') + '</div>';
 }
 function viewComs() {
@@ -1300,12 +1329,15 @@ function viewClients() {
   var q = norm(S.cq), list = D.clients.filter(function (c) { return shown(c) && !c.arch && (!q || norm(c.name).indexOf(q) >= 0); });
   var arch = D.clients.filter(function (c) { return shown(c) && c.arch && (!q || norm(c.name).indexOf(q) >= 0); });
   var act = function (c) { return /Тренируется/.test(c.status) ? 0 : /Пауза/.test(c.status) ? 1 : 2; };
-  list.sort(function (a, b) { return act(a) - act(b) || a.name.localeCompare(b.name, 'ru'); });
+  list.sort(function (a, b) { return fmtRank(a) - fmtRank(b) || act(a) - act(b) || a.name.localeCompare(b.name, 'ru'); });   // 2.5: PRO, BASIC, START, остальные
   var h = '<h1 class="hello">Клиенты</h1><p class="lead-p">Выберите клиента, чтобы составить тренировку или посмотреть результат.</p>' + ownChips();
   if (D.clients.filter(shown).length > 7) h += '<div style="margin-bottom:14px">' + fi('cQ', 'Поиск по имени', S.cq, 'text', 'autocomplete="off" data-f="cq"') + '</div>';
   h += '<div id="cList">' + clientRows(list, arch) + '</div>';
   return h;
 }
+/** 2.5: порядок клиентов по формату: PRO, BASIC, START, остальные (бесплатные, без формата). */
+var FMT_GROUPS = ['PRO', 'BASIC', 'START', 'Бесплатные и без формата'];
+function fmtRank(c) { var f = String(c.format || '').toUpperCase(); return f === 'PRO' ? 0 : f === 'BASIC' ? 1 : f === 'START' ? 2 : 3; }
 function clientRows(list, arch) {
   var row = function (c) {
     var l = wList(c.id), next = l.filter(function (w) { return !w.done && w.date >= TODAY; })[0], miss = l.filter(function (w) { return !w.done && w.date < TODAY && access(w).s !== 'closed'; }).length;
@@ -1321,7 +1353,11 @@ function clientRows(list, arch) {
   // в основном списке – кто тренируется (в т. ч. пауза, заморозка, пробный); после консультации, ждут оплату и т. п. – свёрнуто ниже
   var on = function (c) { return /тренир|пауз|замороз|пробн/i.test(c.status || ''); }, wait = list.filter(function (c) { return !on(c); });
   list = list.filter(on);
-  var h = list.length ? '<div class="card"><div class="rows">' + list.map(row).join('') + '</div></div>' : '';
+  var h = '';
+  FMT_GROUPS.forEach(function (g, k) {                                    // 2.5: группы по формату – по значимости
+    var gl = list.filter(function (c) { return fmtRank(c) === k; });
+    if (gl.length) h += '<div class="grp-fmt">' + g + ' · ' + gl.length + '</div><div class="card"><div class="rows">' + gl.map(row).join('') + '</div></div>';
+  });
   if (wait.length) h += '<details class="cwait"' + (S.cq || wait.some(function (c) { return String(c.id) === String(S.cid); }) ? ' open' : '') + '><summary class="grp-title">Ещё не тренируются · ' + wait.length + '</summary>' +
     '<div class="card"><div class="rows">' + wait.map(row).join('') + '</div></div></details>';
   if (arch.length) h += '<div class="grp-title">Закончили · ' + arch.length + '</div><div class="card"><div class="rows">' + arch.map(row).join('') + '</div></div>';
@@ -1989,7 +2025,7 @@ function setMy(r) {
   if (M) M.list.forEach(function (w) { if (PEND[w.id] && w.items) keep[w.id] = w; });           // несохранённое не затираем ответом сервера
   var rdWas = {}; if (M && M.msgs) M.msgs.forEach(function (m) { if (m.rd) rdWas[m.id] = m.rd; });
   M = { name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
-    pay: r.pay || '', aw: r.aw || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
+    pay: r.pay || '', aw: r.aw || null, tg: r.tg || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
   TODAY = M.today || TODAY;
@@ -2034,7 +2070,9 @@ function touch(w, done) {
   clearTimeout(pushT); pushT = setTimeout(pushNow, done !== undefined ? 50 : 2500);
 }
 function resBody(w, p) {
-  var b = { id: w.id, items: w.items.map(function (it) { return { id: it.id, sets: it.sets.map(function (s) { return { fw: s.fw, fr: s.fr, ok: !!s.ok }; }), diff: it.diff || 0, comment: it.comment || '' }; }) };
+  var b = { id: w.id, items: w.items.map(function (it) { var o = { id: it.id, sets: it.sets.map(function (s) { return { fw: s.fw, fr: s.fr, ok: !!s.ok }; }), diff: it.diff || 0, comment: it.comment || '' };
+    if (it.more && it.more.length) o.more = it.more.map(function (e) { return { c: e.c, t: e.t }; });   // 2.5: следующие комментарии
+    return o; }) };
   if (p.done !== undefined) b.done = p.done;
   if (p.reset) b.reset = true;
   if (p.cn && p.cn.length) b.cn = p.cn.slice();
@@ -2065,7 +2103,10 @@ function pushNow(keep) {
         if (PEND[id].cn) PEND[id].cn = PEND[id].cn.filter(function (x) { return sentCn.indexOf(x) < 0; });
       }
       if (r.aw) M.aw = r.aw;
-      if (sentCn.length && cur && cur.items) cur.items.forEach(function (it) { if (sentCn.indexOf(it.id) >= 0) it.cs = true; });   // 2.4: ушёл тренеру
+      if (sentCn.length && cur && cur.items) cur.items.forEach(function (it) {                     // 2.4–2.5: ушёл тренеру
+        if (sentCn.indexOf(it.id) >= 0) it.cs = true;
+        (it.more || []).forEach(function (e) { if (sentCn.indexOf(it.id + ':' + e.c) >= 0) e.cs = true; });
+      });
       pendSave(); paintSync(); if (S.view === 'run') csPaint(myOf(S.run));
       if (r.medal || r.disc) awCheck();
       if (sentCn.length) toast('Комментарий отправлен тренеру');
@@ -2113,6 +2154,13 @@ function cvRefresh() {
   CV.again = false;
   loadMy(false, true);                                                    // cvArm – внутри loadMy
 }
+/** 2.5: уведомления в Telegram – бот «Lite Fit» ещё не подключён. Скрыть можно крестиком. */
+function tgCard() {
+  if (!M.tg || M.tg.on || M.closed || LS.get('lf_wk_tg_hide') === '1') return '';
+  return '<div class="card"><div class="tgc"><span class="mn"><b>Уведомления в Telegram</b><small>Напоминание в день тренировки и ответы тренера на Ваши комментарии.</small></span>' +
+    '<a class="btn pri sm" href="' + esc(M.tg.link) + '" target="_blank" rel="noopener noreferrer">Подключить</a></div>' +
+    '<button class="txtb" data-act="tgHide" style="margin-top:8px">Не сейчас</button></div>';
+}
 /** Номер тренировки у клиента: «4 из 12», «№ 7»; пусто – сверх пакета (номер не показываем). */
 function labOf(w) { return w.lab === undefined ? '№ ' + w.num : w.lab; }
 function titleOf(w) { var l = labOf(w); return 'Тренировка' + (l ? ' ' + l : ''); }
@@ -2130,7 +2178,7 @@ function viewMy() {
       (M.pay && M.pay >= pk.s && M.pay >= TODAY ? '<p class="pk-pay">Оплата следующего пакета – <b>' + dMon(M.pay) + '</b></p>' : '') + awStrip() + '</div>';
     h += '<div class="meta"><span class="pill">Всего выполнено тренировок: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
   } else h += '<div class="meta"><span class="pill">Всего: <b class="num">' + M.total + '</b></span><span class="pill">Выполнено: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
-  h += coachBanner() + installCard();
+  h += coachBanner() + installCard() + tgCard();
   if (M.closed) h += '<div class="banner warn">Ведение завершено: тренировки открыты для просмотра, новые отметки не принимаются.</div>';
   h += '<h2 class="sec-title" style="margin-top:0">Сегодня, ' + dMon(TODAY) + '</h2>';
   if (!td.length) h += '<div class="card"><h3>На сегодня тренировки нет</h3><p class="sub" style="margin:0">' + (next.length ? 'Ближайшая: ' + longDate(next[0].date) + '.' : 'Тренер добавит следующую, и она появится здесь.') + '</p></div>';
@@ -2608,14 +2656,15 @@ function awCheck() {
     '<button class="btn pri" data-act="close">Спасибо!</button></div>');
 }
 /** Статус комментария клиента: отправляется / отправлен / тренер прочитал, и ответ тренера. */
-function comStatus(w, it) {
-  if (!String(it.comment || '').trim()) return '';
-  var pend = !!PEND[w.id] && !!(PEND[w.id].cn || []).length, h;
+function comStatus(w, it, e) {
+  e = e || { c: '', t: it.comment, rp: it.rp };
+  if (!String(e.t || '').trim()) return '';
+  var key = e.c ? it.id + ':' + e.c : it.id, pend = !!PEND[w.id] && (PEND[w.id].cn || []).indexOf(key) >= 0, h;
   if (pend) h = '<p class="cst">' + IC.clock + (S.offline ? 'Отправится тренеру, когда появится интернет' : 'Отправляю тренеру…') + '</p>';
-  else if (it.cr || it.rp) h = '<p class="cst rd">' + IC.check2 + 'Тренер прочитал</p>';
+  else if (it.cr || e.rp) h = '<p class="cst rd">' + IC.check2 + 'Тренер прочитал</p>';
   else h = '<p class="cst">' + IC.check + 'Отправлено тренеру</p>';
-  if (it.rp) h += '<div class="rpb"><small>Ответ тренера' + (it.rp.by ? ' · ' + esc(it.rp.by) : '') + '</small>' + (it.rp.t ? '<p>' + esc(it.rp.t) + '</p>' : '') +
-    (it.rp.img && it.rp.mid ? imgHtml(it.rp.mid, it.rp.img) : '') + (it.rp.at ? '<div class="wh">' + stampTxt(it.rp.at) + '</div>' : '') + '</div>';
+  if (e.rp) h += '<div class="rpb"><small>Ответ тренера' + (e.rp.by ? ' · ' + esc(e.rp.by) : '') + '</small>' + (e.rp.t ? '<p>' + esc(e.rp.t) + '</p>' : '') +
+    (e.rp.img && e.rp.mid ? imgHtml(e.rp.mid, e.rp.img) : '') + (e.rp.at ? '<div class="wh">' + stampTxt(e.rp.at) + '</div>' : '') + '</div>';
   return h;
 }
 /**
@@ -2623,12 +2672,17 @@ function comStatus(w, it) {
  * правки, статус и ответ. Комментарий, написанный до 2.4 и ещё не ушедший тренеру, – с кнопкой «Отправить тренеру».
  */
 function comBox(w, it, i) {
-  var t = String(it.comment || '').trim();
-  if (!t) return M && M.closed ? '' : '<button class="btn sec sm cmb" data-act="cmOpen" data-i="' + i + '">' + IC.chat + 'Написать тренеру</button>';
+  var t = String(it.comment || '').trim(), closed = M && M.closed;
+  if (!t) return closed ? '' : '<button class="btn sec sm cmw" data-act="cmOpen" data-i="' + i + '">' + IC.chat + 'Написать тренеру</button>';
   var sent = it.cs || it.cr || it.rp || (PEND[w.id] && (PEND[w.id].cn || []).indexOf(it.id) >= 0);
-  return '<div class="cmq"><small>Ваш комментарий тренеру</small><p>' + esc(t) + '</p></div>' +
-    (sent ? '<div id="cs-' + it.id + '">' + comStatus(w, it) + '</div>'
-      : '<p class="cst">' + IC.clock + 'Ещё не отправлен тренеру</p><button class="btn pri sm cmb" data-act="cmSend" data-i="' + i + '">' + IC.reply + 'Отправить тренеру</button>');
+  var more = it.more || [], h = '<div class="cmq"><small>' + (more.length ? 'Ваш комментарий тренеру · 1' : 'Ваш комментарий тренеру') + '</small><p>' + esc(t) + '</p></div>' +
+    (sent ? '<div class="cms">' + comStatus(w, it) + '</div>'
+      : '<p class="cst">' + IC.clock + 'Ещё не отправлен тренеру</p><button class="btn pri sm cmw" data-act="cmSend" data-i="' + i + '">' + IC.reply + 'Отправить тренеру</button>');
+  more.forEach(function (e, k) {                                          // 2.5: следующие комментарии – каждый со своим статусом и ответом
+    h += '<div class="cmq"><small>Ваш комментарий тренеру · ' + (k + 2) + '</small><p>' + esc(e.t) + '</p></div><div class="cms">' + comStatus(w, it, e) + '</div>';
+  });
+  if (sent && !closed && more.length < 20) h += '<button class="btn sec sm cmw" data-act="cmOpen" data-i="' + i + '" style="margin-top:10px">' + IC.chat + 'Написать ещё</button>';
+  return h;
 }
 function csPaint(w) {
   if (!w || !w.items) return;
@@ -2639,15 +2693,17 @@ function cmForm(i) {
   var w = myOf(S.run), it = w && w.items[i]; if (!it) return;
   var NS = numsOf(w.items);
   S.cm = { i: i };
-  sheet('Комментарий тренеру', '<h2>Комментарий тренеру</h2><p class="lead">' + esc(NS[i] + '. ' + it.name) + '</p>' +
+  var again = !!String(it.comment || '').trim();
+  sheet('Комментарий тренеру', '<h2>' + (again ? 'Ещё комментарий тренеру' : 'Комментарий тренеру') + '</h2><p class="lead">' + esc(NS[i] + '. ' + it.name) + '</p>' +
     ft('cmT', 'Ваш комментарий', '', 6, 'maxlength="500" placeholder="Например: в последнем подходе тянуло поясницу"') +
     '<p class="note" style="margin:0">Тренер получит комментарий сразу и ответит здесь же, под упражнением. Отправленный комментарий изменить нельзя – напишите всё, что хотели сказать.</p><p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn pri" data-act="cmGo">' + IC.reply + 'Отправить тренеру</button>');
   var t = document.getElementById('cmT'); if (t) { try { t.focus(); } catch (x) {} }
 }
 /** Комментарий – в очередь отправки с пометкой «сообщить тренеру», сразу. */
-function cmSendNow(w, it) {
-  var p = PEND[w.id] || {}; p.cn = p.cn || []; if (p.cn.indexOf(it.id) < 0) p.cn.push(it.id); PEND[w.id] = p; pendSave();
+function cmSendNow(w, it, key) {
+  key = key || it.id;
+  var p = PEND[w.id] || {}; p.cn = p.cn || []; if (p.cn.indexOf(key) < 0) p.cn.push(key); PEND[w.id] = p; pendSave();
   csPaint(w); paintSync(); clearTimeout(pushT); pushT = setTimeout(pushNow, 50);
 }
 
@@ -2939,13 +2995,13 @@ var ACT = {
     });
   },
   tmDel: function (b) { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно убрать? Нажмите ещё раз'; return; } ACT.tmGo(b, null, true); },
-  rpOpen: function (b) { rpForm(b.getAttribute('data-id'), b.getAttribute('data-it')); },
+  rpOpen: function (b) { rpForm(b.getAttribute('data-id'), b.getAttribute('data-it'), b.getAttribute('data-c') || ''); },
   rpGo: function (b, e, del) {
     var R = S.rp, text = del ? '' : val('rpT'), I = S.img || {};
     if (!R) return;
     if (!del && !text && !I.d && !(I.had && !I.del)) return ferr('Напишите ответ или приложите фото.');
     b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
-    call('reply', del ? { id: R.id, item: R.it, text: '', imgDel: true } : imgBody({ id: R.id, item: R.it, text: text })).then(function (r) {
+    call('reply', del ? { id: R.id, item: R.it, c: R.c || '', text: '', imgDel: true } : imgBody({ id: R.id, item: R.it, c: R.c || '', text: text })).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = del ? 'Убрать ответ' : 'Отправить ответ'; return ferr(errText(r)); }
       if (r.rp && r.rp.img && I.d) IMGC[imgKey(r.rp.mid, r.rp.img)] = { u: I.d };   // своё новое фото – сразу, без загрузки
@@ -2960,15 +3016,20 @@ var ACT = {
     if (v) { var back = document.createElement('div'); back.className = 'viewer'; back.id = 'viewer2'; back.innerHTML = '<div class="vp"><div class="vh"><b>Фото тренера</b><button class="x" data-act="imgClose" aria-label="Закрыть">' + IC.x + '</button></div><div class="vb"><img class="imfull" src="' + c.u + '" alt="Фото тренера"></div></div>'; document.body.appendChild(back); return; }
     sheet('Фото тренера', '<img class="imfull" src="' + c.u + '" alt="Фото тренера">');
   },
+  tgHide: function () { LS.set('lf_wk_tg_hide', '1'); rerenderKeep(); },
   imgClose: function () { var v = document.getElementById('viewer2'); if (v) v.remove(); },
   cmOpen: function (b) { cmForm(+b.getAttribute('data-i')); },
   cmGo: function (b) {
     var w = myOf(S.run), it = w && S.cm ? w.items[S.cm.i] : null, text = val('cmT');
     if (!it) return closeSheet();
     if (!text) return ferr('Напишите комментарий.');
-    if (String(it.comment || '').trim()) { closeSheet(); return toast('Комментарий к этому упражнению уже отправлен', 'bad'); }
-    it.comment = text.slice(0, 500); it.cr = false;
     closeSheet();
+    if (String(it.comment || '').trim()) {                                // 2.5: следующий комментарий
+      var c = Math.random().toString(36).slice(2, 10);
+      (it.more = it.more || []).push({ c: c, t: text.slice(0, 500) }); it.cr = false;
+      return cmSendNow(w, it, it.id + ':' + c);
+    }
+    it.comment = text.slice(0, 500); it.cr = false;
     cmSendNow(w, it);
   },
   cmSend: function (b) { var w = myOf(S.run), it = w && w.items[+b.getAttribute('data-i')]; if (it && String(it.comment || '').trim()) cmSendNow(w, it); },
