@@ -531,6 +531,72 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
   body.tr .cv2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
   body.tr .cv2 .card{margin:0}
 }
+
+/* 2.3: фигура с мышцами */
+.body .bs{fill:#122427}
+.body .bm{fill:#1C3739;stroke:var(--bg);stroke-width:.6}
+.body .bx{fill:#1F8E88}
+.body .bp{fill:var(--accent);filter:drop-shadow(0 0 2px rgba(62,214,206,.8))}
+.body .bl{stroke:var(--bg);stroke-width:.7;fill:none}
+.ex-h .figb{flex:none;width:74px;margin:-4px -4px 0 0;padding:2px;border-radius:12px;border:1px solid var(--line2);background:var(--card2)}
+.ex-h .figb svg{display:block;width:100%}
+.sup .ex-h .figb{background:rgba(5,9,11,.35)}
+.fig-big{display:block;width:100%;max-width:340px;margin:4px auto 14px}
+.mu-l{font-size:14px;margin:0 0 8px}
+.mu-l i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.mu-l i.p{background:var(--accent);box-shadow:0 0 8px -1px var(--glow)}
+.mu-l i.s{background:#1F8E88}
+.mu-pick{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.mu-pick button{border:1px solid var(--line);border-radius:99px;padding:7px 11px;font-size:13px;font-weight:700;color:var(--muted)}
+.mu-pick button.p{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.mu-pick button.s{border-color:var(--accent-d);color:var(--accent);background:rgba(62,214,206,.1)}
+.mu-ed{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:start}
+.mu-ed .body{width:100%}
+/* 2.3: обратная связь */
+.cst{display:flex;align-items:center;gap:6px;margin:8px 0 0;font-size:12.5px;color:var(--muted)}
+.cst svg{width:15px;height:15px;flex:none}
+.cst.rd{color:var(--accent)}
+.rpb{margin-top:10px;padding:11px 13px;border-radius:13px;background:rgba(62,214,206,.09);border:1px solid var(--accent-d);font-size:14px}
+.rpb small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.rpb p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.rpb .wh{font-size:12px;color:var(--muted);margin-top:4px}
+.rpt{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;font-weight:800;color:var(--accent);min-height:32px}
+.rpt svg{width:16px;height:16px}
+.msg{padding:14px 0;border-top:1px solid var(--line)}
+.msg:first-child{border-top:0;padding-top:2px}
+.msg-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-bottom:6px;font-size:12.5px;color:var(--muted)}
+.msg-h b{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.msg-h .nw{margin-left:auto}
+.msg p{margin:0;font-size:15px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.msg .ctx{font-size:13px;color:var(--muted);margin:0 0 6px;padding-left:10px;border-left:2px solid var(--line2)}
+.msg.un p:not(.ctx){color:var(--text);font-weight:600}
+.msg .msub{font-size:12px;color:var(--dim);margin-top:6px}
+.msg-act{display:flex;gap:14px;margin-top:4px}
+.kchips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.kchips button{border:1px solid var(--line);border-radius:12px;padding:10px 6px;font-size:13.5px;font-weight:700;color:var(--muted)}
+.kchips button.on{border-color:var(--accent);color:var(--accent);background:rgba(62,214,206,.08)}
+/* 2.3: награды */
+.medal{display:block;width:96px;height:auto;margin:0 auto 10px}
+.medal.sm{width:44px;margin:0}
+.medal.off{opacity:.28;filter:grayscale(1)}
+.aw-slots{display:flex;justify-content:center;gap:14px;margin:12px 0 6px}
+.aw-row{display:flex;align-items:center;gap:12px}
+.aw-row .mn{flex:1;min-width:0}
+.aw-row .mn b{display:block;font-size:15px}
+.aw-row .mn small{display:block;font-size:12.5px;color:var(--muted)}
+.card.aw{text-align:center}
+.card.aw h3{font-size:18px}
+.card.disc{border-color:var(--accent);background:linear-gradient(160deg,rgba(62,214,206,.16),rgba(62,214,206,.03))}
+.card.disc .big{font-size:40px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.02em}
+.awstrip{display:flex;align-items:center;gap:10px;width:100%;text-align:left}
+.awstrip .mn{flex:1;min-width:0;font-size:13.5px;color:var(--muted)}
+.awstrip .mn b{color:var(--text)}
+.pk-pay{font-size:13.5px;color:var(--muted);margin:6px 0 0}
+.pk-pay b{color:var(--text)}
+/* 2.3: черновик тренировки */
+.banner.draft{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.banner.draft .mn{flex:1 1 200px}
+.banner.draft .btn{width:auto;flex:0 0 auto;padding:0 14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -545,6 +611,12 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.3 (18.10.2026). Сервер 4.10. Обратная связь: у комментария клиента – «отправлено тренеру» / «тренер прочитал» / ответ
+ *   тренера; тренер отвечает во вкладке «Комментарии» и в тренировке, пишет клиенту рекомендации, напутствия и мотивацию
+ *   (карточка клиента → «Сообщения клиенту»). У клиента внизу вкладки «Тренировки», «Тренер», «Награды». Фигура с мышцами
+ *   у каждого упражнения (тренер правит мышцы в карточке упражнения). Медаль «Лучший подопечный Lite Fit» за весь пакет в срок,
+ *   3 подряд – скидка 10 %. Пакет «до 29.10 (оплата 30.10)». Тренировка, которую составляли без связи, не теряется:
+ *   черновик хранится в телефоне и отправляется сам, когда появится интернет.
  * 2.2 (14.10.2026, вечер). Сервер 4.9.1. Комментарий клиента уходит тренеру в Telegram не сразу, а через 1,5 минуты после того,
  *   как клиент закончил его писать (поле потеряло фокус и больше не правилось): исправил опечатку – тренеру одно сообщение.
  *   Клиент свернул приложение – комментарий уходит сразу. Ожидание хранится в телефоне (lf_wk_cnw_…), переживает перезапуск.
@@ -596,7 +668,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.2';
+var VERSION = '2.3';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -648,8 +720,88 @@ var IC = {
   photo: ic('<path d="M4 8.5A2 2 0 016 6.5h2.2L9.8 4.5h4.4l1.6 2H18a2 2 0 012 2V17a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><circle cx="12" cy="12.5" r="3.4"/>', 1.8),
   gallery: ic('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.5" r="1.7"/><path d="M20.5 15.5l-5-5L5 19.5"/>', 1.8),
   clock: ic('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', 2.2),
-  sync: ic('<path d="M20 12a8 8 0 01-13.7 5.6M4 12a8 8 0 0113.7-5.6"/><path d="M18 3v4h-4M6 21v-4h4"/>', 1.8), link: ic('<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>', 1.8)
+  sync: ic('<path d="M20 12a8 8 0 01-13.7 5.6M4 12a8 8 0 0113.7-5.6"/><path d="M18 3v4h-4M6 21v-4h4"/>', 1.8),
+  check2: ic('<path d="M2.5 12.5l4 4L15 8M10 15.5l1 1L21.5 8"/>', 2.2), reply: ic('<path d="M10 8L5 12.5l5 4.5"/><path d="M5.5 12.5H14a5 5 0 015 5V19"/>', 2),
+  coach: ic('<circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.8 3.4-6 7-6s6.4 2.2 7 6"/><path d="M16.5 3.8l1.6-1.3M18.8 6.3l1.9-.4"/>', 1.8),
+  award: ic('<circle cx="12" cy="14.5" r="5.5"/><path d="M8.5 10L6 3h4l2 4.5L14 3h4l-2.5 7"/><path d="M12 12.3l.8 1.6 1.7.2-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.2z"/>', 1.6),
+  edit: ic('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>', 1.8), link: ic('<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>', 1.8)
 };
+
+/* ---------- фигура с мышцами (2.3): спереди и сзади; рисуется левая половина, правая – зеркалом ---------- */
+var BODY = {
+  sil: [
+    'M50,29 C45,30 38,31 33,33 C28,34 25,38 24,44 L26,48 C27,48 32,48 33,49 C34,58 35,70 36,82 C35,88 34,94 34,100 L50,100 Z',
+    'M24,44 C22,52 22,62 23,68 C21,78 20,88 20,98 C19,104 19,110 21,116 C23,118 26,117 26,114 C26,108 27,102 28,98 C30,88 32,78 32,70 C33,62 33,54 33,49 Z',
+    'M34,98 C32,110 32,124 34,140 C34,148 33,160 34,172 C35,182 36,192 37,200 C35,204 34,207 36,209 L45,209 C46,205 46,200 45,196 C46,186 47,172 47,160 C48,150 48,144 48,140 C49,126 49.8,112 49.8,100 Z'
+  ],
+  f: {
+    traps: ['M44,30 C40,31 36,32 33,34 L42,35.5 Z'],
+    sdelt: ['M33,34 C28,34 25,38 25,44 C25,46 26,47 27,46 C27,40 29,36 33,34 Z'],
+    fdelt: ['M33.5,34.5 C30,35.5 28,39 28,45 C30,46 31.5,45 32.5,43 C33.5,40 35.5,37.5 38.5,36.5 Z'],
+    chest: ['M49,36.5 C44,35.5 39.5,36.5 37.5,38.5 C35.5,41.5 35.5,47 37.5,51 C41,53 46,53 49,51.5 Z'],
+    biceps: ['M27.5,48.5 C25.5,54 25.5,61 26.5,66 C28.5,68 31,67 32,65 C33,59 33,53 32.3,48.5 C30.5,47.5 28.5,47.5 27.5,48.5 Z'],
+    forearm: ['M25,70 C23,78 22,88 22,96 C24,97 26,97 27,96 C29,88 31,78 31,70 C29,69 27,69 25,70 Z'],
+    obliq: ['M37.5,54 C36.5,62 37.5,72 40,80 C41.5,83 43,85 44,85 C43,74 43,64 43.5,56 C41.5,55 39.5,54.3 37.5,54 Z'],
+    abs: ['M49.4,55 L44.5,56 C44,64 44,74 45,84 C46.5,85.5 48,86.5 49.4,87 Z'],
+    quads: ['M36,99 C33,108 33,122 35,134 C37,139 41,140 44,138 C46,128 47,114 46,101 C43,98 39,97 36,99 Z'],
+    adduct: ['M46.5,101 C47.5,110 47.5,122 45.5,132 C47.5,132 49,130 49.5,124 L49.5,103 C48.5,101 47.5,100.5 46.5,101 Z'],
+    calves: ['M35.5,150 C34,160 34,172 36,184 L38.5,184 C39.5,172 39.5,160 38.5,150 Z']
+  },
+  b: {
+    traps: ['M49.5,27 L44,29 C40,31 36,32 33,34 L41,37.5 L49.5,53 Z'],
+    sdelt: ['M33,34 C28,34 25,38 25,44 C25,46 26,47 27,46 C27,40 29,36 33,34 Z'],
+    rdelt: ['M33.5,34.5 C30,35.5 28,39 28,45 C30,46 31.5,45 32.5,43 C33.5,40 35.5,37.5 38.5,36.5 Z'],
+    triceps: ['M27.5,48.5 C25.5,54 25.5,61 26.5,66 C28.5,68 31,67 32,65 C33,59 33,53 32.3,48.5 C30.5,47.5 28.5,47.5 27.5,48.5 Z'],
+    forearm: ['M25,70 C23,78 22,88 22,96 C24,97 26,97 27,96 C29,88 31,78 31,70 C29,69 27,69 25,70 Z'],
+    midback: ['M38.5,38 C36.5,40.5 36.5,45 38,48 C41,49.5 44.5,49.5 47,48 L41.5,39 Z'],
+    lats: ['M36.5,49.5 C35,56 36,64 39,72 C42,77 46,78.5 49.4,78.5 L49.4,58 C46,55 42,52 38.5,49.5 Z'],
+    lowback: ['M46,63 C44.6,70 44,79 44.3,89 C46,90 48,90.3 49.4,90.3 L49.4,63 Z'],
+    gmed: ['M36,88 C35,92 35,96 36.5,99 L43,93 C41,90 38.5,88.3 36,88 Z'],
+    glutes: ['M38,94.5 C35,100 36,108 41,112 C45,114 49.4,112 49.4,107 L49.4,92 C46,90.5 42,91 38,94.5 Z'],
+    hams: ['M36,114.5 C34,122 34,130 36,138 L45.5,138 C47.5,130 47.5,121 46.5,114.5 C43,112.5 39,112.5 36,114.5 Z'],
+    adduct: ['M47,115 C48,121 48,128 47,134 L49.4,132 L49.4,114 Z'],
+    calves: ['M36,148 C33,156 34,166 38,174 C40,176 44,176 46,174 C48,166 47,156 45,148 C42,146 39,146 36,148 Z']
+  }
+};
+/** mu: { p:[коды], s:[коды] }. Возвращает SVG: спереди и сзади. */
+function bodySvg(mu, cls) {
+  var P = {}, Sx = {};
+  (mu && mu.p || []).forEach(function (c) { P[c] = 1; });
+  (mu && mu.s || []).forEach(function (c) { Sx[c] = 1; });
+  var half = function (side) {
+    var h = BODY.sil.map(function (d) { return '<path class="bs" d="' + d + '"/>'; }).join('');
+    Object.keys(BODY[side]).forEach(function (k) { BODY[side][k].forEach(function (d) { h += '<path class="bm' + (P[k] ? ' bp' : Sx[k] ? ' bx' : '') + '" d="' + d + '"/>'; }); });
+    return h;
+  };
+  var fig = function (side, x) {
+    var h = half(side);
+    return '<g transform="translate(' + x + ',0)"><ellipse class="bs" cx="50" cy="14" rx="9.5" ry="11.5"/><path class="bs" d="M45,23 L55,23 L56.5,31 L43.5,31 Z"/>' +
+      h + '<g transform="translate(100,0) scale(-1,1)">' + h + '</g>' +
+      (side === 'f' ? '<path class="bl" d="M50,56 L50,87 M44.6,63 L55.4,63 M44.4,70.5 L55.6,70.5 M44.6,78 L55.4,78"/>' : '<path class="bl" d="M50,28 L50,89"/>') + '</g>';
+  };
+  return '<svg class="body ' + (cls || '') + '" viewBox="0 0 210 214" aria-hidden="true">' + fig('f', 0) + fig('b', 110) + '</svg>';
+}
+
+var MUSCLES = [['chest', 'Грудь'], ['fdelt', 'Передняя дельта'], ['sdelt', 'Средняя дельта'], ['rdelt', 'Задняя дельта'], ['traps', 'Трапеция'],
+  ['biceps', 'Бицепс'], ['triceps', 'Трицепс'], ['forearm', 'Предплечья'], ['lats', 'Широчайшие'], ['midback', 'Середина спины'], ['lowback', 'Поясница'],
+  ['abs', 'Пресс'], ['obliq', 'Косые мышцы живота'], ['glutes', 'Ягодичные'], ['gmed', 'Средняя ягодичная'], ['quads', 'Квадрицепс'],
+  ['hams', 'Задняя поверхность бедра'], ['adduct', 'Приводящие'], ['calves', 'Икры']];
+function muName(c) { var m = MUSCLES.filter(function (x) { return x[0] === c; })[0]; return m ? m[1] : c; }
+function muOk(mu) { return !!mu && ((mu.p && mu.p.length) || (mu.s && mu.s.length)); }
+/** Подпись под большой фигурой: что работает основное, что помогает. */
+function muLegend(mu) {
+  var t = function (a) { return (a || []).map(muName).join(', ').toLowerCase().replace(/^./, function (x) { return x.toUpperCase(); }); };
+  return (mu.p && mu.p.length ? '<p class="mu-l"><i class="p"></i><b>Основная работа:</b> ' + esc(t(mu.p)) + '</p>' : '') + (mu.s && mu.s.length ? '<p class="mu-l"><i class="s"></i><b>Помогают:</b> ' + esc(t(mu.s)) + '</p>' : '');
+}
+/** Медаль «Лучший подопечный Lite Fit». off – ещё не получена (серая). */
+function medalSvg(cls, off) {
+  var st = '', r1 = 15, r2 = 6.5;
+  for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? r2 : r1; st += (i ? 'L' : 'M') + (50 + r * Math.cos(a)).toFixed(1) + ',' + (76 + r * Math.sin(a)).toFixed(1); }
+  return '<svg class="medal ' + (cls || '') + (off ? ' off' : '') + '" viewBox="0 0 100 120" aria-hidden="true"><defs><linearGradient id="mdg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9AF7F1"/><stop offset=".55" stop-color="#3ED6CE"/><stop offset="1" stop-color="#1F8E88"/></linearGradient></defs>' +
+    '<path d="M28,0 H46 L60,40 L44,46 Z" fill="#1F8E88"/><path d="M72,0 H54 L40,40 L56,46 Z" fill="#3ED6CE"/>' +
+    '<circle cx="50" cy="76" r="38" fill="url(#mdg)"/><circle cx="50" cy="76" r="30" fill="#05090B"/><circle cx="50" cy="76" r="27" fill="none" stroke="#3ED6CE" stroke-width="1.5" stroke-dasharray="2 3"/>' +
+    '<path d="' + st + 'Z" fill="#3ED6CE"/><text x="50" y="100" text-anchor="middle" font-size="7.5" font-weight="800" fill="#9AF7F1" font-family="Manrope,sans-serif">LITE FIT</text></svg>';
+}
 
 /* ---------- мелочи ---------- */
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -733,7 +885,7 @@ function copyText(t) {
 /* ================= СВЯЗЬ С СЕРВЕРОМ ================= */
 var NET = { ok: false, net: true, error: 'нет связи с сервером – проверьте интернет и попробуйте ещё раз' };
 var S = { pg: '', pb: false, bg: '', bb: false, bv: '', vnew: -1, vrep: null, vbEdit: false, vfull: false, ref: null, coms: null, comCid: '', comF: 'all', comBusy: false, tab: 'clients', view: 'home', cid: null, draft: null, dirty: false, isNew: false, run: null, q: '', bq: '', bf: 'all', cq: '', own: '', open: {}, del: false,
-  calM: TODAY.slice(0, 7), calDay: TODAY, ret: 'client', busy: 0, saving: false, hints: null, vid: '', loadedAt: 0, offline: false, exEdit: null, pinName: '' };
+  calM: TODAY.slice(0, 7), calDay: TODAY, ret: 'client', ctab: 'w', busy: 0, saving: false, hints: null, vid: '', loadedAt: 0, offline: false, exEdit: null, pinName: '' };
 function post(body) {
   return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { return r.text(); }).then(function (t) {
     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('bad'); }
@@ -741,7 +893,7 @@ function post(body) {
   });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1 };
+var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -766,7 +918,7 @@ function call(op, body, quiet) {
         if (r && r.running) return asked < 30 ? ask() : { ok: false, error: 'сервер ещё выполняет действие – обновите страницу через минуту и проверьте результат' };
         if (r && r.unknown) return asked < 3 ? ask() : { ok: false, net: true, error: 'запрос не дошёл до сервера – проверьте интернет и повторите' };
         return r;
-      }).catch(function () { return asked < 30 ? ask() : NET; });
+      }).catch(function () { return asked < (navigator.onLine === false ? 3 : 30) ? ask() : NET; });   // телефон сам говорит «нет сети» – не ждём две минуты
     };
     p = post(b).catch(ask);
   }
@@ -871,6 +1023,8 @@ function shown(c) { return !D.admin || S.own === '*' || c.owner === S.own; }
 function packsOf(c) { return c && c.packs instanceof Array ? c.packs : []; }
 function baseOf(c) { return c && c.base !== '' && c.base != null ? +c.base : (c && +c.start > 0 ? +c.start - 1 : 0); }
 function packEnd(p) { return shift(p.s, (+p.d || 30) - 1 + (+p.f || 0)); }
+/** «(оплата 30.10)» – дата следующей оплаты из главной таблицы, если она относится к этому пакету. */
+function payTxt(c, N) { return c && c.pay && N && c.pay >= N.p.s ? ' (оплата ' + dm(c.pay) + ')' : ''; }
 /**
  * Номера тренировок клиента: { map: { id: { t, k, n, out } }, per: [{ done }] по пакетам, total – всего выполнено, cur – индекс текущего пакета }.
  * extra – тренировка, которой ещё нет в списке (новая или с изменённой датой).
@@ -921,6 +1075,7 @@ function loadList(first) {
     if (!r.ok) { S.offline = !!r.net; if (D) { paintSync(); toast(errText(r), 'bad'); } else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false;
     setList(r); memSave();
+    setTimeout(function () { draftPush(); draftArm(); }, 800);
     if (OPENW) {                                                            // пришли по ссылке из Telegram – сразу эта тренировка
       var wid = OPENW; OPENW = '';
       try { history.replaceState(null, '', location.pathname); } catch (e) {}
@@ -1018,7 +1173,37 @@ function viewCal() {
   return '<h1 class="hello">Календарь</h1><p class="lead-p">Тренировки клиентов по датам. Нажмите на день, чтобы открыть тренировку.</p>' + ownChips() + '<div class="card calc"><div class="calc-a">' + calHtml('') + '</div><div class="calc-b">' + dayList('') + '</div></div>';
 }
 /** Комментарии клиента к упражнениям одной тренировки: [{ no, name, text }]. */
-function comList(w) { var NS = numsOf(w.items), out = []; w.items.forEach(function (it, i) { if (it.comment) out.push({ id: it.id, no: NS[i], name: it.name, text: it.comment, u: it.cu === true }); }); return out; }
+function comList(w) { var NS = numsOf(w.items), out = []; w.items.forEach(function (it, i) { if (it.comment) out.push({ id: it.id, no: NS[i], name: it.name, text: it.comment, u: it.cu === true, rp: it.rp || null }); }); return out; }
+/** «2026-10-18 12:30» → «18.10 в 12:30». */
+function stampTxt(at) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)/.exec(at || ''); return m ? m[3] + '.' + m[2] + ' в ' + m[4] : ''; }
+/** Ответ тренера под комментарием клиента и кнопка «Ответить» / «Изменить ответ». */
+function rpLine(wid, iid, rp) {
+  var b = '<button class="rpt" data-act="rpOpen" data-id="' + esc(wid) + '" data-it="' + esc(iid) + '">';
+  if (!rp) return S.isNew && S.view === 'edit' ? '' : b + IC.reply + 'Ответить клиенту</button>';
+  return '<div class="rpb"><small>Ответ тренера' + (rp.by && D && rp.by !== D.trainer ? ' · ' + esc(rp.by) : '') + '</small><p>' + esc(rp.t) + '</p>' +
+    (rp.rd !== undefined ? '<div class="wh">' + (rp.rd ? 'Клиент прочитал ' + stampTxt(rp.rd) : 'Клиент ещё не открыл') + '</div>' : '') + '</div>' + b + IC.edit + 'Изменить ответ</button>';
+}
+/** Окно ответа на комментарий. */
+function rpForm(wid, iid) {
+  var e = (S.coms ? S.coms.list : []).filter(function (x) { return x.id === wid && x.it === iid; })[0], w = S.draft && S.draft.id === wid ? S.draft : FULL[wid], it = w ? w.items.filter(function (x) { return x.id === iid; })[0] : null;
+  var text = e ? e.text : it ? it.comment : '', name = e ? e.no + '. ' + e.name : it ? it.name : '', rp = (e && e.rp) || (it && it.rp) || null, s0 = sumOf(wid), c = s0 ? clientOf(s0.cid) : null;
+  S.rp = { id: wid, it: iid };
+  sheet('Ответ клиенту', '<h2>' + (rp ? 'Изменить ответ' : 'Ответ клиенту') + '</h2><p class="lead">' + esc(c ? c.name : 'Клиент') + ' · ' + esc(name) + '</p>' +
+    '<div class="coms" style="margin:0"><small>Комментарий клиента</small><p style="margin:0">«' + esc(text) + '»</p></div>' +
+    ft('rpT', 'Ваш ответ', rp ? rp.t : '', 5, 'maxlength="1000"') +
+    '<p class="note" style="margin:0">Клиент увидит ответ под своим комментарием и во вкладке «Тренер». Комментарий отметится прочитанным.</p><p class="ferr" id="ferr" hidden></p>' +
+    '<button class="btn pri" data-act="rpGo">' + IC.reply + (rp ? 'Сохранить ответ' : 'Отправить ответ') + '</button>' + (rp ? '<button class="btn danger" data-act="rpDel" style="margin-top:0">Убрать ответ</button>' : ''));
+  var t = document.getElementById('rpT'); if (t) { try { t.focus(); } catch (x) {} }
+}
+/** Ответ сохранён: обновить вкладку «Комментарии», тренировку и счётчики. */
+function rpApply(r) {
+  var id = r.id, iid = r.item, rp = r.rp;
+  comLocal[id + '|' + iid] = { u: 0, until: Infinity };
+  if (S.coms) S.coms.list.forEach(function (e) { if (e.id === id && e.it === iid) { e.rp = rp ? { t: rp.t, at: rp.at, by: rp.by, rd: '' } : null; e.u = 0; } });
+  [FULL[id], S.draft && S.draft.id === id ? S.draft : null].forEach(function (w) { if (w) w.items.forEach(function (x) { if (x.id === iid) { if (rp) x.rp = rp; else delete x.rp; delete x.cu; } }); });
+  if (r.sum) { var n = sumObj(r.sum), old = sumOf(id); if (old) D.w[D.w.indexOf(old)] = n; }
+  memSave(); comPaint();
+}
 /** Сколько комментариев тренер ещё не отметил «прочитано» (среди клиентов, которых он сейчас видит). */
 function unreadN() { return D.w.reduce(function (a, w) { return a + (w.u && shownW(w) ? w.u : 0); }, 0); }
 /* ---------- вкладка «Комментарии» ---------- */
@@ -1058,9 +1243,9 @@ function comsHtml() {
   if (!l.length) return h + '<div class="card"><h3>Комментариев пока нет</h3><p class="sub" style="margin:0">' + esc(S.coms.err || 'Здесь появится всё, что клиенты напишут под упражнениями.') + '</p></div>';
   h += '<div class="card"><div class="cm-h"><span>Комментарий</span><span>Прочитано</span></div><div class="rows">' + l.map(function (x) {
     var w = x.w, e = x.e, when = comWhen(e.at);
-    return '<div class="row fd cm' + (e.u ? ' un' : '') + '"><button class="mn cmb" data-act="editW" data-id="' + w.id + '" data-from="coms"><b>' + esc(x.c ? x.c.name : 'Клиент') + ' · ' + numFor(w) + ' от ' + dm(w.date) + (e.u ? '<span class="nw">новый</span>' : '') + '</b>' +
+    return '<div class="row fd cm' + (e.u ? ' un' : '') + '"><div class="mn"><button class="cmb" data-act="editW" data-id="' + w.id + '" data-from="coms"><b>' + esc(x.c ? x.c.name : 'Клиент') + ' · ' + numFor(w) + ' от ' + dm(w.date) + (e.u ? '<span class="nw">новый</span>' : '') + '</b>' +
       '<small><i>' + esc(e.no) + '. ' + esc(e.name) + ':</i> «' + esc(e.text) + '»' + (e.diff ? ' · сложность ' + e.diff + ' из 5' : '') + '</small>' +
-      (when ? '<small class="wh">' + when + '</small>' : '') + '</button>' + readBtn(w.id, e.it, !!e.u) + '</div>';
+      (when ? '<small class="wh">' + when + '</small>' : '') + '</button>' + rpLine(w.id, e.it, e.rp) + '</div>' + readBtn(w.id, e.it, !!e.u) + '</div>';
   }).join('') + '</div></div>';
   return h;
 }
@@ -1082,7 +1267,7 @@ function comsTop(w) {
   var cs = comList(w);
   if (!cs.length) return '';
   return '<div class="coms" id="comsTop"><div class="cm-h"><small>Комментарии клиента</small><span>Прочитано</span></div>' + cs.map(function (x) {
-    return '<div class="cmr' + (x.u ? ' un' : '') + '"><p><b>' + x.no + '. ' + esc(x.name) + ':</b> «' + esc(x.text) + '»' + (x.u ? '<span class="nw">новый</span>' : '') + '</p>' + (S.isNew ? '' : readBtn(w.id, x.id, x.u)) + '</div>';
+    return '<div class="cmr' + (x.u ? ' un' : '') + '"><div style="flex:1;min-width:0"><p><b>' + x.no + '. ' + esc(x.name) + ':</b> «' + esc(x.text) + '»' + (x.u ? '<span class="nw">новый</span>' : '') + '</p>' + (S.isNew ? '' : rpLine(w.id, x.id, x.rp)) + '</div>' + (S.isNew ? '' : readBtn(w.id, x.id, x.u)) + '</div>';
   }).join('') + '</div>';
 }
 function viewComs() {
@@ -1103,10 +1288,11 @@ function clientRows(list, arch) {
   var row = function (c) {
     var l = wList(c.id), next = l.filter(function (w) { return !w.done && w.date >= TODAY; })[0], miss = l.filter(function (w) { return !w.done && w.date < TODAY && access(w).s !== 'closed'; }).length;
     var chg = l.filter(function (w) { return w.done && (w.c || w.m) && w.date >= shift(TODAY, -3); }).length, nc = l.reduce(function (a, w) { return a + (w.u || 0); }, 0);
-    var N = packNow(c), pkTxt = N ? (N.end < TODAY ? '' : ' · пакет ' + N.done + '/' + N.p.n + ' до ' + dm(N.end)) : '';
+    var N = packNow(c), pkTxt = N ? (N.end < TODAY ? '' : ' · пакет ' + N.done + '/' + N.p.n + ' до ' + dm(N.end) + payTxt(c, N)) : '';
     var sub = (c.format ? c.format + ' · ' : '') + (D.admin && S.own === '*' ? c.owner + ' · ' : '') + (l.length ? 'тренировок: ' + l.length + (next ? ' · ближайшая ' + (next.date === TODAY ? 'сегодня' : dm(next.date)) : ' · новых нет') : 'тренировок пока нет') + pkTxt;
     return '<button class="row' + (S.view === 'client' && String(c.id) === String(S.cid) ? ' sel' : '') + '" data-act="openClient" data-id="' + esc(c.id) + '"><span class="mn"><b>' + esc(c.name) + '</b><small>' + esc(sub) +
       (N && N.end < TODAY ? ' · <span class="st-warn">пакет закончился ' + dm(N.end) + '</span>' : N && !N.left ? ' · <span class="st-warn">пакет выполнен</span>' : '') +
+      (c.aw && c.aw.d ? ' · <span class="st-new">скидка ' + c.aw.disc + ' %</span>' : c.aw && c.aw.m.length ? ' · медалей: ' + c.aw.m.length : '') +
       (miss ? ' · <span class="st-warn">не отмечено: ' + miss + '</span>' : '') + (chg ? ' · <span class="st-warn">есть изменения</span>' : '') + (nc ? ' · <span class="st-new">новый комментарий' + (nc > 1 ? ': ' + nc : '') + '</span>' : '') + '</small></span><span class="chev">›</span></button>';
   };
   if (!list.length && !arch.length) return '<div class="card"><h3>Клиентов нет</h3><p class="sub" style="margin:0">Здесь появляются клиенты из главной таблицы, у которых Вы – ответственный тренер.</p></div>';
@@ -1125,6 +1311,7 @@ function viewClient() {
   var h = '<button class="back" data-act="home">' + IC.back + 'Клиенты</button><h1 class="hello">' + esc(c.name) + '</h1>' +
     '<div class="meta">' + (c.format ? '<span class="pill">' + esc(c.format) + '</span>' : '') + '<span class="pill">Тренировок: <b class="num">' + l.length + '</b></span><span class="pill">Выполнено: <b class="num">' + dn + '</b></span></div>';
   h += '<div class="cv"><div class="cv-a">' + pkCard(c) + '<div class="card">' + calHtml(c.id) + dayList(c.id) + '<button class="btn pri" data-act="newW" style="margin-top:14px">' + IC.plus + 'Новая тренировка на ' + dMon(S.calDay) + '</button></div>';
+  h += '<div id="msgBox">' + msgCard(c) + '</div>';
   h += '<button class="btn sec" data-act="clink">' + IC.link + 'Ссылка для клиента</button></div><div class="cv-b">';
   if (l.length) h += '<h2 class="sec-title">Все тренировки</h2><div class="card"><div class="rows">' + l.map(function (w) { return wRow(w, 'editW'); }).join('') + '</div></div>';
   h += '</div></div><h2 class="sec-title">Настройки клиента</h2><div class="cv2">';
@@ -1133,17 +1320,57 @@ function viewClient() {
   h += '</div>';
   return h;
 }
+/* ---------- сообщения тренера клиенту (2.3) ---------- */
+var KINDS = { reply: 'Ответ на комментарий', tip: 'Рекомендация', go: 'Напутствие', fire: 'Мотивация', msg: 'Сообщение' };
+function loadMsgs(cid) {
+  S.msgs = S.msgs || {};
+  return call('msgs', { cid: cid }, true).then(function (r) {
+    if (!r || r.auth) return;
+    S.msgs[cid] = r.ok ? { list: r.list || [] } : { list: [], err: errText(r) };
+    msgPaint(cid);
+  });
+}
+function msgPaint(cid) { var el = document.getElementById('msgBox'); if (el && S.view === 'client' && String(S.cid) === String(cid)) el.innerHTML = msgCard(clientOf(cid)); }
+/** Карточка «Сообщения клиенту»: последние сообщения тренеров с отметкой «прочитал». */
+function msgCard(c) {
+  var M = S.msgs && S.msgs[c.id], h = '<div class="card"><div class="pk-h"><h3>Сообщения клиенту</h3><button class="btn pri sm" data-act="tmNew" style="width:auto;padding:0 14px">' + IC.plus + 'Написать</button></div>' +
+    '<p class="sub">Рекомендации, напутствия, мотивация. Клиент увидит их во вкладке «Тренер».</p>';
+  if (!M) return h + '<p class="note" style="margin:0">Загружаю…</p></div>';
+  if (M.err) return h + '<p class="note" style="margin:0">' + esc(M.err) + '</p></div>';
+  if (!M.list.length) return h + '<p class="note" style="margin:0">Сообщений пока нет.</p></div>';
+  var l = S.msgAll ? M.list : M.list.slice(0, 4);
+  h += '<div>' + l.map(function (m) {
+    return '<div class="msg"><div class="msg-h"><b>' + esc(KINDS[m.k] || KINDS.msg) + '</b><span>' + stampTxt(m.at) + (m.by && m.by !== D.trainer ? ' · ' + esc(m.by) : '') + '</span></div>' +
+      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + '<p>' + esc(m.t) + '</p>' +
+      '<div class="msub">' + (m.rd ? '<span class="st-ok">Клиент прочитал ' + stampTxt(m.rd) + '</span>' : 'Клиент ещё не открыл') + '</div>' +
+      (m.k !== 'reply' ? '<div class="msg-act"><button class="rpt" data-act="tmEdit" data-id="' + esc(m.id) + '">' + IC.edit + 'Изменить</button></div>' : '') + '</div>';
+  }).join('') + '</div>';
+  if (M.list.length > 4) h += '<button class="txtb" data-act="msgAll">' + (S.msgAll ? 'Показать последние' : 'Все сообщения · ' + M.list.length) + '</button>';
+  return h + '</div>';
+}
+function tmForm(mid) {
+  var c = clientOf(S.cid), M = S.msgs && S.msgs[c.id], m = mid && M ? M.list.filter(function (x) { return x.id === mid; })[0] : null;
+  S.tm = { mid: m ? m.id : '', kind: m ? m.k : (S.tm && S.tm.kind) || 'tip' };
+  sheet(m ? 'Изменить сообщение' : 'Сообщение клиенту', '<h2>' + (m ? 'Изменить сообщение' : 'Сообщение клиенту') + '</h2><p class="lead">' + esc(c.name) + '. Клиент увидит его во вкладке «Тренер», новое – с пометкой.</p>' +
+    '<div class="kchips" id="tmK">' + tmChips() + '</div>' + ft('tmT', 'Текст', m ? m.t : '', 6, 'maxlength="1000"') + '<p class="ferr" id="ferr" hidden></p>' +
+    '<button class="btn pri" data-act="tmGo">' + (m ? 'Сохранить' : 'Отправить клиенту') + '</button>' + (m ? '<button class="btn danger" data-act="tmDel" style="margin-top:0">Убрать сообщение</button>' : ''));
+}
+function tmChips() { return ['tip', 'go', 'fire', 'msg'].map(function (k) { return '<button data-act="tmK" data-v="' + k + '" class="' + (S.tm.kind === k ? 'on' : '') + '">' + KINDS[k] + '</button>'; }).join(''); }
+
 /** Карточка «Пакет» у клиента: текущий пакет, всего выполнено, кнопки, история. */
 function pkCard(c) {
   var N = packNow(c), P = packsOf(c), L = labelsOf(c.id), h = '<div class="card"><div class="pk-h"><h3>Пакет</h3>';
   if (N) {
     var ended = N.end < TODAY;
-    h += '<span class="pill' + (ended ? ' warn' : N.left ? ' ok' : ' warn') + '">' + (ended ? 'закончился ' + dm(N.end) : N.left ? 'до ' + dm(N.end) : 'все тренировки выполнены') + '</span></div>' +
+    h += '<span class="pill' + (ended ? ' warn' : N.left ? ' ok' : ' warn') + '">' + (ended ? 'закончился ' + dm(N.end) : N.left ? 'до ' + dm(N.end) + payTxt(c, N) : 'все тренировки выполнены') + '</span></div>' +
       '<div class="pk-bar"><i style="width:' + Math.min(100, Math.round(N.done * 100 / N.p.n)) + '%"></i></div>' +
       '<div class="pk-n"><span>Выполнено <b class="num">' + N.done + '</b> из ' + N.p.n + '</span><span>Осталось <b class="num">' + N.left + '</b></span></div>' +
       '<p class="pk-end">' + dm(N.p.s) + ' – ' + dm(N.end) + ' · ' + daysWord(+N.p.d) + (N.p.f ? ' + заморозка ' + daysWord(+N.p.f) : '') + (N.p.pre ? ' · до приложения выполнено ' + N.p.pre : '') + '</p>';
   } else h += '</div><p class="sub" style="margin:0 0 4px">Пакет не задан – тренировки нумеруются по порядку: № 1, № 2…</p>';
+  if (N && c.pay && c.pay >= N.p.s) h += '<p class="pk-pay">Следующая оплата: <b>' + longDate(c.pay) + '</b>' + (c.pay < TODAY ? ' – <span class="st-warn">дата прошла</span>' : '') + '</p>';
   h += '<p class="pk-end">Всего выполнено тренировок: <b>' + L.total + '</b></p>';
+  if (c.aw) h += '<div class="aw-row" style="margin:12px 0 2px">' + medalSvg('sm', !c.aw.m.length) + '<span class="mn"><b>' + (c.aw.d ? 'Скидка ' + c.aw.disc + ' % с ' + dm(c.aw.d) : 'Медалей: ' + c.aw.m.length + (c.aw.streak ? ' · подряд ' + c.aw.streak + ' из ' + c.aw.need : '')) + '</b><small>' +
+    (c.aw.d ? 'На все следующие пакеты – ' + c.aw.need + ' медали подряд. Медалей всего: ' + c.aw.m.length : c.aw.cur ? (c.aw.cur.medal ? 'Медаль за этот пакет уже есть' : 'До медали за этот пакет: ' + c.aw.cur.left + ' ' + plural(c.aw.cur.left, 'тренировка', 'тренировки', 'тренировок') + ' до ' + dm(c.aw.cur.end)) + '. ' + c.aw.need + ' подряд – скидка ' + c.aw.disc + ' %' : '') + '</small></span></div>';
   h += '<div class="acts" style="margin:12px 0 0">' + (N ? '<button class="btn sec sm" data-act="pkEdit" data-i="' + N.i + '">Изменить пакет</button><button class="btn pri sm" data-act="pkNew">' + IC.plus + 'Новый пакет</button>'
     : '<button class="btn pri sm" data-act="pkNew">' + IC.plus + 'Задать пакет</button>') + '</div>';
   h += '<div class="mt">' + fi('cBase', 'Выполнено тренировок до приложения', baseOf(c), 'text', 'inputmode="numeric" data-f="base"') + '<p class="note" style="margin-top:6px">Например, сколько клиент сделал в TRNR. Дальше «Всего выполнено» растёт само.</p></div>';
@@ -1248,7 +1475,8 @@ function resHtml(w, it) {
 function editItem(w, it, i, n, no) {
   var b = exOf(it.exId), own = !it.exId, W = wide();
   var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn">' +
-    (own && it.isOwn ? '<b>Своё упражнение</b><small>Его нет в базе</small>' : '<b>' + esc(it.name) + '</b><small>' + esc(it.grp || (own ? 'нет в базе' : '')) + (b && b.cat ? ' · ' + esc(b.cat) : '') + '</small>') + '</div></div>';
+    (own && it.isOwn ? '<b>Своё упражнение</b><small>Его нет в базе</small>' : '<b>' + esc(it.name) + '</b><small>' + esc(it.grp || (own ? 'нет в базе' : '')) + (b && b.cat ? ' · ' + esc(b.cat) : '') + '</small>') + '</div>' +
+    (b && muOk(b.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Мышцы" title="Мышцы – меняются в «Базе упражнений»">' + bodySvg(b.mu) + '</button>' : '') + '</div>';
   if (own && it.isOwn) h += '<div class="stack" style="margin-bottom:10px">' + fi('n-' + it.id, 'Название упражнения', it.name, 'text', 'maxlength="80" autocomplete="off" data-f="name" data-i="' + i + '"') + '</div>';
   h += '<div class="stack" style="margin-bottom:6px">' + videoEdit(it, i) + (own && it.isOwn ? sw('addBase', it.addBase !== false, 'Добавить упражнение в базу', 'Появится в подсказках у всех тренеров', 'data-i="' + i + '"') : '') + '</div>';
   h += '<div id="lh-' + it.id + '">' + hintHtml(it) + '</div>';
@@ -1313,7 +1541,7 @@ function viewEdit() {
   if (!S.isNew) h += '<div class="ed-acts"><button class="btn sec" data-act="copyW">' + IC.copy + 'Скопировать на другую дату или клиенту</button><button class="btn danger" data-act="delW">' + (S.del ? 'Точно удалить? Нажмите ещё раз' : 'Удалить тренировку') + '</button></div>';
   return h;
 }
-function markDirty() { if (!S.dirty) { S.dirty = true; paintBar(); } }
+function markDirty() { if (!S.dirty) { S.dirty = true; paintBar(); } draftSoon(); }
 /* ---------- прошлая тренировка рядом с новой ---------- */
 /** Другие тренировки этого клиента, свежие сверху, — из них тренер выбирает, какую держать перед глазами. */
 function refList(w) { return D.w.filter(function (x) { return x.cid === String(w.cid) && x.id !== w.id; }).sort(function (a, b) { return wSort(b, a); }); }
@@ -1365,11 +1593,24 @@ function openEditor(w, isNew, dirty, refId) {
 }
 function dropEdit() { S.draft = null; S.dirty = false; S.isNew = false; S.saving = false; S.q = ''; S.open = {}; S.del = false; S.hints = null; S.ref = null; }
 function leaveEdit() { dropEdit(); S.view = S.ret === 'cal' || S.ret === 'coms' ? 'home' : 'client'; closeSheet(); render(); window.scrollTo(0, 0); if (S.view === 'home' && S.tab === 'coms') loadComs(); }
-function saveDraft() {
-  var w = S.draft, bad = '';
-  if (S.saving) return;
-  if (!w.items.length) return toast('Добавьте хотя бы одно упражнение', 'bad');
-  if (!isYmd(w.date)) return toast('Укажите дату тренировки', 'bad');
+/* ---------- черновик тренировки (2.3): всё набранное лежит в телефоне, пока сервер не подтвердит сохранение ---------- */
+var DRAFT_KEY = 'lf_wk_drafts_' + TKEY.slice(0, 10), draftT = null, draftBusy = false;
+function draftsAll() { try { return JSON.parse(LS.get(DRAFT_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function draftsPut(o) { try { if (Object.keys(o).length) LS.set(DRAFT_KEY, JSON.stringify(o)); else LS.del(DRAFT_KEY); } catch (e) {} }
+/** Запомнить открытую тренировку. q – ждёт отправки (связи не было). */
+function draftKeep(q) {
+  if (MODE !== 'trainer' || S.view !== 'edit' || !S.draft || !(S.dirty || S.isNew) || !S.draft.items.length) return;
+  var o = draftsAll(), w = S.draft, old = o[w.id];
+  o[w.id] = { w: w, isNew: S.isNew, at: Date.now(), q: q === undefined ? !!(old && old.q) : q, err: '' };
+  draftsPut(o);
+}
+function draftSoon() { clearTimeout(draftT); draftT = setTimeout(function () { draftKeep(); }, 500); }
+function draftDrop(id) { var o = draftsAll(); if (o[id]) { delete o[id]; draftsPut(o); } }
+/** Что отправить на сервер; строка – ошибка (что исправить). */
+function draftOut(w, isNew) {
+  var bad = '';
+  if (!w.items.length) return 'Добавьте хотя бы одно упражнение';
+  if (!isYmd(w.date)) return 'Укажите дату тренировки';
   var NS = numsOf(w.items);
   w.items.forEach(function (it, i) {
     if (bad) return;
@@ -1377,25 +1618,80 @@ function saveDraft() {
     if (!it.name) { bad = 'Упражнение ' + NS[i] + ': впишите название'; return; }
     if (fixUrl(it.video) === null) bad = 'Упражнение ' + NS[i] + ': проверьте ссылку на видео';
   });
-  if (bad) return toast(bad, 'bad');
-  var out = { id: S.isNew ? '' : w.id, cid: w.cid, date: w.date, note: w.note || '', items: w.items.map(function (it) {
+  if (bad) return bad;
+  return { id: isNew ? '' : w.id, nid: isNew ? w.id : '', cid: w.cid, date: w.date, note: w.note || '', items: w.items.map(function (it) {
     return { id: it.id, exId: it.exId || '', name: it.name, grp: it.grp || '', video: fixUrl(it.video) || '', desc: it.desc || '', noW: !!it.noW, sec: !!it.sec, join: !!it.join,
       sets: it.sets.map(function (s) { return { w: s.w, r: s.r }; }), keep: it.keep !== false, addBase: !!it.isOwn && it.addBase !== false };
   }) };
+}
+/** Ответ сервера «сохранено» – в данные страницы. */
+function savedIn(r) {
+  FULL[r.w.id] = r.w;
+  var s = sumObj(r.sum), old = sumOf(s.id);
+  if (old) D.w[D.w.indexOf(old)] = s; else D.w.push(s);
+  if (r.ex) D.ex = r.ex;
+  memSave();
+  return s;
+}
+function saveDraft() {
+  var w = S.draft;
+  if (S.saving) return;
+  var out = draftOut(w, S.isNew);
+  if (typeof out === 'string') return toast(out, 'bad');
+  var key = w.id;
+  draftKeep();
+  if (navigator.onLine === false) { draftKeep(true); draftArm(); return toast('Нет связи – тренировка сохранена в телефоне и отправится сама, когда появится интернет', 'bad'); }
   S.saving = true; paintBar();
   call('save', { w: out }).then(function (r) {
     S.saving = false;
     if (r.auth) return;
-    if (!r.ok) { paintBar(); toast(errText(r), 'bad'); return; }
-    FULL[r.w.id] = r.w;
-    var s = sumObj(r.sum), old = sumOf(s.id);
-    if (old) D.w[D.w.indexOf(old)] = s; else D.w.push(s);
-    if (r.ex) D.ex = r.ex;
-    memSave();
+    if (!r.ok) {
+      paintBar();
+      if (r.net) { draftKeep(true); toast('Нет связи – тренировка сохранена в телефоне и отправится сама, когда появится интернет', 'bad'); draftArm(); return; }
+      toast(errText(r), 'bad'); return;
+    }
+    draftDrop(key);
+    var s = savedIn(r);
     S.calDay = s.date; S.calM = s.date.slice(0, 7); S.cid = s.cid;
     leaveEdit();
     if (r.warn) toast((r.msg || 'Тренировка сохранена') + '. Но ' + r.warn, 'bad'); else toast(r.msg || 'Тренировка сохранена');
   });
+}
+/** Отправить тренировки, которые ждут связи. Открытую в редакторе – как обычное сохранение. */
+function draftPush() {
+  if (MODE !== 'trainer' || !D || draftBusy || S.saving) return;
+  var o = draftsAll(), ids = Object.keys(o).filter(function (k) { return o[k].q; });
+  if (!ids.length) return;
+  if (navigator.onLine === false) return;
+  var id = ids[0], d = o[id];
+  if (S.view === 'edit' && S.draft && S.draft.id === id) return saveDraft();
+  var out = draftOut(d.w, d.isNew);
+  if (typeof out === 'string') { d.q = false; d.err = out; draftsPut(o); return; }
+  draftBusy = true;
+  call('save', { w: out }, true).then(function (r) {
+    draftBusy = false;
+    if (!r || r.auth) return;
+    var o2 = draftsAll();
+    if (!r.ok) { if (!r.net && o2[id]) { o2[id].q = false; o2[id].err = errText(r); draftsPut(o2); draftRepaint(); } return; }
+    draftDrop(id); savedIn(r);
+    var c = clientOf(r.w.cid);
+    toast('Тренировка ' + (c ? c.name + ' ' : '') + 'на ' + dm(r.w.date) + ' сохранена – связь появилась');
+    draftRepaint();
+    setTimeout(draftPush, 300);
+  });
+}
+var draftIv = null;
+function draftArm() { if (!draftIv) draftIv = setInterval(function () { var o = draftsAll(); if (!Object.keys(o).some(function (k) { return o[k].q; })) { clearInterval(draftIv); draftIv = null; return; } draftPush(); }, 30000); }
+function draftRepaint() { if (S.view === 'home' || S.view === 'client') rerenderKeep(); }
+/** Плашка над списком: несохранённые тренировки (кроме открытой сейчас). */
+function draftBanner() {
+  var o = draftsAll(), ids = Object.keys(o).filter(function (k) { return !(S.view === 'edit' && S.draft && S.draft.id === k); });
+  return ids.map(function (k) {
+    var d = o[k], c = clientOf(d.w.cid);
+    return '<div class="banner warn draft"><span class="mn"><b>' + (d.q ? 'Ждёт связи' : 'Не сохранена') + ':</b> тренировка ' + esc(c ? c.name : 'клиента') + ' на ' + dm(d.w.date) + ' · ' + exWord(d.w.items.length) +
+      (d.q ? '. Отправится сама, когда появится интернет.' : d.err ? '. ' + esc(cap(d.err)) : '. Откройте и сохраните.') + '</span>' +
+      '<button class="btn sec sm" data-act="draftOpen" data-id="' + esc(k) + '">Открыть</button><button class="btn sec sm" data-act="draftDel" data-id="' + esc(k) + '">Удалить</button></div>';
+  }).join('');
 }
 
 /* ---------- база упражнений ---------- */
@@ -1456,7 +1752,7 @@ function baseList() {
 }
 function exForm(id) {
   var e = id ? exOf(id) : null, x = e || { name: '', grp: '', cat: 'Другое', video: '', desc: '', noW: false, sec: false };
-  S.exEdit = { id: id || '', noW: !!x.noW, sec: !!x.sec, del: false };
+  S.exEdit = { id: id || '', noW: !!x.noW, sec: !!x.sec, del: false, mu: !e || e.mua ? null : e.mun ? false : { p: (e.mu && e.mu.p || []).slice(), s: (e.mu && e.mu.s || []).slice() }, muAuto: e && e.mua ? e.mu : null, muDirty: false };
   var go = [['', 'не указана']].concat(grps().map(function (g) { return [g, g]; }));
   if (x.grp && grps().indexOf(x.grp) < 0) go.push([x.grp, x.grp + ' (прежняя)']);
   var cats = D.cats.slice(); D.ex.forEach(function (y) { if (y.cat && cats.indexOf(y.cat) < 0) cats.push(y.cat); });
@@ -1469,9 +1765,22 @@ function exForm(id) {
     fs('xCat', 'Оборудование', cats.map(function (c) { return [c, c]; }), x.cat || 'Другое') +
     fi('xVideo', 'Ссылка на видео: файл, Rutube, VK и другие', x.video, 'url', 'inputmode="url" autocomplete="off" autocapitalize="off" placeholder="видео ещё не добавлено"') +
     ft('xDesc', 'Описание техники (подставится в тренировку)', x.desc, 4, 'maxlength="800"') +
-    '<div id="xSw">' + exSw() + '</div><p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="exSave">Сохранить</button>' +
+    '<div id="xSw">' + exSw() + '</div><div class="lbl"><span>Мышцы – фигура у клиента</span></div><div id="xMu">' + muEd() + '</div>' +
+    '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="exSave">Сохранить</button>' +
     (e ? '<button class="btn danger" data-act="exDel" style="margin-top:0">Удалить из базы</button>' : ''));
 }
+/** Выбор мышц в карточке упражнения: нажатие – основная, ещё раз – помогает, ещё раз – убрать. */
+function muShown() { var E = S.exEdit; return E.mu === false ? null : E.mu === null ? E.muAuto : E.mu; }
+function muEd() {
+  var E = S.exEdit, sh = muShown() || { p: [], s: [] }, P = {}, X = {};
+  sh.p.forEach(function (c) { P[c] = 1; }); (sh.s || []).forEach(function (c) { X[c] = 1; });
+  var t = E.mu === false ? 'Фигура у клиента не показывается. Нажмите на мышцу, чтобы выбрать свои.' : E.mu === null ? (E.muAuto ? 'Подобраны по названию упражнения.' : 'Подберутся по названию после сохранения.') + ' Нажмите на мышцу: один раз – основная, второй – помогает, третий – убрать.'
+    : 'Свой выбор. Один раз – основная, второй – помогает, третий – убрать.';
+  return '<div class="mu-ed">' + bodySvg(sh) + '<div><p class="note" style="margin:0 0 4px">' + t + '</p><div class="mu-pick">' + MUSCLES.map(function (m) {
+    return '<button data-act="xMu" data-v="' + m[0] + '" class="' + (P[m[0]] ? 'p' : X[m[0]] ? 's' : '') + '">' + esc(m[1]) + '</button>';
+  }).join('') + '</div><div class="msg-act">' + (E.mu !== null ? '<button class="rpt" data-act="xMuAuto">' + IC.restart + 'По названию</button>' : '') + (E.mu !== false ? '<button class="rpt" data-act="xMuNone">' + IC.x + 'Без фигуры</button>' : '') + '</div></div></div>';
+}
+function muPaint() { var el = document.getElementById('xMu'); if (el) el.innerHTML = muEd(); }
 function exSw() { return sw('xNoW', S.exEdit.noW, 'Без веса', 'По умолчанию графа веса убрана') + sw('xSec', S.exEdit.sec, 'Считать секунды, а не повторы', ''); }
 
 /* ---------- номера для видео: ролик -> упражнение -> файл переименования (только компьютер) ---------- */
@@ -1654,7 +1963,9 @@ function myOf(id) { return M ? M.list.filter(function (w) { return w.id === id; 
 function setMy(r) {
   var keep = {};
   if (M) M.list.forEach(function (w) { if (PEND[w.id] && w.items) keep[w.id] = w; });           // несохранённое не затираем ответом сервера
-  M = { name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone };
+  var rdWas = {}; if (M && M.msgs) M.msgs.forEach(function (m) { if (m.rd) rdWas[m.id] = m.rd; });
+  M = { name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
+    pay: r.pay || '', aw: r.aw || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
   TODAY = M.today || TODAY;
@@ -1695,7 +2006,7 @@ function cnFire(all) {
 function touch(w, done) {
   var p = PEND[w.id] || {};
   if (done !== undefined) p.done = done;
-  PEND[w.id] = p; pendSave(); paintSync();
+  PEND[w.id] = p; pendSave(); paintSync(); if (MODE === 'client' && S.view === 'run') csPaint(w);
   clearTimeout(pushT); pushT = setTimeout(pushNow, done !== undefined ? 50 : 2500);
 }
 function resBody(w, p) {
@@ -1729,14 +2040,16 @@ function pushNow(keep) {
         if (sentReset) delete PEND[id].reset;
         if (PEND[id].cn) PEND[id].cn = PEND[id].cn.filter(function (x) { return sentCn.indexOf(x) < 0; });
       }
-      pendSave(); paintSync();
+      if (r.aw) M.aw = r.aw;
+      pendSave(); paintSync(); if (S.view === 'run') csPaint(myOf(S.run));
+      if (r.medal || r.disc) awCheck();
       if (sentCn.length) toast('Комментарий отправлен тренеру');
       if (pendCount()) return pushNow();
     } else if (r.gone || r.closed) {
       delete PEND[id]; pendSave(); toast(errText(r), 'bad'); loadMy();
     } else if (!r.net && sentReset && PEND[id]) {                         // начать заново уже нельзя (завершена или другой день) – берём то, что на сервере
       delete PEND[id]; pendSave(); toast(errText(r), 'bad'); loadMy();
-    } else { S.offline = !!r.net; paintSync(); pushT = setTimeout(pushNow, 15000); }
+    } else { S.offline = !!r.net; paintSync(); if (S.view === 'run') csPaint(myOf(S.run)); pushT = setTimeout(pushNow, 15000); }
   });
 }
 function loadMy(first) {
@@ -1745,7 +2058,8 @@ function loadMy(first) {
     if (!r.ok) { S.offline = !!r.net; if (M) paintSync(); else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false; setMy(r);
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
-    if (S.view === 'home' || first) { if (first) render(); else rerenderKeep(); } else paintSync();
+    if (S.view === 'home' || first) { if (first) render(); else rerenderKeep(); } else { paintSync(); if (S.view === 'run') csPaint(myOf(S.run)); }
+    awCheck();
   });
 }
 /** Номер тренировки у клиента: «4 из 12», «№ 7»; пусто – сверх пакета (номер не показываем). */
@@ -1761,10 +2075,11 @@ function viewMy() {
     h += '<div class="card pack"><div class="pk-h"><h3>Ваш пакет</h3><span class="pill' + (ended ? ' warn' : ' ok') + '">' + (ended ? 'закончился ' + dm(pk.end) : 'до ' + dMon(pk.end)) + '</span></div>' +
       '<div class="pk-bar"><i style="width:' + Math.min(100, Math.round(pk.done * 100 / pk.n)) + '%"></i></div>' +
       '<div class="pk-n"><span>Выполнено <b class="num">' + pk.done + '</b> из ' + pk.n + '</span><span>Осталось <b class="num">' + pk.left + '</b></span></div>' +
-      (pk.f ? '<p class="note" style="margin:6px 0 0">С учётом заморозки ' + daysWord(pk.f) + '.</p>' : '') + '</div>';
+      (pk.f ? '<p class="note" style="margin:6px 0 0">С учётом заморозки ' + daysWord(pk.f) + '.</p>' : '') +
+      (M.pay && M.pay >= pk.s && M.pay >= TODAY ? '<p class="pk-pay">Оплата следующего пакета – <b>' + dMon(M.pay) + '</b></p>' : '') + awStrip() + '</div>';
     h += '<div class="meta"><span class="pill">Всего выполнено тренировок: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
   } else h += '<div class="meta"><span class="pill">Всего: <b class="num">' + M.total + '</b></span><span class="pill">Выполнено: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
-  h += installCard();
+  h += coachBanner() + installCard();
   if (M.closed) h += '<div class="banner warn">Ведение завершено: тренировки открыты для просмотра, новые отметки не принимаются.</div>';
   h += '<h2 class="sec-title" style="margin-top:0">Сегодня, ' + dMon(TODAY) + '</h2>';
   if (!td.length) h += '<div class="card"><h3>На сегодня тренировки нет</h3><p class="sub" style="margin:0">' + (next.length ? 'Ближайшая: ' + longDate(next[0].date) + '.' : 'Тренер добавит следующую, и она появится здесь.') + '</p></div>';
@@ -2041,7 +2356,7 @@ function mqBoot() {
   MQ.forEach(function (j) { if (j.st === 'prep' && !MFILE[j.mid]) j.st = 'lost'; if (j.st === 'send') j.st = 'wait'; });
   mqSave(); mqKick();
 }
-window.addEventListener('online', function () { S.mqOff = false; mqPause = 5000; medPaint(); mqKick(); });
+window.addEventListener('online', function () { if (MODE === 'trainer') { setTimeout(draftPush, 1500); return; } S.mqOff = false; mqPause = 5000; medPaint(); mqKick(); });
 window.addEventListener('offline', function () { S.mqOff = true; medPaint(); });
 /** Тренеру у упражнения: сколько фото и видео прислал клиент. */
 function medNote(it) {
@@ -2084,9 +2399,12 @@ function helpHtml() {
     '<li><b>«Описание»</b> – советы тренера именно для Вас: на что обратить внимание, как дышать, где держать паузу. Кнопка есть, если тренер их добавил, – обязательно откройте.</li>' +
     '<li><b>Кружок справа</b> – нажмите, когда сделали подход. Вес и повторы уже стоят от тренера. Получилось по-другому – исправьте цифры, тренер увидит разницу.</li>' +
     '<li><b>Сложность</b> – 1 очень легко, 3 рабочая нагрузка, 5 на пределе. Ставьте по ощущениям после упражнения.</li>' +
-    '<li><b>Комментарий тренеру</b> – если что-то не получается, неудобно или нужен совет. Когда Вы допишете комментарий, тренер сразу получит уведомление.</li>' +
+    '<li><b>Комментарий тренеру</b> – если что-то не получается, неудобно или нужен совет. Когда Вы допишете комментарий, тренер получит уведомление. Под комментарием видно: «Отправлено тренеру», «Тренер прочитал», а потом и его ответ.</li>' +
     '<li><b>«Фото/видео тренеру»</b> – чтобы тренер проверил технику: снимите подход на видео, сделайте фото или выберите из галереи. К упражнению – до 3 файлов, видео до 90 секунд. Ждать не нужно: файл отправится сам, пока Вы тренируетесь, а без интернета – когда связь появится. Галочка на файле – тренер его получил.</li></ol>' +
     '<p>В конце нажмите <b>«Завершить тренировку»</b> – время остановится, тренер увидит результат.</p>' +
+    '<h3>Какие мышцы работают</h3><p>Справа от названия упражнения – фигура: ярко подсвечено то, что работает основное, приглушённо – что помогает. Нажмите на неё, чтобы рассмотреть крупно.</p>' +
+    '<h3>Вкладки внизу</h3><ul><li><b>«Тренировки»</b> – Ваш пакет и тренировки.</li><li><b>«Тренер»</b> – ответы на Ваши комментарии, рекомендации и напутствия тренера. Новое – с пометкой и цифрой на вкладке.</li>' +
+    '<li><b>«Награды»</b> – медаль «Лучший подопечный Lite Fit» за все тренировки пакета, выполненные в его срок. Три медали подряд – скидка 10 % на все следующие пакеты.</li></ul>' +
     '<h3>Если что-то пошло не так</h3><ul>' +
     '<li>Нажали «Начать» случайно – вверху тренировки есть «Сбросить и начать заново». Отметки, время и комментарии удалятся. Это можно сделать в тот же день, пока тренировка не завершена.</li>' +
     '<li>Завершили раньше времени – внизу «Снять отметку о выполнении», и продолжайте.</li>' +
@@ -2119,7 +2437,8 @@ function playerHtml(url) {
 }
 function runItem(w, it, i, no) {
   var url = it.video || '', k = url ? videoKind(url) : null;
-  var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn"><b>' + esc(it.name) + '</b><small>' + esc((it.grp ? it.grp + ' · ' : '') + 'план: ' + planTxt(it)) + '</small></div></div>';
+  var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn"><b>' + esc(it.name) + '</b><small>' + esc((it.grp ? it.grp + ' · ' : '') + 'план: ' + planTxt(it)) + '</small></div>' +
+    (muOk(it.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Какие мышцы работают">' + bodySvg(it.mu) + '</button>' : '') + '</div>';
   var acts = '';
   if (k && k.t === 'link') acts += '<a class="btn sec sm hl" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + IC.play + 'Видео</a>';
   else if (k) acts += '<button class="btn sec sm hl" data-act="video" data-i="' + i + '">' + IC.play + (S.vid === it.id ? 'Скрыть видео' : 'Видео') + '</button>';
@@ -2128,7 +2447,7 @@ function runItem(w, it, i, no) {
   if (k && S.vid === it.id) h += playerHtml(url);
   if (it.desc && S.open['d' + it.id]) h += '<div class="desc">' + esc(it.desc) + '</div>';
   h += runSets(it, i) + diffHtml(it, i);
-  h += '<div class="mt">' + ft('c-' + it.id, 'Комментарий тренеру', it.comment, 2, 'maxlength="500" data-f="comment" data-i="' + i + '"') + '</div>';
+  h += '<div class="mt">' + ft('c-' + it.id, 'Комментарий тренеру', it.comment, 2, 'maxlength="500" data-f="comment" data-i="' + i + '"') + '<div id="cs-' + it.id + '">' + comStatus(w, it) + '</div></div>';
   h += '<div class="med" id="md-' + it.id + '">' + medInner(w, it, i) + '</div></div>';
   return h;
 }
@@ -2163,6 +2482,90 @@ function preconnect(w) {
   });
 }
 
+/* ================= КЛИЕНТ: ТРЕНЕР И НАГРАДЫ (2.3) ================= */
+var KINDS_C = { reply: 'Ответ тренера', tip: 'Рекомендация', go: 'Напутствие', fire: 'Мотивация', msg: 'Сообщение' };
+function msgUnread() { return M && M.msgs ? M.msgs.filter(function (m) { return !m.rd; }) : []; }
+/** Клиент открыл сообщения – отметка «прочитал» (тренер её видит). Без связи – попробуем при следующем открытии. */
+function msgMark(list) {
+  var ids = list.filter(function (m) { return !m.rd; }).map(function (m) { return m.id; });
+  if (!ids.length) return;
+  ccall('mread', { ids: ids }, true).then(function (r) {
+    if (!r || !r.ok) return;
+    M.msgs.forEach(function (m) { if (ids.indexOf(m.id) >= 0) m.rd = r.at || 'да'; });
+    pendSave(); paintBar();
+  });
+}
+function coachBanner() {
+  var u = msgUnread();
+  if (!u.length) return '';
+  var m = u[0];
+  return '<button class="banner done" data-act="ctab" data-v="coach" style="display:block;width:100%;text-align:left"><b>' + (u.length > 1 ? 'Тренер написал Вам: новых сообщений – ' + u.length : (m.k === 'reply' ? 'Тренер ответил на Ваш комментарий' : 'Тренер написал Вам')) + '</b>' +
+    (u.length === 1 ? '<br><span style="color:var(--muted)">«' + esc(m.t.length > 90 ? m.t.slice(0, 90) + '…' : m.t) + '»</span>' : '') + '<br><span class="lnk">Открыть</span></button>';
+}
+function viewCoach() {
+  var l = M.msgs || [], fresh = {};
+  msgUnread().forEach(function (m) { fresh[m.id] = 1; });
+  var h = '<h1 class="hello">Ваш тренер</h1><p class="lead-p">Ответы на Ваши комментарии, рекомендации и напутствия тренера. Вопрос к упражнению – пишите в комментарии под ним, тренер ответит здесь.</p>';
+  if (!l.length) h += '<div class="card"><h3>Сообщений пока нет</h3><p class="sub" style="margin:0">Когда тренер ответит на комментарий или напишет Вам, сообщение появится здесь.</p></div>';
+  else h += '<div class="card">' + l.map(function (m) {
+    return '<div class="msg' + (fresh[m.id] ? ' un' : '') + '"><div class="msg-h"><b>' + esc(KINDS_C[m.k] || KINDS_C.msg) + '</b><span>' + stampTxt(m.at) + (m.by ? ' · ' + esc(m.by) : '') + '</span>' + (fresh[m.id] ? '<span class="nw">новое</span>' : '') + '</div>' +
+      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + '<p>' + esc(m.t) + '</p></div>';
+  }).join('') + '</div>';
+  setTimeout(function () { msgMark(l); }, 600);
+  return h;
+}
+/** Полоска на карточке пакета: сколько до медали. */
+function awStrip() {
+  var a = M.aw; if (!a || !a.cur) return '';
+  var c = a.cur;
+  return '<button class="awstrip" data-act="ctab" data-v="aw" style="margin-top:12px">' + medalSvg('sm', !c.medal) + '<span class="mn">' + (a.d ? '<b>Ваша скидка ' + a.disc + ' %</b> на все следующие пакеты' : c.medal ? '<b>Медаль за этот пакет – Ваша!</b> Подряд: ' + a.streak + ' из ' + a.need :
+    'До медали «' + esc(a.name) + '»: <b>' + c.left + ' ' + plural(c.left, 'тренировка', 'тренировки', 'тренировок') + '</b>') + '</span><span class="chev">›</span></button>';
+}
+function viewAw() {
+  var a = M.aw, h = '<h1 class="hello">Награды</h1>';
+  if (!a) return h + '<div class="card aw">' + medalSvg('', true) + '<h3>' + 'Медаль «Лучший подопечный Lite Fit»' + '</h3><p class="sub" style="margin:0">Выполните все тренировки пакета в его срок – и медаль Ваша. Три медали подряд – скидка 10 % на все следующие пакеты. Награды появятся, когда тренер оформит Ваш пакет в приложении.</p></div>';
+  if (a.d) h += '<div class="card disc"><div class="aw-row"><span class="big">−' + a.disc + ' %</span><span class="mn"><b>Ваша скидка на все следующие пакеты</b><small>Действует с ' + dMon(a.d) + ' – за ' + a.need + ' медали подряд. Спасибо за Вашу дисциплину!</small></span></div></div>';
+  var c = a.cur;
+  if (c) {
+    var pc = Math.min(100, Math.round(c.ok * 100 / c.n));
+    h += '<div class="card aw">' + medalSvg('', !c.medal) + '<h3>' + (c.medal ? 'Медаль за этот пакет – Ваша!' : 'Медаль «' + esc(a.name) + '»') + '</h3>' +
+      '<p class="sub">' + (c.medal ? 'Все тренировки пакета выполнены в срок.' : 'Выполните все тренировки пакета до ' + dMon(c.end) + '.') + '</p>' +
+      '<div class="pk-bar"><i style="width:' + pc + '%"></i></div><div class="pk-n"><span>Выполнено <b class="num">' + c.ok + '</b> из ' + c.n + '</span><span>' + (c.medal ? 'готово' : 'осталось <b class="num">' + c.left + '</b>') + '</span></div></div>';
+  }
+  if (!a.d) {
+    var sl = ''; for (var i = 0; i < a.need; i++) sl += medalSvg('sm', i >= a.streak);
+    h += '<div class="card aw"><h3>' + a.need + ' медали подряд – скидка ' + a.disc + ' %</h3><div class="aw-slots">' + sl + '</div><p class="sub" style="margin:0">' +
+      (a.streak ? 'Подряд: ' + a.streak + ' из ' + a.need + '. ' : '') + 'Скидка – на все следующие пакеты, навсегда. Пакет без медали начинает счёт заново.</p></div>';
+  }
+  if (a.m.length) h += '<h2 class="sec-title">Ваши медали · ' + a.m.length + '</h2><div class="card"><div class="rows">' + a.m.slice().reverse().map(function (m) {
+    return '<div class="row" style="min-height:0;padding:9px 0">' + medalSvg('sm') + '<span class="mn"><b>' + esc(a.name) + '</b><small>Пакет с ' + dMon(m.s) + ' – ' + m.n + ' из ' + m.n + ' · получена ' + dMon(m.at) + '</small></span></div>';
+  }).join('') + '</div></div>';
+  return h;
+}
+/** Новая медаль или скидка с прошлого раза – поздравление (один раз на устройстве). */
+function awCheck() {
+  var a = M && M.aw; if (!a) return;
+  var key = 'lf_wk_aw_' + CKEY.slice(0, 10), was = LS.get(key), now = a.m.length + (a.d ? 100 : 0);
+  if (was === null) { LS.set(key, String(now)); return; }                 // первый раз на этом устройстве – без поздравления за старое
+  if (now <= +was) return;
+  LS.set(key, String(now));
+  var disc = a.d && +was < 100;
+  sheet('Поздравляем!', '<div class="center" style="min-height:0;padding:10px 0 0">' + medalSvg('') + '<h2>' + (disc ? 'Скидка ' + a.disc + ' % – Ваша!' : 'Медаль «' + esc(a.name) + '»') + '</h2><p>' +
+    (disc ? a.need + ' медали подряд. Теперь все следующие пакеты – со скидкой ' + a.disc + ' %. Так держать!' : 'Все тренировки пакета выполнены в срок. ' + (a.streak < a.need ? 'Ещё ' + (a.need - a.streak) + ' подряд – и скидка ' + a.disc + ' % на все следующие пакеты.' : '')) + '</p>' +
+    '<button class="btn pri" data-act="close">Спасибо!</button></div>');
+}
+/** Статус комментария клиента: отправляется / отправлен / тренер прочитал, и ответ тренера. */
+function comStatus(w, it) {
+  if (!String(it.comment || '').trim()) return '';
+  var pend = !!PEND[w.id], h;
+  if (pend) h = '<p class="cst">' + IC.clock + (S.offline ? 'Отправится тренеру, когда появится интернет' : 'Сохраняю…') + '</p>';
+  else if (it.cr || it.rp) h = '<p class="cst rd">' + IC.check2 + 'Тренер прочитал</p>';
+  else h = '<p class="cst">' + IC.check + 'Отправлено тренеру</p>';
+  if (it.rp) h += '<div class="rpb"><small>Ответ тренера' + (it.rp.by ? ' · ' + esc(it.rp.by) : '') + '</small><p>' + esc(it.rp.t) + '</p>' + (it.rp.at ? '<div class="wh">' + stampTxt(it.rp.at) + '</div>' : '') + '</div>';
+  return h;
+}
+function csPaint(w) { if (!w || !w.items) return; w.items.forEach(function (it) { var el = document.getElementById('cs-' + it.id); if (el) el.innerHTML = comStatus(w, it); }); }
+
 /* ================= СБОРКА СТРАНИЦЫ ================= */
 function paintBar() {
   var showTabs = MODE === 'trainer' && !!D && (S.view === 'home' || wide());
@@ -2177,6 +2580,11 @@ function paintBar() {
       : !w.ts ? '<button class="btn pri" data-act="startW">' + IC.play + 'Начать тренировку</button>'
       : '<div class="runbar"><div class="tmr"><b id="tmr">' + clock(Date.now() - w.ts) + '</b><small>идёт</small></div><button class="btn pri" data-act="finish">' + IC.check + 'Завершить тренировку</button></div>';
   }
+  if (MODE === 'client' && M && S.view === 'home') {                     // клиент: вкладки внизу
+    var cu = msgUnread().length, cb = function (v, icon, t, n) { return '<button data-act="ctab" data-v="' + v + '" class="' + (S.ctab === v ? 'on' : '') + '">' + icon + '<span>' + t + '</span>' + (n ? '<i class="tb num">' + n + '</i>' : '') + '</button>'; };
+    tabsEl.hidden = false;
+    tabsEl.innerHTML = '<nav style="grid-template-columns:repeat(3,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('aw', IC.award, 'Награды', 0) + '</nav>';
+  }
   barEl.hidden = !h; barEl.innerHTML = h ? '<div class="in">' + h + '</div>' : '';
 }
 function render() {
@@ -2186,6 +2594,7 @@ function render() {
     if (S.view === 'load') h += '<div class="center" style="min-height:50vh"><img class="pulse" src="' + LOGO + '" alt=""><p>Открываю тренировку…</p></div>';
     else if (S.view === 'edit') h += viewEdit();
     else {
+      h += draftBanner();
       if (S.view === 'client') S.tab = 'clients';
       if (wide() && S.tab === 'clients') h += '<div class="md"><div class="md-l">' + viewClients() + '</div><div class="md-r">' + (S.view === 'client' ? viewClient() :
         '<div class="md-0"><h3>Выберите клиента</h3><p>Слева – список клиентов. Справа откроются календарь клиента, его тренировки и настройки.</p></div>') + '</div></div>';
@@ -2194,7 +2603,7 @@ function render() {
   } else {
     if (!M) return;
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
-    h += S.view === 'run' ? viewRun() : viewMy();
+    h += S.view === 'run' ? viewRun() : S.ctab === 'coach' ? viewCoach() : S.ctab === 'aw' ? viewAw() : viewMy();
   }
   h += '<p class="ver">Lite Fit · тренировки ' + VERSION + '</p>';
   shell(MODE === 'trainer'); app.innerHTML = h; paintBar();
@@ -2210,6 +2619,8 @@ function chipsPaint(el, html) { var x = [].map.call(el.querySelectorAll('.chips'
 function pickRepaint() { var f = document.getElementById('pickF'), s = document.getElementById('sugg'); if (!f || !s) return rerenderKeep(); chipsPaint(f, pickChips()); s.innerHTML = suggHtml(); }
 function baseRepaint() { var f = document.getElementById('bgF'), l = document.getElementById('baseList'); if (!f || !l) return rerenderKeep(); chipsPaint(f, baseChips()); l.innerHTML = baseList(); }
 function draftItem(b) { return S.draft.items[+b.getAttribute('data-i')]; }
+/** Мышцы упражнения: у клиента приходят с тренировкой, у тренера – из базы. */
+function muOf(it) { if (MODE === 'client') return it.mu || null; var e = exOf(it.exId); return e ? e.mu || null : null; }
 function runItemOf(b) { var w = myOf(S.run); return w ? w.items[+b.getAttribute('data-i')] : null; }
 function cset(field, v) {
   var c = clientOf(S.cid), body = { id: c.id, start: c.start, before: accOf(c).b, after: accOf(c).a };
@@ -2251,7 +2662,7 @@ var ACT = {
   calNext: function () { var d = pd(S.calM + '-01'); d.setMonth(d.getMonth() + 1); S.calM = ymd(d).slice(0, 7); rerenderKeep(); },
   calDay: function (b) { S.calDay = b.getAttribute('data-d'); rerenderKeep(); },
   home: function () { S.view = 'home'; S.cid = null; render(); window.scrollTo(0, 0); },
-  openClient: function (b) { S.cid = b.getAttribute('data-id'); S.view = 'client'; S.ret = 'client'; S.calDay = TODAY; S.calM = TODAY.slice(0, 7); render(); window.scrollTo(0, 0); },
+  openClient: function (b) { S.cid = b.getAttribute('data-id'); S.view = 'client'; S.ret = 'client'; S.calDay = TODAY; S.calM = TODAY.slice(0, 7); S.msgAll = false; render(); window.scrollTo(0, 0); loadMsgs(S.cid); },
   clink: function (b) {
     var c = clientOf(S.cid), reset = b.getAttribute('data-reset') === '1';
     if (reset && !b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Прежняя ссылка перестанет работать. Нажмите ещё раз'; return; }
@@ -2313,8 +2724,9 @@ var ACT = {
     });
   },
   editW: function (b) {
-    var id = b.getAttribute('data-id'), s = sumOf(id);
+    var id = b.getAttribute('data-id'), s = sumOf(id), dr = draftsAll()[id];
     if (!s) return;
+    if (dr) { S.cid = s.cid; S.ret = b.getAttribute('data-from') === 'cal' ? 'cal' : b.getAttribute('data-from') === 'coms' ? 'coms' : 'client'; openEditor(clone(dr.w), false, true); toast('Открыта Ваша несохранённая версия – сохраните её'); return; }
     var from = b.getAttribute('data-from');
     S.cid = s.cid; S.ret = from === 'cal' ? 'cal' : from === 'coms' ? 'coms' : 'client';
     var go = function (full) { var w = clone(full); w.row = s.row; w.date = s.date; openEditor(w, false, false); };
@@ -2327,7 +2739,17 @@ var ACT = {
     if (!S.dirty) return leaveEdit();
     sheet('Изменения не сохранены', '<h2>Сохранить изменения?</h2><p class="lead">В тренировке есть правки, которые ещё не сохранены.</p><button class="btn pri" data-act="saveW">Сохранить</button><button class="btn sec" data-act="dropW">Выйти без сохранения</button><button class="btn sec" data-act="close">Вернуться к тренировке</button>');
   },
-  dropW: function () { leaveEdit(); },
+  dropW: function () { if (S.draft) draftDrop(S.draft.id); leaveEdit(); },
+  draftOpen: function (b) {
+    var d = draftsAll()[b.getAttribute('data-id')];
+    if (!d) return render();
+    if (!clientOf(d.w.cid)) return toast('Клиента этой тренировки больше нет в Вашем списке', 'bad');
+    S.ret = 'client'; openEditor(clone(d.w), d.isNew, true); toast('Открыта несохранённая тренировка – проверьте и сохраните');
+  },
+  draftDel: function (b) {
+    if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно удалить?'; return; }
+    draftDrop(b.getAttribute('data-id')); rerenderKeep(); toast('Черновик удалён');
+  },
   saveW: function () { closeSheet(); saveDraft(); },
   delW: function (b) {
     if (S.saving) return;
@@ -2338,7 +2760,7 @@ var ACT = {
       S.saving = false;
       if (r.auth) return;
       if (!r.ok) { toast(errText(r), 'bad'); return rerenderKeep(); }
-      D.w = D.w.filter(function (w) { return w.id !== id; }); delete FULL[id]; memSave();
+      D.w = D.w.filter(function (w) { return w.id !== id; }); delete FULL[id]; memSave(); draftDrop(id);
       leaveEdit();
       if (r.warn) toast('Тренировка удалена. Но ' + r.warn, 'bad'); else toast('Тренировка удалена');
     });
@@ -2363,6 +2785,35 @@ var ACT = {
       memSave(); paintBar();
     });
   },
+  tmNew: function () { tmForm(''); },
+  tmEdit: function (b) { tmForm(b.getAttribute('data-id')); },
+  tmK: function (b) { S.tm.kind = b.getAttribute('data-v'); var el = document.getElementById('tmK'); if (el) el.innerHTML = tmChips(); },
+  msgAll: function () { S.msgAll = !S.msgAll; msgPaint(S.cid); },
+  tmGo: function (b, e, del) {
+    var c = clientOf(S.cid), text = val('tmT'), cid = c.id;
+    if (!del && !text) return ferr('Напишите текст сообщения.');
+    b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
+    call('tmsg', { cid: cid, kind: S.tm.kind, text: text, mid: S.tm.mid, del: !!del }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = 'Повторить'; return ferr(errText(r)); }
+      S.msgs = S.msgs || {}; S.msgs[cid] = { list: r.list || [] };
+      closeSheet(); msgPaint(cid); toast(r.msg || 'Готово');
+    });
+  },
+  tmDel: function (b) { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно убрать? Нажмите ещё раз'; return; } ACT.tmGo(b, null, true); },
+  rpOpen: function (b) { rpForm(b.getAttribute('data-id'), b.getAttribute('data-it')); },
+  rpGo: function (b, e, del) {
+    var R = S.rp, text = del ? '' : val('rpT');
+    if (!R) return;
+    if (!del && !text) return ferr('Напишите ответ.');
+    b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
+    call('reply', { id: R.id, item: R.it, text: text }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = del ? 'Убрать ответ' : 'Отправить ответ'; return ferr(errText(r)); }
+      closeSheet(); rpApply(r); toast(r.msg || 'Ответ отправлен');
+    });
+  },
+  rpDel: function (b) { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно убрать? Нажмите ещё раз'; return; } ACT.rpGo(b, null, true); },
   refToggle: function () { if (!S.ref) return; S.ref.open = !S.ref.open; loadRef(); rerenderKeep(); if (S.ref.open && !wide()) scrollToEl('refCard'); },
   openNote: function () { S.open.note = true; rerenderKeep('wNote'); },
   openDesc: function (b) { var it = draftItem(b); S.open['d' + it.id] = true; rerenderKeep('d-' + it.id); },
@@ -2454,13 +2905,24 @@ var ACT = {
   exEdit: function (b) { exForm(b.getAttribute('data-id')); },
   xNoW: function () { S.exEdit.noW = !S.exEdit.noW; document.getElementById('xSw').innerHTML = exSw(); },
   xSec: function () { S.exEdit.sec = !S.exEdit.sec; document.getElementById('xSw').innerHTML = exSw(); },
+  xMu: function (b) {
+    var E = S.exEdit, c = b.getAttribute('data-v'), sh = muShown() || { p: [], s: [] }, m = { p: sh.p.slice(), s: (sh.s || []).slice() };
+    if (m.p.indexOf(c) >= 0) { m.p.splice(m.p.indexOf(c), 1); m.s.push(c); }
+    else if (m.s.indexOf(c) >= 0) m.s.splice(m.s.indexOf(c), 1);
+    else m.p.push(c);
+    E.mu = m.p.length || m.s.length ? m : false; E.muDirty = true; muPaint();
+  },
+  xMuAuto: function () { S.exEdit.mu = null; S.exEdit.muDirty = true; muPaint(); },
+  xMuNone: function () { S.exEdit.mu = false; S.exEdit.muDirty = true; muPaint(); },
+  fig: function (b) { var it = MODE === 'client' ? runItemOf(b) : draftItem(b), mu = it ? muOf(it) : null; if (!muOk(mu)) return; sheet(it.name, '<h2>' + esc(it.name) + '</h2>' + bodySvg(mu, 'fig-big') + muLegend(mu) + '<p class="note" style="margin:0 0 14px">Слева – вид спереди, справа – сзади. Ярко – что работает основное, приглушённо – что помогает.</p><button class="btn sec" data-act="close">Понятно</button>'); },
   exSave: function (b) {
     var name = val('xName'), u = fixUrl(val('xVideo')), e = exOf(S.exEdit.id);
     if (name.length < 2) return ferr('Впишите название упражнения.');
     if (u === null) return ferr('Проверьте ссылку на видео: это должен быть адрес страницы или файла, например https://rutube.ru/video/…');
     var twin = exByName(name); if (twin && twin !== e) return ferr('Упражнение с таким названием уже есть в базе.');
     b.disabled = true; b.textContent = 'Сохраняю…';
-    call('exsave', { ex: { id: S.exEdit.id, name: name, grp: val('xGrp'), cat: val('xCat'), video: u, desc: val('xDesc'), noW: S.exEdit.noW, sec: S.exEdit.sec } }).then(function (r) {
+    var E = S.exEdit, mu = E.muDirty ? (E.mu === null ? 'auto' : E.mu === false ? 'none' : E.mu) : undefined;
+    call('exsave', { ex: { id: S.exEdit.id, name: name, grp: val('xGrp'), cat: val('xCat'), video: u, desc: val('xDesc'), noW: S.exEdit.noW, sec: S.exEdit.sec, mu: mu } }).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = 'Сохранить'; return ferr(errText(r)); }
       D.ex = r.ex; memSave(); closeSheet(); rerenderKeep(); toast('Упражнение сохранено');
@@ -2476,8 +2938,13 @@ var ACT = {
     });
   },
   /* клиент */
+  ctab: function (b) { S.ctab = b.getAttribute('data-v'); S.view = 'home'; S.run = null; closeSheet(); render(); window.scrollTo(0, 0); },
   myHome: function () { S.view = 'home'; S.run = null; S.open = {}; S.vid = ''; render(); window.scrollTo(0, 0); },
-  runW: function (b) { var w = myOf(b.getAttribute('data-id')); if (!w || w.st !== 'open' || !w.items) return toast('Эта тренировка сейчас закрыта', 'bad'); S.run = w.id; S.view = 'run'; S.open = {}; S.vid = ''; preconnect(w); render(); window.scrollTo(0, 0); },
+  runW: function (b) {
+    var w = myOf(b.getAttribute('data-id')); if (!w || w.st !== 'open' || !w.items) return toast('Эта тренировка сейчас закрыта', 'bad');
+    S.run = w.id; S.view = 'run'; S.open = {}; S.vid = ''; preconnect(w); render(); window.scrollTo(0, 0);
+    if (M.msgs) msgMark(M.msgs.filter(function (m) { return m.k === 'reply' && m.wid === w.id; }));   // ответы тренера в этой тренировке клиент увидел
+  },
   video: function (b) { var it = runItemOf(b); if (!it) return; S.vid = S.vid === it.id ? '' : it.id; rerenderKeep(); },
   showDesc: function (b) { var it = runItemOf(b); if (!it) return; S.open['d' + it.id] = !S.open['d' + it.id]; rerenderKeep(); },
   help: function () { sheet('Как пользоваться', helpHtml()); },
@@ -2597,7 +3064,7 @@ document.addEventListener('input', function (e) {
     var rw = myOf(S.run), ri = rw && rw.items[i]; if (!ri || M.closed) return;
     if (f === 'fw') { v = numW(v); if (el.value !== v) el.value = v; ri.sets[k].fw = v; }
     else if (f === 'fr') { v = numR(v); if (el.value !== v) el.value = v; ri.sets[k].fr = v; }
-    else if (f === 'comment') { ri.comment = v; cnBump(rw, ri); }
+    else if (f === 'comment') { ri.comment = v; ri.cr = false; cnBump(rw, ri); }
     touch(rw);
   }
 });
