@@ -560,6 +560,19 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .rpb small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
 .rpb p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
 .rpb .wh{font-size:12px;color:var(--muted);margin-top:4px}
+.cmq{padding:11px 13px;border-radius:13px;background:var(--card2,rgba(255,255,255,.04));border:1px solid var(--line2);font-size:14px}
+.cmq small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.cmq p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.cmb{margin-top:4px}
+.mimg{display:block;width:100%;max-width:340px;margin:8px 0 2px;padding:0;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);min-height:90px;cursor:zoom-in}
+.mimg img{display:block;width:100%;height:auto;min-height:90px;object-fit:cover}
+.mimg.err{min-height:0;padding:10px;font-size:12.5px;color:var(--muted);cursor:default}
+.imfull{display:block;width:100%;height:auto;border-radius:12px}
+.imgpick{display:flex;align-items:center;gap:10px;margin:2px 0 12px}
+.imgpick img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line2)}
+.imgpick .mn{flex:1;font-size:13.5px;color:var(--muted)}
+.imgpick label.btn{width:auto;padding:0 14px;margin:0}
+.awx{margin-top:10px;font-size:13px;color:var(--warm)}
 .rpt{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;font-weight:800;color:var(--accent);min-height:32px}
 .rpt svg{width:16px;height:16px}
 .msg{padding:14px 0;border-top:1px solid var(--line)}
@@ -611,6 +624,13 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.4 (18.10.2026). Сервер 4.11. Комментарий тренеру – кнопкой «Написать тренеру»: окно, текст, «Отправить тренеру», окно
+ *   закрывается, под упражнением – комментарий (изменить его нельзя) и «Отправлено тренеру» / «Тренер прочитал» / ответ.
+ *   Пауза в 1,5 минуты убрана: комментарий уходит сразу и целиком. Ответ тренера и его сообщения – с фото (тренер прикрепляет
+ *   фото в окне ответа, телефон сжимает его до 1600 px); фото открывается на весь экран. Открытое приложение клиента раз в
+ *   20 секунд спрашивает, нет ли нового (op 'cv' – лёгкий запрос), и сразу, когда клиент возвращается в приложение: ответ
+ *   тренера появляется без обновления. Награды: скидка – за 3 медали подряд и продление без перерыва с оплатой в срок,
+ *   перерыв или просрочка – скидка снимается.
  * 2.3 (18.10.2026). Сервер 4.10. Обратная связь: у комментария клиента – «отправлено тренеру» / «тренер прочитал» / ответ
  *   тренера; тренер отвечает во вкладке «Комментарии» и в тренировке, пишет клиенту рекомендации, напутствия и мотивацию
  *   (карточка клиента → «Сообщения клиенту»). У клиента внизу вкладки «Тренировки», «Тренер», «Награды». Фигура с мышцами
@@ -668,7 +688,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.3';
+var VERSION = '2.4';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -1180,7 +1200,7 @@ function stampTxt(at) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)/.exec(at || 
 function rpLine(wid, iid, rp) {
   var b = '<button class="rpt" data-act="rpOpen" data-id="' + esc(wid) + '" data-it="' + esc(iid) + '">';
   if (!rp) return S.isNew && S.view === 'edit' ? '' : b + IC.reply + 'Ответить клиенту</button>';
-  return '<div class="rpb"><small>Ответ тренера' + (rp.by && D && rp.by !== D.trainer ? ' · ' + esc(rp.by) : '') + '</small><p>' + esc(rp.t) + '</p>' +
+  return '<div class="rpb"><small>Ответ тренера' + (rp.by && D && rp.by !== D.trainer ? ' · ' + esc(rp.by) : '') + '</small>' + (rp.t ? '<p>' + esc(rp.t) + '</p>' : '') + (rp.img && rp.mid ? imgHtml(rp.mid, rp.img) : '') +
     (rp.rd !== undefined ? '<div class="wh">' + (rp.rd ? 'Клиент прочитал ' + stampTxt(rp.rd) : 'Клиент ещё не открыл') + '</div>' : '') + '</div>' + b + IC.edit + 'Изменить ответ</button>';
 }
 /** Окно ответа на комментарий. */
@@ -1188,9 +1208,11 @@ function rpForm(wid, iid) {
   var e = (S.coms ? S.coms.list : []).filter(function (x) { return x.id === wid && x.it === iid; })[0], w = S.draft && S.draft.id === wid ? S.draft : FULL[wid], it = w ? w.items.filter(function (x) { return x.id === iid; })[0] : null;
   var text = e ? e.text : it ? it.comment : '', name = e ? e.no + '. ' + e.name : it ? it.name : '', rp = (e && e.rp) || (it && it.rp) || null, s0 = sumOf(wid), c = s0 ? clientOf(s0.cid) : null;
   S.rp = { id: wid, it: iid };
+  S.img = { had: rp && rp.img ? rp.mid : '', tok: rp && rp.img ? rp.img : '' };
+  if (S.img.had) imgLoad(S.img.had, S.img.tok);
   sheet('Ответ клиенту', '<h2>' + (rp ? 'Изменить ответ' : 'Ответ клиенту') + '</h2><p class="lead">' + esc(c ? c.name : 'Клиент') + ' · ' + esc(name) + '</p>' +
     '<div class="coms" style="margin:0"><small>Комментарий клиента</small><p style="margin:0">«' + esc(text) + '»</p></div>' +
-    ft('rpT', 'Ваш ответ', rp ? rp.t : '', 5, 'maxlength="1000"') +
+    ft('rpT', 'Ваш ответ', rp ? rp.t : '', 5, 'maxlength="1000"') + imgPick() +
     '<p class="note" style="margin:0">Клиент увидит ответ под своим комментарием и во вкладке «Тренер». Комментарий отметится прочитанным.</p><p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn pri" data-act="rpGo">' + IC.reply + (rp ? 'Сохранить ответ' : 'Отправить ответ') + '</button>' + (rp ? '<button class="btn danger" data-act="rpDel" style="margin-top:0">Убрать ответ</button>' : ''));
   var t = document.getElementById('rpT'); if (t) { try { t.focus(); } catch (x) {} }
@@ -1199,7 +1221,7 @@ function rpForm(wid, iid) {
 function rpApply(r) {
   var id = r.id, iid = r.item, rp = r.rp;
   comLocal[id + '|' + iid] = { u: 0, until: Infinity };
-  if (S.coms) S.coms.list.forEach(function (e) { if (e.id === id && e.it === iid) { e.rp = rp ? { t: rp.t, at: rp.at, by: rp.by, rd: '' } : null; e.u = 0; } });
+  if (S.coms) S.coms.list.forEach(function (e) { if (e.id === id && e.it === iid) { e.rp = rp ? { t: rp.t, at: rp.at, by: rp.by, mid: rp.mid || '', img: rp.img || '', rd: '' } : null; e.u = 0; } });
   [FULL[id], S.draft && S.draft.id === id ? S.draft : null].forEach(function (w) { if (w) w.items.forEach(function (x) { if (x.id === iid) { if (rp) x.rp = rp; else delete x.rp; delete x.cu; } }); });
   if (r.sum) { var n = sumObj(r.sum), old = sumOf(id); if (old) D.w[D.w.indexOf(old)] = n; }
   memSave(); comPaint();
@@ -1341,7 +1363,7 @@ function msgCard(c) {
   var l = S.msgAll ? M.list : M.list.slice(0, 4);
   h += '<div>' + l.map(function (m) {
     return '<div class="msg"><div class="msg-h"><b>' + esc(KINDS[m.k] || KINDS.msg) + '</b><span>' + stampTxt(m.at) + (m.by && m.by !== D.trainer ? ' · ' + esc(m.by) : '') + '</span></div>' +
-      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + '<p>' + esc(m.t) + '</p>' +
+      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + (m.t ? '<p>' + esc(m.t) + '</p>' : '') + (m.img ? imgHtml(m.id, m.img) : '') +
       '<div class="msub">' + (m.rd ? '<span class="st-ok">Клиент прочитал ' + stampTxt(m.rd) + '</span>' : 'Клиент ещё не открыл') + '</div>' +
       (m.k !== 'reply' ? '<div class="msg-act"><button class="rpt" data-act="tmEdit" data-id="' + esc(m.id) + '">' + IC.edit + 'Изменить</button></div>' : '') + '</div>';
   }).join('') + '</div>';
@@ -1351,8 +1373,10 @@ function msgCard(c) {
 function tmForm(mid) {
   var c = clientOf(S.cid), M = S.msgs && S.msgs[c.id], m = mid && M ? M.list.filter(function (x) { return x.id === mid; })[0] : null;
   S.tm = { mid: m ? m.id : '', kind: m ? m.k : (S.tm && S.tm.kind) || 'tip' };
+  S.img = { had: m && m.img ? m.id : '', tok: m && m.img ? m.img : '' };
+  if (S.img.had) imgLoad(S.img.had, S.img.tok);
   sheet(m ? 'Изменить сообщение' : 'Сообщение клиенту', '<h2>' + (m ? 'Изменить сообщение' : 'Сообщение клиенту') + '</h2><p class="lead">' + esc(c.name) + '. Клиент увидит его во вкладке «Тренер», новое – с пометкой.</p>' +
-    '<div class="kchips" id="tmK">' + tmChips() + '</div>' + ft('tmT', 'Текст', m ? m.t : '', 6, 'maxlength="1000"') + '<p class="ferr" id="ferr" hidden></p>' +
+    '<div class="kchips" id="tmK">' + tmChips() + '</div>' + ft('tmT', 'Текст', m ? m.t : '', 6, 'maxlength="1000"') + imgPick() + '<p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn pri" data-act="tmGo">' + (m ? 'Сохранить' : 'Отправить клиенту') + '</button>' + (m ? '<button class="btn danger" data-act="tmDel" style="margin-top:0">Убрать сообщение</button>' : ''));
 }
 function tmChips() { return ['tip', 'go', 'fire', 'msg'].map(function (k) { return '<button data-act="tmK" data-v="' + k + '" class="' + (S.tm.kind === k ? 'on' : '') + '">' + KINDS[k] + '</button>'; }).join(''); }
@@ -2041,6 +2065,7 @@ function pushNow(keep) {
         if (PEND[id].cn) PEND[id].cn = PEND[id].cn.filter(function (x) { return sentCn.indexOf(x) < 0; });
       }
       if (r.aw) M.aw = r.aw;
+      if (sentCn.length && cur && cur.items) cur.items.forEach(function (it) { if (sentCn.indexOf(it.id) >= 0) it.cs = true; });   // 2.4: ушёл тренеру
       pendSave(); paintSync(); if (S.view === 'run') csPaint(myOf(S.run));
       if (r.medal || r.disc) awCheck();
       if (sentCn.length) toast('Комментарий отправлен тренеру');
@@ -2052,15 +2077,41 @@ function pushNow(keep) {
     } else { S.offline = !!r.net; paintSync(); if (S.view === 'run') csPaint(myOf(S.run)); pushT = setTimeout(pushNow, 15000); }
   });
 }
-function loadMy(first) {
-  return (pendCount() && M ? pushNow() : Promise.resolve()).then(function () { return ccall('my', {}); }).then(function (r) {
+function loadMy(first, quiet) {
+  return (pendCount() && M ? pushNow() : Promise.resolve()).then(function () { return ccall('my', {}, !!quiet); }).then(function (r) {
     if (r.auth) return;
     if (!r.ok) { S.offline = !!r.net; if (M) paintSync(); else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false; setMy(r);
+    if (r.cv !== undefined) CV.v = String(r.cv);
+    cvArm();
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
     if (S.view === 'home' || first) { if (first) render(); else rerenderKeep(); } else { paintSync(); if (S.view === 'run') csPaint(myOf(S.run)); }
     awCheck();
   });
+}
+/*
+ * 2.4: есть ли новое от тренера (ответ, сообщение, тренировка). Пока приложение открыто – раз в CV_SEC секунд лёгкий запрос
+ * { op:'cv' } (сервер не открывает таблиц), вернулись в приложение – сразу. Изменилось – данные подтягиваются тихо; если
+ * клиент в этот момент что-то вводит или открыто окно – чуть позже.
+ */
+var CV_SEC = 20, CV = { v: null, t: null, again: false, busy: false };
+function cvArm(sec) { clearTimeout(CV.t); if (MODE !== 'client' || !M) return; CV.t = setTimeout(cvCheck, (sec === undefined ? CV_SEC : sec) * 1000); }
+function cvCheck() {
+  if (MODE !== 'client' || !M || CV.busy) return;
+  if (document.visibilityState === 'hidden') return;                    // свёрнуто – не спрашиваем, проверим при возврате
+  if (CV.again) return cvRefresh();
+  CV.busy = true;
+  ccall('cv', {}, true).then(function (r) {
+    CV.busy = false;
+    if (r && r.ok) { var v = String(r.v); if (CV.v === null) CV.v = v; else if (v !== CV.v) { CV.v = v; return cvRefresh(); } }
+    cvArm();
+  });
+}
+function cvRefresh() {
+  var a = document.activeElement;
+  if (pushing || S.busy || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) || document.getElementById('viewer')) { CV.again = true; return cvArm(5); }
+  CV.again = false;
+  loadMy(false, true);                                                    // cvArm – внутри loadMy
 }
 /** Номер тренировки у клиента: «4 из 12», «№ 7»; пусто – сверх пакета (номер не показываем). */
 function labOf(w) { return w.lab === undefined ? '№ ' + w.num : w.lab; }
@@ -2447,7 +2498,7 @@ function runItem(w, it, i, no) {
   if (k && S.vid === it.id) h += playerHtml(url);
   if (it.desc && S.open['d' + it.id]) h += '<div class="desc">' + esc(it.desc) + '</div>';
   h += runSets(it, i) + diffHtml(it, i);
-  h += '<div class="mt">' + ft('c-' + it.id, 'Комментарий тренеру', it.comment, 2, 'maxlength="500" data-f="comment" data-i="' + i + '"') + '<div id="cs-' + it.id + '">' + comStatus(w, it) + '</div></div>';
+  h += '<div class="mt" id="cm-' + it.id + '">' + comBox(w, it, i) + '</div>';
   h += '<div class="med" id="md-' + it.id + '">' + medInner(w, it, i) + '</div></div>';
   return h;
 }
@@ -2505,11 +2556,11 @@ function coachBanner() {
 function viewCoach() {
   var l = M.msgs || [], fresh = {};
   msgUnread().forEach(function (m) { fresh[m.id] = 1; });
-  var h = '<h1 class="hello">Ваш тренер</h1><p class="lead-p">Ответы на Ваши комментарии, рекомендации и напутствия тренера. Вопрос к упражнению – пишите в комментарии под ним, тренер ответит здесь.</p>';
+  var h = '<h1 class="hello">Ваш тренер</h1><p class="lead-p">Ответы на Ваши комментарии, рекомендации и напутствия тренера. Вопрос к упражнению – кнопка «Написать тренеру» под ним, тренер ответит здесь.</p>';
   if (!l.length) h += '<div class="card"><h3>Сообщений пока нет</h3><p class="sub" style="margin:0">Когда тренер ответит на комментарий или напишет Вам, сообщение появится здесь.</p></div>';
   else h += '<div class="card">' + l.map(function (m) {
     return '<div class="msg' + (fresh[m.id] ? ' un' : '') + '"><div class="msg-h"><b>' + esc(KINDS_C[m.k] || KINDS_C.msg) + '</b><span>' + stampTxt(m.at) + (m.by ? ' · ' + esc(m.by) : '') + '</span>' + (fresh[m.id] ? '<span class="nw">новое</span>' : '') + '</div>' +
-      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + '<p>' + esc(m.t) + '</p></div>';
+      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + (m.t ? '<p>' + esc(m.t) + '</p>' : '') + (m.img ? imgHtml(m.id, m.img) : '') + '</div>';
   }).join('') + '</div>';
   setTimeout(function () { msgMark(l); }, 600);
   return h;
@@ -2518,13 +2569,14 @@ function viewCoach() {
 function awStrip() {
   var a = M.aw; if (!a || !a.cur) return '';
   var c = a.cur;
-  return '<button class="awstrip" data-act="ctab" data-v="aw" style="margin-top:12px">' + medalSvg('sm', !c.medal) + '<span class="mn">' + (a.d ? '<b>Ваша скидка ' + a.disc + ' %</b> на все следующие пакеты' : c.medal ? '<b>Медаль за этот пакет – Ваша!</b> Подряд: ' + a.streak + ' из ' + a.need :
+  return '<button class="awstrip" data-act="ctab" data-v="aw" style="margin-top:12px">' + medalSvg('sm', !c.medal) + '<span class="mn">' + (a.d ? '<b>Ваша скидка ' + a.disc + ' %</b> – пока продлеваете без перерыва' : c.medal ? '<b>Медаль за этот пакет – Ваша!</b> Подряд: ' + a.streak + ' из ' + a.need :
     'До медали «' + esc(a.name) + '»: <b>' + c.left + ' ' + plural(c.left, 'тренировка', 'тренировки', 'тренировок') + '</b>') + '</span><span class="chev">›</span></button>';
 }
 function viewAw() {
   var a = M.aw, h = '<h1 class="hello">Награды</h1>';
-  if (!a) return h + '<div class="card aw">' + medalSvg('', true) + '<h3>' + 'Медаль «Лучший подопечный Lite Fit»' + '</h3><p class="sub" style="margin:0">Выполните все тренировки пакета в его срок – и медаль Ваша. Три медали подряд – скидка 10 % на все следующие пакеты. Награды появятся, когда тренер оформит Ваш пакет в приложении.</p></div>';
-  if (a.d) h += '<div class="card disc"><div class="aw-row"><span class="big">−' + a.disc + ' %</span><span class="mn"><b>Ваша скидка на все следующие пакеты</b><small>Действует с ' + dMon(a.d) + ' – за ' + a.need + ' медали подряд. Спасибо за Вашу дисциплину!</small></span></div></div>';
+  if (!a) return h + '<div class="card aw">' + medalSvg('', true) + '<h3>' + 'Медаль «Лучший подопечный Lite Fit»' + '</h3><p class="sub" style="margin:0">Выполните все тренировки пакета в его срок – и медаль Ваша. Три медали подряд и продление пакета без перерыва – скидка 10 %. Награды появятся, когда тренер оформит Ваш пакет в приложении.</p></div>';
+  if (a.d) h += '<div class="card disc"><div class="aw-row"><span class="big">−' + a.disc + ' %</span><span class="mn"><b>Ваша скидка на следующие пакеты</b><small>Действует с ' + dMon(a.d) + ' – за ' + a.need + ' медали подряд. Сохраняется, пока Вы продлеваете пакет без перерыва и оплачиваете ' +
+    (a.pay && a.pay.due ? 'до ' + dMon(a.pay.due) : 'до даты следующего платежа') + '. Спасибо за Вашу дисциплину!</small></span></div></div>';
   var c = a.cur;
   if (c) {
     var pc = Math.min(100, Math.round(c.ok * 100 / c.n));
@@ -2535,7 +2587,8 @@ function viewAw() {
   if (!a.d) {
     var sl = ''; for (var i = 0; i < a.need; i++) sl += medalSvg('sm', i >= a.streak);
     h += '<div class="card aw"><h3>' + a.need + ' медали подряд – скидка ' + a.disc + ' %</h3><div class="aw-slots">' + sl + '</div><p class="sub" style="margin:0">' +
-      (a.streak ? 'Подряд: ' + a.streak + ' из ' + a.need + '. ' : '') + 'Скидка – на все следующие пакеты, навсегда. Пакет без медали начинает счёт заново.</p></div>';
+      (a.streak ? 'Подряд: ' + a.streak + ' из ' + a.need + '. ' : '') + 'Медаль – за все тренировки пакета в срок. Скидка – после ' + a.need + ' медалей подряд, если пакеты продлеваются без перерыва и оплата – не позже даты следующего платежа. Пакет без медали, перерыв или просрочка начинают счёт заново.</p>' +
+      (a.x ? '<p class="awx">Скидка снята ' + dMon(a.x.at) + ': ' + esc(a.x.why) + '.</p>' : '') + '</div>';
   }
   if (a.m.length) h += '<h2 class="sec-title">Ваши медали · ' + a.m.length + '</h2><div class="card"><div class="rows">' + a.m.slice().reverse().map(function (m) {
     return '<div class="row" style="min-height:0;padding:9px 0">' + medalSvg('sm') + '<span class="mn"><b>' + esc(a.name) + '</b><small>Пакет с ' + dMon(m.s) + ' – ' + m.n + ' из ' + m.n + ' · получена ' + dMon(m.at) + '</small></span></div>';
@@ -2551,20 +2604,103 @@ function awCheck() {
   LS.set(key, String(now));
   var disc = a.d && +was < 100;
   sheet('Поздравляем!', '<div class="center" style="min-height:0;padding:10px 0 0">' + medalSvg('') + '<h2>' + (disc ? 'Скидка ' + a.disc + ' % – Ваша!' : 'Медаль «' + esc(a.name) + '»') + '</h2><p>' +
-    (disc ? a.need + ' медали подряд. Теперь все следующие пакеты – со скидкой ' + a.disc + ' %. Так держать!' : 'Все тренировки пакета выполнены в срок. ' + (a.streak < a.need ? 'Ещё ' + (a.need - a.streak) + ' подряд – и скидка ' + a.disc + ' % на все следующие пакеты.' : '')) + '</p>' +
+    (disc ? a.need + ' медали подряд и продление без перерыва. Теперь следующие пакеты – со скидкой ' + a.disc + ' %, пока продлеваете вовремя. Так держать!' : 'Все тренировки пакета выполнены в срок. ' + (a.streak < a.need ? 'Ещё ' + (a.need - a.streak) + ' подряд с продлением в срок – и скидка ' + a.disc + ' %.' : '')) + '</p>' +
     '<button class="btn pri" data-act="close">Спасибо!</button></div>');
 }
 /** Статус комментария клиента: отправляется / отправлен / тренер прочитал, и ответ тренера. */
 function comStatus(w, it) {
   if (!String(it.comment || '').trim()) return '';
-  var pend = !!PEND[w.id], h;
-  if (pend) h = '<p class="cst">' + IC.clock + (S.offline ? 'Отправится тренеру, когда появится интернет' : 'Сохраняю…') + '</p>';
+  var pend = !!PEND[w.id] && !!(PEND[w.id].cn || []).length, h;
+  if (pend) h = '<p class="cst">' + IC.clock + (S.offline ? 'Отправится тренеру, когда появится интернет' : 'Отправляю тренеру…') + '</p>';
   else if (it.cr || it.rp) h = '<p class="cst rd">' + IC.check2 + 'Тренер прочитал</p>';
   else h = '<p class="cst">' + IC.check + 'Отправлено тренеру</p>';
-  if (it.rp) h += '<div class="rpb"><small>Ответ тренера' + (it.rp.by ? ' · ' + esc(it.rp.by) : '') + '</small><p>' + esc(it.rp.t) + '</p>' + (it.rp.at ? '<div class="wh">' + stampTxt(it.rp.at) + '</div>' : '') + '</div>';
+  if (it.rp) h += '<div class="rpb"><small>Ответ тренера' + (it.rp.by ? ' · ' + esc(it.rp.by) : '') + '</small>' + (it.rp.t ? '<p>' + esc(it.rp.t) + '</p>' : '') +
+    (it.rp.img && it.rp.mid ? imgHtml(it.rp.mid, it.rp.img) : '') + (it.rp.at ? '<div class="wh">' + stampTxt(it.rp.at) + '</div>' : '') + '</div>';
   return h;
 }
-function csPaint(w) { if (!w || !w.items) return; w.items.forEach(function (it) { var el = document.getElementById('cs-' + it.id); if (el) el.innerHTML = comStatus(w, it); }); }
+/**
+ * 2.4: комментарий тренеру у клиента. Нет комментария – кнопка «Написать тренеру» (окно, «Отправить тренеру»). Есть – текст без
+ * правки, статус и ответ. Комментарий, написанный до 2.4 и ещё не ушедший тренеру, – с кнопкой «Отправить тренеру».
+ */
+function comBox(w, it, i) {
+  var t = String(it.comment || '').trim();
+  if (!t) return M && M.closed ? '' : '<button class="btn sec sm cmb" data-act="cmOpen" data-i="' + i + '">' + IC.chat + 'Написать тренеру</button>';
+  var sent = it.cs || it.cr || it.rp || (PEND[w.id] && (PEND[w.id].cn || []).indexOf(it.id) >= 0);
+  return '<div class="cmq"><small>Ваш комментарий тренеру</small><p>' + esc(t) + '</p></div>' +
+    (sent ? '<div id="cs-' + it.id + '">' + comStatus(w, it) + '</div>'
+      : '<p class="cst">' + IC.clock + 'Ещё не отправлен тренеру</p><button class="btn pri sm cmb" data-act="cmSend" data-i="' + i + '">' + IC.reply + 'Отправить тренеру</button>');
+}
+function csPaint(w) {
+  if (!w || !w.items) return;
+  w.items.forEach(function (it, i) { var el = document.getElementById('cm-' + it.id); if (el) el.innerHTML = comBox(w, it, i); });
+}
+/** Окно комментария: пишет, «Отправить тренеру» – окно закрывается, комментарий уходит сразу и больше не меняется. */
+function cmForm(i) {
+  var w = myOf(S.run), it = w && w.items[i]; if (!it) return;
+  var NS = numsOf(w.items);
+  S.cm = { i: i };
+  sheet('Комментарий тренеру', '<h2>Комментарий тренеру</h2><p class="lead">' + esc(NS[i] + '. ' + it.name) + '</p>' +
+    ft('cmT', 'Ваш комментарий', '', 6, 'maxlength="500" placeholder="Например: в последнем подходе тянуло поясницу"') +
+    '<p class="note" style="margin:0">Тренер получит комментарий сразу и ответит здесь же, под упражнением. Отправленный комментарий изменить нельзя – напишите всё, что хотели сказать.</p><p class="ferr" id="ferr" hidden></p>' +
+    '<button class="btn pri" data-act="cmGo">' + IC.reply + 'Отправить тренеру</button>');
+  var t = document.getElementById('cmT'); if (t) { try { t.focus(); } catch (x) {} }
+}
+/** Комментарий – в очередь отправки с пометкой «сообщить тренеру», сразу. */
+function cmSendNow(w, it) {
+  var p = PEND[w.id] || {}; p.cn = p.cn || []; if (p.cn.indexOf(it.id) < 0) p.cn.push(it.id); PEND[w.id] = p; pendSave();
+  csPaint(w); paintSync(); clearTimeout(pushT); pushT = setTimeout(pushNow, 50);
+}
+
+/* ---------- 2.4: фото тренера (ответ, сообщение) ---------- */
+var IMGC = {};                                                            // фото по «сообщение.метка файла»: сменили фото – новая метка
+function imgKey(mid, tok) { return mid + '.' + (tok || ''); }
+function imgHtml(mid, tok) {
+  var key = imgKey(mid, tok), c = IMGC[key];
+  if (c && c.err) return '<div class="mimg err">Фото не загрузилось – обновите страницу</div>';
+  setTimeout(function () { imgLoad(mid, tok); }, 0);
+  return '<button class="mimg" data-act="imgView" data-mid="' + esc(key) + '" aria-label="Фото тренера – открыть"><img data-im="' + esc(key) + '" alt="Фото тренера"' + (c && c.u ? ' src="' + c.u + '"' : '') + '></button>';
+}
+function imgLoad(mid, tok) {
+  var key = imgKey(mid, tok);
+  if (IMGC[key]) return;
+  IMGC[key] = { st: 1 };
+  var p = MODE === 'client' ? ccall('img', { mid: mid }, true) : call('img', { mid: mid }, true);
+  p.then(function (r) {
+    if (r && r.ok && r.data) { IMGC[key] = { u: 'data:' + (r.mime || 'image/jpeg') + ';base64,' + r.data }; [].forEach.call(document.querySelectorAll('img[data-im="' + key + '"]'), function (el) { el.src = IMGC[key].u; }); }
+    else { IMGC[key] = r && r.net ? null : { err: 1 }; }
+  });
+}
+/** Фото с телефона тренера: до 1600 px, JPEG; base64 без «data:» – для { img }. */
+function prepTrImg(f) {
+  return new Promise(function (ok, no) {
+    var u = URL.createObjectURL(f), im = new Image();
+    im.onload = function () {
+      var W = im.naturalWidth, H = im.naturalHeight, go = function (side, q) {
+        var sc = Math.min(1, side / Math.max(W, H)), cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(W * sc)); cv.height = Math.max(1, Math.round(H * sc));
+        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+        return cv.toDataURL('image/jpeg', q);
+      };
+      var d = go(1600, 0.82);
+      if (d.length > 1150000) d = go(1280, 0.72);
+      if (d.length > 1150000) d = go(1024, 0.65);
+      URL.revokeObjectURL(u);
+      ok(d);
+    };
+    im.onerror = function () { URL.revokeObjectURL(u); no(new Error('этот формат фото телефон не открывает – выберите другое')); };
+    im.src = u;
+  });
+}
+/** Блок «Фото» в окне ответа / сообщения тренера. S.img: { d – новое (dataURL), del – убрать прежнее, had – mid прежнего }. */
+function imgPick() {
+  var I = S.img || {}, hk = I.had ? imgKey(I.had, I.tok) : '', src = I.d || (I.had && !I.del && IMGC[hk] && IMGC[hk].u) || '';
+  var has = !!I.d || (!!I.had && !I.del);
+  return '<div class="imgpick" id="imgPick">' + (has ? (src ? '<img src="' + src + '" alt="">' : '<img alt="">') : '') + '<span class="mn">' + (has ? 'Фото прикреплено' : 'Можно приложить фото') + '</span>' +
+    '<label class="btn sec sm">' + IC.photo + (has ? 'Другое' : 'Фото') + '<input type="file" accept="image/*" data-f="trimg" hidden></label>' +
+    (has ? '<button class="btn danger sm" data-act="imgDel" style="width:auto;padding:0 12px;margin:0">' + IC.trash + '</button>' : '') + '</div>';
+}
+function imgPickPaint() { var el = document.getElementById('imgPick'); if (el) el.outerHTML = imgPick(); }
+function imgBody(b) { var I = S.img || {}; if (I.d) b.img = I.d.slice(I.d.indexOf(',') + 1); else if (I.del) b.imgDel = true; return b; }
 
 /* ================= СБОРКА СТРАНИЦЫ ================= */
 function paintBar() {
@@ -2790,30 +2926,52 @@ var ACT = {
   tmK: function (b) { S.tm.kind = b.getAttribute('data-v'); var el = document.getElementById('tmK'); if (el) el.innerHTML = tmChips(); },
   msgAll: function () { S.msgAll = !S.msgAll; msgPaint(S.cid); },
   tmGo: function (b, e, del) {
-    var c = clientOf(S.cid), text = val('tmT'), cid = c.id;
-    if (!del && !text) return ferr('Напишите текст сообщения.');
+    var c = clientOf(S.cid), text = val('tmT'), cid = c.id, I = S.img || {};
+    if (!del && !text && !I.d && !(I.had && !I.del)) return ferr('Напишите текст сообщения или приложите фото.');
     b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
-    call('tmsg', { cid: cid, kind: S.tm.kind, text: text, mid: S.tm.mid, del: !!del }).then(function (r) {
+    call('tmsg', imgBody({ cid: cid, kind: S.tm.kind, text: text, mid: S.tm.mid, del: !!del })).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = 'Повторить'; return ferr(errText(r)); }
       S.msgs = S.msgs || {}; S.msgs[cid] = { list: r.list || [] };
+      var nm = (r.list || []).filter(function (m) { return S.tm.mid ? m.id === S.tm.mid : true; })[0];   // новое – первое в списке (свежие сверху)
+      if (I.d && !del && nm && nm.img) IMGC[imgKey(nm.id, nm.img)] = { u: I.d };
       closeSheet(); msgPaint(cid); toast(r.msg || 'Готово');
     });
   },
   tmDel: function (b) { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно убрать? Нажмите ещё раз'; return; } ACT.tmGo(b, null, true); },
   rpOpen: function (b) { rpForm(b.getAttribute('data-id'), b.getAttribute('data-it')); },
   rpGo: function (b, e, del) {
-    var R = S.rp, text = del ? '' : val('rpT');
+    var R = S.rp, text = del ? '' : val('rpT'), I = S.img || {};
     if (!R) return;
-    if (!del && !text) return ferr('Напишите ответ.');
+    if (!del && !text && !I.d && !(I.had && !I.del)) return ferr('Напишите ответ или приложите фото.');
     b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
-    call('reply', { id: R.id, item: R.it, text: text }).then(function (r) {
+    call('reply', del ? { id: R.id, item: R.it, text: '', imgDel: true } : imgBody({ id: R.id, item: R.it, text: text })).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = del ? 'Убрать ответ' : 'Отправить ответ'; return ferr(errText(r)); }
+      if (r.rp && r.rp.img && I.d) IMGC[imgKey(r.rp.mid, r.rp.img)] = { u: I.d };   // своё новое фото – сразу, без загрузки
       closeSheet(); rpApply(r); toast(r.msg || 'Ответ отправлен');
     });
   },
   rpDel: function (b) { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно убрать? Нажмите ещё раз'; return; } ACT.rpGo(b, null, true); },
+  imgDel: function () { S.img = S.img || {}; if (S.img.d) delete S.img.d; else S.img.del = true; imgPickPaint(); },
+  imgView: function (b) {
+    var mid = b.getAttribute('data-mid'), c = IMGC[mid]; if (!c || !c.u) return;
+    var v = document.getElementById('viewer');
+    if (v) { var back = document.createElement('div'); back.className = 'viewer'; back.id = 'viewer2'; back.innerHTML = '<div class="vp"><div class="vh"><b>Фото тренера</b><button class="x" data-act="imgClose" aria-label="Закрыть">' + IC.x + '</button></div><div class="vb"><img class="imfull" src="' + c.u + '" alt="Фото тренера"></div></div>'; document.body.appendChild(back); return; }
+    sheet('Фото тренера', '<img class="imfull" src="' + c.u + '" alt="Фото тренера">');
+  },
+  imgClose: function () { var v = document.getElementById('viewer2'); if (v) v.remove(); },
+  cmOpen: function (b) { cmForm(+b.getAttribute('data-i')); },
+  cmGo: function (b) {
+    var w = myOf(S.run), it = w && S.cm ? w.items[S.cm.i] : null, text = val('cmT');
+    if (!it) return closeSheet();
+    if (!text) return ferr('Напишите комментарий.');
+    if (String(it.comment || '').trim()) { closeSheet(); return toast('Комментарий к этому упражнению уже отправлен', 'bad'); }
+    it.comment = text.slice(0, 500); it.cr = false;
+    closeSheet();
+    cmSendNow(w, it);
+  },
+  cmSend: function (b) { var w = myOf(S.run), it = w && w.items[+b.getAttribute('data-i')]; if (it && String(it.comment || '').trim()) cmSendNow(w, it); },
   refToggle: function () { if (!S.ref) return; S.ref.open = !S.ref.open; loadRef(); rerenderKeep(); if (S.ref.open && !wide()) scrollToEl('refCard'); },
   openNote: function () { S.open.note = true; rerenderKeep('wNote'); },
   openDesc: function (b) { var it = draftItem(b); S.open['d' + it.id] = true; rerenderKeep('d-' + it.id); },
@@ -3064,7 +3222,7 @@ document.addEventListener('input', function (e) {
     var rw = myOf(S.run), ri = rw && rw.items[i]; if (!ri || M.closed) return;
     if (f === 'fw') { v = numW(v); if (el.value !== v) el.value = v; ri.sets[k].fw = v; }
     else if (f === 'fr') { v = numR(v); if (el.value !== v) el.value = v; ri.sets[k].fr = v; }
-    else if (f === 'comment') { ri.comment = v; ri.cr = false; cnBump(rw, ri); }
+    else return;                                                          // 2.4: комментарий – только через окно «Написать тренеру»
     touch(rw);
   }
 });
@@ -3072,9 +3230,9 @@ document.addEventListener('change', function (e) {
   var el = e.target, f = el.getAttribute && el.getAttribute('data-f');
   if (f === 'vdir') { var fl = [].slice.call(el.files || []); setTimeout(function () { vidLoad(fl); S.bv = 'vid'; render(); window.scrollTo(0, 0); }, 0); return; }
   if (f === 'vex' && V) { var vi = +el.getAttribute('data-i'), was = V.files[vi] ? V.files[vi].ex : '', hit = vidAssign(vi, el.value); if (V.files[vi] && (V.files[vi].ex !== was || !hit)) vidPaint(hit ? vidNextFree(vi) : -1); return; }
-  if (f === 'comment' && MODE === 'client' && S.view === 'run' && M && !M.closed) {
-    var cw = myOf(S.run), ci = cw && cw.items[+el.getAttribute('data-i')];
-    if (ci && String(ci.comment || '').trim()) cnLater(cw, ci);   // тренеру – через полторы минуты, если клиент больше не правит
+  if (f === 'trimg') {                                                    // 2.4: фото к ответу или сообщению тренера
+    var tf = el.files && el.files[0]; if (!tf) return;
+    prepTrImg(tf).then(function (d) { S.img = S.img || {}; S.img.d = d; S.img.del = false; imgPickPaint(); ferr(''); }).catch(function (x) { ferr(cap(x.message || 'фото не открылось')); });
     return;
   }
   if (f === 'comCid' && S.comCid !== el.value) { S.comCid = el.value; var cb = document.getElementById('comBox'); if (cb) cb.innerHTML = comsHtml(); return; }   // на случай браузера без события input у списка
@@ -3099,6 +3257,7 @@ document.addEventListener('keydown', function (e) {
 document.addEventListener('visibilitychange', function () {
   if (document.visibilityState === 'hidden') { if (MODE === 'client') { cnFire(true); if (pendCount() && !pushing) pushNow(true); } return; }
   if (MODE === 'client') { mqPause = 5000; mqKick(); }
+  if (MODE === 'client' && M && Date.now() - S.loadedAt < 120000) { cvArm(0); return; }   // 2.4: недавно загружали – только «есть ли новое»
   if (Date.now() - S.loadedAt < 120000 || S.busy) return;
   if (MODE === 'client' && M) loadMy();
   if (MODE === 'trainer' && D && S.view !== 'edit' && S.view !== 'load') loadList();
