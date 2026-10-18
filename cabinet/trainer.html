@@ -517,6 +517,40 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 62px)}
 .frm .banner{margin-bottom:0}
 .frm .hidden{display:none}
 .card .btns:first-child{margin-top:0}
+/* 1.5: баллы и медали клиентов */
+.mdw{position:relative;display:inline-flex;flex:none}
+.mdw i{position:absolute;right:-4px;bottom:2px;font-style:normal;font-size:11px;font-weight:800;background:var(--accent);color:var(--on-accent);border-radius:99px;padding:1px 5px}
+.mdl.off{opacity:.55}
+.awrow{display:flex;gap:8px;align-items:flex-end;overflow-x:auto;padding:4px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.awrow::-webkit-scrollbar{display:none}
+.pts-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.pts-h h3{margin:0}
+.pts-n{font-size:13px;color:var(--muted)}
+.pts-n b{color:var(--text);font-size:15px}
+.ptb{position:relative;height:10px;border-radius:99px;background:var(--card2);border:1px solid var(--line);margin:24px 0 8px}
+.ptb i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent))}
+.ptb b{position:absolute;top:-4px;width:2px;height:16px;background:var(--line2);margin-left:-1px}
+.ptb b span{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted);font-weight:700}
+.ptb b.on.bronze{background:#E2A06B}.ptb b.on.silver{background:#E9EEF0}.ptb b.on.gold{background:#FFE08A}
+.ptr{width:100%;border-collapse:collapse;font-size:14px}
+.ptr th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:6px 0;border-bottom:1px solid var(--line)}
+.ptr td{padding:8px 0;border-bottom:1px solid var(--line)}
+.ptr td.num,.ptr th:last-child{text-align:right}
+.ptm-r{display:flex;align-items:center;gap:12px;padding:5px 0}
+.ptm-r .mdl{flex:none}
+.ptm-r small{display:block;color:var(--muted);font-size:12.5px}
+.ptls{margin-top:4px}
+.ptl{display:grid;grid-template-columns:1fr auto 44px;gap:2px 10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline}
+.ptl:last-child{border-bottom:0}
+.ptl b{text-align:right;color:var(--accent)}
+.ptl small{grid-column:1 / -1;color:var(--muted);font-size:12.5px}
+.ptgo{margin-top:6px;font-size:13px;color:var(--muted)}
+.ptgo b{color:var(--text)}
+.pt-big{display:flex;gap:14px;align-items:center}
+.pt-big .mn{flex:1;min-width:0}
+.pt-big small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.pt-mon{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.ptm-r h3{margin:0}
 </style>
 </head>
 <body>
@@ -653,6 +687,11 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.5 (19.10.2026). Баллы и медали клиентов (как в кабинете клиента 2.9): карточка в обзоре клиента с разбором месяца и строкой
+ *   «Подскажите клиенту», на «Сегодня» – «Медали: месяц заканчивается» и памятка «Что делать тренеру». Данные тренировок –
+ *   запрос { a:'wk', op:'ptsall' } к приложению тренировок (сервер 4.13.0), раз в 10 минут.
+ * 1.4 (18.10.2026). Клиенты по значимости: PRO, BASIC, START, бесплатные (последняя оплата – 0 ₽), без формата – во вкладке
+ * «Клиенты» группами, на «Сегодня» в «Требуют внимания» и «Данные за сегодня» в том же порядке.
  * 1.3 (18.10.2026). В окне «Оплата» – плашка, если у клиента скидка Lite Fit (медали в приложении тренировок и продление в срок):
  * «Цена по прайсу» ставится сама (lite-fit-trainer 3.9.4, lite-fit-trenirovki 4.11). Сообщение после смены интервала замеров
  * называет ближайшую дату.
@@ -671,8 +710,8 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '1.3';
-var PATCH = '.2';                // правка страницы без смены версии сервера
+var VERSION = '1.5';
+var PATCH = '';                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 var qs = new URLSearchParams(location.search);
@@ -1016,9 +1055,18 @@ function summ(c) {
 }
 function allAlerts() {
   var out = [];
-  D.clients.forEach(function (c) { if (!c.arch) summ(c).alerts.forEach(function (a) { out.push({ c: c, text: a.text, sub: a.sub }); }); });
+  byRank(D.clients).forEach(function (c) { if (!c.arch) summ(c).alerts.forEach(function (a) { out.push({ c: c, text: a.text, sub: a.sub }); }); });
   return out;
 }
+/** 1.4: клиенты по значимости: PRO, BASIC, START, бесплатные (последняя оплата – 0 ₽), без формата. */
+var RANKS = ['PRO', 'BASIC', 'START', 'Бесплатные', 'Без формата'];
+function fmtRank(c) {
+  var p = c.pays && c.pays[0];
+  if (p && p.sum === 0) return 3;
+  var f = String(c.format || '').toUpperCase();
+  return f === 'PRO' ? 0 : f === 'BASIC' ? 1 : f === 'START' ? 2 : 4;
+}
+function byRank(list) { return list.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return fmtRank(a[0]) - fmtRank(b[0]) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
 function metaLine(c) {
   var tr = trialSt(c), p = [c.format || 'формат не выбран'];
   if (D.admin && !D.as && c.owner) p.push(c.owner);
@@ -1026,6 +1074,247 @@ function metaLine(c) {
   else if (c.loaded && c.start && T >= dn(c.start) && T <= dn(c.end)) p.push('день ' + (T - dn(c.start) + 1) + ' из ' + (dn(c.end) - dn(c.start) + 1));
   if (c.payEnd && !tr) p.push('оплачено до ' + dm(c.payEnd));
   return p.join(' · ');
+}
+
+/* ================= БАЛЛЫ И МЕДАЛИ (одинаково в кабинете клиента и в кабинете тренера) =================
+ * Баллы – за месяц ведения (30 дней от старта, как «Итоги месяца»): питание внесено – 1, шаги внесены – 1, норма шагов – ещё 1,
+ * контрольные замеры – 3, фото месяца (фас, профиль, спина) – 5, выполненная тренировка в приложении – 3. Дни заморозки не считаются.
+ * Медали месяца: по сумме – бронза 60, серебро 80, золото 100 (без шагов – 35, 50, 60); за каждое направление своя – «Питание» (питание 25 дней из 30),
+ * «Активность» (норма шагов 20 дней из 30), «Замеры» (все замеры месяца внесены), «Фото-отчёт», «Тренировки» (8 за месяц).
+ * Серии – «7 дней питания подряд», «30 дней питания подряд» (один раз). Главная награда – «Лучший подопечный Lite Fit»
+ * (весь пакет тренировок в срок; 3 подряд с продлением в срок – скидка 10 %) – из приложения тренировок.
+ * Сервер баллы не хранит: страница считает их по тем же данным, что и так показывает. */
+var PTS = {
+  FOOD: 1, STEPS: 1, STEPS_OK: 1, MEAS: 3, PHOTO: 5, TRAIN: 3,
+  TIERS: [[60, 'bronze', 'Бронза'], [80, 'silver', 'Серебро'], [100, 'gold', 'Золото']],
+  FOOD_DAYS: 25, STEPS_DAYS: 20, TRAIN_N: 8, STREAKS: [7, 30], NO_STEPS: [35, 50, 60],   // без шагов (пробный, нет нормы) – пороги ниже
+  NAMES: { food: 'Питание', steps: 'Активность', meas: 'Замеры', photo: 'Фото-отчёт', train: 'Тренировки', streak7: '7 дней питания подряд',
+    streak30: '30 дней питания подряд', bronze: 'Бронза месяца', silver: 'Серебро месяца', gold: 'Золото месяца', best: 'Лучший подопечный Lite Fit', disc: 'Скидка 10 %' }
+};
+/**
+ * X: { today, start, end, base – начало счёта месяцев, stepsNorm, noSteps, day(y) → { kcal, steps } | null, frz(y) → true – заморозка,
+ *      meas: [{ date, filled }], photos: [{ date, code }], done: [дни выполненных тренировок] }.
+ * → { months: [{ n, from, to, open, days, food, steps, stepsOk, meas, measN, photo, train, pts, tier, medals: [{ k, at }] }], cur, streak, all: [{ k, n, at }] }
+ */
+/** Пороги бронзы, серебра, золота: без шагов за день можно набрать втрое меньше – пороги ниже. */
+function ptsTiers(noSteps) { return noSteps ? PTS.TIERS.map(function (t, i) { return [PTS.NO_STEPS[i], t[1], t[2]]; }) : PTS.TIERS; }
+function ptsCalc(X) {
+  var TI = ptsTiers(X.noSteps);
+  var T = dn(X.today), S0 = dn(X.start), E0 = dn(X.end), B = dn(X.base || X.start);
+  if (T == null || S0 == null || E0 == null || B == null) return null;
+  var doneBy = {}, months = [], all = [];
+  (X.done || []).forEach(function (y) { doneBy[y] = (doneBy[y] || 0) + 1; });
+  for (var k = 0; k < 60; k++) {
+    var a = B + 30 * k, b = Math.min(a + 29, E0);
+    if (a > T || a > E0) break;
+    var m = { n: k + 1, from: ymd(a), to: ymd(b), open: b >= T, days: 0, food: 0, steps: 0, stepsOk: 0, meas: 0, measN: 0, photo: false, train: 0, pts: 0, tier: null, tiers: TI, medals: [] };
+    for (var n = a; n <= b; n++) {
+      var y = ymd(n);
+      if (n <= T) m.train += doneBy[y] || 0;
+      if (n < S0 || X.frz(y)) continue;
+      m.days++;
+      if (n > T) continue;
+      var d = X.day(y) || {};
+      if (d.kcal != null) m.food++;
+      if (!X.noSteps && d.steps != null) { m.steps++; if (X.stepsNorm && d.steps >= X.stepsNorm) m.stepsOk++; }
+    }
+    (X.meas || []).forEach(function (c) { var cn = dn(c.date); if (cn >= a && cn <= Math.min(b, T)) { m.measN++; if (c.filled) m.meas++; } });
+    var kinds = {};
+    (X.photos || []).forEach(function (p) { var pn = dn(p.date); if (pn >= a && pn <= b && pn <= T) kinds[p.code] = true; });
+    m.photo = !!(kinds.front && kinds.side && kinds.back);
+    m.pts = m.food * PTS.FOOD + m.steps * PTS.STEPS + m.stepsOk * PTS.STEPS_OK + m.meas * PTS.MEAS + (m.photo ? PTS.PHOTO : 0) + m.train * PTS.TRAIN;
+    TI.forEach(function (t) { if (m.pts >= t[0]) m.tier = t; });
+    m.need = { food: Math.ceil(m.days * PTS.FOOD_DAYS / 30), steps: Math.ceil(m.days * PTS.STEPS_DAYS / 30) };
+    if (m.tier) m.medals.push({ k: m.tier[1] });
+    if (m.days && m.food >= m.need.food) m.medals.push({ k: 'food' });
+    if (!X.noSteps && X.stepsNorm && m.days && m.stepsOk >= m.need.steps) m.medals.push({ k: 'steps' });
+    if (!m.open && m.measN && m.meas === m.measN) m.medals.push({ k: 'meas' });
+    if (m.photo) m.medals.push({ k: 'photo' });
+    if (m.train >= PTS.TRAIN_N) m.medals.push({ k: 'train' });
+    m.medals.forEach(function (x) { all.push({ k: x.k, n: m.n }); });
+    months.push(m);
+  }
+  // серии питания: подряд по дням ведения, заморозка серию не рвёт
+  var run = 0, best = 0, got = {};
+  for (var q = S0; q <= Math.min(T, E0); q++) {
+    var yq = ymd(q);
+    if (X.frz(yq)) continue;
+    var dq = X.day(yq) || {};
+    if (dq.kcal != null) { run++; if (run > best) best = run; PTS.STREAKS.forEach(function (s) { if (run === s && !got[s]) { got[s] = yq; all.push({ k: 'streak' + s, at: yq }); } }); }
+    else if (q < T) run = 0;                                          // сегодня ещё можно внести – серию не обнуляем
+  }
+  return { months: months, cur: months[months.length - 1] || null, streak: run, best: best, all: all };
+}
+/** Сколько до следующей медали за баллы: { t: [порог, код, название], left } или null – уже золото. */
+function ptsNext(m) { var TI = m.tiers || PTS.TIERS; for (var i = 0; i < TI.length; i++) if (m.pts < TI[i][0]) return { t: TI[i], left: TI[i][0] - m.pts }; return null; }
+
+var PTS_IC = {
+  food: '<path d="M4 12.5h16a8 8 0 0 1-16 0z"/><path d="M9 9c0-1.5.8-2.3 1.6-3.2M13 9c0-1.5.8-2.3 1.6-3.2"/>',
+  steps: '<path d="M8.5 3.5c1.6 0 2.5 1.8 2.5 4.3S10.1 12 8.5 12 6 10.3 6 7.8s.9-4.3 2.5-4.3zM15.5 9.5c1.6 0 2.5 1.8 2.5 4.3S17.1 18 15.5 18 13 16.3 13 13.8s.9-4.3 2.5-4.3z"/>',
+  meas: '<circle cx="10.5" cy="11" r="6.5"/><circle cx="10.5" cy="11" r="1.8"/><path d="M17 11h4v6h-9"/>',
+  photo: '<path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/>',
+  train: '<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
+  streak: '<path d="M12 3c.6 3.4 4.8 5 4.8 10a4.8 4.8 0 0 1-9.6 0c0-2.6 1.7-3.6 1.9-5.6 1 .9 1.6 1.8 1.7 3 .9-1.9 1.4-4.3 1.2-7.4z"/>',
+  star: '<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>'
+};
+/** У каждой медали свой цвет: металлы месяца, направления – каждое своим, главная награда – фирменная бирюза. */
+var PTS_COL = { bronze: ['#E2A06B', '#8A4F22'], silver: ['#E9EEF0', '#7E8C92'], gold: ['#FFE08A', '#C08A1E'], best: ['#7DEBE5', '#1F8E88'], disc: ['#FFE08A', '#C08A1E'],
+  food: ['#B6EE8E', '#3F8F2C'], steps: ['#9CD0FF', '#2E6DB5'], meas: ['#D3BEFF', '#6B4DC6'], photo: ['#FFB8CB', '#B94468'], train: ['#FFC48E', '#C2601B'], streak: ['#FFA07E', '#B53A21'] };
+/**
+ * Медаль картинкой: k – код (food, steps, meas, photo, train, streak7, streak30, bronze, silver, gold, best, disc), sz – размер
+ * в пикселях, off – ещё не получена (серая), label – текст внутри (номер месяца, «−10 %»).
+ */
+function medalSvg2(k, sz, off, label) {
+  var id = 'm' + Math.random().toString(36).slice(2, 8), big = k === 'best' || k === 'disc', metal = PTS_COL[k] || PTS_COL[k.replace(/\d+$/, '')];
+  var c1 = off ? '#2A3B3D' : metal ? metal[0] : '#5FE3DB', c2 = off ? '#142224' : metal ? metal[1] : '#16716C';
+  var rib = off ? '#22393B' : big ? '#3ED6CE' : metal ? metal[1] : '#1F8E88', glyph = off ? '#5E7577' : k === 'best' ? '#04211F' : '#1C1408';
+  var ic = k === 'best' ? PTS_IC.star : PTS_IC[k.replace(/\d+$/, '')] || '';
+  var h = '<svg class="mdl' + (off ? ' off' : '') + '" width="' + sz + '" height="' + Math.round(sz * 1.18) + '" viewBox="0 0 64 76" aria-hidden="true">' +
+    '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>' +
+    (big && !off ? '<circle cx="32" cy="46" r="30" fill="' + c1 + '" opacity=".22"/>' : '') + '<path d="M18 2h11l5 18-9 4z" fill="' + rib + '" opacity=".9"/><path d="M46 2H35l-5 18 9 4z" fill="' + rib + '" opacity=".75"/>' +
+    '<circle cx="32" cy="46" r="27" fill="url(#' + id + ')"/><circle cx="32" cy="46" r="21.5" fill="none" stroke="' + glyph + '" stroke-opacity=".28" stroke-width="1.5"' + (big ? ' stroke-dasharray="2 2.4"' : '') + '/>';
+  if (label) h += '<text x="32" y="' + (label.length > 3 ? 51 : 53) + '" text-anchor="middle" font-family="Manrope,Montserrat,sans-serif" font-weight="800" font-size="' + (label.length > 3 ? 13 : 19) + '" fill="' + glyph + '">' + esc(label) + '</text>';
+  else if (ic) h += '<g transform="translate(20 34)" fill="' + (k === 'best' ? glyph : 'none') + '" stroke="' + glyph + '" stroke-width="' + (k === 'best' ? 1 : 2) + '" stroke-linecap="round" stroke-linejoin="round">' + ic + '</g>';
+  if (k === 'best' && !off) h += '<text x="32" y="65" text-anchor="middle" font-family="Manrope,Montserrat,sans-serif" font-weight="800" font-size="5.4" letter-spacing=".6" fill="' + glyph + '">LITE FIT</text>';
+  return h + '</svg>';
+}
+/** Подпись медали: «Питание · месяц 2», «Золото месяца 3», «7 дней питания подряд». */
+function ptsTitle(x) { return (PTS.NAMES[x.k] || x.k) + (x.n ? ' · месяц ' + x.n : ''); }
+/** Строка медалей: главная награда (если есть), затем медали – свежие первыми. */
+function ptsRow(R, aw, max) {
+  var h = '';
+  if (aw && aw.d) h += '<span class="mdw big" title="' + esc(PTS.NAMES.disc) + '">' + medalSvg2('disc', 52, false, '−' + aw.disc + '%') + '</span>';
+  if (aw && aw.m && aw.m.length) h += '<span class="mdw big" title="' + esc(PTS.NAMES.best) + '">' + medalSvg2('best', 52, false) + (aw.m.length > 1 ? '<i>×' + aw.m.length + '</i>' : '') + '</span>';
+  var list = R ? R.all.slice().reverse() : [];
+  list.slice(0, max || 12).forEach(function (x) {
+    var lab = x.k === 'bronze' || x.k === 'silver' || x.k === 'gold' ? String(x.n) : x.k === 'streak7' ? '7' : x.k === 'streak30' ? '30' : '';
+    h += '<span class="mdw" title="' + esc(ptsTitle(x)) + '">' + medalSvg2(x.k, 38, false, lab) + '</span>';
+  });
+  return h;
+}
+/** Полоса баллов месяца с отметками 60 / 80 / 100. */
+function ptsBar(m) {
+  var TI = m.tiers || PTS.TIERS, top = TI[TI.length - 1][0] * 1.15, pc = Math.min(m.pts / top, 1) * 100;
+  return '<div class="ptb"><i style="width:' + pc.toFixed(1) + '%"></i>' + TI.map(function (t) {
+    return '<b class="' + t[1] + (m.pts >= t[0] ? ' on' : '') + '" style="left:' + (t[0] / top * 100).toFixed(1) + '%"><span>' + t[0] + '</span></b>';
+  }).join('') + '</div>';
+}
+/** Таблица «как начисляются баллы» и описание медалей – для инструкции клиенту и тренеру. */
+function ptsRules(noSteps) {
+  var rows = [['Питание внесено за день', '1'], noSteps ? null : ['Шаги внесены', '1'], noSteps ? null : ['Норма шагов выполнена', '+1'],
+    ['Контрольные замеры в свой день', '3'], ['Фото месяца: фас, профиль, спина', '5'], ['Тренировка выполнена в приложении', '3']].filter(Boolean);
+  var md = [['bronze', 'Бронза, серебро, золото месяца', 'за ' + ptsTiers(noSteps).map(function (t) { return t[0]; }).join(', ') + ' баллов за месяц ведения' + (noSteps ? ' (без шагов)' : ''), '1'],
+    ['food', 'Питание', 'питание внесено ' + PTS.FOOD_DAYS + ' дней из 30'], noSteps ? null : ['steps', 'Активность', 'норма шагов ' + PTS.STEPS_DAYS + ' дней из 30'],
+    ['meas', 'Замеры', 'все контрольные замеры месяца внесены'], ['photo', 'Фото-отчёт', 'все три фото месяца'],
+    ['train', 'Тренировки', PTS.TRAIN_N + ' тренировок за месяц в приложении'], ['streak7', 'Серии', '7 и 30 дней питания подряд – один раз', '7']].filter(Boolean);
+  return '<table class="ptr"><tr><th>За что</th><th>Баллов</th></tr>' + rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td class="num">' + r[1] + '</td></tr>'; }).join('') + '</table>' +
+    '<p class="sub" style="margin:10px 0 14px">Месяц – 30 дней ведения, как в «Итогах месяца». Дни заморозки не считаются и серию не прерывают.</p>' +
+    '<div class="ptm">' + md.map(function (r) { return '<div class="ptm-r">' + medalSvg2(r[0], 34, false, r[3] || '') + '<span><b>' + r[1] + '</b><small>' + r[2] + '</small></span></div>'; }).join('') + '</div>';
+}
+/** Разбор месяца по направлениям: сколько баллов и сколько до медали направления. */
+function ptsBreak(m, noSteps) {
+  var line = function (name, val, pts, goal) { return '<div class="ptl"><span>' + name + '</span><span class="num">' + val + '</span><b class="num">' + pts + '</b>' + (goal ? '<small>' + goal + '</small>' : '') + '</div>'; };
+  var has = function (k) { return m.medals.some(function (x) { return x.k === k; }); };
+  var dd = function (n) { return n + ' ' + plural(n, 'день', 'дня', 'дней'); };
+  return '<div class="ptls">' +
+    line('Питание', dd(m.food), m.food * PTS.FOOD, has('food') ? '✓ медаль «Питание»' : 'медаль – ' + m.need.food + ' дней') +
+    (noSteps ? '' : line('Шаги внесены', dd(m.steps), m.steps * PTS.STEPS, '') + line('Норма шагов', dd(m.stepsOk), m.stepsOk * PTS.STEPS_OK, has('steps') ? '✓ медаль «Активность»' : 'медаль – ' + m.need.steps + ' дней')) +
+    line('Замеры', m.meas + ' из ' + m.measN, m.meas * PTS.MEAS, has('meas') ? '✓ медаль «Замеры»' : m.open ? 'медаль – когда месяц закончится, если внесены все' : '') +
+    line('Фото месяца', m.photo ? 'есть' : 'нет', m.photo ? PTS.PHOTO : 0, has('photo') ? '✓ медаль «Фото-отчёт»' : 'нужны фас, профиль и спина') +
+    line('Тренировки', String(m.train), m.train * PTS.TRAIN, has('train') ? '✓ медаль «Тренировки»' : 'медаль – ' + PTS.TRAIN_N + ' за месяц') + '</div>';
+}
+
+/* ================= 1.5: БАЛЛЫ И МЕДАЛИ КЛИЕНТОВ ================= */
+var PTS_LS = 'lf_tr_pts_' + KEY.slice(0, 10), PTS_SEEN = 'lf_tr_pts_ok', PTSA = null;
+try { PTSA = JSON.parse(LS.get(PTS_LS) || 'null'); } catch (e) { PTSA = null; }
+/** Дни выполненных тренировок и главная награда всех клиентов – одним запросом к приложению тренировок, раз в 10 минут. */
+function ptsLoadAll(force) {
+  if (!API || !KEY || !DEV || S.ptsBusy || (!force && PTSA && Date.now() - (PTSA.at || 0) < 600000)) return;
+  S.ptsBusy = true;
+  post({ a: 'wk', op: 'ptsall', t: KEY, d: DEV }).then(function (r) {
+    S.ptsBusy = false;
+    if (!r || !r.ok) return;
+    PTSA = { list: r.list || {}, at: Date.now() };
+    LS.set(PTS_LS, JSON.stringify(PTSA));
+    if (D && !document.getElementById('viewer') && (S.cid || S.tab === 'home')) render();
+  }, function () { S.ptsBusy = false; });
+}
+/** Баллы клиента – так же, как их видит клиент в кабинете (дневник в кабинете тренера – за последние 200 дней). */
+function ptsOfC(c) {
+  if (!c || !c.loaded || !c.table || !c.start || !c.end || c.arch) return null;
+  var p = (PTSA && PTSA.list && PTSA.list[c.id]) || null;
+  var base = c.proFrom && dn(c.proFrom) > dn(c.start) ? c.proFrom : c.start;
+  var R = ptsCalc({ today: TODAY, start: c.start, end: c.end, base: base, stepsNorm: c.steps, noSteps: noSteps(c),
+    day: function (y) { var r = hrow(c, y); return r ? { kcal: r.k, steps: r.s } : null; }, frz: function (y) { return !!frzOn(c, dn(y)); },
+    meas: measCols(c).map(function (x) { return { date: x.date, filled: filled(x) }; }),
+    photos: (c.photos || []).map(function (x) { return { date: x.date, code: x.code }; }), done: p ? p.done || [] : [] });
+  return R ? { R: R, aw: p ? p.aw : null } : null;
+}
+/** Что подсказать клиенту в этом месяце: самые «дешёвые» баллы, которые ещё можно взять. */
+function ptsTips(c, m) {
+  var out = [], left = Math.max(dn(m.to) - T, 0), ns = noSteps(c), has = function (k) { return m.medals.some(function (x) { return x.k === k; }); };
+  if (!m.photo) out.push('фото месяца (фас, профиль, спина) – +' + PTS.PHOTO + ' баллов и медаль «Фото-отчёт»');
+  var mc = measCols(c).filter(function (x) { var n = dn(x.date); return n >= dn(m.from) && n <= dn(m.to) && !filled(x); })[0];
+  if (mc) out.push('замеры ' + dm(mc.date) + ' – +' + PTS.MEAS + ' балла' + (m.measN ? ', без них не будет медали «Замеры»' : ''));
+  if (!has('food')) { var nf = m.need.food - m.food; if (nf > 0 && nf <= left + 1) out.push('питание: до медали «Питание» – ещё ' + nf + ' ' + plural(nf, 'день', 'дня', 'дней')); }
+  if (!ns && c.steps && !has('steps')) { var nst = m.need.steps - m.stepsOk; if (nst > 0 && nst <= left + 1) out.push('шаги: до медали «Активность» – ещё ' + nst + ' ' + plural(nst, 'день', 'дня', 'дней') + ' с нормой'); }
+  if (!has('train')) { var nt = PTS.TRAIN_N - m.train; if (nt > 0 && nt <= 4) out.push('тренировки в приложении: до медали – ещё ' + nt + ' (каждая +' + PTS.TRAIN + ')'); }
+  return out;
+}
+/** Карточка в обзоре клиента. */
+function ptsCardC(c) {
+  var P = ptsOfC(c); if (!P || !P.R.cur) return '';
+  var R = P.R, m = R.cur, nx = ptsNext(m), row = ptsRow(R, P.aw, 10), tips = ptsTips(c, m), left = dn(m.to) - T;
+  var h = '<div class="card"><div class="pts-h"><h3>Баллы и медали</h3><span class="pts-n">месяц ' + m.n + ' · <b class="num">' + m.pts + '</b> ' + plural(m.pts, 'балл', 'балла', 'баллов') + '</span></div>' +
+    (row ? '<div class="awrow">' + row + '</div>' : '<p class="sub" style="margin:6px 0 0">Медалей пока нет.</p>') + ptsBar(m) +
+    '<div class="ptgo">' + (nx ? 'До «' + nx.t[2] + '» – <b class="num">' + nx.left + '</b> ' + plural(nx.left, 'балл', 'балла', 'баллов') : '<b>Золото месяца</b>') +
+    ' · месяц до <b class="num">' + dm(m.to) + '</b>' + (left >= 0 ? ' (' + (left === 0 ? 'сегодня' : 'ещё ' + left + ' ' + plural(left, 'день', 'дня', 'дней')) + ')' : '') +
+    (R.streak >= 3 ? ' · питание подряд: <b class="num">' + R.streak + '</b>' : '') + '</div>' + ptsBreak(m, noSteps(c));
+  if (P.aw) h += '<p class="sub" style="margin:10px 0 0">Главная награда: медалей за пакет – <b class="num" style="color:var(--text)">' + P.aw.m.length + '</b>' +
+    (P.aw.d ? ', скидка ' + P.aw.disc + ' % действует' : ', подряд ' + P.aw.streak + ' из ' + P.aw.need) + '.</p>';
+  if (tips.length) h += '<div class="banner" style="margin:12px 0 0"><b>Подскажите клиенту</b>' + tips.map(function (x) { return '<div style="margin-top:6px">– ' + esc(x) + '</div>'; }).join('') + '</div>';
+  return h + '<button class="btn sec sm mt" data-act="ptsHow">Как начисляются баллы</button></div>';
+}
+/** Клиенты, у которых месяц заканчивается в ближайшие 5 дней, а до следующей медали за баллы недалеко – для «Сегодня». */
+function ptsSoon() {
+  var out = [];
+  byRank(D.clients).forEach(function (c) {
+    var P = ptsOfC(c); if (!P || !P.R.cur) return;
+    var m = P.R.cur, nx = ptsNext(m), left = dn(m.to) - T;
+    if (!nx || left < 0 || left > 5 || dn(m.to) > dn(c.end)) return;
+    var can = (left + 1) * ((noSteps(c) ? 1 : 3)) + (m.photo ? 0 : PTS.PHOTO) + 6;   // сколько ещё реально набрать: дни × (питание + шаги + норма) + фото + пара тренировок
+    if (nx.left <= can) out.push({ c: c, m: m, nx: nx, left: left });
+  });
+  return out;
+}
+function ptsHomeCard() {
+  var seen = LS.get(PTS_SEEN) === '1', soon = ptsSoon(), h = '';
+  if (!seen) h += '<div class="card" style="border-color:var(--accent-d)"><div class="pts-h"><h3>Новое: баллы и медали</h3></div>' +
+    '<p class="sub">У клиентов в кабинете появились баллы за питание, шаги, замеры, фото и тренировки, медали месяца и за каждое направление. Главная награда – «Лучший подопечный Lite Fit» за пакет тренировок в срок.</p>' +
+    '<div class="awrow">' + ['gold', 'food', 'steps', 'meas', 'photo', 'train'].map(function (k) { return '<span class="mdw">' + medalSvg2(k, 34, false, k === 'gold' ? '1' : '') + '</span>'; }).join('') +
+    '<span class="mdw big">' + medalSvg2('best', 44, false) + '</span></div>' +
+    '<div class="btns" style="margin-top:10px"><button class="btn pri sm" data-act="ptsHow">Что делать тренеру</button><button class="btn sec sm" data-act="ptsSeen">Понятно</button></div></div>';
+  if (soon.length) h += '<div class="card"><h3>Медали: месяц заканчивается</h3><p class="sub">До медали за баллы недалеко – напишите клиенту, чего не хватает.</p><div class="rows">' + soon.map(function (x) {
+    return '<button class="row" data-open="' + x.c.id + '" data-sub="over"><span class="dot"></span><span class="mn"><b>' + esc(x.c.name) + '</b><small>' + x.m.pts + ' ' + plural(x.m.pts, 'балл', 'балла', 'баллов') +
+      ', до «' + x.nx.t[2] + '» – ' + x.nx.left + ' · месяц до ' + dm(x.m.to) + (x.left === 0 ? ' (сегодня)' : '') + '</small></span><span class="chev">›</span></button>';
+  }).join('') + '</div>' + (seen ? '<button class="btn sec sm mt" data-act="ptsHow">Как начисляются баллы</button>' : '') + '</div>';
+  return h;
+}
+/** Памятка тренеру: как начисляются баллы и что делать тренеру. */
+function ptsHowHtml() {
+  return '<h2>Баллы и медали</h2><p class="lead">Клиент видит их вверху «Сегодня» в своём кабинете. Вы – в обзоре клиента и на «Сегодня».</p>' +
+    '<h3>Как начисляются баллы</h3>' + ptsRules(false) +
+    '<p class="sub">Если клиенту шаги не заданы или закрыты (пробный), пороги медалей месяца ниже – ' + PTS.NO_STEPS.join(', ') + ' баллов.</p>' +
+    '<div class="ptm-r" style="margin-top:6px">' + medalSvg2('best', 44, false) + '<span><b>Лучший подопечный Lite Fit – главная награда</b><small>Весь пакет тренировок выполнен в срок. ' +
+    '3 медали подряд и продление пакета без перерыва – скидка 10 %, она сама ставится в «Активных клиентах» и в «Платежах».</small></span></div>' +
+    '<h3 style="margin-top:22px">Что делать тренеру</h3><ol>' +
+    '<li><b>Раз в неделю – карточка «Баллы и медали»</b><p>В обзоре клиента: сколько баллов за месяц и чего не хватает. Строка <em>«Подскажите клиенту»</em> – что даст больше всего баллов прямо сейчас.</p></li>' +
+    '<li><b>За 5 дней до конца месяца – «Сегодня»</b><p>Блок <em>«Медали: месяц заканчивается»</em> – у кого медаль за баллы ещё достижима. Напишите клиенту, сколько осталось и что внести.</p></li>' +
+    '<li><b>Замеры и фото – самые ценные</b><p>Замеры в свой день – 3 балла, все замеры месяца – медаль «Замеры». Фото месяца – 5 баллов и медаль «Фото-отчёт». Напомните в день замеров.</p></li>' +
+    '<li><b>Поздравьте с медалью</b><p>Новая медаль – повод для пары тёплых слов в сообщении или в ответе на комментарий к тренировке. Это лучше любого напоминания.</p></li>' +
+    '<li><b>Главная награда – за тренировки</b><p>Медаль «Лучший подопечный Lite Fit» и скидка считаются в приложении тренировок. Следите, чтобы клиент закрывал пакет до даты следующей оплаты.</p></li>' +
+    '</ol><p class="sub">Баллы считаются по тем же данным, что видны в кабинете: дневник, замеры, фото и тренировки в приложении. Дни заморозки не считаются. Месяц – 30 дней ведения, как в «Итогах месяца».</p>' +
+    '<button class="btn pri mt" data-act="ptsSeen">Понятно</button>';
 }
 
 /* ================= ОБЩЕЕ: шапка, вкладки, окно формы ================= */
@@ -1168,7 +1457,7 @@ function viewHome() {
 
   var plan = [];
   D.clients.forEach(function (c) { if (c.loaded && !c.arch && c.status === ST_ACTIVE && !locked(c, 'plan')) (c.plan || []).forEach(function (p) { if (p.date === TODAY) plan.push({ c: c, p: p }); }); });
-  plan.sort(function (a, b) { return String(a.p.time || '99') < String(b.p.time || '99') ? -1 : 1; });
+  plan.sort(function (a, b) { return String(a.p.time || '99') < String(b.p.time || '99') ? -1 : String(a.p.time || '99') > String(b.p.time || '99') ? 1 : fmtRank(a.c) - fmtRank(b.c); });
   h += '<div class="card"><h3>Сегодня по плану</h3>';
   if (!plan.length) h += '<p class="sub" style="margin:0">На сегодня тренировок и созвонов нет.</p>';
   else h += '<div class="rows">' + plan.map(function (x) {
@@ -1177,8 +1466,10 @@ function viewHome() {
   }).join('') + '</div>';
   h += '</div>';
 
+  h += ptsHomeCard();
+
   var G = { ok: [], wait: [], frz: [], trial: [], load: [] };
-  D.clients.forEach(function (c) {
+  byRank(D.clients).forEach(function (c) {
     var s = summ(c), tr = trialSt(c);
     if (s.state === 'off' || s.state === 'nocab') return;
     if (s.state === 'load') G.load.push([c, s]); else if (s.state === 'frz') G.frz.push([c, s]); else if (tr) G.trial.push([c, s]); else if (s.state === 'ok') G.ok.push([c, s]); else G.wait.push([c, s]);
@@ -1241,13 +1532,16 @@ function inFilter(c, f) {
 }
 function clientRows() {
   var q = S.q.toLowerCase();
-  var list = D.clients.filter(function (c) { return inFilter(c, S.filter) && (!q || c.name.toLowerCase().indexOf(q) >= 0); });
+  var list = byRank(D.clients.filter(function (c) { return inFilter(c, S.filter) && (!q || c.name.toLowerCase().indexOf(q) >= 0); }));
   if (!list.length) return '<p class="muted" style="margin:6px 0">Никого не нашлось.</p>';
-  return '<div class="rows">' + list.map(function (c) {
-    var s = summ(c);
-    return '<button class="row" data-open="' + c.id + '" data-sub="over"><span class="ava">' + esc(c.name.charAt(0)) + '</span><span class="mn"><b>' + esc(c.name) + '</b><small>' + esc(metaLine(c)) + '</small></span>' +
+  var h = '', last = -1, open = false;
+  list.forEach(function (c) {                                              // 1.4: группы по формату
+    var r = fmtRank(c), s = summ(c);
+    if (r !== last) { if (open) h += '</div>'; h += '<div class="grp">' + RANKS[r] + ' · ' + list.filter(function (x) { return fmtRank(x) === r; }).length + '</div><div class="rows">'; open = true; last = r; }
+    h += '<button class="row" data-open="' + c.id + '" data-sub="over"><span class="ava">' + esc(c.name.charAt(0)) + '</span><span class="mn"><b>' + esc(c.name) + '</b><small>' + esc(metaLine(c)) + '</small></span>' +
       '<span class="st ' + s.cls + '">' + esc(s.text) + '</span></button>';
-  }).join('') + '</div>';
+  });
+  return h + (open ? '</div>' : '');
 }
 function viewClients() {
   return '<h2 class="sec-title">Клиенты</h2>' +
@@ -1401,7 +1695,7 @@ function subOver(c) {
   }
   h += '<div class="card"><h3>Дисциплина за 10 дней</h3><p class="sub">Полностью внесено: <b class="num" style="color:var(--text)">' + full + ' из ' + inDays + '</b>. ' +
     (miss.length ? 'Пропуски: ' + esc(miss.join('; ')) + '.' : 'Пропусков нет.') + '</p><div class="strip s10">' + cells.join('') + '</div></div>';
-  return h + weightBlock(c) + aboutCard(c) + taskCard(c);
+  return h + ptsCardC(c) + weightBlock(c) + aboutCard(c) + taskCard(c);
 }
 function weightBlock(c) {
   var wr = c.hist.filter(function (r) { return r.w != null; }).map(function (r) { return { d: r.d, n: dn(r.d), w: r.w }; });
@@ -1838,6 +2132,8 @@ var ACT = {
   back: function () { if (NAV[NAV.length - 1] === 'client') { try { history.back(); return; } catch (e) {} NAV.pop(); } S.cid = null; render(true); },
   close: function () { closeSheet(); render(); },
   retry: function () { boot(); },
+  ptsHow: function () { sheet('Баллы и медали', ptsHowHtml()); },
+  ptsSeen: function () { LS.set(PTS_SEEN, '1'); closeSheet(); render(); },
   refresh: function () { refresh(true); },
   reload: function () { var c = cur(); if (!c) return; c.err = ''; loadClient(c.id, true); render(); paintSync(); },
   sw: function (t) {
@@ -2274,6 +2570,7 @@ function loadList(first, manual) {
     var c = cur();
     if (c && manual && c.table && !loading[c.id]) loadClient(c.id, true);
     loadAll();
+    ptsLoadAll(manual);
     if (c && wantCard(c) && !loading[c.id]) loadClient(c.id);
     if (manual) toast('Обновлено', 'ok');
     if (S.diag.ping == null) {                                             // один раз за открытие: сколько длится запрос, в котором сервер ничего не делает
