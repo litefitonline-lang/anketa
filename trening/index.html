@@ -237,6 +237,27 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .sup-h span{display:block;font-size:12.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--on-accent);opacity:.8;margin-top:2px}
 .sup .card{margin:0;border:0;border-top:1px solid rgba(62,214,206,.3);border-radius:0;background:none}
 .sup-h+.card,.sup-in>.card:first-child{border-top:0}
+/* 2.6: перестановка упражнений – суперсет целиком, перетаскивание мышью */
+.sup-h.ctl{display:flex;align-items:center;gap:8px;padding-right:8px}
+.sup-h.ctl>em{flex:1;min-width:0;font-style:normal}
+.sup-h .sup-b{display:flex;gap:4px;flex:none;margin:0;opacity:1;letter-spacing:0}
+.sup-b button{width:34px;height:30px;border-radius:9px;background:rgba(4,33,31,.16);color:var(--on-accent);display:grid;place-items:center;border:0;cursor:pointer}
+.sup-b button:disabled{opacity:.35;cursor:default}
+.sup-b svg{width:17px;height:17px}
+.dh{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--dim);cursor:grab;border:1px dashed var(--line2);-webkit-user-select:none;user-select:none}
+.dh:hover{color:var(--accent);border-color:var(--accent)}
+.dh svg{width:16px;height:16px;pointer-events:none}
+.sup-h .sup-b .dh{display:grid;margin:0;opacity:1;border-color:rgba(4,33,31,.35);color:var(--on-accent);width:34px}
+@media (pointer:coarse){.sup-h .sup-b .dh{display:none}}
+@media (pointer:coarse){.dh{display:none}}
+.dragging .card.ex,.dragging .sup{transition:box-shadow .08s}
+.card.ex.dz-t,.sup.dz-t{box-shadow:0 -4px 0 0 var(--accent),0 0 22px -6px var(--glow)}
+.card.ex.dz-b,.sup.dz-b{box-shadow:0 4px 0 0 var(--accent),0 0 22px -6px var(--glow)}
+.card.ex.dz-l,.sup.dz-l{box-shadow:-4px 0 0 0 var(--accent),0 0 22px -6px var(--glow)}
+.card.ex.dz-r,.sup.dz-r{box-shadow:4px 0 0 0 var(--accent),0 0 22px -6px var(--glow)}
+.card.ex.drag-src,.sup.drag-src{opacity:.45}
+.upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 10px);z-index:80;width:min(520px,calc(100% - 24px));display:flex;gap:10px;align-items:center;justify-content:space-between;background:#0F2A2A;border:1px solid var(--accent);border-radius:14px;padding:10px 10px 10px 14px;font-size:14px;box-shadow:0 12px 34px -14px rgba(0,0,0,.8)}
+.upd .btn{width:auto;height:40px;padding:0 16px;flex:none}
 .sup .ex-n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .sup .ex-h .mn small,.sup .swrow .mn small,.sup .sets-h,.sup .last,.sup .lbl{color:#A9C4C5}
 .sup .ex-f{border-top-color:rgba(62,214,206,.3)}
@@ -630,6 +651,12 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.6 (20.10.2026). Сервер 4.13.1 (только версия страницы). Перестановка упражнений: стрелки обходят суперсеты целиком (одиночное
+ *   упражнение перепрыгивает суперсет, не разбивая его), внутри суперсета стрелки меняют порядок только в нём; у суперсета –
+ *   свои стрелки в заголовке. На компьютере упражнение и суперсет можно перетащить мышью за значок ⠿ (до или после
+ *   упражнения; на суперсет – до или после него целиком). В подходах: → в конце поля веса – в повторы, ← в начале – обратно,
+ *   ↑ ↓ – то же поле в соседнем подходе. Устаревшая страница (кэш браузера) показывает плашку «Вышла новая версия – Обновить».
+ *   Прошлая тренировка справа и список клиентов больше не прыгают вверх после «Заполнить», стрелок и других правок.
  * 2.5 (18.10.2026). Сервер 4.12. К упражнению можно написать второй и следующие комментарии («Написать ещё»): каждый уходит
  *   тренеру сразу, не меняется, у каждого свой статус и свой ответ тренера. У тренера каждый комментарий – отдельной строкой
  *   с кнопкой «Ответить клиенту». У клиента на главной – «Уведомления в Telegram»: подключить бота «Lite Fit» (напоминание
@@ -698,7 +725,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.5';
+var VERSION = '2.6';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -735,6 +762,7 @@ var MEM_T = 'lf_wk_tr_' + TKEY.slice(0, 10), MEM_C = 'lf_wk_my_' + CKEY.slice(0,
 function ic(d, w) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.9) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
 var IC = {
   back: ic('<path d="M15 5l-7 7 7 7"/>', 2.2), fwd: ic('<path d="M9 5l7 7-7 7"/>', 2.2), x: ic('<path d="M6 6l12 12M18 6L6 18"/>'), check: ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 2.6),
+  drag: ic('<circle cx="9" cy="6" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="18" r="1.4"/>', 2.4),
   plus: ic('<path d="M12 5v14M5 12h14"/>', 2.2), minus: ic('<path d="M5 12h14"/>', 2.2), up: ic('<path d="M12 19V5M6 11l6-6 6 6"/>'), down: ic('<path d="M12 5v14M6 13l6 6 6-6"/>'),
   trash: ic('<path d="M5 7h14M10 7V4.5h4V7M7 7l1 12.5h8L17 7M10 11v5M14 11v5"/>', 1.8), play: ic('<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5-5.5 3.5z" fill="currentColor"/>', 1.8),
   info: ic('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/>'), fill: ic('<path d="M7 4v10M3.5 10.5L7 14l3.5-3.5M13 6h8M13 12h8M13 18h8"/>'),
@@ -1004,12 +1032,55 @@ function syncText() {
 function topHtml() { return '<div class="top"><img src="' + LOGO + '" alt="Lite Fit"><div class="topr"><button class="sync' + (S.busy ? ' busy' : '') + '" id="sync" data-act="refresh" aria-label="Обновить"><span>' + esc(syncText()) + '</span>' + IC.sync + '</button>' +
   (MODE === 'client' ? '<button class="qb" data-act="help" aria-label="Как пользоваться" title="Как пользоваться">?</button>' : '') + '</div></div>'; }
 function paintSync() { var el = document.getElementById('sync'); if (el) { el.className = 'sync' + (S.busy ? ' busy' : ''); el.firstChild.textContent = syncText(); } }
-function rerenderKeep(focusId) { var y = window.scrollY; render(); window.scrollTo(0, y); if (focusId) { var el = document.getElementById(focusId); if (el) { try { el.focus({ preventScroll: true }); var n = el.value.length; el.setSelectionRange(n, n); } catch (e) {} } } }
+var KEEP_SCROLL = ['.ed-ref', '.md-l', '.vd-r', '#sugg'];     // 2.6: панели со своей прокруткой (прошлая тренировка справа, список клиентов)
+function rerenderKeep(focusId) {
+  var y = window.scrollY, ps = KEEP_SCROLL.map(function (q) { var el = document.querySelector(q); return el ? el.scrollTop : 0; });
+  render(); window.scrollTo(0, y);
+  KEEP_SCROLL.forEach(function (q, k) { var el = document.querySelector(q); if (el && ps[k]) el.scrollTop = ps[k]; }); if (focusId) { var el = document.getElementById(focusId); if (el) { try { el.focus({ preventScroll: true }); var n = el.value.length; el.setSelectionRange(n, n); } catch (e) {} } } }
 function scrollToEl(id) { var el = document.getElementById(id); if (el) { var top = el.getBoundingClientRect().top + window.scrollY - 12; try { window.scrollTo({ top: top, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, top); } } }
 function wSort(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.row || 1e9) - (b.row || 1e9); }
 /** Номера упражнений: одиночное – «3», в сете – «3.1», «3.2». Сет занимает одно место в тренировке. */
 function numsOf(items) { var out = []; groups(items).forEach(function (g, gi) { g.forEach(function (i, k) { out[i] = g.length > 1 ? (gi + 1) + '.' + (k + 1) : String(gi + 1); }); }); return out; }
 function groups(items) { var g = []; items.forEach(function (it, i) { if (i > 0 && it.join) g[g.length - 1].push(i); else g.push([i]); }); return g; }
+/* 2.6: блоки тренировки – одиночные упражнения и суперсеты целиком; перестановка не разбивает суперсеты */
+function blocksOf(a) { return groups(a).map(function (g) { return g.map(function (i) { return a[i]; }); }); }
+function unblock(bl) { var out = []; bl.forEach(function (b) { b.forEach(function (it, k) { it.join = k > 0; out.push(it); }); }); return out; }
+function posOf(bl, id) { for (var b = 0; b < bl.length; b++) for (var k = 0; k < bl[b].length; k++) if (bl[b][k].id === id) return { b: b, k: k }; return null; }
+/** Можно ли сдвинуть упражнение i: одиночное – на место соседнего блока, в суперсете – только внутри него. */
+function canMv(a, i, dir) {
+  var g = groups(a), gi = -1, k = -1;
+  g.forEach(function (x, j) { var p = x.indexOf(i); if (p >= 0) { gi = j; k = p; } });
+  if (gi < 0) return false;
+  return g[gi].length > 1 ? k + dir >= 0 && k + dir < g[gi].length : gi + dir >= 0 && gi + dir < g.length;
+}
+function mvItem(id, dir) {
+  var bl = blocksOf(S.draft.items), p = posOf(bl, id); if (!p) return false;
+  var blk = bl[p.b], t;
+  if (blk.length > 1) { var k2 = p.k + dir; if (k2 < 0 || k2 >= blk.length) return false; t = blk[p.k]; blk[p.k] = blk[k2]; blk[k2] = t; }
+  else { var b2 = p.b + dir; if (b2 < 0 || b2 >= bl.length) return false; t = bl[p.b]; bl[p.b] = bl[b2]; bl[b2] = t; }
+  S.draft.items = unblock(bl); return true;
+}
+function mvBlock(id, dir) {
+  var bl = blocksOf(S.draft.items), p = posOf(bl, id); if (!p) return false;
+  var b2 = p.b + dir; if (b2 < 0 || b2 >= bl.length) return false;
+  var t = bl[p.b]; bl[p.b] = bl[b2]; bl[b2] = t; S.draft.items = unblock(bl); return true;
+}
+/**
+ * Перетаскивание: dragId – упражнение (isSet – весь его суперсет), tgtId – упражнение, на которое отпустили, before – до него.
+ * Внутри того же суперсета – меняется порядок в нём; на чужой суперсет – встаёт до или после него целиком; упражнение из
+ * суперсета, перенесённое в другое место, становится одиночным.
+ */
+function dropMove(dragId, isSet, tgtId, before) {
+  if (dragId === tgtId) return false;
+  var bl = blocksOf(S.draft.items), p = posOf(bl, dragId), q0 = posOf(bl, tgtId); if (!p || !q0) return false;
+  var unit, same = !isSet && p.b === q0.b && bl[p.b].length > 1;
+  if (isSet) { if (p.b === q0.b) return false; unit = bl.splice(p.b, 1)[0]; }
+  else { unit = bl[p.b].splice(p.k, 1); if (!bl[p.b].length) bl.splice(p.b, 1); }
+  var q = posOf(bl, tgtId);
+  if (same) bl[q.b].splice(before ? q.k : q.k + 1, 0, unit[0]);
+  else bl.splice(before ? q.b : q.b + 1, 0, unit);
+  S.draft.items = unblock(bl); return true;
+}
 function one(it, w, r) { return (!it.noW && w ? w + ' кг × ' : '') + (r || '–') + (it.sec ? ' сек' : ''); }
 function planTxt(it) {
   var s = it.sets, same = s.every(function (x) { return x.w === s[0].w && x.r === s[0].r; });
@@ -1104,7 +1175,7 @@ function loadList(first) {
     if (r.auth) return;
     if (!r.ok) { S.offline = !!r.net; if (D) { paintSync(); toast(errText(r), 'bad'); } else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false;
-    setList(r); memSave();
+    setList(r); memSave(); updCheck(r);
     setTimeout(function () { draftPush(); draftArm(); }, 800);
     if (OPENW) {                                                            // пришли по ссылке из Telegram – сразу эта тренировка
       var wid = OPENW; OPENW = '';
@@ -1536,7 +1607,8 @@ function editItem(w, it, i, n, no) {
   var b = exOf(it.exId), own = !it.exId, W = wide();
   var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn">' +
     (own && it.isOwn ? '<b>Своё упражнение</b><small>Его нет в базе</small>' : '<b>' + esc(it.name) + '</b><small>' + esc(it.grp || (own ? 'нет в базе' : '')) + (b && b.cat ? ' · ' + esc(b.cat) : '') + '</small>') + '</div>' +
-    (b && muOk(b.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Мышцы" title="Мышцы – меняются в «Базе упражнений»">' + bodySvg(b.mu) + '</button>' : '') + '</div>';
+    (b && muOk(b.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Мышцы" title="Мышцы – меняются в «Базе упражнений»">' + bodySvg(b.mu) + '</button>' : '') +
+    '<span class="dh" draggable="true" data-drag="' + it.id + '" title="Перетащить мышью" aria-hidden="true">' + IC.drag + '</span></div>';
   if (own && it.isOwn) h += '<div class="stack" style="margin-bottom:10px">' + fi('n-' + it.id, 'Название упражнения', it.name, 'text', 'maxlength="80" autocomplete="off" data-f="name" data-i="' + i + '"') + '</div>';
   h += '<div class="stack" style="margin-bottom:6px">' + videoEdit(it, i) + (own && it.isOwn ? sw('addBase', it.addBase !== false, 'Добавить упражнение в базу', 'Появится в подсказках у всех тренеров', 'data-i="' + i + '"') : '') + '</div>';
   h += '<div id="lh-' + it.id + '">' + hintHtml(it) + '</div>';
@@ -1547,7 +1619,7 @@ function editItem(w, it, i, n, no) {
   else h += '<button class="txtb" data-act="openDesc" data-i="' + i + '">' + IC.note + 'Добавить описание или рекомендации</button>';
   h += resHtml(w, it) + medNote(it);
   if (i > 0) h += '<div class="mt">' + sw('join', it.join, 'Вместе с предыдущим (суперсет)', 'Упражнения выполняются подряд', 'data-i="' + i + '"') + '</div>';
-  h += '<div class="ex-f"><button class="ib" data-act="up" data-i="' + i + '" aria-label="Выше"' + (i === 0 ? ' disabled' : '') + '>' + IC.up + '</button><button class="ib" data-act="down" data-i="' + i + '" aria-label="Ниже"' + (i === n - 1 ? ' disabled' : '') + '>' + IC.down + '</button>' +
+  h += '<div class="ex-f"><button class="ib" data-act="up" data-i="' + i + '" aria-label="Выше"' + (canMv(w.items, i, -1) ? '' : ' disabled') + '>' + IC.up + '</button><button class="ib" data-act="down" data-i="' + i + '" aria-label="Ниже"' + (canMv(w.items, i, 1) ? '' : ' disabled') + '>' + IC.down + '</button>' +
     '<button class="ib del" data-act="delItem" data-i="' + i + '">' + IC.trash + 'Убрать</button></div></div>';
   return h;
 }
@@ -1594,7 +1666,11 @@ function viewEdit() {
   var NS = numsOf(w.items);
   groups(w.items).forEach(function (g, gi) {
     var inner = g.map(function (i) { return editItem(w, w.items[i], i, w.items.length, NS[i]); }).join('');
-    h += g.length > 1 ? '<div class="sup"><div class="sup-h">Суперсет ' + (gi + 1) + ' · ' + exWord(g.length) + '</div><div class="sup-in">' + inner + '</div></div>' : inner;
+    var fid = w.items[g[0]].id, ng = groups(w.items).length;
+    h += g.length > 1 ? '<div class="sup" id="sp-' + fid + '"><div class="sup-h ctl"><em>Суперсет ' + (gi + 1) + ' · ' + exWord(g.length) + '</em><span class="sup-b">' +
+      '<button data-act="supMv" data-id="' + fid + '" data-d="-1" aria-label="Суперсет выше"' + (gi ? '' : ' disabled') + '>' + IC.up + '</button>' +
+      '<button data-act="supMv" data-id="' + fid + '" data-d="1" aria-label="Суперсет ниже"' + (gi < ng - 1 ? '' : ' disabled') + '>' + IC.down + '</button>' +
+      '<span class="dh" draggable="true" data-drag="' + fid + '" data-dset="1" title="Перетащить суперсет целиком" aria-hidden="true">' + IC.drag + '</span></span></div><div class="sup-in">' + inner + '</div></div>' : inner;
   });
   h += '<div class="card" id="addCard"><h3>' + (w.items.length ? 'Следующее упражнение' : 'Первое упражнение') + '</h3><p class="sub">Выберите группу мышц или начните вводить название – подсказка появится по первым буквам.</p><div id="pickF">' + pickChips() + '</div>' +
     fi('exQ', 'Название упражнения', S.q, 'text', 'autocomplete="off" autocorrect="off" data-f="q"') + '<div class="sugg" id="sugg">' + suggHtml() + '</div></div></div></div>' + (RF.panel && W ? '<div class="ed-ref">' + RF.panel + '</div>' : '') + '</div>';
@@ -2122,7 +2198,7 @@ function loadMy(first, quiet) {
   return (pendCount() && M ? pushNow() : Promise.resolve()).then(function () { return ccall('my', {}, !!quiet); }).then(function (r) {
     if (r.auth) return;
     if (!r.ok) { S.offline = !!r.net; if (M) paintSync(); else screen('Не получилось загрузить', errText(r), true); return; }
-    S.offline = false; setMy(r);
+    S.offline = false; setMy(r); updCheck(r);
     if (r.cv !== undefined) CV.v = String(r.cv);
     cvArm();
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
@@ -3050,8 +3126,13 @@ var ACT = {
   keep: function (b) { var it = draftItem(b); it.keep = it.keep === false; markDirty(); rerenderKeep(); },
   addBase: function (b) { var it = draftItem(b); it.addBase = it.addBase === false; markDirty(); rerenderKeep(); },
   join: function (b) { var it = draftItem(b); it.join = !it.join; markDirty(); rerenderKeep(); },
-  up: function (b) { var i = +b.getAttribute('data-i'), a = S.draft.items; if (i < 1) return; var t = a[i]; a[i] = a[i - 1]; a[i - 1] = t; a[0].join = false; markDirty(); rerenderKeep(); scrollToEl('it-' + t.id); },
-  down: function (b) { var i = +b.getAttribute('data-i'), a = S.draft.items; if (i >= a.length - 1) return; var t = a[i]; a[i] = a[i + 1]; a[i + 1] = t; a[0].join = false; markDirty(); rerenderKeep(); scrollToEl('it-' + t.id); },
+  up: function (b) { var t = draftItem(b); if (t && mvItem(t.id, -1)) { markDirty(); rerenderKeep(); scrollToEl('it-' + t.id); } },      // 2.6: обходит суперсеты
+  down: function (b) { var t = draftItem(b); if (t && mvItem(t.id, 1)) { markDirty(); rerenderKeep(); scrollToEl('it-' + t.id); } },
+  supMv: function (b) { var id = b.getAttribute('data-id'); if (mvBlock(id, +b.getAttribute('data-d'))) { markDirty(); rerenderKeep(); scrollToEl('sp-' + id); } },
+  updGo: function () {
+    if (MODE === 'trainer' && S.view === 'edit' && S.dirty) { toast('Сначала сохраните тренировку – потом обновите', 'bad'); return; }
+    try { var u = new URL(location.href); u.searchParams.set('v', Date.now().toString(36)); location.replace(u.toString()); } catch (e) { location.reload(); }
+  },
   delItem: function (b) { var a = S.draft.items; a.splice(+b.getAttribute('data-i'), 1); if (a[0]) a[0].join = false; markDirty(); rerenderKeep(); },
   bf: function (b) { S.bf = b.getAttribute('data-v'); rerenderKeep(); },
   bg: function (b) { S.bg = b.getAttribute('data-v'); baseRepaint(); },
@@ -3310,10 +3391,75 @@ document.addEventListener('error', function (e) {
   if (n && f) n.innerHTML = esc(f.name) + ' · <span class="st-warn">браузер не показывает этот ролик – откройте его в проводнике</span>';
 }, true);
 document.addEventListener('keydown', function (e) {
+  if (e.target && /^Arrow/.test(e.key) && setKey(e)) return;                // 2.6: стрелки между полями подходов
   if (e.key !== 'Enter' || !e.target) return;
   if (e.target.id === 'exQ') { var first = document.querySelector('#sugg [data-act]'); if (first) { e.preventDefault(); first.click(); } }
   if (e.target.id === 'pin') { var pb = document.querySelector('[data-act="pinGo"]'); if (pb && !pb.disabled) ACT.pinGo(pb); }
 });
+/**
+ * 2.6: в подходах у тренера – → в конце поля веса переводит в повторы (в конце повторов – в вес следующего подхода),
+ * ← в начале поля – обратно, ↑ ↓ – то же поле в соседнем подходе. Значение в новом поле выделяется – можно сразу писать.
+ */
+function setKey(e) {
+  var el = e.target;
+  if (MODE !== 'trainer' || S.view !== 'edit' || !el.matches || !el.matches('.set input[data-f]')) return false;
+  var f = el.getAttribute('data-f'), i = el.getAttribute('data-i'), k = +el.getAttribute('data-k'), n = el.value.length, a = el.selectionStart, z = el.selectionEnd;
+  var q = function (ff, kk) { return document.querySelector('.set input[data-f="' + ff + '"][data-i="' + i + '"][data-k="' + kk + '"]'); };
+  var hasW = !!q('w', k), to = null;
+  if (e.key === 'ArrowRight') { if (a !== n || z !== n) return false; to = f === 'w' ? q('r', k) : (hasW ? q('w', k + 1) : q('r', k + 1)); }
+  else if (e.key === 'ArrowLeft') { if (a !== 0 || z !== 0) return false; to = f === 'r' ? (hasW ? q('w', k) : q('r', k - 1)) : q('r', k - 1); }
+  else if (e.key === 'ArrowDown') to = q(f, k + 1);
+  else if (e.key === 'ArrowUp') to = q(f, k - 1);
+  if (!to) return false;
+  e.preventDefault(); to.focus(); try { to.select(); } catch (x) {}
+  return true;
+}
+/* 2.6: перетаскивание упражнений и суперсетов мышью (на компьютере) */
+var DRG = null;
+function dzClear() { document.querySelectorAll('.dz-t,.dz-b,.dz-l,.dz-r,.drag-src').forEach(function (x) { x.classList.remove('dz-t', 'dz-b', 'dz-l', 'dz-r', 'drag-src'); }); }
+/** Куда встанет перетаскиваемое: { el – что подсветить, id – упражнение-цель, before }. */
+function dropAt(e) {
+  if (!DRG) return null;
+  var card = e.target.closest && e.target.closest('.ed-grid .card.ex'); if (!card) return null;
+  var id = card.id.slice(3), sup = card.closest('.sup'), mySup = document.getElementById('it-' + DRG.id); mySup = mySup && mySup.closest('.sup');
+  var el = sup && (DRG.set || sup !== mySup) ? sup : card;
+  if (DRG.set && el === mySup) return null;
+  var r = el.getBoundingClientRect(), box = (el.parentNode || el).getBoundingClientRect(), row = r.width < box.width * 0.75;
+  var before = row ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2;
+  return { el: el, id: id, before: before, row: row };
+}
+document.addEventListener('dragstart', function (e) {
+  var h = e.target.closest && e.target.closest('[data-drag]');
+  if (!h || MODE !== 'trainer' || S.view !== 'edit') return;
+  DRG = { id: h.getAttribute('data-drag'), set: h.hasAttribute('data-dset') };
+  var src = DRG.set ? document.getElementById('sp-' + DRG.id) : document.getElementById('it-' + DRG.id);
+  try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', DRG.id); if (src) e.dataTransfer.setDragImage(src, 30, 24); } catch (x) {}
+  setTimeout(function () { if (src) src.classList.add('drag-src'); document.body.classList.add('dragging'); }, 0);
+});
+document.addEventListener('dragover', function (e) {
+  if (!DRG) return;
+  var d = dropAt(e);
+  document.querySelectorAll('.dz-t,.dz-b,.dz-l,.dz-r').forEach(function (x) { x.classList.remove('dz-t', 'dz-b', 'dz-l', 'dz-r'); });
+  if (!d) return;
+  e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (x) {}
+  d.el.classList.add(d.row ? (d.before ? 'dz-l' : 'dz-r') : (d.before ? 'dz-t' : 'dz-b'));
+});
+document.addEventListener('drop', function (e) {
+  if (!DRG) return;
+  var d = dropAt(e), g = DRG; DRG = null; dzClear(); document.body.classList.remove('dragging');
+  if (!d) return;
+  e.preventDefault();
+  if (dropMove(g.id, g.set, d.id, d.before)) { markDirty(); rerenderKeep(); }
+});
+document.addEventListener('dragend', function () { DRG = null; dzClear(); document.body.classList.remove('dragging'); });
+/* 2.6: страница из кэша браузера старше той, что на сервере, – плашка «Обновить» */
+function verGt(a, b) { a = String(a || '').split('.').map(Number); b = String(b || '').split('.').map(Number); for (var i = 0; i < Math.max(a.length, b.length); i++) { var x = a[i] || 0, y = b[i] || 0; if (x !== y) return x > y; } return false; }
+function updCheck(r) {
+  if (!r || !r.page || !verGt(r.page, VERSION) || document.getElementById('upd')) return;
+  var d = document.createElement('div'); d.id = 'upd'; d.className = 'upd'; d.setAttribute('role', 'status');
+  d.innerHTML = '<span>Вышла новая версия приложения – ' + esc(r.page) + '</span><button class="btn pri sm" data-act="updGo">Обновить</button>';
+  document.body.appendChild(d);
+}
 /* вкладку закрывают или сворачивают — несохранённые отметки клиента уходят сразу; вернулись — данные обновляются */
 document.addEventListener('visibilitychange', function () {
   if (document.visibilityState === 'hidden') { if (MODE === 'client') { cnFire(true); if (pendCount() && !pushing) pushNow(true); } return; }
