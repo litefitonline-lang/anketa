@@ -136,6 +136,8 @@ var CONFIG = {
   // каналы на экране «Анкета отправлена» (пусто – кнопка скрыта)
   tgUrl: "https://t.me/lite_fit_online",
   maxUrl: "https://max.ru/join/BkXc82YgFe0TWviNnV1Nksk87Oi8FGVYEr8cqrwchjc",
+  // версия страницы анкеты
+  version: "4.1",
   // ID полей Google Формы (entry.…)
   ids: {
     email:        "emailAddress",
@@ -155,7 +157,11 @@ var CONFIG = {
     weight:       "entry.1656484063",
     targetWeight: "entry.542155565",
     consult:      "entry.364933439",
-    offer:        "entry.601355959"
+    offer:        "entry.601355959",
+    // 4.1: новые вопросы формы – номера показывает пункт таблицы «(разово) 4.1 – FREE: анкета и таблица»
+    src:          "entry.551080972",
+    repost:       "entry.960819753",
+    alt:          "entry.255284187"
   }
 };
 /* ================================================= */
@@ -164,23 +170,36 @@ var DEMO = Object.keys(CONFIG.ids).some(function(k){ return CONFIG.ids[k].indexO
 
 // value – точный текст варианта в Google Форме (не менять без правки формы)
 var NUTRITION = "Контроль и план питания: рекомендации, КБЖУ, чек-листы (входит в формат PRO).";
+var FREE = "3 тренировки бесплатно";
+function isFree(){ return state.format === FREE; }
+// метка источника из ссылки: …/anketa/?src=reels_oct или utm_source / utm_campaign – уходит в Google Форму вместе с анкетой
+var SRC = (function(){
+  var q = location.search; try { if (window.top !== window && window.top.location.search) q = window.top.location.search + "&" + q.replace(/^\?/,""); } catch(e){}
+  var u; try { u = new URLSearchParams(q); } catch(e){ return ""; }
+  var v = u.get("src") || u.get("ref") || [u.get("utm_source"), u.get("utm_medium"), u.get("utm_campaign")].filter(Boolean).join("/");
+  v = String(v || "").replace(/[\u0000-\u001f<>"]/g, "").trim().slice(0, 100);
+  try { if (v) sessionStorage.setItem("lfSrc", v); else v = sessionStorage.getItem("lfSrc") || ""; } catch(e){}
+  return v;
+})();
 var STEPS = [
   { title:"Давайте знакомиться",
-    lead:"Артём и Андрей на связи. Ответьте на несколько вопросов – тренер изучит вашу цель и подберёт формат. Это займёт 3–4 минуты.",
+    lead:"Артём и Андрей на связи. Ответьте на несколько вопросов – тренер изучит Вашу цель и подберёт формат. Это займёт 3–4 минуты.",
     fields:[
       {key:"name",  type:"text",  label:"Имя и фамилия", hint:"Фамилию – по желанию", req:true, ac:"name", ph:"Например: Анна Смирнова"},
-      {key:"phone", type:"tel",   label:"Телефон для связи в Telegram или MAX", hint:"Сюда пришлём персональные рекомендации", req:true, ac:"tel", ph:"+7 900 000-00-00"},
+      {key:"phone", type:"tel",   label:"Телефон для связи в Telegram", hint:"Сюда тренер напишет и пришлёт персональные рекомендации", req:true, ac:"tel", ph:"+7 900 000-00-00"},
+      {key:"noTg",  type:"toggle", text:"У меня нет Telegram"},
+      {key:"alt",   type:"text",  label:"Как с Вами связаться?", when:function(){ return !!state.noTg; }, hint:"Ссылка на VK, MAX или WhatsApp – тренер напишет туда", req:true, ph:"Например: vk.com/anna или WhatsApp"},
       {key:"email", type:"email", label:"Электронная почта", req:true, ac:"email", ph:"name@mail.ru"},
-      {key:"source",type:"radio", label:"Откуда вы о нас узнали?", other:true, options:[
-        {value:"Я ваш текущий/бывший офлайн-клиент из зала", label:"Я ваш клиент из зала – сейчас или раньше"},
+      {key:"source",type:"radio", label:"Откуда Вы о нас узнали?", other:true, options:[
+        {value:"Я ваш текущий/бывший офлайн-клиент из зала", label:"Я Ваш клиент из зала – сейчас или раньше"},
         {value:"Рекомендация от друга/знакомого", label:"Рекомендация друга или знакомого"},
         {value:"Соцсети (Instagram/VK/Telegram)", label:"Соцсети – Instagram, VK, Telegram"}
       ]}
     ]},
   { title:"Цели и опыт",
-    lead:"Чтобы программа подходила именно вам, а не «среднему человеку».",
+    lead:"Чтобы программа подходила именно Вам, а не «среднему человеку».",
     fields:[
-      {key:"goal", type:"radio", label:"Какая у вас основная цель сейчас?", req:true, other:true, options:[
+      {key:"goal", type:"radio", label:"Какая у Вас основная цель сейчас?", req:true, other:true, options:[
         {value:"Не бросать тренировки и продолжить прогресс под контролем"},
         {value:"Снизить вес и улучшить композицию тела"},
         {value:"Набрать мышечную массу, стать сильнее"},
@@ -195,10 +214,10 @@ var STEPS = [
         {value:"🔴 Опытный (глубокие знания, опыт работы с циклами и планами)", label:"Опытный", sub:"Глубокие знания, опыт работы с циклами и планами"}
       ]}
     ]},
-  { title:"Что для вас важно",
-    lead:"Отметьте всё, что откликается, – так мы поймём, какой формат сопровождения вам нужен.",
+  { title:"Что для Вас важно",
+    lead:"Отметьте всё, что откликается, – так мы поймём, какой формат сопровождения Вам нужен.",
     fields:[
-      {key:"expect", type:"checkbox", label:"Что вы ожидаете от сопровождения Lite Fit?", hint:"Можно выбрать несколько", req:true, other:true, options:[
+      {key:"expect", type:"checkbox", label:"Что Вы ожидаете от сопровождения Lite Fit?", hint:"Можно выбрать несколько", req:true, other:true, options:[
         {value:"Готовую программу тренировок, которой я буду следовать.", label:"Готовую программу, которой я буду следовать"},
         {value:"Корректировку программы под мои ощущения и прогресс от недели к неделе.", label:"Корректировку программы под мои ощущения и прогресс"},
         {value:NUTRITION, label:"Питание: план рациона, КБЖУ, чек-листы", sub:"Входит в формат PRO"},
@@ -215,26 +234,27 @@ var STEPS = [
         {value:"Начинаю и вскоре бросаю"}
       ]}
     ]},
-  { title:"Какой формат вам интересен?",
-    lead:"Если пока не определились – ничего страшного, поможем выбрать на консультации.",
+  { title:"Какой формат Вам интересен?",
+    lead:"Если пока не определились – ничего страшного: выберите «Не знаю», тренер напишет и поможет выбрать.",
     fields:[
       {key:"nutritionNote", type:"note", when:function(){ return (state.expect||[]).indexOf(NUTRITION)!==-1; },
-       html:"Вы отметили питание – оно входит в формат <b>PRO</b>. Можно начать сразу с него, а можно пройти START и перейти в PRO после финального разбора. Сомневаетесь – выберите «Не знаю», подскажем на консультации."},
+       html:"Вы отметили питание – оно входит в формат <b>PRO</b>. Можно начать сразу с него, а можно пройти START и перейти в PRO после финального разбора. Сомневаетесь – выберите «Не знаю», тренер подскажет."},
       {key:"format", type:"radio", plan:true, aria:"Формат ведения", req:true, options:[
+        {value:"3 тренировки бесплатно", tag:"FREE", badge:"бесплатно", label:"3 тренировки, чтобы попробовать", sub:"Ссылку на тренировки тренер пришлёт в Telegram"},
         {value:"Lite Fit START - первый шаг на 14 дней", tag:"START", badge:"14 дней", label:"Первый шаг к тренировкам"},
         {value:"BASIC - полноценное сопровождение тренировок", tag:"BASIC", label:"Полноценное сопровождение тренировок"},
         {value:"PRO - тренировки + питание + расширенное сопровождение", tag:"PRO", label:"Тренировки, питание и расширенное сопровождение"},
-        {value:"Не знаю, какой формат мне подходит. Нужна консультация", label:"Не знаю, что мне подходит", sub:"Подскажем на бесплатной консультации"}
+        {value:"Не знаю, какой формат мне подходит. Нужна консультация", label:"Не знаю, что мне подходит", sub:"Тренер напишет и поможет выбрать"}
       ]}
     ]},
   { title:"Время, инвентарь и здоровье",
-    lead:"Подстроим нагрузку под ваш график и условия.",
+    lead:"Подстроим нагрузку под Ваш график и условия.",
     fields:[
       {key:"time", type:"radio", label:"Сколько времени в неделю готовы уделять тренировкам?", req:true, options:[
         {value:"До 3 часов (2-3 тренировки)", label:"До 3 часов", sub:"2–3 тренировки"},
         {value:"3-4 часа (3-4 тренировки)", label:"3–4 часа", sub:"3–4 тренировки"},
         {value:"Более 4 часов", label:"Больше 4 часов"},
-        {value:"Пока не знаю, нужна ваша рекомендация.", label:"Пока не знаю – нужна ваша рекомендация"}
+        {value:"Пока не знаю, нужна ваша рекомендация.", label:"Пока не знаю – нужна Ваша рекомендация"}
       ]},
       {key:"equipment", type:"checkbox", label:"Где и с чем будете заниматься?", hint:"Можно выбрать несколько", req:true, options:[
         {value:"Доступ в тренажерный зал", label:"Есть доступ в тренажёрный зал"},
@@ -250,12 +270,8 @@ var STEPS = [
         {key:"height", label:"Рост, см"},
         {key:"weight", label:"Вес, кг"},
         {key:"targetWeight", label:"Желаемый вес, кг"}
-      ]}
-    ]},
-  { title:"Бесплатная консультация",
-    lead:"15 минут онлайн: познакомимся, обсудим цель и подберём формат.",
-    fields:[
-      {key:"consult", type:"text", label:"Когда вам удобно созвониться?", req:true, ph:"Например: будни после 19:00"},
+      ]},
+      {key:"repost", type:"text", label:"Ссылка на репост", when:isFree, hint:"Если поделились постом Lite Fit у себя – вставьте ссылку на него", ph:"https://…"},
       {key:"offer", type:"consent", req:true, value:"Ознакомлен"}
     ]}
 ];
@@ -267,12 +283,12 @@ var state = {}; var step = 0;
 if (/taplink/.test(location.hostname)) root.classList.add("in-taplink");
 else { document.body.style.margin = "0"; document.body.style.background = "#05090B"; }
 
-// переход по кнопкам сайта: #anketa, #anketa-start, #anketa-basic, #anketa-pro
-var PRESET = {start:"Lite Fit START - первый шаг на 14 дней", basic:"BASIC - полноценное сопровождение тренировок", pro:"PRO - тренировки + питание + расширенное сопровождение"};
+// переход по кнопкам сайта: #anketa, #anketa-free, #anketa-start, #anketa-basic, #anketa-pro (или ?format=free и т. д.)
+var PRESET = {free:FREE, start:"Lite Fit START - первый шаг на 14 дней", basic:"BASIC - полноценное сопровождение тренировок", pro:"PRO - тренировки + питание + расширенное сопровождение"};
 function readHash(){ var h=""; try { h = window.top.location.hash; } catch(e){} return h || location.hash || ""; }
 function openFromHash(){
-  var q = /[?&]format=(start|basic|pro)/i.exec(location.search);
-  var m = q ? [null, q[1]] : /^#anketa(?:-(start|basic|pro))?$/i.exec(readHash()); if (!m) return;
+  var q = /[?&]format=(free|start|basic|pro)/i.exec(location.search);
+  var m = q ? [null, q[1]] : /^#anketa(?:-(free|start|basic|pro))?$/i.exec(readHash()); if (!m) return;
   if (m[1] && !root.querySelector(".lf-done")) { state.format = PRESET[m[1].toLowerCase()]; render(); }
   if (!q) setTimeout(function(){ root.scrollIntoView({behavior:"smooth", block:"start"}); }, 150);
 }
@@ -341,7 +357,8 @@ function qWrap(f){
 }
 
 function renderField(f){
-  if (f.type==="note"){ return (f.when && !f.when()) ? document.createDocumentFragment() : el("p",{class:"lf-note"}, f.html); }
+  if (f.when && !f.when()) return document.createDocumentFragment();
+  if (f.type==="note"){ return el("p",{class:"lf-note"}, f.html); }
   var q = qWrap(f);
   var err = el("p",{class:"lf-err"});
 
@@ -416,10 +433,18 @@ function renderField(f){
     q.appendChild(grid);
   }
 
+  if (f.type==="toggle"){
+    q.classList.add("lf-toggle");
+    var tg = el("button",{type:"button",class:"lf-choice lf-consent",role:"checkbox"}, '<span class="lf-ind"></span><span class="lf-ctext">'+esc(f.text)+'</span>');
+    tg.classList.toggle("sel", !!state[f.key]); tg.setAttribute("aria-checked", state[f.key] ? "true" : "false");
+    tg.onclick = function(){ state[f.key] = !state[f.key]; render(); var a = root.querySelector('.lf-q[data-key="alt"] input'); if (a) a.focus(); };
+    var list3 = el("div",{class:"lf-choices"}); list3.appendChild(tg); q.appendChild(list3);
+  }
+
   if (f.type==="consent"){
     var list2 = el("div",{class:"lf-choices"});
     var c = el("button",{type:"button",class:"lf-choice lf-consent",role:"checkbox"},
-      '<span class="lf-ind"></span><span class="lf-ctext">Я ознакомлен(а) и согласен(на) с условиями <a href="'+CONFIG.offerUrl+'" target="_blank" rel="noopener">договора оферты</a></span>');
+      '<span class="lf-ind"></span><span class="lf-ctext">С <a href="'+CONFIG.offerUrl+'" target="_blank" rel="noopener">офертой</a> ознакомлен(а), мне есть 18 лет, об ограничениях по здоровью написал(а) выше</span>');
     function paintC(){ c.classList.toggle("sel", !!state.offer); c.setAttribute("aria-checked", state.offer ? "true":"false"); }
     paintC();
     c.onclick = function(e){ if (e.target.tagName==="A") return; state.offer = !state.offer; paintC(); q.classList.remove("invalid"); };
@@ -433,13 +458,13 @@ function renderField(f){
 function validate(){
   var ok = true, first = null;
   STEPS[step].fields.forEach(function(f){
-    if (f.type==="note") return;
+    if (f.type==="note" || (f.when && !f.when())) return;
     var q = root.querySelector('.lf-q[data-key="'+f.key+'"]'); var msg = "";
     var v = state[f.key];
     if (f.req){
       if (f.type==="checkbox" && !(v && v.length)) msg = "Выберите хотя бы один вариант";
       else if (f.type==="radio" && !v) msg = "Выберите вариант";
-      else if (f.type==="consent" && !v) msg = "Нужно ваше согласие с условиями оферты";
+      else if (f.type==="consent" && !v) msg = "Отметьте галочку – без неё анкету не отправить";
       else if (/text|tel|email|textarea/.test(f.type) && !(v && v.trim())) msg = "Заполните это поле";
     }
     if (!msg && f.type==="email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())) msg = "Проверьте адрес почты – похоже, в нём опечатка";
@@ -458,7 +483,7 @@ function validate(){
 function buildPayload(){
   var p = new URLSearchParams(), ids = CONFIG.ids;
   STEPS.forEach(function(s){ s.fields.forEach(function(f){
-    if (f.type==="note") return;
+    if (f.type==="note" || f.type==="toggle" || (f.when && !f.when())) return;
     if (f.type==="params"){ f.items.forEach(function(it){ var v=(state[it.key]||"").trim(); if (v && ids[it.key]) p.append(ids[it.key], v); }); return; }
     var id = ids[f.key], v = state[f.key]; if (!id || v==null || v==="") return;
     if (f.type==="consent"){ if (v) p.append(id, f.value); return; }
@@ -470,6 +495,7 @@ function buildPayload(){
     if (f.type==="radio" && v==="__other__"){ p.append(id,"__other_option__"); p.append(id+".other_option_response", state[f.key+"_other"].trim()); return; }
     p.append(id, String(v).trim());
   }); });
+  if (ids.src && SRC) p.append(ids.src, SRC);
   p.append("fvv","1");
   p.append("pageHistory", CONFIG.pageHistory);
   return p;
@@ -491,7 +517,10 @@ function done(){
   var w = el("div",{class:"lf-step lf-done"});
   w.appendChild(el("div",{class:"lf-done-ico"}, ICON.check));
   w.appendChild(el("h2",{class:"lf-title"}, "Анкета отправлена"));
-  w.appendChild(el("p",{class:"lf-lead"}, (name ? esc(name)+", спасибо! " : "Спасибо! ") + "Тренер изучит ваши ответы и свяжется с вами, чтобы договориться о консультации. А пока загляните в наши каналы – там полезное о тренировках."));
+  var hi = name ? esc(name)+", спасибо! " : "Спасибо! ";
+  w.appendChild(el("p",{class:"lf-lead"}, isFree()
+    ? hi + "Тренер проверит анкету и пришлёт Вам в Telegram ссылку на бота Lite Fit – через него откроются Ваши 3 тренировки. А пока подпишитесь на наш канал – там полезное о тренировках."
+    : hi + "Тренер изучит Ваши ответы и напишет Вам в Telegram, чтобы обсудить цель и формат. А пока загляните в наши каналы – там полезное о тренировках."));
   if (CONFIG.tgUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.tgUrl,target:"_blank",rel:"noopener"}, ICON.tg+"Канал в Telegram"));
   if (CONFIG.maxUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.maxUrl,target:"_blank",rel:"noopener"}, ICON.max+"Канал в MAX"));
   if (CONFIG.siteUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.siteUrl}, "Вернуться на сайт"));
