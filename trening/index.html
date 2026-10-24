@@ -256,6 +256,10 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .card.ex.dz-l,.sup.dz-l{box-shadow:-4px 0 0 0 var(--accent),0 0 22px -6px var(--glow)}
 .card.ex.dz-r,.sup.dz-r{box-shadow:4px 0 0 0 var(--accent),0 0 22px -6px var(--glow)}
 .card.ex.drag-src,.sup.drag-src{opacity:.45}
+.card.ex.dz-s{box-shadow:inset 0 0 0 2px var(--accent),0 0 22px -6px var(--glow)}
+.dz-tip{position:fixed;z-index:60;transform:translateX(-50%);padding:5px 10px;border-radius:9px;background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:800;pointer-events:none;box-shadow:0 8px 20px -8px #000}
+.card.ex.just-moved,.sup.just-moved{animation:jm .9s ease-out}
+@keyframes jm{0%{box-shadow:0 0 0 2px var(--accent),0 0 28px -4px var(--glow)}100%{box-shadow:0 0 0 0 transparent}}
 .upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 10px);z-index:80;width:min(520px,calc(100% - 24px));display:flex;gap:10px;align-items:center;justify-content:space-between;background:#0F2A2A;border:1px solid var(--accent);border-radius:14px;padding:10px 10px 10px 14px;font-size:14px;box-shadow:0 12px 34px -14px rgba(0,0,0,.8)}
 .upd .btn{width:auto;height:40px;padding:0 16px;flex:none}
 .sup .ex-n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
@@ -496,6 +500,26 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
   body.tr .calc-b .day-t{margin-top:4px}
   body.tr .calc .cal button{height:56px}
 
+  /* 2.7: календарь клиента – упражнения в клетках */
+  body.tr .calw{padding:20px 22px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+  body.tr .calw-b .day-t{margin-top:0}
+  body.tr .calw-b .btn{width:auto;max-width:360px;white-space:normal;height:auto;min-height:48px;padding-top:10px;padding-bottom:10px;line-height:1.25}
+  body.tr .calB{gap:5px}
+  body.tr .calB button{height:auto;min-height:96px;padding:6px 7px 7px;align-items:stretch;justify-content:flex-start;gap:4px;text-align:left;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.012);overflow:hidden}
+  body.tr .calB button:hover{border-color:var(--line2)}
+  body.tr .calB button.sel{background:var(--card2);border-color:var(--accent)}
+  body.tr .calB .cn{font-size:13px;font-weight:800;color:var(--muted)}
+  body.tr .calB button.td .cn{color:var(--accent)}
+  body.tr .calB button.has .cn{color:var(--text)}
+  body.tr .calB .wb{display:flex;flex-direction:column;gap:1px;padding-left:6px;border-left:2px solid var(--accent);min-width:0}
+  body.tr .calB .wb.p{border-left-color:rgba(62,214,206,.45)}
+  body.tr .calB .wb.m{border-left-color:var(--warm)}
+  body.tr .calB .wb span{font-size:11.5px;font-weight:600;line-height:1.25;color:var(--text);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  body.tr .calB .wb span+span{margin-top:2px}
+  body.tr .calB .wb.p span{color:var(--muted)}
+  body.tr .calB .wb .nm0,body.tr .calB .wb .nmm{color:var(--dim);font-weight:600}
+  body.tr .calB .cb0{min-height:0}
+  body.tr .calw .legend{margin-top:10px}
   /* тренировка: упражнения в колонках, «Следующее упражнение» – следующей клеткой; «Сохранить» – полосой внизу */
   body.tr .ed-head{max-width:560px}
   body.tr .ed.has-ref{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
@@ -545,6 +569,10 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
   body.tr .lb-l{display:inline}
   body.tr .ed.has-ref{grid-template-columns:minmax(0,1fr) 380px}
   body.tr .md{grid-template-columns:340px minmax(0,1fr)}
+}
+@media (min-width:1600px){
+  body.tr .calw{grid-template-columns:minmax(0,1fr) 320px;gap:28px}
+  body.tr .calw-b .btn{width:100%}
 }
 @media (min-width:1440px){
   body.tr .cv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
@@ -651,6 +679,15 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.8 (24.10.2026). Сервер 4.13.3 (только версия страницы). Перетаскивание мышью: пока тащите упражнение к верхнему или нижнему
+ *   краю окна, страница сама прокручивается; отпущенное упражнение остаётся под курсором и коротко подсвечивается. Внутри
+ *   суперсета: на середину другого упражнения – «Поменять местами» (1.1 ↔ 1.3), на край – встать до или после него. Одиночное
+ *   упражнение (или из другого суперсета), отпущенное на упражнение суперсета, встаёт в этот суперсет («В суперсет»), не разбивая
+ *   его; на заголовок суперсета – до него целиком; на «Добавить упражнение» – в конец.
+ * 2.7 (24.10.2026). Сервер 4.13.2 ({ op:'nm' }). Календарь клиента на компьютере (экран от 1200 px): клетки месяца крупные, в
+ *   каждой – упражнения тренировки коротко («Вертикальная тяга», «Приседания со штангой», «Ягодичный мост»), полоска слева – статус
+ *   (выполнена / запланирована / не отмечена), при наведении – полный список. Справа или ниже – выбранный день и «Новая тренировка».
+ *   Названия, которых нет в загруженных тренировках, догружаются одним запросом за месяц. На телефоне и узком экране – как было.
  * 2.6 (20.10.2026). Сервер 4.13.1 (только версия страницы). Перестановка упражнений: стрелки обходят суперсеты целиком (одиночное
  *   упражнение перепрыгивает суперсет, не разбивая его), внутри суперсета стрелки меняют порядок только в нём; у суперсета –
  *   свои стрелки в заголовке. На компьютере упражнение и суперсет можно перетащить мышью за значок ⠿ (до или после
@@ -725,7 +762,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.6';
+var VERSION = '2.8';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -1066,19 +1103,25 @@ function mvBlock(id, dir) {
   var t = bl[p.b]; bl[p.b] = bl[b2]; bl[b2] = t; S.draft.items = unblock(bl); return true;
 }
 /**
- * Перетаскивание: dragId – упражнение (isSet – весь его суперсет), tgtId – упражнение, на которое отпустили, before – до него.
- * Внутри того же суперсета – меняется порядок в нём; на чужой суперсет – встаёт до или после него целиком; упражнение из
- * суперсета, перенесённое в другое место, становится одиночным.
+ * Перетаскивание: dragId – упражнение (isSet – весь его суперсет), tgtId – упражнение-цель, mode:
+ * 'b' / 'a' – до / после блока цели (одиночного упражнения или суперсета целиком);
+ * 'jb' / 'ja' – в суперсет цели до / после неё (2.8: так упражнение добавляется в суперсет, не разбивая его);
+ * 's' – поменять местами с целью в том же суперсете (2.8). Упражнение из суперсета, перенесённое в другое место, становится одиночным.
  */
-function dropMove(dragId, isSet, tgtId, before) {
+function dropMove(dragId, isSet, tgtId, mode) {
   if (dragId === tgtId) return false;
   var bl = blocksOf(S.draft.items), p = posOf(bl, dragId), q0 = posOf(bl, tgtId); if (!p || !q0) return false;
-  var unit, same = !isSet && p.b === q0.b && bl[p.b].length > 1;
-  if (isSet) { if (p.b === q0.b) return false; unit = bl.splice(p.b, 1)[0]; }
+  if (mode === 's') {
+    if (isSet || p.b !== q0.b) return false;
+    var blk = bl[p.b], t = blk[p.k]; blk[p.k] = blk[q0.k]; blk[q0.k] = t;
+    S.draft.items = unblock(bl); return true;
+  }
+  var unit;
+  if (isSet) { if (p.b === q0.b) return false; unit = bl.splice(p.b, 1)[0]; if (mode === 'jb' || mode === 'ja') mode = mode === 'jb' ? 'b' : 'a'; }
   else { unit = bl[p.b].splice(p.k, 1); if (!bl[p.b].length) bl.splice(p.b, 1); }
   var q = posOf(bl, tgtId);
-  if (same) bl[q.b].splice(before ? q.k : q.k + 1, 0, unit[0]);
-  else bl.splice(before ? q.b : q.b + 1, 0, unit);
+  if (mode === 'jb' || mode === 'ja') bl[q.b].splice(mode === 'jb' ? q.k : q.k + 1, 0, unit[0]);
+  else bl.splice(mode === 'b' ? q.b : q.b + 1, 0, unit);
   S.draft.items = unblock(bl); return true;
 }
 function one(it, w, r) { return (!it.noW && w ? w + ' кг × ' : '') + (r || '–') + (it.sec ? ' сек' : ''); }
@@ -1249,9 +1292,10 @@ function wRow(w, act, who) {
     '<span class="mn"><b>' + (who ? esc(cl ? cl.name : 'Клиент') + ' · ' + num : 'Тренировка ' + num) + '</b><small>' + exWord(w.n) + ' · <span class="' + st.c + '">' + st.t + '</span>' + extra + '</small></span><span class="chev">›</span></button>';
 }
 /** Календарь месяца с отметками тренировок. cid – один клиент, без него – все клиенты, которых видит тренер. */
-function calHtml(cid) {
+function calHtml(cid, big) {
   var m = S.calM, y = +m.slice(0, 4), mo = +m.slice(5, 7) - 1, days = new Date(y, mo + 1, 0).getDate(), lead = (new Date(y, mo, 1).getDay() + 6) % 7, by = {};
   D.w.forEach(function (w) { if ((cid ? w.cid === String(cid) : shownW(w)) && w.date.slice(0, 7) === m) (by[w.date] = by[w.date] || []).push(w); });
+  if (big) return calBig(cid, m, y, mo, days, lead, by);
   var h = '<div class="cal-h"><button data-act="calPrev" aria-label="Предыдущий месяц">' + IC.back + '</button><b>' + MONN[mo] + ' ' + y + '</b><button data-act="calNext" aria-label="Следующий месяц">' + IC.fwd + '</button></div><div class="cal">' +
     ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map(function (x) { return '<span class="dw">' + x + '</span>'; }).join('');
   for (var i = 0; i < lead; i++) h += '<span></span>';
@@ -1260,6 +1304,64 @@ function calHtml(cid) {
     var marks = l.slice(0, 3).map(function (w) { return '<i class="' + (w.done ? 'd' : w.date < TODAY ? 'm' : 'p') + '"></i>'; }).join('') + (l.length > 3 ? '<b>+</b>' : '');
     h += '<button data-act="calDay" data-d="' + ds + '" class="' + (ds === TODAY ? 'td ' : '') + (ds === S.calDay ? 'sel' : '') + '" aria-label="' + dMon(ds) + (l.length ? ', тренировок: ' + l.length : '') + '">' + d + '<span class="mk">' + marks + '</span></button>';
   }
+  return h + '</div><div class="legend"><span><i class="d"></i>выполнена</span><span><i class="p"></i>запланирована</span><span><i class="m"></i>клиент не отметил</span></div>';
+}
+/* ---------- 2.7: календарь клиента на компьютере – упражнения прямо в клетках ---------- */
+var NM = {}, NMQ = {}, BIGR = null, BIGT = 0;
+/** Клетки с упражнениями – на экране от 1200 px, уже – прежний календарь с точками. */
+function bigCal() { return wide() && window.innerWidth >= 1200; }
+window.addEventListener('resize', function () {
+  clearTimeout(BIGT);
+  BIGT = setTimeout(function () { if (MODE === 'trainer' && D && S.view === 'client' && BIGR !== null && bigCal() !== BIGR) rerenderKeep(); }, 250);
+});
+/** Названия упражнений тренировки: из открытой или загруженной целиком, иначе из NM (op 'nm'); null – ещё не знаем. */
+function wNames(w) {
+  var f = S.draft && S.draft.id === w.id ? S.draft : FULL[w.id];
+  if (f && f.items) return f.items.map(function (it) { return String(it.name || '').trim(); }).filter(String);
+  return NM[w.id] || null;
+}
+/** Коротко для клетки: без уточнения в скобках. */
+function nmShort(n) {
+  var t = String(n).replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim() || String(n);
+  var m = /^(\S+\s+\S+.*?)\s+(?:в|на|со?|под|из|у|к|над|за|через|вдоль|без)\s.*$/i.exec(t);   // «Вертикальная тяга в блоке» → «Вертикальная тяга»
+  t = m ? m[1] : t;
+  if (window.innerWidth < 1600) t = t.replace(/[А-ЯЁа-яё]{10,}/g, function (w) {                 // узкая клетка: «Вертикальная» → «Вертик.»
+    var k = 6; while (k < w.length - 2 && /[аеёиоуыэюяй]/i.test(w.charAt(k - 1))) k++;
+    return w.slice(0, k) + '.';
+  });
+  return t;
+}
+/** Догрузить названия за месяц одним запросом, если каких-то не хватает. */
+function nmNeed(cid, m, miss) {
+  var key = cid + '|' + m;
+  if (!miss || NMQ[key]) return;
+  NMQ[key] = 1;
+  setTimeout(function () {
+    call('nm', { cid: cid, m: m }, true).then(function (r) {
+      if (!r || !r.ok || !r.nm) { if (!r || r === NET) delete NMQ[key]; return; }
+      Object.keys(r.nm).forEach(function (id) { NM[id] = r.nm[id]; });
+      if (S.view === 'client' && String(S.cid) === String(cid) && S.calM === m && bigCal()) rerenderKeep();
+    });
+  }, 0);
+}
+function calBig(cid, m, y, mo, days, lead, by) {
+  var miss = 0, h = '<div class="cal-h">' + '<button data-act="calPrev" aria-label="Предыдущий месяц">' + IC.back + '</button><b>' + MONN[mo] + ' ' + y + '</b><button data-act="calNext" aria-label="Следующий месяц">' + IC.fwd + '</button></div><div class="cal calB">' +
+    ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map(function (x) { return '<span class="dw">' + x + '</span>'; }).join('');
+  for (var i = 0; i < lead; i++) h += '<span class="cb0"></span>';
+  for (var d = 1; d <= days; d++) {
+    var ds = m + '-' + pad(d), l = (by[ds] || []).sort(wSort), tip = [], body = '';
+    l.forEach(function (w) {
+      var nm = wNames(w), st = w.done ? 'd' : w.date < TODAY ? 'm' : 'p', lab = numFor(w);
+      if (!nm) miss++;
+      tip.push(lab + (nm && nm.length ? ': ' + nm.join(', ') : ''));
+      var li = nm ? nm.slice(0, l.length > 1 ? 2 : 4).map(function (n) { return '<span>' + esc(nmShort(n)) + '</span>'; }).join('') : '<span class="nm0">' + exWord(w.n) + '</span>';
+      var more = nm && nm.length > (l.length > 1 ? 2 : 4) ? '<span class="nmm">ещё ' + (nm.length - (l.length > 1 ? 2 : 4)) + '</span>' : '';
+      body += '<span class="wb ' + st + '">' + li + more + '</span>';
+    });
+    h += '<button data-act="calDay" data-d="' + ds + '" class="' + (ds === TODAY ? 'td ' : '') + (ds === S.calDay ? 'sel ' : '') + (l.length ? 'has' : '') + '"' + (tip.length ? ' title="' + esc(tip.join('\n')) + '"' : '') +
+      ' aria-label="' + dMon(ds) + (l.length ? ', тренировок: ' + l.length : '') + '"><b class="cn">' + d + '</b>' + body + '</button>';
+  }
+  nmNeed(String(cid), m, miss);
   return h + '</div><div class="legend"><span><i class="d"></i>выполнена</span><span><i class="p"></i>запланирована</span><span><i class="m"></i>клиент не отметил</span></div>';
 }
 function shownW(w) { var c = clientOf(w.cid); return !!c && shown(c); }
@@ -1439,7 +1541,10 @@ function viewClient() {
   var c = clientOf(S.cid), l = wList(c.id).reverse(), dn = l.filter(function (w) { return w.done; }).length, a = accOf(c);
   var h = '<button class="back" data-act="home">' + IC.back + 'Клиенты</button><h1 class="hello">' + esc(c.name) + '</h1>' +
     '<div class="meta">' + (c.format ? '<span class="pill">' + esc(c.format) + '</span>' : '') + '<span class="pill">Тренировок: <b class="num">' + l.length + '</b></span><span class="pill">Выполнено: <b class="num">' + dn + '</b></span></div>';
-  h += '<div class="cv"><div class="cv-a">' + pkCard(c) + '<div class="card">' + calHtml(c.id) + dayList(c.id) + '<button class="btn pri" data-act="newW" style="margin-top:14px">' + IC.plus + 'Новая тренировка на ' + dMon(S.calDay) + '</button></div>';
+  var nb = '<button class="btn pri" data-act="newW" style="margin-top:14px">' + IC.plus + 'Новая тренировка на ' + dMon(S.calDay) + '</button>';
+  BIGR = bigCal();
+  if (BIGR) h += '<div class="card calw"><div class="calw-a">' + calHtml(c.id, true) + '</div><div class="calw-b">' + dayList(c.id) + nb + '</div></div><div class="cv"><div class="cv-a">' + pkCard(c);   // 2.7
+  else h += '<div class="cv"><div class="cv-a">' + pkCard(c) + '<div class="card">' + calHtml(c.id) + dayList(c.id) + nb + '</div>';
   h += '<div id="msgBox">' + msgCard(c) + '</div>';
   h += '<button class="btn sec" data-act="clink">' + IC.link + 'Ссылка для клиента</button></div><div class="cv-b">';
   if (l.length) h += '<h2 class="sec-title">Все тренировки</h2><div class="card"><div class="rows">' + l.map(function (w) { return wRow(w, 'editW'); }).join('') + '</div></div>';
@@ -1608,7 +1713,7 @@ function editItem(w, it, i, n, no) {
   var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn">' +
     (own && it.isOwn ? '<b>Своё упражнение</b><small>Его нет в базе</small>' : '<b>' + esc(it.name) + '</b><small>' + esc(it.grp || (own ? 'нет в базе' : '')) + (b && b.cat ? ' · ' + esc(b.cat) : '') + '</small>') + '</div>' +
     (b && muOk(b.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Мышцы" title="Мышцы – меняются в «Базе упражнений»">' + bodySvg(b.mu) + '</button>' : '') +
-    '<span class="dh" draggable="true" data-drag="' + it.id + '" title="Перетащить мышью" aria-hidden="true">' + IC.drag + '</span></div>';
+    '<span class="dh" draggable="true" data-drag="' + it.id + '" title="Перетащить мышью. На упражнение суперсета – добавить в суперсет, на середину соседнего в суперсете – поменять местами" aria-hidden="true">' + IC.drag + '</span></div>';
   if (own && it.isOwn) h += '<div class="stack" style="margin-bottom:10px">' + fi('n-' + it.id, 'Название упражнения', it.name, 'text', 'maxlength="80" autocomplete="off" data-f="name" data-i="' + i + '"') + '</div>';
   h += '<div class="stack" style="margin-bottom:6px">' + videoEdit(it, i) + (own && it.isOwn ? sw('addBase', it.addBase !== false, 'Добавить упражнение в базу', 'Появится в подсказках у всех тренеров', 'data-i="' + i + '"') : '') + '</div>';
   h += '<div id="lh-' + it.id + '">' + hintHtml(it) + '</div>';
@@ -3416,42 +3521,85 @@ function setKey(e) {
 }
 /* 2.6: перетаскивание упражнений и суперсетов мышью (на компьютере) */
 var DRG = null;
-function dzClear() { document.querySelectorAll('.dz-t,.dz-b,.dz-l,.dz-r,.drag-src').forEach(function (x) { x.classList.remove('dz-t', 'dz-b', 'dz-l', 'dz-r', 'drag-src'); }); }
-/** Куда встанет перетаскиваемое: { el – что подсветить, id – упражнение-цель, before }. */
+function dzClear() { document.querySelectorAll('.dz-t,.dz-b,.dz-l,.dz-r,.dz-s,.drag-src').forEach(function (x) { x.classList.remove('dz-t', 'dz-b', 'dz-l', 'dz-r', 'dz-s', 'drag-src'); }); }
+/**
+ * Куда встанет перетаскиваемое: { el – что подсветить, id – упражнение-цель, mode (см. dropMove), row – по горизонтали }.
+ * 2.8: на упражнении чужого суперсета – встаёт в этот суперсет; в своём суперсете середина карточки – «поменять местами»;
+ * на заголовке суперсета – до него целиком; под последним упражнением – в конец.
+ */
 function dropAt(e) {
   if (!DRG) return null;
-  var card = e.target.closest && e.target.closest('.ed-grid .card.ex'); if (!card) return null;
-  var id = card.id.slice(3), sup = card.closest('.sup'), mySup = document.getElementById('it-' + DRG.id); mySup = mySup && mySup.closest('.sup');
-  var el = sup && (DRG.set || sup !== mySup) ? sup : card;
+  var t = e.target.closest ? e.target : null; if (!t) return null;
+  var mine = DRG.set ? document.getElementById('sp-' + DRG.id) : document.getElementById('it-' + DRG.id), mySup = mine && (DRG.set ? mine : mine.closest('.sup'));
+  var hd = t.closest('.ed-grid .sup-h');
+  if (hd) { var hs = hd.closest('.sup'); if (DRG.set && hs === mySup) return null; return { el: hs, id: hs.id.slice(3), mode: 'b', row: false }; }
+  var card = t.closest('.ed-grid .card.ex');
+  if (!card) {
+    var grid = t.closest('.ed-grid') || (t.closest('.ed') && document.querySelector('.ed-grid')); if (!grid) return null;
+    var bs = grid.querySelectorAll(':scope>.card.ex,:scope>.sup'), last = bs[bs.length - 1];
+    if (!last || (!t.closest('#addCard') && e.clientY < last.getBoundingClientRect().bottom)) return null;
+    if (last === mine || (DRG.set && last === mySup)) return null;
+    var lc = last.classList.contains('sup') ? last.querySelector('.card.ex:last-child') : last; if (!lc) return null;
+    return { el: last, id: lc.id.slice(3), mode: 'a', row: false };
+  }
+  if (card === mine) return null;
+  var id = card.id.slice(3), sup = card.closest('.sup');
+  var el = sup && DRG.set ? sup : card;
   if (DRG.set && el === mySup) return null;
   var r = el.getBoundingClientRect(), box = (el.parentNode || el).getBoundingClientRect(), row = r.width < box.width * 0.75;
-  var before = row ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2;
-  return { el: el, id: id, before: before, row: row };
+  var f = row ? (e.clientX - r.left) / r.width : (e.clientY - r.top) / r.height;
+  if (sup && !DRG.set && sup === mySup) return { el: card, id: id, mode: f < 0.3 ? 'jb' : f > 0.7 ? 'ja' : 's', row: row };
+  if (sup && !DRG.set) return { el: card, id: id, mode: f < 0.5 ? 'jb' : 'ja', row: row, join: true };
+  return { el: el, id: id, mode: f < 0.5 ? 'b' : 'a', row: row };
 }
+function dzMark(d) {
+  document.querySelectorAll('.dz-t,.dz-b,.dz-l,.dz-r,.dz-s').forEach(function (x) { x.classList.remove('dz-t', 'dz-b', 'dz-l', 'dz-r', 'dz-s'); });
+  var tip = document.getElementById('dzTip');
+  if (!d) { if (tip) tip.hidden = true; return; }
+  var before = d.mode === 'b' || d.mode === 'jb';
+  d.el.classList.add(d.mode === 's' ? 'dz-s' : d.row ? (before ? 'dz-l' : 'dz-r') : (before ? 'dz-t' : 'dz-b'));
+  var txt = d.mode === 's' ? 'Поменять местами' : d.join ? 'В суперсет' : '';
+  if (!tip) { tip = document.createElement('div'); tip.id = 'dzTip'; tip.className = 'dz-tip'; document.body.appendChild(tip); }
+  tip.hidden = !txt; if (txt) { tip.textContent = txt; var r = d.el.getBoundingClientRect(); tip.style.left = Math.round(r.left + r.width / 2) + 'px'; tip.style.top = Math.round(Math.max(r.top, 8) + 10) + 'px'; }
+}
+/** 2.8: у края окна страница сама прокручивается вверх или вниз, пока тащите упражнение. */
+function dragScroll() {
+  if (!DRG) return;
+  var y = DRG.y, H = window.innerHeight, v = 0;
+  if (y != null) { if (y < 110) v = -Math.ceil((110 - Math.max(y, 0)) / 5); else if (y > H - 150) v = Math.ceil((Math.min(y, H) - (H - 150)) / 5); }
+  if (v) window.scrollBy(0, v);
+  DRG.raf = requestAnimationFrame(dragScroll);
+}
+function dragStop() { if (DRG && DRG.raf) cancelAnimationFrame(DRG.raf); DRG = null; dzClear(); dzMark(null); document.body.classList.remove('dragging'); }
 document.addEventListener('dragstart', function (e) {
   var h = e.target.closest && e.target.closest('[data-drag]');
   if (!h || MODE !== 'trainer' || S.view !== 'edit') return;
-  DRG = { id: h.getAttribute('data-drag'), set: h.hasAttribute('data-dset') };
+  DRG = { id: h.getAttribute('data-drag'), set: h.hasAttribute('data-dset'), y: null };
   var src = DRG.set ? document.getElementById('sp-' + DRG.id) : document.getElementById('it-' + DRG.id);
   try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', DRG.id); if (src) e.dataTransfer.setDragImage(src, 30, 24); } catch (x) {}
   setTimeout(function () { if (src) src.classList.add('drag-src'); document.body.classList.add('dragging'); }, 0);
+  DRG.raf = requestAnimationFrame(dragScroll);
 });
 document.addEventListener('dragover', function (e) {
   if (!DRG) return;
+  DRG.y = e.clientY;
   var d = dropAt(e);
-  document.querySelectorAll('.dz-t,.dz-b,.dz-l,.dz-r').forEach(function (x) { x.classList.remove('dz-t', 'dz-b', 'dz-l', 'dz-r'); });
+  dzMark(d);
   if (!d) return;
   e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (x) {}
-  d.el.classList.add(d.row ? (d.before ? 'dz-l' : 'dz-r') : (d.before ? 'dz-t' : 'dz-b'));
 });
+document.addEventListener('dragleave', function (e) { if (DRG && !e.relatedTarget) DRG.y = null; });   // вышли за окно – не крутим
 document.addEventListener('drop', function (e) {
   if (!DRG) return;
-  var d = dropAt(e), g = DRG; DRG = null; dzClear(); document.body.classList.remove('dragging');
+  var d = dropAt(e), g = { id: DRG.id, set: DRG.set }, y = e.clientY; dragStop();
   if (!d) return;
   e.preventDefault();
-  if (dropMove(g.id, g.set, d.id, d.before)) { markDirty(); rerenderKeep(); }
+  if (!dropMove(g.id, g.set, d.id, d.mode)) return;
+  markDirty(); rerenderKeep();
+  var el = document.getElementById((g.set ? 'sp-' : 'it-') + g.id) || document.getElementById('it-' + g.id);   // 2.8: упражнение остаётся там, где его отпустили
+  if (el) { var top = el.getBoundingClientRect().top, want = Math.min(Math.max(y - 40, 70), window.innerHeight - 220); if (Math.abs(top - want) > 4) window.scrollBy(0, top - want); el.classList.add('just-moved'); setTimeout(function () { el.classList.remove('just-moved'); }, 900); }
 });
-document.addEventListener('dragend', function () { DRG = null; dzClear(); document.body.classList.remove('dragging'); });
+document.addEventListener('dragend', function () { dragStop(); });
 /* 2.6: страница из кэша браузера старше той, что на сервере, – плашка «Обновить» */
 function verGt(a, b) { a = String(a || '').split('.').map(Number); b = String(b || '').split('.').map(Number); for (var i = 0; i < Math.max(a.length, b.length); i++) { var x = a[i] || 0, y = b[i] || 0; if (x !== y) return x > y; } return false; }
 function updCheck(r) {
