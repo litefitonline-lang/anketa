@@ -742,6 +742,7 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.8.2 (25.10.2026). Владелец переключает «Все клиенты» / «Кабинет Андрея» / «Кабинет Дарьи» (было «Как видит …»).
  * 1.8.1 (25.10.2026). Отдельно эта страница больше не открывается: по прямой ссылке – сразу общий кабинет (trainer.html).
  * 1.8 (25.10.2026). Общий кабинет тренера: эта страница (cabinet/trainer-app.html) открывается внутри общего кабинета
  *   (cabinet/trainer.html, ?embed=1) рядом с приложением тренировок – без своего меню внизу, разделы переключает кабинет,
@@ -781,7 +782,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.8';
-var PATCH = '.1';               // 1.8.1: отдельно страница не открывается – только внутри общего кабинета                // правка страницы без смены версии сервера
+var PATCH = '.2';               // 1.8.1: отдельно не открывается; 1.8.2: «Кабинет Андрея» вместо «Как видит Андрей»                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -872,6 +873,12 @@ function whenTxt(ms) {
   if (!ms) return '';
   var d = new Date(ms), hm = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   return (new Date().toDateString() === d.toDateString() ? '' : pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ' ') + hm;
+}
+/** Имя в родительном падеже: «Андрей» → «Андрея», «Дарья» → «Дарьи», «Артём» → «Артёма». */
+function gen(n) {
+  n = String(n || '').trim(); var w = n.split(/\s+/)[0], rest = n.slice(w.length);
+  var g = /[йь]$/i.test(w) ? w.slice(0, -1) + 'я' : /[ия]$/i.test(w) ? w.slice(0, -1) + 'и' : /а$/i.test(w) ? w.slice(0, -1) + (/[гкхжчшщ]а$/i.test(w) ? 'и' : 'ы') : /[бвгдзклмнпрстфхцжшщч]$/i.test(w) ? w + 'а' : w;
+  return g + rest;
 }
 var AS = '';                     // владелец: «как видит тренер» (имя) или '' — все клиенты
 
@@ -1473,12 +1480,12 @@ function topBar(back) {
 function header() {
   var who = '';
   if (D.admin && D.trainers.length) {
-    who = '<label class="fld plain asbox"><select id="asSel" data-ch="as" aria-label="Чьи клиенты">' + [['', 'Все клиенты']].concat(D.trainers.filter(function (n) { return n !== D.trainer; }).map(function (n) { return [n, 'Как видит ' + n]; }))
+    who = '<label class="fld plain asbox"><select id="asSel" data-ch="as" aria-label="Чьи клиенты">' + [['', 'Все клиенты']].concat(D.trainers.filter(function (n) { return n !== D.trainer; }).map(function (n) { return [n, 'Кабинет ' + gen(n)]; }))
       .map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === (D.as || '') ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
   }
   return topBar(false) + '<h1 class="hello">' + greet() + ', ' + esc(D.trainer) + '</h1>' +
     '<div class="meta"><span class="pill">Кабинет тренера</span><span class="pill">Клиентов <b class="num">' + D.clients.filter(function (c) { return !c.arch; }).length + '</b></span>' +
-    (D.as ? '<span class="pill warm">Как видит ' + esc(D.as) + '</span>' : '') + '</div>' + who;
+    (D.as ? '<span class="pill warm">Кабинет ' + esc(gen(D.as)) + '</span>' : '') + '</div>' + who;
 }
 function render(nav) {
   if (!D) return;
@@ -1699,7 +1706,7 @@ function viewFresh() {
     h += '<div class="card"><h3>' + esc(f.name) + '</h3><p class="sub">' + (a.at ? 'Анкета ' + (a.at === TODAY ? 'сегодня' : dm(a.at)) + ' · ' : '') + esc(f.phone || '') + '</p><div class="kvs">' +
       kv('Статус', esc(stShort(f.status))) + kv('Цель', esc(a.goal || f.goal || '—')) + (a.exp ? kv('Опыт', esc(a.exp)) : '') + (a.lim ? kv('Ограничения', esc(a.lim)) : '') +
       kv('Формат в анкете', esc(f.format || 'не выбран')) + '</div>' +
-      (D.as ? '<p class="note">Вы смотрите список как ' + esc(D.as) + '. Взять клиента может сам тренер.</p>' : '<button class="btn pri mt" data-act="takeForm" data-id="' + f.id + '" style="height:48px">Взять клиента</button>') + '</div>';
+      (D.as ? '<p class="note">Открыт кабинет ' + esc(gen(D.as)) + '. Взять клиента может сам тренер.</p>' : '<button class="btn pri mt" data-act="takeForm" data-id="' + f.id + '" style="height:48px">Взять клиента</button>') + '</div>';
   });
   return h;
 }
@@ -2299,7 +2306,7 @@ function freeCard(x, fresh, inList) {
     (a.alt ? '<div class="banner warn" style="margin-bottom:10px">📵 <b>Нет Telegram</b> – связь: ' + esc(a.alt) + '</div>' : '') +
     '<div class="kvs">' + rows + '</div>' + (st ? '<p class="frst ' + cls + '">' + st + '</p>' : '');
   if (fresh) {
-    if (D.as) h += '<p class="note">Вы смотрите список как ' + esc(D.as) + '. Взять клиента может сам тренер.</p>';
+    if (D.as) h += '<p class="note">Открыт кабинет ' + esc(gen(D.as)) + '. Взять клиента может сам тренер.</p>';
     else {
       h += '<button class="btn pri mt" data-act="freeTake" data-id="' + x.id + '" style="height:48px">Взять себе</button>';
       if (D.admin && D.trainers.length > 1) h += '<div class="asg">' + fs('asg' + x.id, 'Или назначить тренеру', D.trainers.map(function (n) { return [n, n]; }), D.trainers.filter(function (n) { return n !== D.trainer; })[0] || D.trainer) +
