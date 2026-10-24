@@ -742,6 +742,7 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.8.1 (25.10.2026). Отдельно эта страница больше не открывается: по прямой ссылке – сразу общий кабинет (trainer.html).
  * 1.8 (25.10.2026). Общий кабинет тренера: эта страница (cabinet/trainer-app.html) открывается внутри общего кабинета
  *   (cabinet/trainer.html, ?embed=1) рядом с приложением тренировок – без своего меню внизу, разделы переключает кабинет,
  *   счётчики («Требуют внимания», Free, Новые) уходят в его меню. В карточке клиента – «Тренировки»: открывает тренировки
@@ -780,11 +781,16 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.8';
-var PATCH = '';                // правка страницы без смены версии сервера
+var PATCH = '.1';               // 1.8.1: отдельно страница не открывается – только внутри общего кабинета                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
 var EMBED = new URLSearchParams(location.search).get('embed') === '1' && window.top !== window;
+if (window.top === window) {                                                // 1.8.1: отдельно не открывается – только внутри общего кабинета
+  var t0 = new URLSearchParams(location.search).get('t');
+  location.replace('trainer.html' + (t0 ? '?t=' + encodeURIComponent(t0) : ''));
+  return;
+}
 function toShell(o) { if (!EMBED) return; o.lf = 1; o.app = 'A'; try { window.parent.postMessage(o, location.origin); } catch (e) {} }
 function WIDE() { return window.innerWidth >= 1100; }
 var wideWas = null, wideT = 0;
