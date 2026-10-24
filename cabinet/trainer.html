@@ -411,7 +411,7 @@ details.card[open]>summary{margin-bottom:12px}
 @media (max-width:360px){.app{padding-left:14px;padding-right:14px}.rings{width:210px;height:210px}.ctr .big{font-size:38px}.ctr .of{font-size:11.5px}.grid3{gap:8px}.week .wg{grid-template-columns:repeat(2,1fr)}}
 
 /* ================= КАБИНЕТ ТРЕНЕРА: дополнения к стилям кабинета клиента ================= */
-.tabs nav{grid-template-columns:repeat(4,1fr)}
+.tabs nav{grid-template-columns:repeat(5,1fr)}
 .tabs .cnt{position:absolute;top:8px;left:calc(50% + 8px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--warm);color:#231204;font-size:10.5px;font-weight:800;display:grid;place-items:center;font-variant-numeric:tabular-nums}
 .back{display:inline-flex;align-items:center;gap:4px;height:44px;padding:0 12px 0 4px;margin-left:-6px;font-size:15px;font-weight:700;color:var(--accent)}
 .back svg{width:20px;height:20px}
@@ -551,6 +551,36 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 62px)}
 .pt-big small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
 .pt-mon{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .ptm-r h3{margin:0}
+/* 1.7: FREE */
+.tag.free{color:#231204;background:var(--warm);border-color:var(--warm)}
+.frh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.frh h3{margin:0}
+.frst{font-size:13px;font-weight:700;margin:6px 0 0}
+.frst.warm{color:var(--warm)}
+.frst.ok{color:var(--accent)}
+.asg{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-top:10px}
+.asg .btn{height:48px;padding:0 16px;width:auto}
+.copt.dis{opacity:.5;cursor:default}
+.copt .tag{margin-right:6px;font-size:11px;padding:2px 8px}
+/* 1.6: календарь замеров */
+.mcal{margin-top:14px}
+.mcal-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.mcal-h b{font-size:16px;font-weight:800;text-transform:capitalize}
+.mcal-h button{width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);font:inherit;font-size:20px;line-height:1;cursor:pointer}
+.mcal-h button:disabled{opacity:.3;cursor:default}
+.mcal-w,.mcal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.mcal-w span{font-size:11px;color:var(--muted);font-weight:700;padding:4px 0;text-transform:uppercase}
+.mcal-g button{position:relative;aspect-ratio:1;min-height:38px;border-radius:12px;border:1.5px solid transparent;background:none;color:var(--text);font:inherit;font-size:15px;font-weight:600;padding:0;cursor:pointer;font-variant-numeric:tabular-nums}
+.mcal-g button.out{color:var(--dim);opacity:.45}
+.mcal-g button.fz{background:rgba(120,160,255,.09);color:#A9C1FF}
+.mcal-g button.today::after{content:"";position:absolute;bottom:4px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--text)}
+.mcal-g button.m-plan{border-color:var(--accent);color:var(--accent)}
+.mcal-g button.m-done{background:var(--accent);color:var(--on-accent)}
+.mcal-g button.m-done.today::after{background:var(--on-accent)}
+.mcal-g button.m-due{background:var(--warm-bg);border-color:var(--warm);color:var(--warm)}
+.mcal-g button.m-miss{background:rgba(255,139,123,.12);color:var(--err)}
+.mcal-l{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin-top:10px}
+.mcal-l i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:5px;border:1.5px solid transparent}
 </style>
 </head>
 <body>
@@ -687,6 +717,15 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.7 (25.10.2026). FREE «3 тренировки бесплатно» (lite-fit-trainer 3.10.0): вкладка «Free» – заявки FREE (взять себе,
+ *   Артём – назначить тренеру) и свои клиенты FREE («Выдать доступ» – готовое сообщение со ссылкой на бота или, без Telegram,
+ *   на кабинет; «Перевести в START / BASIC / PRO»). Пометка FREE в списках, группа FREE во вкладке «Клиенты», на «Сегодня» –
+ *   «FREE: выдайте доступ». «Сменить формат» в разделе «Ведение»: только вверх по воронке и BASIC ↔ PRO, FREE и START – один раз
+ *   (недоступные варианты – с причиной: «START уже был 03.10»). START – через пробный кабинет, PRO – через таблицу или перевод
+ *   с пробного, BASIC – сразу (с PRO: таблица остаётся, напоминания кабинета выключаются, Артёму – уведомление).
+ * 1.6 (19.10.2026). Замеры: календарь месяца вместо поля даты – внесённые, запланированные, пропущенные, заморозка. «Авто» –
+ *   нажатие на день переносит ближайшие замеры (следующие от него по интервалу), «тренер» – нажатие ставит или убирает дату
+ *   ({ op:'meas', add | del }, lite-fit-trainer 3.9.7).
  * 1.5 (19.10.2026). Баллы и медали клиентов (как в кабинете клиента 2.9): карточка в обзоре клиента с разбором месяца и строкой
  *   «Подскажите клиенту», на «Сегодня» – «Медали: месяц заканчивается» и памятка «Что делать тренеру». Данные тренировок –
  *   запрос { a:'wk', op:'ptsall' } к приложению тренировок (сервер 4.13.0), раз в 10 минут.
@@ -710,7 +749,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '1.5';
+var VERSION = '1.7';
 var PATCH = '';                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -785,6 +824,7 @@ IC.back = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wid
 IC.people = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M16.5 14.3c2.6.3 4.5 2.6 4.5 5.7"/></svg>';
 IC.add = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.4"/><path d="M3.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><path d="M19 6.5v6M16 9.5h6"/></svg>';
 IC.list = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 6l1.2 1.2L7.2 5M4 12l1.2 1.2 2-2.2M4 18l1.2 1.2 2-2.2"/></svg>';
+IC.gift = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8.5V20"/><path d="M12 8.5c-1.5-3.5-5.5-4-5.5-1.5S10 8.5 12 8.5zM12 8.5c1.5-3.5 5.5-4 5.5-1.5S14 8.5 12 8.5z"/></svg>';
 IC.trash = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 12.5h8L17 7M10 11v5M14 11v5"/></svg>';
 
 var ST_ACTIVE = '🟢 Тренируется', ST_PAUSE = '⏸ Пауза / заморозка';
@@ -802,7 +842,8 @@ function stShort(s) { return String(s || '').replace(/^\S+\s+/, ''); }
 
 /* ================= СВЯЗЬ С СЕРВЕРОМ ================= */
 var WRITE = { norm: 1, normf: 1, calc: 1, steps: 1, plan: 1, plandel: 1, plancopy: 1, meas: 1, guide: 1, remind: 1, pay: 1, freeze: 1, freezedel: 1, status: 1, extend: 1,
-  topro: 1, trial: 1, create: 1, take: 1, cablink: 1, cabreset: 1, msg: 1, fb: 1, mrsave: 1, mrsend: 1, taskadd: 1, taskdel: 1, ctask: 1 };
+  topro: 1, trial: 1, create: 1, take: 1, cablink: 1, cabreset: 1, msg: 1, fb: 1, mrsave: 1, mrsend: 1, taskadd: 1, taskdel: 1, ctask: 1,
+  freetake: 1, freegive: 1, fmt: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 function post(body) {
@@ -1014,6 +1055,14 @@ function noSteps(c) { return locked(c, 'steps') || c.steps == null; }
 function summ(c) {
   var o = { state: 'ok', miss: [], alerts: [], text: 'всё внесено', cls: '' }, tr = trialSt(c), endIn = c.payEnd ? dn(c.payEnd) - T : null;
   if (c.arch) { o.state = 'off'; o.text = stShort(c.status).toLowerCase(); o.cls = 'dim'; return o; }
+  if (isFree(c) && !c.table) {                                             // 1.7: FREE – пока без кабинета
+    var fr = c.free || {};
+    o.state = 'nocab';
+    if (!fr.given) { o.text = 'FREE: доступ не выдан'; o.cls = 'warm'; o.alerts.push({ text: 'FREE: выдайте доступ – клиент ждёт ссылку', sub: 'over' }); }
+    else if (fr.mode === 'tg' && !c.bot) { o.text = 'FREE: бот не подключён'; o.cls = 'warm'; if (dn(fr.given) < T) o.alerts.push({ text: 'FREE: доступ выдан ' + dm(fr.given) + ', а бот не подключён – напишите клиенту', sub: 'over' }); }
+    else { o.text = fr.mode === 'cab' ? 'FREE: ссылка на кабинет' : 'FREE: бот подключён'; o.cls = ''; }
+    return o;
+  }
   var act = c.status === ST_ACTIVE;
   if (act && !tr && endIn !== null && endIn <= 3) o.alerts.push({ text: endIn < 0 ? 'Оплаченный период закончился ' + dm(c.payEnd) : 'Пакет заканчивается ' + (endIn === 0 ? 'сегодня' : dm(c.payEnd) + ' – через ' + days(endIn)), sub: 'care' });
   if (act && !tr && endIn === null && !/аванс/i.test(c.payStatus || '')) o.alerts.push({ text: 'Нет оплаты – внесите её в разделе «Ведение»', sub: 'care' });
@@ -1059,13 +1108,20 @@ function allAlerts() {
   return out;
 }
 /** 1.4: клиенты по значимости: PRO, BASIC, START, бесплатные (последняя оплата – 0 ₽), без формата. */
-var RANKS = ['PRO', 'BASIC', 'START', 'Бесплатные', 'Без формата'];
+var RANKS = ['PRO', 'BASIC', 'START', 'Бесплатные', 'FREE · 3 тренировки', 'Без формата'];
 function fmtRank(c) {
+  var f = String(c.format || '').toUpperCase();
+  if (f === 'FREE') return 4;                                              // 1.7
   var p = c.pays && c.pays[0];
   if (p && p.sum === 0) return 3;
-  var f = String(c.format || '').toUpperCase();
-  return f === 'PRO' ? 0 : f === 'BASIC' ? 1 : f === 'START' ? 2 : 4;
+  return f === 'PRO' ? 0 : f === 'BASIC' ? 1 : f === 'START' ? 2 : 5;
 }
+/* ---------- 1.7: FREE ---------- */
+function isFree(c) { return !!c && String(c.format || '').toUpperCase() === 'FREE'; }
+function freshFree() { return D.fresh.filter(isFree); }
+function freshOther() { return D.fresh.filter(function (f) { return !isFree(f); }); }
+function myFree() { return byRank(D.clients.filter(function (c) { return isFree(c) && !c.arch; })); }
+function freeTodo() { return myFree().filter(function (c) { return !(c.free && c.free.given); }).length; }
 function byRank(list) { return list.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return fmtRank(a[0]) - fmtRank(b[0]) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
 function metaLine(c) {
   var tr = trialSt(c), p = [c.format || 'формат не выбран'];
@@ -1336,10 +1392,10 @@ function paintSync() {
   b.classList.toggle('busy', S.busy > 0 || active > 0 || (S.unsure && !S.offline) || (D && !loadState().done && queue.length > 0));
   var t = $('.sync-t', b); if (t) t.textContent = syncText();
 }
-var TABS = [['home', 'Сегодня', IC.today], ['clients', 'Клиенты', IC.people], ['fresh', 'Новые', IC.add], ['tasks', 'Задачи', IC.list]];
+var TABS = [['home', 'Сегодня', IC.today], ['clients', 'Клиенты', IC.people], ['free', 'Free', IC.gift], ['fresh', 'Новые', IC.add], ['tasks', 'Задачи', IC.list]];
 function paintTabs() {
   tabsEl.classList.remove('hidden');
-  var cnt = { home: allAlerts().length, fresh: D.fresh.length };
+  var cnt = { home: allAlerts().length, fresh: freshOther().length, free: freshFree().length + freeTodo() };
   var on = S.tab;
   tabsEl.querySelector('nav').innerHTML = TABS.map(function (t) {
     return '<button data-tab="' + t[0] + '" class="' + (on === t[0] ? 'on' : '') + '" aria-label="' + t[1] + '">' + t[2] + t[1] +
@@ -1365,7 +1421,7 @@ function render(nav) {
   paintTabs();
   var c = cur();
   if (S.cid && !c) { S.cid = null; }
-  var body = c ? viewClient(c) : S.tab === 'clients' ? viewClients() : S.tab === 'fresh' ? viewFresh() : S.tab === 'tasks' ? viewTasks() : viewHome();
+  var body = c ? viewClient(c) : S.tab === 'clients' ? viewClients() : S.tab === 'free' ? viewFree() : S.tab === 'fresh' ? viewFresh() : S.tab === 'tasks' ? viewTasks() : viewHome();
   app.innerHTML = (c ? '' : header() + staleBanner()) + '<div class="' + (nav ? 'view' : '') + '">' + body + '</div>';
   var chip = app.querySelector('.chips .on'); if (chip) chip.parentNode.scrollLeft = Math.max(chip.offsetLeft - chip.parentNode.offsetLeft - 24, 0);
   if (nav) window.scrollTo(0, 0);
@@ -1444,13 +1500,15 @@ function viewHome() {
   if (S.unsure) h += '<div class="banner' + (S.offline ? ' warn' : '') + '">' + (S.offline ? 'Нет связи с сервером. ' : '') + 'Показаны данные на <b class="num">' + whenTxt(S.loadedAt) + '</b>' + (S.offline ? '. Изменения сохранить не получится, пока связь не вернётся.' : ' – сверяю, что изменилось.') + '</div>';
   else if (!ls.done) h += '<div class="banner">Обновляю данные клиентов: <b class="num">' + ls.got + ' из ' + ls.n + '</b>. Список уже можно смотреть – поводы для внимания дополняются.</div>';
   h += '<div class="card"><h3>Требуют внимания</h3>';
-  if (!al.length && !D.fresh.length) h += '<p class="sub" style="margin:0">' + (ls.done ? 'Сегодня всё спокойно.' : 'Пока ничего. Данные ещё загружаются.') + '</p>';
+  var fo = freshOther(), ff = freshFree();
+  if (!al.length && !fo.length && !ff.length) h += '<p class="sub" style="margin:0">' + (ls.done ? 'Сегодня всё спокойно.' : 'Пока ничего. Данные ещё загружаются.') + '</p>';
   else {
     h += '<p class="sub">Нажмите на строку – откроется нужный раздел клиента.</p><div class="rows">';
     al.forEach(function (a) {
       h += '<button class="row" data-open="' + a.c.id + '" data-sub="' + a.sub + '"><span class="dot warm"></span><span class="mn"><b>' + esc(a.c.name) + '</b><small>' + esc(a.text) + '</small></span><span class="chev">›</span></button>';
     });
-    if (D.fresh.length) h += '<button class="row" data-tab="fresh"><span class="dot"></span><span class="mn"><b>Новые клиенты без тренера: ' + D.fresh.length + '</b><small>Можно взять клиента себе и сразу создать ему кабинет</small></span><span class="chev">›</span></button>';
+    if (ff.length) h += '<button class="row" data-tab="free"><span class="dot warm"></span><span class="mn"><b>Заявки FREE без тренера: ' + ff.length + '</b><small>3 бесплатные тренировки – возьмите клиента и выдайте доступ</small></span><span class="chev">›</span></button>';
+    if (fo.length) h += '<button class="row" data-tab="fresh"><span class="dot"></span><span class="mn"><b>Новые клиенты без тренера: ' + fo.length + '</b><small>Можно взять клиента себе и сразу создать ему кабинет</small></span><span class="chev">›</span></button>';
     h += '</div>';
   }
   h += '</div>';
@@ -1520,12 +1578,13 @@ function verGt(a, b) {
 }
 
 /* ================= КЛИЕНТЫ ================= */
-var FILTERS = [['all', 'Все'], ['pro', 'PRO'], ['trial', 'Пробный'], ['nocab', 'Без кабинета'], ['frz', 'Заморозка'], ['arch', 'Архив']];
+var FILTERS = [['all', 'Все'], ['pro', 'PRO'], ['trial', 'Пробный'], ['free', 'FREE'], ['nocab', 'Без кабинета'], ['frz', 'Заморозка'], ['arch', 'Архив']];
 function inFilter(c, f) {
   if (f === 'arch') return !!c.arch;
   if (c.arch) return false;
   if (f === 'pro') return c.format === 'PRO';
   if (f === 'trial') return !!c.trial;
+  if (f === 'free') return isFree(c);
   if (f === 'nocab') return !c.table;
   if (f === 'frz') return !!frzOn(c, T) || c.status === ST_PAUSE;
   return true;
@@ -1548,19 +1607,19 @@ function viewClients() {
     '<label class="fld plain" style="margin-bottom:10px"><input id="q" type="search" placeholder="Поиск по имени" value="' + esc(S.q) + '" autocomplete="off" enterkeyhint="search"></label>' +
     '<div class="chips">' + FILTERS.map(function (f) {
       var n = D.clients.filter(function (c) { return inFilter(c, f[0]); }).length;
-      if (f[0] === 'arch' && !n) return '';
+      if ((f[0] === 'arch' || f[0] === 'free') && !n) return '';
       return '<button data-filter="' + f[0] + '" class="' + (S.filter === f[0] ? 'on' : '') + '">' + f[1] + ' ' + n + '</button>';
     }).join('') + '</div>' +
     '<div class="card" id="clist">' + clientRows() + '</div>' +
-    '<p class="muted" style="font-size:13px;margin:4px 2px 0">' + (D.admin && !D.as ? 'Здесь клиенты всех тренеров.' : 'Здесь только ' + (D.as ? 'клиенты тренера ' + esc(D.as) : 'ваши клиенты') + '.') + ' Новые заявки без тренера – на вкладке «Новые».</p>';
+    '<p class="muted" style="font-size:13px;margin:4px 2px 0">' + (D.admin && !D.as ? 'Здесь клиенты всех тренеров.' : 'Здесь только ' + (D.as ? 'клиенты тренера ' + esc(D.as) : 'ваши клиенты') + '.') + ' Новые заявки без тренера – на вкладках «Новые» и «Free».</p>';
 }
 
 /* ================= НОВЫЕ ================= */
 function viewFresh() {
-  var h = '<h2 class="sec-title">Новые клиенты</h2>';
-  if (!D.fresh.length) return h + '<div class="card"><p class="muted" style="margin:0">Новых заявок без тренера сейчас нет. Когда придёт анкета, клиент появится здесь.</p></div>';
-  h += '<p class="muted" style="font-size:13px;margin:-4px 2px 12px">Заявки, у которых ещё нет ответственного. Берёте клиента – становитесь его тренером.</p>';
-  D.fresh.forEach(function (f) {
+  var h = '<h2 class="sec-title">Новые клиенты</h2>', list = freshOther();
+  if (!list.length) return h + '<div class="card"><p class="muted" style="margin:0">Новых заявок без тренера сейчас нет. Когда придёт анкета, клиент появится здесь.' + (freshFree().length ? ' Заявки FREE – на вкладке «Free».' : '') + '</p></div>';
+  h += '<p class="muted" style="font-size:13px;margin:-4px 2px 12px">Заявки, у которых ещё нет ответственного. Берёте клиента – становитесь его тренером. Заявки FREE – на вкладке «Free».</p>';
+  list.forEach(function (f) {
     var a = f.an || {};
     h += '<div class="card"><h3>' + esc(f.name) + '</h3><p class="sub">' + (a.at ? 'Анкета ' + (a.at === TODAY ? 'сегодня' : dm(a.at)) + ' · ' : '') + esc(f.phone || '') + '</p><div class="kvs">' +
       kv('Статус', esc(stShort(f.status))) + kv('Цель', esc(a.goal || f.goal || '—')) + (a.exp ? kv('Опыт', esc(a.exp)) : '') + (a.lim ? kv('Ограничения', esc(a.lim)) : '') +
@@ -1600,7 +1659,7 @@ function loadingCard(c) {
 }
 function viewClient(c) {
   var s = summ(c), tr = trialSt(c), pills = [], ban = '';
-  pills.push('<span class="tag ' + (c.format === 'PRO' ? 'pro' : '') + '">' + esc(c.format || 'формат не выбран') + '</span>');
+  pills.push('<span class="tag ' + (c.format === 'PRO' ? 'pro' : isFree(c) ? 'free' : '') + '">' + esc(c.format || 'формат не выбран') + '</span>');
   if (tr && !tr.ended && !tr.before) pills.push('<span class="pill">Пробный · день <b class="num">' + tr.day + '</b> из ' + tr.total + '</span>');
   else if (c.loaded && c.start && T >= dn(c.start) && T <= dn(c.end)) pills.push('<span class="pill">День <b class="num">' + (T - dn(c.start) + 1) + '</b> из ' + (dn(c.end) - dn(c.start) + 1) + '</span>');
   if (!tr && c.payEnd) pills.push('<span class="pill">Оплачено до <b>' + dm(c.payEnd) + '</b></span>');
@@ -1647,6 +1706,7 @@ function aboutCard(c) {
 
 /* ---------- обзор ---------- */
 function noCabCard(c) {
+  if (isFree(c)) return freeCard(c, false);                                // 1.7
   var h = '<div class="card"><h3>Личного кабинета пока нет</h3>';
   if (c.arch) return h + '<p class="sub" style="margin:0">Клиент в архиве.</p></div>';
   if (c.format === 'PRO') return h + '<p class="sub">Клиент на PRO, но таблицы и кабинета у него ещё нет. Создайте их – это около минуты.</p><button class="btn pri" data-act="createForm" style="height:48px">Создать таблицу и кабинет</button></div>';
@@ -1795,17 +1855,67 @@ function photosCard(c) {
   if (dates.length > 2) h += '<button class="btn sec sm mt" data-act="allPhotos">' + (S.allPhotos ? 'Показать последние' : 'Показать все: ' + dates.length + ' ' + plural(dates.length, 'дата', 'даты', 'дат')) + '</button>';
   return h + '</div>';
 }
+var MONTHS_N = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+/** 1.6: календарь замеров на месяц: внесённые, запланированные, пропущенные, заморозка, вне дневника. */
+function measCal(c) {
+  var m = c.meas, by = {}, late = m.late || 2, sN = dn(c.start), eN = dn(c.end);
+  measCols(c).forEach(function (x) { by[x.date] = x; });
+  var lo = c.start.slice(0, 7), hi = c.end.slice(0, 7), key = S.mcal && S.mcal.id === c.id ? S.mcal.m : TODAY.slice(0, 7);
+  if (key < lo) key = lo; if (key > hi) key = hi;
+  var yy = +key.slice(0, 4), mm = +key.slice(5, 7), first = Date.UTC(yy, mm - 1, 1) / 864e5, nd = new Date(Date.UTC(yy, mm, 0)).getUTCDate();
+  var wd = (new Date(first * 864e5).getUTCDay() + 6) % 7, g = '';
+  for (var i = 0; i < wd; i++) g += '<span></span>';
+  for (var n = first; n < first + nd; n++) {
+    var y = ymd(n), col = by[y], cls = [];
+    if (n < sN || n > eN) cls.push('out');
+    else if (frzOn(c, n)) cls.push('fz');
+    if (n === T) cls.push('today');
+    var st = '';
+    if (col) { st = filled(col) ? 'm-done' : n > T ? 'm-plan' : n >= T - late ? 'm-due' : 'm-miss'; cls.push(st); }
+    var lab = dm(y) + (st === 'm-done' ? ', замеры внесены' : st === 'm-plan' ? ', замеры запланированы' : st === 'm-due' ? ', замеры ждут' : st === 'm-miss' ? ', замеры пропущены' : '');
+    g += '<button data-act="mDay" data-d="' + y + '" class="' + cls.join(' ') + '" aria-label="' + lab + '">' + (n - first + 1) + '</button>';
+  }
+  return '<div class="mcal"><div class="mcal-h"><button data-act="mMon" data-m="-1" aria-label="Предыдущий месяц"' + (key <= lo ? ' disabled' : '') + '>‹</button>' +
+    '<b>' + MONTHS_N[mm - 1] + ' ' + yy + '</b><button data-act="mMon" data-m="1" aria-label="Следующий месяц"' + (key >= hi ? ' disabled' : '') + '>›</button></div>' +
+    '<div class="mcal-w">' + ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>' +
+    '<div class="mcal-g">' + g + '</div>' +
+    '<div class="mcal-l"><span><i style="background:var(--accent)"></i>внесены</span><span><i style="border-color:var(--accent)"></i>запланированы</span>' +
+    '<span><i style="background:var(--warm-bg);border-color:var(--warm)"></i>ждут</span><span><i style="background:rgba(255,139,123,.25)"></i>пропущены</span>' +
+    (c.frz && c.frz.length ? '<span><i style="background:rgba(120,160,255,.25)"></i>заморозка</span>' : '') + '</div></div>';
+}
+/** Нажатие на день календаря замеров. */
+function measTap(c, y) {
+  var m = c.meas, n = dn(y), col = measCols(c).filter(function (x) { return x.date === y; })[0];
+  if (n < dn(c.start) || n > dn(c.end)) return toast('Вне дневника клиента (' + dm(c.start) + '–' + dm(c.end) + ')', '');
+  if (col && filled(col)) return toast('Замеры за ' + dm(y) + ' уже внесены', '');
+  if (n < T) return toast('Прошедшую дату менять нельзя', '');
+  if (m.mode === 'manual') return inline('meas', col ? { id: c.id, del: y } : { id: c.id, add: y });
+  var nx = measNext(c);
+  if (n === T) return toast('В режиме «авто» ближайшие замеры можно перенести на завтра и позже', '');
+  if (nx && nx.date === y) return toast('Ближайшие замеры уже стоят на ' + dm(y), '');
+  if (col) return toast('Эта дата стоит по интервалу. Ставить даты вручную – режим «тренер»', '');
+  sheet('Замеры', '<h2>' + (nx ? 'Перенести ближайшие замеры?' : 'Поставить замеры?') + '</h2><p class="lead">' +
+    (nx ? 'С ' + dm(nx.date) + ' на <b style="color:var(--text)">' + dm(y) + '</b>. ' : 'На <b style="color:var(--text)">' + dm(y) + '</b>. ') +
+    'Следующие даты встанут от неё каждые ' + m.every + ' ' + plural(m.every, 'день', 'дня', 'дней') + ' до конца дневника.</p>' +
+    '<button class="btn pri" data-act="mMove" data-d="' + y + '">' + (nx ? 'Перенести на ' + dm(y) : 'Поставить на ' + dm(y)) + '</button>');
+}
 function subMeas(c) {
   var m = c.meas, h = '';
   if (!m) return '<div class="card"><p class="muted" style="margin:0">Замеры появятся вместе с кабинетом клиента.</p></div>';
   var cols = measCols(c), nx = measNext(c), due = measDue(c), fut = cols.filter(function (x) { return dn(x.date) > T; });
   if (due) h += '<div class="banner warn">' + (due.date === TODAY ? 'Сегодня день замеров – клиент их ещё не внёс.' : 'Замеры за ' + dm(due.date) + ' не внесены, внести можно до ' + dm(ymd(dn(due.date) + m.late)) + '.') + '</div>';
   if (locked(c, 'measures')) h += '<div class="card"><h3>График замеров</h3><p class="sub" style="margin:0">В пробном кабинете открыты только стартовые замеры. Контрольные по графику появятся в PRO.</p></div>';
-  else h += '<div class="card"><h3>График замеров</h3><div class="frm"><div class="grid2">' + fs('mEvery', 'Каждые, дней', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], m.every, 'data-ch="measEvery"') +
-    fs('mMode', 'Даты ставит', [['auto', 'авто'], ['manual', 'тренер']], m.mode, 'data-ch="measMode"') + '</div>' +
-    (c.end && dn(c.end) > T ? fi('mNext', 'Ближайшие замеры', nx ? nx.date : '', 'date', 'data-ch="measNext" min="' + ymd(T + 1) + '" max="' + c.end + '"') : '') + '</div>' +
-    '<p class="note">' + (fut.length ? 'Дальше по графику: ' + fut.slice(0, 6).map(function (x) { return dm(x.date); }).join(', ') + (fut.length > 6 ? '…' : '') + '.' : 'До конца дневника замеров больше нет.') +
-    (m.mode === 'auto' ? ' Перенесёте ближайшую дату – следующие пересчитаются от неё.' : ' В режиме «тренер» остальные даты не меняются.') + '</p></div>';
+  else {                                                                  // 1.6: календарь вместо поля даты
+    var man = m.mode === 'manual', nxt = fut.filter(function (x) { return !filled(x); });
+    h += '<div class="card"><h3>График замеров</h3><div class="frm"><div class="' + (man ? '' : 'grid2') + '">' +
+      (man ? '' : fs('mEvery', 'Каждые, дней', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'], m.every, 'data-ch="measEvery"')) +
+      fs('mMode', 'Даты ставит', [['auto', 'авто'], ['manual', 'тренер']], m.mode, 'data-ch="measMode"') + '</div></div>' +
+      '<p class="note">' + (man ? '<b style="color:var(--text)">Даты ставите Вы.</b> Нажмите пустой день – замеры добавятся, отмеченный – уберутся. Скрипт даты не меняет и при продлении новые не ставит.'
+        : '<b style="color:var(--text)">Даты идут сами</b> – каждые ' + m.every + ' ' + plural(m.every, 'день', 'дня', 'дней') + ' от последних замеров до конца дневника. Чтобы перенести ближайшие, нажмите нужный день – следующие пересчитаются от него.') + '</p>' +
+      measCal(c) +
+      '<p class="note">' + (nxt.length ? 'Ближайшие замеры – <b style="color:var(--text)">' + longDate(nxt[0].date) + '</b>' + (nxt.length > 1 ? ', затем ' + nxt.slice(1, 6).map(function (x) { return dm(x.date); }).join(', ') + (nxt.length > 6 ? '…' : '') : '') + '.'
+        : (c.end && dn(c.end) > T ? 'Будущих дат замеров нет – ' + (man ? 'нажмите день в календаре.' : 'нажмите день в календаре, чтобы поставить ближайшие.') : 'Дневник закончился ' + dm(c.end) + ' – новые даты появятся после продления.')) + '</p></div>';
+  }
 
   var got = cols.filter(filled);
   if (!got.length) return h + '<div class="card"><h3>Результаты</h3><p class="sub" style="margin:0">Замеров пока нет.</p></div>' + photosCard(c);
@@ -1861,8 +1971,9 @@ function subCare(c) {
     (c.payEnd ? kv('Оплачено до', dm(c.payEnd) + '.' + c.payEnd.slice(0, 4)) : '') + (c.payStatus ? kv('Статус оплаты', esc(c.payStatus)) : '') +
     (c.sessTotal ? kv('Тренировок в пакете', c.sessTotal) : '') + (c.proFrom ? kv('Старт PRO', dm(c.proFrom)) : '') + '</div>' +
     (c.arch ? '<div class="btns one"><button class="btn sec" data-act="statusForm">Сменить статус</button></div>'
-      : '<div class="btns"><button class="btn pri" data-act="payForm">Внести оплату</button><button class="btn sec" data-act="frzForm">Заморозка</button>' +
-        '<button class="btn sec" data-act="statusForm">Сменить статус</button>' + (c.table && !tr ? '<button class="btn sec" data-act="extend">Продлить дневник</button>' : '') + '</div>') + '</div>';
+      : '<div class="btns">' + (isFree(c) ? '' : '<button class="btn pri" data-act="payForm">Внести оплату</button><button class="btn sec" data-act="frzForm">Заморозка</button>') +
+        '<button class="btn sec" data-act="statusForm">Сменить статус</button>' + (c.fmtTo && c.fmtTo.length ? '<button class="btn sec" data-act="fmtForm">Сменить формат</button>' : '') +
+        (c.table && !tr ? '<button class="btn sec" data-act="extend">Продлить дневник</button>' : '') + '</div>') + fmtNote(c) + '</div>';
 
   if (tr) h += '<div class="card"><h3>Пробный кабинет</h3><p class="sub">' + (tr.before ? 'Начнётся ' + longDate(c.trial.from) + '.' : tr.ended ? 'Закончился ' + longDate(c.trial.to) + '. Кабинет открыт клиенту только для просмотра.' : 'День ' + tr.day + ' из ' + tr.total + ', до ' + longDate(c.trial.to) + ' включительно.') +
     (c.trial.want ? ' Клиент нажимал «Перейти на PRO» ' + dm(c.trial.want) + '.' : '') + '</p><button class="btn pri" data-act="proForm" style="height:48px">Перевести на PRO</button></div>';
@@ -2078,6 +2189,123 @@ function botLead(r) {
   return r && r.bot && r.bot.linked ? 'Бот у клиента уже подключён: кабинет открывается по кнопке в боте.' : 'Отправьте клиенту это сообщение: он откроет ссылку, нажмёт «Старт» – и бот пришлёт кабинет.';
 }
 
+/** Пробный кабинет: S.trialFmt = 'START' – перевод из FREE (формат в окне не выбирается). */
+function trialForm() {
+  var c = cur();
+  sheet('Пробный кабинет', '<h2>' + (S.trialFmt === 'START' ? 'START – пробный кабинет на ' : 'Пробный кабинет на ') + days(L().trialDays || 14) + '</h2><p class="lead">' + esc(c.name) + '. ' +
+    (S.trialFmt === 'START' ? 'Формат сменится с ' + esc(c.format) + ' на START. ' : '') + 'Создастся таблица клиента, норма питания посчитается по анкете. Пробный выдаётся один раз. Это около минуты.</p>' +
+    (c.format || S.trialFmt ? '' : fs('trFmt', 'Формат', [['', '– выберите –'], 'START', 'BASIC'], '')) + trialFields(c, c.an) + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="trialSave">Включить</button>');
+}
+
+/* ---------- 1.7: FREE ---------- */
+var FREE_SOON = true;              // кабинет FREE с тренировками ещё в работе (шаги 3–5) – подсказка тренеру
+/** Карточка заявки или клиента FREE. fresh – заявка без тренера (вкладка «Free»); иначе – свой клиент. */
+function freeCard(x, fresh, inList) {
+  var a = x.an || {}, fr = x.free || {}, rows = '';
+  var lim = a.lim && !/^(нет|не|отсутств)/i.test(a.lim) ? a.lim : '';
+  rows += kv('Цель', esc(a.goal || x.goal || '—'));
+  if (a.level) rows += kv('Уровень', esc(a.level));
+  if (a.place) rows += kv('Где и с чем', esc(a.place));
+  if (a.time) rows += kv('Время в неделю', esc(a.time));
+  if (lim) rows += kv('Ограничения', '<span style="color:var(--warm)">' + esc(lim) + '</span>');
+  if (a.src || a.from) rows += kv('Источник', esc(a.src ? a.src + (a.from ? ' · ' + a.from : '') : a.from));
+  if (a.repost) rows += kv('Репост', /^https?:\/\//i.test(a.repost) ? '<a class="lnk" href="' + esc(a.repost) + '" target="_blank" rel="noopener">открыть</a>' : esc(a.repost));
+  if (x.phone) rows += kv('Телефон', '<a href="tel:' + esc(x.phone.replace(/[^\d+]/g, '')) + '" style="color:var(--accent);text-decoration:none">' + esc(x.phone) + '</a>');
+  var st = '', cls = '';
+  if (!fresh) {
+    if (!fr.given) { st = 'Доступ ещё не выдан'; cls = 'warm'; }
+    else if (fr.mode === 'cab') { st = 'Доступ выдан ' + dm(fr.given) + ' – ссылка на кабинет'; cls = 'ok'; }
+    else if (x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' · бот подключён'; cls = 'ok'; }
+    else { st = 'Доступ выдан ' + dm(fr.given) + ' · клиент ещё не открыл бота'; cls = 'warm'; }
+  }
+  var h = '<div class="card"><div class="frh"><h3>' + (inList ? '<button data-open="' + x.id + '" data-sub="over" style="text-align:left;font-weight:800">' + esc(x.name) + ' <span class="chev">›</span></button>' : 'FREE · 3 тренировки') + '</h3><span class="tag free">FREE</span></div>' +
+    '<p class="sub" style="margin:4px 0 10px">' + (a.at ? 'Анкета ' + (a.at === TODAY ? 'сегодня' : dm(a.at)) : 'Анкета') + (fresh || !D.admin || !x.owner ? '' : ' · тренер ' + esc(x.owner)) + '</p>' +
+    (a.alt ? '<div class="banner warn" style="margin-bottom:10px">📵 <b>Нет Telegram</b> – связь: ' + esc(a.alt) + '</div>' : '') +
+    '<div class="kvs">' + rows + '</div>' + (st ? '<p class="frst ' + cls + '">' + st + '</p>' : '');
+  if (fresh) {
+    if (D.as) h += '<p class="note">Вы смотрите список как ' + esc(D.as) + '. Взять клиента может сам тренер.</p>';
+    else {
+      h += '<button class="btn pri mt" data-act="freeTake" data-id="' + x.id + '" style="height:48px">Взять себе</button>';
+      if (D.admin && D.trainers.length > 1) h += '<div class="asg">' + fs('asg' + x.id, 'Или назначить тренеру', D.trainers.map(function (n) { return [n, n]; }), D.trainers.filter(function (n) { return n !== D.trainer; })[0] || D.trainer) +
+        '<button class="btn sec" data-act="freeAssign" data-id="' + x.id + '">Назначить</button></div>';
+    }
+  } else if (!x.arch) {
+    h += '<div class="btns">' + '<button class="btn ' + (fr.given ? 'sec' : 'pri') + '" data-act="freeGiveForm" data-id="' + x.id + '">' + (fr.given ? 'Сообщение со ссылкой' : 'Выдать доступ') + '</button>' +
+      '<button class="btn sec" data-act="fmtFormId" data-id="' + x.id + '">В START / BASIC / PRO</button></div>';
+    if (D.admin && !D.as && D.trainers.length > 1) h += '<div class="asg">' + fs('asg' + x.id, 'Передать другому тренеру', D.trainers.map(function (n) { return [n, n]; }), x.owner || D.trainer) +
+      '<button class="btn sec" data-act="freeAssign" data-id="' + x.id + '">Передать</button></div>';
+  }
+  return h + '</div>';
+}
+function viewFree() {
+  var h = '<h2 class="sec-title">Free · 3 тренировки</h2>', ff = freshFree(), mine = myFree();
+  var was = byRank(D.clients.filter(function (c) { return !isFree(c) && c.free && c.free.at; }));
+  h += '<p class="muted" style="font-size:13px;margin:-4px 2px 12px">Заявки FREE: взять клиента, выдать доступ, перевести в START, BASIC или PRO. FREE даётся клиенту один раз.</p>';
+  if (FREE_SOON) h += '<div class="banner">Кабинет FREE с тремя тренировками ещё готовится. Если клиент уже открыл бота, бот ответит, что тренировки скоро откроются.</div>';
+  h += '<div class="grp">Новые заявки FREE · ' + ff.length + '</div>';
+  h += ff.length ? ff.map(function (f) { return freeCard(f, true, false).replace('<h3>FREE · 3 тренировки</h3>', '<h3>' + esc(f.name) + '</h3>'); }).join('')
+    : '<div class="card"><p class="muted" style="margin:0">Новых заявок FREE нет. Когда клиент выберет в анкете «3 тренировки бесплатно», заявка появится здесь.</p></div>';
+  h += '<div class="grp">' + (D.admin && !D.as ? 'Клиенты FREE' : 'Мои клиенты FREE') + ' · ' + mine.length + '</div>';
+  h += mine.length ? mine.map(function (c) { return freeCard(c, false, true); }).join('') : '<div class="card"><p class="muted" style="margin:0">Клиентов FREE пока нет.</p></div>';
+  if (was.length) h += '<div class="grp">Перешли из FREE · ' + was.length + '</div><div class="card"><div class="rows">' + was.map(function (c) {
+    return '<button class="row" data-open="' + c.id + '" data-sub="over"><span class="dot"></span><span class="mn"><b>' + esc(c.name) + '</b><small>FREE ' + (c.free.at && c.free.at !== 'да' ? 'с ' + dm(c.free.at) + ' · ' : '') + 'сейчас ' + esc(c.format || 'без формата') + '</small></span><span class="chev">›</span></button>';
+  }).join('') + '</div></div>';
+  return h;
+}
+/** Клиент из вкладки «Free» – из заявок или из своих. */
+function anyOf(id) { return clientOf(id) || freshOf(id); }
+function freeGiveForm(id) {
+  var x = anyOf(id); if (!x) return;
+  var a = x.an || {}, fr = x.free || {}, noBot = !D.botUser, cabFirst = !!a.alt || noBot;
+  S.freeId = String(id);
+  sheet('Выдать доступ', '<h2>' + esc(x.name) + '</h2><p class="lead">' + (fr.given ? 'Доступ уже выдан ' + dm(fr.given) + '. Можно ещё раз получить сообщение со ссылкой – ссылка та же.' : 'Клиент получит личный кабинет FREE. Выберите, как отправить ссылку.') + '</p>' +
+    (a.alt ? '<div class="banner warn">📵 <b>Нет Telegram</b> – связь: ' + esc(a.alt) + '. Отправьте ссылку на кабинет туда.</div>' : '') +
+    (noBot ? '' : '<button class="btn ' + (cabFirst ? 'sec' : 'pri') + '" data-act="freeGive" data-mode="tg">Ссылка на бота – клиент в Telegram</button>') +
+    '<button class="btn ' + (cabFirst ? 'pri' : 'sec') + '" data-act="freeGive" data-mode="cab">Ссылка на кабинет – нет Telegram</button>' +
+    '<p class="note" style="margin:0">Через бота клиенту приходят напоминания о тренировках и ответы тренера. По ссылке на кабинет – только кабинет, без напоминаний.</p><p class="ferr" id="ferr"></p>');
+}
+
+/* ---------- 1.7: сменить формат ---------- */
+var FMT_INFO = {
+  START: 'Пробный кабинет на 14 дней: питание, вес, замеры, фото. Даётся один раз.',
+  BASIC: 'Тренировки по пакету, без кабинета питания.',
+  PRO: 'Тренировки, питание, полный кабинет.'
+};
+/** Подпись под «Сменить формат»: какие форматы у клиента уже были. */
+function fmtNote(c) {
+  var u = c.fmtUsed || {}, L0 = [];
+  ['FREE', 'START'].forEach(function (f) { if (u[f] && f !== c.format) L0.push(f + ' уже был' + (u[f] !== 'да' ? ' ' + dm(u[f]) : '')); });
+  return L0.length ? '<p class="note">' + L0.join(' · ') + ' – повторно не даётся.</p>' : '';
+}
+function fmtForm(c) {
+  var to = c.fmtTo || [], u = c.fmtUsed || {}, cur0 = c.format || '';
+  var opts = ['START', 'BASIC', 'PRO'].map(function (f) {
+    var ok = to.indexOf(f) >= 0, why = '', info = FMT_INFO[f];
+    if (f === cur0) why = 'текущий формат';
+    else if (!ok && f === 'START' && u.START) why = 'START уже был' + (u.START !== 'да' ? ' ' + dm(u.START) : '') + ' – даётся один раз';
+    else if (!ok) why = 'назад по воронке не переводим';
+    if (ok && f === 'BASIC' && cur0 === 'PRO') info = c.table ? 'Таблица и данные сохранятся, напоминания кабинета выключатся. Артёму придёт уведомление.' : 'Артёму придёт уведомление.';
+    if (ok && f === 'BASIC' && cur0 === 'FREE') info = 'Тренировки по пакету BASIC. Оплату внесёте в «Ведении».';
+    if (ok && f === 'PRO') info = c.trial ? 'Перевод с пробного кабинета: данные сохранятся, кабинет откроется полностью.' : c.table ? 'Кабинет снова полный, напоминания включатся.' : 'Создадим таблицу и кабинет PRO – около минуты.';
+    if (ok && f === 'START') info = 'Пробный кабинет на ' + days(L().trialDays || 14) + ': питание, вес, замеры, фото. Даётся один раз.';
+    return '<button type="button" class="copt' + (ok ? '' : ' dis') + '"' + (ok ? ' data-act="fmtGo" data-to="' + f + '"' : ' disabled') + '><span class="rad"></span><span><b><span class="tag' + (f === 'PRO' ? ' pro' : '') + '">' + f + '</span>' + (ok ? '' : esc(why)) + '</b><small>' + esc(ok ? info : FMT_INFO[f]) + '</small></span></button>';
+  }).join('');
+  sheet('Сменить формат', '<h2>Сменить формат</h2><p class="lead">' + esc(c.name) + '. Сейчас – <b style="color:var(--text)">' + esc(cur0 || 'формат не выбран') + '</b>. Переводы – вверх по воронке и между BASIC и PRO; FREE и START даются один раз.</p>' +
+    '<div class="consent">' + opts + '</div>' + fmtNote(c) + '<p class="ferr" id="ferr"></p>');
+}
+/** Выбран формат: START – пробный кабинет, PRO – перевод с пробного / таблица / сразу, BASIC – подтверждение. */
+function fmtGo(to) {
+  var c = cur(); if (!c) return;
+  if (to === 'START') { S.trialFmt = 'START'; return trialForm(); }
+  if (to === 'PRO' && c.trial) return ACT.proForm();
+  if (to === 'PRO' && !c.table) return ACT.createForm();
+  var down = c.format === 'PRO' && to === 'BASIC';
+  sheet('Сменить формат', '<h2>' + esc(c.format || '—') + ' → ' + to + '?</h2><p class="lead">' + esc(c.name) + '. ' +
+    (down ? (c.table ? 'Таблица и все данные клиента сохранятся. Напоминания кабинета (питание, шаги, замеры, итоги недели) больше не будут приходить. ' : '') + 'Артёму придёт уведомление. Вернуть PRO можно в любой момент.'
+      : to === 'PRO' ? 'Кабинет снова откроется полностью, напоминания включатся.' : 'Формат запишется в таблицу, сообщение уйдёт в рабочий чат.') + '</p>' +
+    '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="fmtOk" data-to="' + to + '">Перевести в ' + to + '</button><button class="btn sec" data-act="close">Отмена</button>');
+}
+
 /* ---------- итоги месяца ---------- */
 function mrRep(c, n) { return c ? c.reports.filter(function (x) { return x.n === +n; })[0] || null : null; }
 function mrTxt() { return { comment: val('mrCom'), goal: val('mrGoal') }; }
@@ -2132,6 +2360,10 @@ var ACT = {
   back: function () { if (NAV[NAV.length - 1] === 'client') { try { history.back(); return; } catch (e) {} NAV.pop(); } S.cid = null; render(true); },
   close: function () { closeSheet(); render(); },
   retry: function () { boot(); },
+  mMon: function (t) { var c = cur(); if (!c) return; var k = S.mcal && S.mcal.id === c.id ? S.mcal.m : TODAY.slice(0, 7), y = +k.slice(0, 4), m = +k.slice(5, 7) - 1 + (+t.getAttribute('data-m'));
+    var d = new Date(Date.UTC(y, m, 1)); S.mcal = { id: c.id, m: d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) }; render(); },
+  mDay: function (t) { var c = cur(); if (c && c.meas) measTap(c, t.getAttribute('data-d')); },
+  mMove: function (t) { var c = cur(); closeSheet(); if (c) inline('meas', { id: c.id, next: t.getAttribute('data-d') }); },
   ptsHow: function () { sheet('Баллы и медали', ptsHowHtml()); },
   ptsSeen: function () { LS.set(PTS_SEEN, '1'); closeSheet(); render(); },
   refresh: function () { refresh(true); },
@@ -2276,15 +2508,12 @@ var ACT = {
   extend: function (t) { var c = cur(); t.disabled = true; inline('extend', { id: c.id }); },
 
   /* --- пробный кабинет, таблица PRO, перевод на PRO --- */
-  trialForm: function () {
-    var c = cur();
-    sheet('Пробный кабинет', '<h2>Пробный кабинет на ' + days(L().trialDays || 14) + '</h2><p class="lead">' + esc(c.name) + '. Создастся таблица клиента, норма питания посчитается по анкете. Пробный выдаётся один раз. Это около минуты.</p>' +
-      (c.format ? '' : fs('trFmt', 'Формат', [['', '– выберите –'], 'START', 'BASIC'], '')) + trialFields(c, c.an) + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="trialSave">Включить</button>');
-  },
+  trialForm: function () { S.trialFmt = ''; trialForm(); },
   trialSave: function () {
     var c = cur(), q = trialRead();
     if (q.err) return ferr(q.err);
-    if (document.getElementById('trFmt')) { if (!val('trFmt')) return ferr('Выберите формат.'); q.format = val('trFmt'); }
+    if (S.trialFmt) q.format = S.trialFmt;                                 // 1.7: FREE → START
+    else if (document.getElementById('trFmt')) { if (!val('trFmt')) return ferr('Выберите формат.'); q.format = val('trFmt'); }
     q.id = c.id;
     send('trial', q, { wait: 'Создаю таблицу и пробный кабинет…<br>Это около минуты, окно можно не закрывать.' }).then(function (r) {
       if (!r) return;
@@ -2328,6 +2557,41 @@ var ACT = {
       resultSheet('Клиент на PRO', esc(r.msg || '') + (r.ext ? '. ' + esc(cap(r.ext)) : '') + '. Кабинет у клиента открылся полностью, заново ему ничего делать не нужно.', r,
         (r.paid ? '' : '<div class="banner warn">Оплата PRO не внесена – дневник продлится после записи оплаты («Ведение», «Внести оплату»).</div>') +
         '<p class="lead" style="margin-bottom:8px">Что настроить дальше: норму шагов и расчёт нормы – «Питание»; интервал замеров – «Замеры»; план – «Тренировки»; гайды – «Ведение».</p>');
+    });
+  },
+
+  /* --- 1.7: FREE и формат --- */
+  freeTake: function (t) {
+    var id = t.getAttribute('data-id'), f = anyOf(id);
+    send('freetake', { id: id }, { btn: t }).then(function (r) { if (!r) return; render(); toast(r.msg || 'Готово', 'ok'); });
+  },
+  freeAssign: function (t) {
+    var id = t.getAttribute('data-id'), to = val('asg' + id);
+    if (!to) return toast('Выберите тренера', 'bad');
+    send('freetake', { id: id, to: to }, { btn: t }).then(function (r) { if (!r) return; render(); toast(r.msg || 'Готово', 'ok'); });
+  },
+  freeGiveForm: function (t) { freeGiveForm(t.getAttribute('data-id')); },
+  freeGive: function (t) {
+    var id = S.freeId, x = anyOf(id), a = (x && x.an) || {}, mode = t.getAttribute('data-mode');
+    send('freegive', { id: id, mode: mode }, { wait: 'Готовлю ссылку…', title: 'Выдать доступ' }).then(function (r) {
+      if (!r) return;
+      render();
+      var lead = r.mode === 'tg' ? 'Отправьте клиенту это сообщение – в Telegram' + (x && x.phone ? ' по номеру ' + esc(x.phone) : '') + '. Он откроет ссылку и нажмёт «Старт».'
+        : 'Отправьте сообщение туда, где клиент на связи' + (a.alt ? ': ' + esc(a.alt) : '') + '. Ссылка личная – только этому клиенту.';
+      if (r.noBot && mode === 'tg') lead = 'Бот клиентов не подключён – в сообщении ссылка на кабинет. ' + lead;
+      resultSheet(r.again ? 'Сообщение со ссылкой' : 'Доступ выдан', lead, r, FREE_SOON ? '<div class="banner">Кабинет FREE с тремя тренировками ещё готовится – до этого бот ответит клиенту, что тренировки скоро откроются.</div>' : '');
+    });
+  },
+  fmtForm: function () { var c = cur(); if (c) fmtForm(c); },
+  fmtFormId: function (t) { var id = t.getAttribute('data-id'); if (!clientOf(id)) return; if (String(S.cid) !== String(id)) openClient(id, 'care'); fmtForm(cur()); },
+  fmtGo: function (t) { fmtGo(t.getAttribute('data-to')); },
+  fmtOk: function (t) {
+    var c = cur(), to = t.getAttribute('data-to');
+    send('fmt', { id: c.id, to: to }, { btn: t }).then(function (r) {
+      if (!r) return;
+      render();
+      if (r.note) sheet('Формат изменён', '<h2>' + esc(r.msg || 'Формат изменён') + '</h2><div class="banner">' + esc(r.note) + '</div><button class="btn sec" data-act="close">Понятно</button>');
+      else done(r.msg || 'Формат изменён');
     });
   },
 
