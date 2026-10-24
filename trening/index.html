@@ -666,6 +666,29 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .banner.draft .mn{flex:1 1 200px}
 .banner.draft .btn{width:auto;flex:0 0 auto;padding:0 14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* 2.9: общий кабинет тренера и тренировка без перехода */
+body.emb .tabs{display:none!important}
+body.emb .top img{display:none}
+body.emb .top{justify-content:flex-end}
+body.emb.tr{--side:0px}
+body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
+.peek{position:fixed;z-index:70;width:340px;max-width:calc(100vw - 16px);max-height:70vh;overflow:hidden;background:var(--card2,#0F1D20);border:1px solid var(--line2,#2A4B4D);border-radius:16px;padding:14px 16px;box-shadow:0 20px 50px -14px #000;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;pointer-events:none}
+.peek.show{opacity:1;transform:none}
+.pk-h b{display:block;font-size:15px;font-weight:800;line-height:1.3}
+.pk-h small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.pk-n{font-size:13px;color:var(--muted);margin:8px 0 0;padding-left:10px;border-left:2px solid var(--line2);white-space:pre-line}
+.pk-l{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.pk-l li{display:flex;gap:9px;align-items:baseline;font-size:14px}
+.pk-l li i{flex:none;min-width:24px;font-style:normal;font-size:12px;font-weight:800;color:var(--accent)}
+.pk-l li b{display:block;font-weight:700;line-height:1.3}
+.pk-l li small{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+.pk-w{font-size:12.5px;color:var(--dim);margin:8px 0 0}
+.pk-t{font-size:11.5px;color:var(--dim);margin:10px 0 0;border-top:1px solid var(--line);padding-top:8px}
+.pk-c{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.pk-c h3{margin:0 0 10px;font-size:15px}
+#pkBox{margin-bottom:14px}
+.calB .wb[data-peek]{cursor:pointer;border-radius:4px}
+.calB .wb[data-peek]:hover{background:rgba(62,214,206,.08)}
 </style>
 </head>
 <body>
@@ -679,6 +702,12 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 2.9 (25.10.2026). Сервер 4.13.4 (только версия страницы). Общий кабинет тренера: у тренера страница открывается внутри
+ *   кабинета (…/cabinet/trainer.html, ?embed=1) – без своего меню, разделы переключает кабинет. Открыли тренировки по старой
+ *   ссылке тренера (?t=…, в том числе из Telegram с ?w=) – страница сама переходит в общий кабинет (?solo=1 – по-старому).
+ *   Календарь: наведение мышью на тренировку в клетке – вся тренировка рядом (упражнения, подходы, вес); нажатие на неё
+ *   (на телефоне – на строку дня) – окно с тренировкой целиком, «Открыть тренировку» и «Скопировать на дату» (другому
+ *   клиенту – тоже). Клиентская страница не менялась.
  * 2.8 (24.10.2026). Сервер 4.13.3 (только версия страницы). Перетаскивание мышью: пока тащите упражнение к верхнему или нижнему
  *   краю окна, страница сама прокручивается; отпущенное упражнение остаётся под курсором и коротко подсвечивается. Внутри
  *   суперсета: на середину другого упражнения – «Поменять местами» (1.1 ↔ 1.3), на край – встать до или после него. Одиночное
@@ -762,7 +791,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.8';
+var VERSION = '2.9';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -780,6 +809,36 @@ else {
   var m0 = LS.get('lf_wk_mode');
   TKEY = LS.get('lf_tr_k') || ''; CKEY = LS.get('lf_wk_k') || LS.get('lf_k') || '';
   MODE = m0 === 'trainer' && TKEY ? 'trainer' : m0 === 'client' && CKEY ? 'client' : TKEY ? 'trainer' : CKEY ? 'client' : '';
+}
+/* 2.9: тренер – внутри общего кабинета (…/cabinet/trainer.html). Открыли отдельно – переходим туда (?solo=1 – по-старому). */
+var EMBED = MODE === 'trainer' && qs.get('embed') === '1' && window.top !== window;
+if (MODE === 'trainer' && window.top === window && qs.get('solo') !== '1') {
+  var goTo = '../cabinet/trainer.html?t=' + encodeURIComponent(TKEY) + '&s=train';
+  ['w', 'i', 'c'].forEach(function (k) { if (qs.get(k)) goTo += '&' + k + '=' + encodeURIComponent(qs.get(k)); });
+  location.replace(goTo);
+  return;
+}
+/** Сообщение общему кабинету (только внутри него). */
+function toShell(o) { if (!EMBED) return; o.lf = 1; o.app = 'B'; try { window.parent.postMessage(o, location.origin); } catch (e) {} }
+var SEC_OF = { clients: 'train', cal: 'cal', coms: 'coms', base: 'base' }, TAB_OF = { train: 'clients', cal: 'cal', coms: 'coms', base: 'base' }, PEND_OPEN = '';
+window.addEventListener('message', function (e) {
+  if (!EMBED || e.origin !== location.origin || !e.data || e.data.lf !== 1 || e.data.to !== 'B') return;
+  var m = e.data;
+  if (m.type === 'nav' && TAB_OF[m.s]) {
+    if (!D) { S.tab = TAB_OF[m.s]; return; }
+    if (S.view === 'home' && S.tab === TAB_OF[m.s] && !m.force) return;
+    ACT.tab({ getAttribute: function () { return TAB_OF[m.s]; } });
+  } else if (m.type === 'open' && m.cid) {
+    if (!D) { PEND_OPEN = String(m.cid); return; }
+    embOpen(String(m.cid));
+  }
+});
+function embOpen(cid) {
+  if (!clientOf(cid)) { toast('Клиента нет в списке тренировок – обновите страницу', 'bad'); return; }
+  if (S.view === 'edit' && (S.saving || S.dirty)) return ACT.editBack();
+  if (S.view === 'edit') dropEdit();
+  closeSheet();
+  ACT.openClient({ getAttribute: function () { return cid; } });
 }
 /* Компьютер: широкая раскладка только у тренера (от 1024 пикселей). Клиент и телефон – одна колонка. */
 var WQ = window.matchMedia ? window.matchMedia('(min-width:1024px)') : null;
@@ -1021,7 +1080,7 @@ function call(op, body, quiet) {
     if (!quiet) busy(-1);
     r = r || NET;
     if (r.auth === 'pin') { S.pinName = r.name || S.pinName; DEV = ''; LS.del(DEV_KEY); if (op !== 'pin') { D = null; LS.del(MEM_T); closeSheet(); viewPin(''); } }
-    else if (r.auth === 'key') { D = null; LS.del(MEM_T); closeSheet(); screen('Ссылка не работает', cap(r.error || 'Попросите у Артёма новую ссылку.')); }
+    else if (r.auth === 'key') { D = null; LS.del(MEM_T); closeSheet(); toShell({ type: 'auth', state: 'key' }); screen('Ссылка не работает', cap(r.error || 'Попросите у Артёма новую ссылку.')); }
     return r;
   });
 }
@@ -1219,6 +1278,8 @@ function loadList(first) {
     if (!r.ok) { S.offline = !!r.net; if (D) { paintSync(); toast(errText(r), 'bad'); } else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false;
     setList(r); memSave(); updCheck(r);
+    toShell({ type: 'auth', state: 'ok', trainer: D && D.trainer || '' });
+    if (PEND_OPEN) { var po = PEND_OPEN; PEND_OPEN = ''; setTimeout(function () { embOpen(po); }, 0); }
     setTimeout(function () { draftPush(); draftArm(); }, 800);
     if (OPENW) {                                                            // пришли по ссылке из Telegram – сразу эта тренировка
       var wid = OPENW; OPENW = '';
@@ -1356,19 +1417,82 @@ function calBig(cid, m, y, mo, days, lead, by) {
       tip.push(lab + (nm && nm.length ? ': ' + nm.join(', ') : ''));
       var li = nm ? nm.slice(0, l.length > 1 ? 2 : 4).map(function (n) { return '<span>' + esc(nmShort(n)) + '</span>'; }).join('') : '<span class="nm0">' + exWord(w.n) + '</span>';
       var more = nm && nm.length > (l.length > 1 ? 2 : 4) ? '<span class="nmm">ещё ' + (nm.length - (l.length > 1 ? 2 : 4)) + '</span>' : '';
-      body += '<span class="wb ' + st + '">' + li + more + '</span>';
+      body += '<span class="wb ' + st + '" data-act="wPeek" data-peek="' + esc(w.id) + '" data-id="' + esc(w.id) + '">' + li + more + '</span>';
     });
-    h += '<button data-act="calDay" data-d="' + ds + '" class="' + (ds === TODAY ? 'td ' : '') + (ds === S.calDay ? 'sel ' : '') + (l.length ? 'has' : '') + '"' + (tip.length ? ' title="' + esc(tip.join('\n')) + '"' : '') +
+    h += '<button data-act="calDay" data-d="' + ds + '" class="' + (ds === TODAY ? 'td ' : '') + (ds === S.calDay ? 'sel ' : '') + (l.length ? 'has' : '') + '"' + (tip.length && !HOVER ? ' title="' + esc(tip.join('\n')) + '"' : '') +
       ' aria-label="' + dMon(ds) + (l.length ? ', тренировок: ' + l.length : '') + '"><b class="cn">' + d + '</b>' + body + '</button>';
   }
   nmNeed(String(cid), m, miss);
   return h + '</div><div class="legend"><span><i class="d"></i>выполнена</span><span><i class="p"></i>запланирована</span><span><i class="m"></i>клиент не отметил</span></div>';
 }
+/* ---------- 2.9: тренировка целиком без перехода – наведение (компьютер) или нажатие в календаре ---------- */
+var PEEKQ = {}, PEEK = { el: null, id: '' }, HOVER = !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches);
+/** Загрузить тренировку целиком тихо (без колёсика и сообщений): для подсказки и окна. */
+function peekLoad(id) {
+  if (FULL[id]) return Promise.resolve(FULL[id]);
+  if (PEEKQ[id]) return PEEKQ[id];
+  PEEKQ[id] = call('get', { id: id }, true).then(function (r) { delete PEEKQ[id]; if (r && r.ok && r.w) { FULL[id] = r.w; return r.w; } return null; });
+  return PEEKQ[id];
+}
+/** Содержимое: шапка (клиент, номер, дата, статус), заметка, упражнения с подходами. f – тренировка целиком или null. */
+function peekBody(w, f) {
+  var st = wState(w), cl = clientOf(w.cid);
+  var h = '<div class="pk-h"><b>' + esc((cl ? cl.name + ' · ' : '') + numFor(w)) + '</b><small>' + esc(cap(longDate(w.date))) + ' · <span class="' + st.c + '">' + esc(st.t) + '</span></small></div>';
+  if (!f) {
+    var nm = wNames(w);
+    return h + (nm && nm.length ? '<ol class="pk-l">' + nm.map(function (n, i) { return '<li><i class="num">' + (i + 1) + '</i><span><b>' + esc(n) + '</b></span></li>'; }).join('') + '</ol>' : '') + '<p class="pk-w">Загружаю тренировку…</p>';
+  }
+  if (f.note) h += '<p class="pk-n">' + esc(f.note) + '</p>';
+  var NS = numsOf(f.items);
+  return h + '<ol class="pk-l">' + f.items.map(function (it, i) {
+    return '<li><i class="num">' + NS[i] + '</i><span><b>' + esc(it.name || 'Упражнение') + '</b><small>' + esc(it.sets && it.sets.length ? planTxt(it) : '') + '</small></span></li>';
+  }).join('') + '</ol>';
+}
+/* наведение: всплывающая карточка рядом с тренировкой (только мышь; на телефоне – нажатие) */
+function peekTip(el) {
+  var id = el.getAttribute('data-peek'), w = sumOf(id);
+  if (!w) return;
+  var tip = document.getElementById('peek');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'peek'; tip.className = 'peek'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip); }
+  PEEK.el = el; PEEK.id = id;
+  tip.innerHTML = peekBody(w, FULL[id] || null) + '<p class="pk-t">Нажмите – открыть или скопировать</p>';
+  tip.classList.add('show');
+  peekPlace(el, tip);
+  if (!FULL[id]) peekLoad(id).then(function (f) { if (f && PEEK.id === id && PEEK.el && document.body.contains(PEEK.el)) { tip.innerHTML = peekBody(w, f) + '<p class="pk-t">Нажмите – открыть или скопировать</p>'; peekPlace(PEEK.el, tip); } });
+}
+function peekPlace(el, tip) {
+  var r = el.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight, tw = tip.offsetWidth, th = tip.offsetHeight;
+  var x = r.right + 10 + tw <= W - 8 ? r.right + 10 : Math.max(8, r.left - 10 - tw), y = Math.min(Math.max(8, r.top - 6), Math.max(8, H - th - 8));
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function peekHide() { PEEK.el = null; PEEK.id = ''; var tip = document.getElementById('peek'); if (tip) tip.classList.remove('show'); }
+document.addEventListener('mouseover', function (e) {
+  if (!HOVER) return;
+  var el = e.target.closest ? e.target.closest('[data-peek]') : null;
+  if (!el) { if (PEEK.el) peekHide(); return; }
+  if (el !== PEEK.el) peekTip(el);
+});
+window.addEventListener('scroll', function () { if (PEEK.el) peekHide(); }, true);
+/** Окно тренировки: целиком, «Открыть» и «Скопировать на дату». */
+function peekSheet(id, from) {
+  var w = sumOf(id); if (!w) return;
+  peekHide();
+  var f = FULL[id] || null, def = shift(w.date, 7);
+  if (def < TODAY) def = TODAY;
+  var acts = '<button class="btn pri" data-act="editW" data-id="' + esc(id) + '" data-from="' + from + '">Открыть тренировку</button>' +
+    '<div class="pk-c"><h3>Скопировать на дату</h3><div class="grid2">' +
+    fs('pkCid', 'Кому', D.clients.filter(function (c) { return !c.arch || c.id === w.cid; }).map(function (c) { return [c.id, c.name]; }), w.cid) +
+    fi('pkDate', 'Дата', def, 'date') + '</div><p class="ferr" id="ferr" hidden></p>' +
+    '<button class="btn sec" data-act="peekCopy" data-id="' + esc(id) + '" data-from="' + from + '">' + IC.copy + 'Скопировать</button>' +
+    '<p class="note" style="margin:6px 0 0">Копия откроется для проверки: упражнения, подходы и веса переносятся, результат клиента нет. Сохраните её – и клиент увидит.</p></div>';
+  sheet('Тренировка', '<div id="pkBox">' + peekBody(w, f) + '</div>' + acts);
+  if (!f) peekLoad(id).then(function (full) { var b = document.getElementById('pkBox'); if (b && full) b.innerHTML = peekBody(w, full); });
+}
 function shownW(w) { var c = clientOf(w.cid); return !!c && shown(c); }
 function dayList(cid) {
   var l = D.w.filter(function (w) { return w.date === S.calDay && (cid ? w.cid === String(cid) : shownW(w)); }).sort(wSort);
   var h = '<div class="day-t">' + cap(longDate(S.calDay)) + '</div>';
-  if (l.length) h += '<div class="rows">' + l.map(function (w) { return wRow(w, 'editW', !cid); }).join('') + '</div>';
+  if (l.length) h += '<div class="rows">' + l.map(function (w) { return wRow(w, 'wPeek', !cid); }).join('') + '</div>';   // 2.9: сначала тренировка целиком
   else h += '<p class="note" style="margin:0">' + (cid ? 'На эту дату тренировки нет.' : 'На эту дату тренировок нет.') + '</p>';
   return h;
 }
@@ -1546,7 +1670,7 @@ function viewClient() {
   if (BIGR) h += '<div class="card calw"><div class="calw-a">' + calHtml(c.id, true) + '</div><div class="calw-b">' + dayList(c.id) + nb + '</div></div><div class="cv"><div class="cv-a">' + pkCard(c);   // 2.7
   else h += '<div class="cv"><div class="cv-a">' + pkCard(c) + '<div class="card">' + calHtml(c.id) + dayList(c.id) + nb + '</div>';
   h += '<div id="msgBox">' + msgCard(c) + '</div>';
-  h += '<button class="btn sec" data-act="clink">' + IC.link + 'Ссылка для клиента</button></div><div class="cv-b">';
+  h += '<button class="btn sec" data-act="clink">' + IC.link + 'Ссылка для клиента</button>' + (EMBED ? '<button class="btn sec" data-act="goCab" style="margin-top:10px">Карточка в кабинете тренера</button>' : '') + '</div><div class="cv-b">';
   if (l.length) h += '<h2 class="sec-title">Все тренировки</h2><div class="card"><div class="rows">' + l.map(function (w) { return wRow(w, 'editW'); }).join('') + '</div></div>';
   h += '</div></div><h2 class="sec-title">Настройки клиента</h2><div class="cv2">';
   h += '<div class="card"><h3>Когда клиент видит тренировку</h3><p class="sub">До этого срока тренировка скрыта, после него закрывается. Одну и ту же программу не получится повторять неделями.</p><div class="grid2">' +
@@ -2185,6 +2309,7 @@ function vidBatText(P) {
 
 /* ---------- ПИН-код ---------- */
 function viewPin(err) {
+  toShell({ type: 'auth', state: 'pin' });
   shell(false); tabsEl.hidden = true; barEl.hidden = true;
   app.innerHTML = '<div class="center pin"><img src="' + LOGO + '" alt="Lite Fit"><h2>Тренировки</h2>' +
     '<p>' + (S.pinName ? esc(S.pinName) + ', введите' : 'Введите') + ' ПИН-код кабинета тренера. На этом устройстве его спросят один раз.</p>' +
@@ -2941,8 +3066,9 @@ function imgBody(b) { var I = S.img || {}; if (I.d) b.img = I.d.slice(I.d.indexO
 
 /* ================= СБОРКА СТРАНИЦЫ ================= */
 function paintBar() {
-  var showTabs = MODE === 'trainer' && !!D && (S.view === 'home' || wide());
+  var showTabs = !EMBED && MODE === 'trainer' && !!D && (S.view === 'home' || wide());
   tabsEl.hidden = !showTabs;
+  if (EMBED && D) { try { toShell({ type: 'badges', b: { coms: unreadN() } }); } catch (e) {} }
   var nu = showTabs ? unreadN() : 0;
   if (showTabs) tabsEl.innerHTML = '<nav><span class="side-logo"><img src="' + LOGO + '" alt="Lite Fit"></span><button data-act="tab" data-v="clients" class="' + (S.tab === 'clients' ? 'on' : '') + '">' + IC.people + '<span>Клиенты</span></button><button data-act="tab" data-v="cal" class="' + (S.tab === 'cal' ? 'on' : '') + '">' + IC.cal + '<span>Календарь</span></button><button data-act="tab" data-v="coms" class="' + (S.tab === 'coms' ? 'on' : '') + '">' + IC.chat + '<span>Комментарии</span>' + (nu ? '<i class="tb num" title="Новые комментарии клиентов">' + nu + '</i>' : '') + '</button><button data-act="tab" data-v="base" class="' + (S.tab === 'base' ? 'on' : '') + '">' + IC.base + '<span class="lb-s">Упражнения</span><span class="lb-l">База упражнений</span></button><span class="side-who">' + esc(D.trainer || '') + '</span></nav>';
   var h = '';
@@ -2980,6 +3106,7 @@ function render() {
   }
   h += '<p class="ver">Lite Fit · тренировки ' + VERSION + '</p>';
   shell(MODE === 'trainer'); app.innerHTML = h; paintBar();
+  if (EMBED && MODE === 'trainer') toShell({ type: 'sec', s: SEC_OF[S.view === 'client' ? 'clients' : S.tab] || 'train' });
 }
 function addItem(it) {
   var w = S.draft; w.items.push(it); S.q = ''; S.del = false; markDirty();
@@ -3034,6 +3161,20 @@ var ACT = {
   calPrev: function () { var d = pd(S.calM + '-01'); d.setMonth(d.getMonth() - 1); S.calM = ymd(d).slice(0, 7); rerenderKeep(); },
   calNext: function () { var d = pd(S.calM + '-01'); d.setMonth(d.getMonth() + 1); S.calM = ymd(d).slice(0, 7); rerenderKeep(); },
   calDay: function (b) { S.calDay = b.getAttribute('data-d'); rerenderKeep(); },
+  goCab: function () { if (S.cid) toShell({ type: 'go', s: 'clients', cid: S.cid }); },   // 2.9: та же карточка в кабинете тренера
+  wPeek: function (b) { var id = b.getAttribute('data-id'), w = sumOf(id); if (!w) return; if (w.date.slice(0, 7) === S.calM) S.calDay = w.date; peekSheet(id, S.view === 'client' ? 'client' : 'cal'); },
+  peekCopy: function (b) {
+    var id = b.getAttribute('data-id'), from = b.getAttribute('data-from'), d = val('pkDate'), cid = val('pkCid') || (sumOf(id) || {}).cid;
+    if (!isYmd(d)) return ferr('Укажите дату новой тренировки.');
+    if (!clientOf(cid)) return ferr('Выберите клиента.');
+    b.disabled = true; b.textContent = 'Готовлю копию…';
+    peekLoad(id).then(function (src) {
+      if (!src) { b.disabled = false; b.textContent = 'Скопировать'; return ferr('Тренировка не загрузилась – проверьте интернет и попробуйте ещё раз.'); }
+      S.ret = from === 'client' && String(cid) === String(S.cid) ? 'client' : from === 'client' ? 'client' : 'cal';
+      openEditor({ id: uid('n'), cid: cid, date: d, note: src.note || '', done: false, doneAt: '', items: cloneItems(src) }, true, true, id);
+      toast('Копия готова – проверьте и сохраните');
+    });
+  },
   home: function () { S.view = 'home'; S.cid = null; render(); window.scrollTo(0, 0); },
   openClient: function (b) { S.cid = b.getAttribute('data-id'); S.view = 'client'; S.ret = 'client'; S.calDay = TODAY; S.calM = TODAY.slice(0, 7); S.msgAll = false; render(); window.scrollTo(0, 0); loadMsgs(S.cid); },
   clink: function (b) {
@@ -3628,6 +3769,7 @@ setInterval(function () {
   if (w && el && w.ts && !w.done) el.textContent = clock(Date.now() - w.ts);
 }, 1000);
 function boot() {
+  if (EMBED) { document.body.classList.add('emb'); if (TAB_OF[qs.get('s')]) S.tab = TAB_OF[qs.get('s')]; }
   if (!API) return screen('Страница не настроена', 'Не найден адрес приёмника данных (файл cabinet/config.js).');
   if (!MODE) return screen('Откройте страницу по своей ссылке', 'Ссылку на тренировки присылает тренер. Если она потерялась – напишите ему.');
   var raw, j;
