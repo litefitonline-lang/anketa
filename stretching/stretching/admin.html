@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Растяжка · Управление</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05090B;--card:#0C1618;--card2:#0F1D20;--line:#1E3A3C;--line2:#2A4B4D;--acc:#3ED6CE;--accD:#1F8E88;--onAcc:#04211F;--tx:#F2F7F7;--tx2:#8FA5A7;--tx3:#5E7577;--warm:#FF9A52;--warmBg:#3A2210;--err:#FF8B7B;--glow:rgba(62,214,206,.55)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:500 15px/1.4 Manrope,system-ui,-apple-system,sans-serif}
+body{padding-bottom:calc(78px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input,select,textarea{font:inherit;font-size:16px;color:var(--tx);background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;outline:none}
+textarea{min-height:84px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+a{color:var(--acc)}
+.bar{position:fixed;top:0;left:0;right:0;height:2px;z-index:60;overflow:hidden;display:none}
+.bar.on{display:block}
+.bar::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:slide 1s linear infinite}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.top{position:sticky;top:0;z-index:5;background:rgba(5,9,11,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:10px 16px 12px}
+.brand{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx2);max-width:640px;margin:0 auto}
+.brand b{color:var(--acc);font-weight:800;letter-spacing:.03em}
+.datebar{display:flex;align-items:center;gap:8px;max-width:640px;margin:8px auto 0}
+.arr{width:42px;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:20px;color:var(--acc);flex-shrink:0}
+.arr:disabled{opacity:.25}
+.dd{flex:1;text-align:center;min-width:0}
+.dd .t{font-weight:800;font-size:17px}
+.dd .s{font-size:12px;color:var(--tx2)}
+main{padding:14px 16px 24px;max-width:640px;margin:0 auto}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat .v{font-size:21px;font-weight:800;line-height:1.2}
+.stat .v small{font-size:13px;color:var(--tx2);font-weight:700}
+.stat .l{font-size:11px;color:var(--tx2);font-weight:600}
+.stat.hl .v{color:var(--acc)}
+.sw{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin-top:12px}
+.sw button{flex:1;padding:10px;border-radius:10px;font-weight:800;font-size:14px;color:var(--tx2)}
+.sw button.on{background:var(--card2);color:var(--acc);box-shadow:inset 0 0 0 1px var(--line2)}
+.grp h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin:20px 4px 8px;display:flex;justify-content:space-between;font-weight:800}
+.grp h3 span{color:var(--tx3)}
+.list{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.who{flex:1;min-width:0;cursor:pointer}
+.nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--card2);border:1px solid var(--line2);color:var(--tx2);white-space:nowrap}
+.chip.acc{color:var(--acc);border-color:rgba(62,214,206,.35);background:rgba(62,214,206,.08)}
+.chip.warm{color:var(--warm);background:var(--warmBg);border-color:transparent}
+.chip.err{color:var(--err);border-color:rgba(255,139,123,.4)}
+.seg{display:flex;border:1px solid var(--line2);border-radius:11px;overflow:hidden;flex-shrink:0}
+.seg button{padding:9px 10px;font-size:13px;font-weight:800;color:var(--tx3)}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.y.on{background:var(--acc);color:var(--onAcc)}
+.seg button.n.on{background:var(--warmBg);color:var(--warm)}
+.tog{width:46px;height:42px;border-radius:12px;border:1.5px solid var(--line2);font-weight:800;font-size:18px;color:var(--tx3);flex-shrink:0}
+.tog.on{background:var(--acc);border-color:var(--acc);color:var(--onAcc)}
+.pay{height:42px;padding:0 11px;border-radius:12px;border:1px solid var(--line2);font-size:13px;font-weight:800;color:var(--tx2);flex-shrink:0;white-space:nowrap}
+.pay.paid{border-color:rgba(62,214,206,.4);color:var(--acc);background:rgba(62,214,206,.06)}
+.pay.due{border-color:var(--warm);color:var(--warm);background:var(--warmBg)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:14px;font-weight:800;background:var(--card);border:1px solid var(--line2);color:var(--tx)}
+.btn.pri{background:var(--acc);color:var(--onAcc);border-color:var(--acc);box-shadow:0 8px 28px -12px var(--glow)}
+.btn.warn{color:var(--warm);border-color:rgba(255,154,82,.4);background:transparent}
+.btn.ghost{background:transparent}
+.btn.sm{padding:10px 12px;font-size:13px;border-radius:12px}
+.btn:disabled{opacity:.45}
+.acts{display:grid;gap:8px;margin-top:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.banner{border-radius:14px;padding:12px 14px;margin-bottom:12px;font-weight:700}
+.banner.warm{background:var(--warmBg);color:var(--warm)}
+.banner.acc{background:rgba(62,214,206,.08);color:var(--acc);border:1px solid rgba(62,214,206,.25)}
+.empty{color:var(--tx2);text-align:center;padding:22px 12px;font-size:14px}
+.more{width:100%;padding:12px;color:var(--acc);font-weight:800;font-size:13px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;justify-content:center;background:rgba(12,22,24,.97);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;max-width:200px;padding:9px 0 11px;color:var(--tx3);font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:1px;position:relative}
+.tabs button.on{color:var(--acc)}
+.tabs .ic{font-size:20px;line-height:1.3}
+.tabs .badge{position:absolute;top:5px;left:calc(50% + 8px);background:var(--warm);color:#1a0d03;font-size:10px;font-weight:800;border-radius:999px;padding:1px 6px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:20;display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+@keyframes fade{from{opacity:0}}
+.sh{width:100%;max-width:640px;max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:16px 16px calc(22px + env(safe-area-inset-bottom));animation:up .2s}
+@keyframes up{from{transform:translateY(30px)}}
+.hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.hd h2{font-size:19px;margin:2px 0 0;line-height:1.25}
+.hd .sub{font-size:13px;color:var(--tx2);margin-top:2px}
+.x{width:38px;height:38px;border-radius:11px;background:var(--card2);color:var(--tx2);font-size:18px;flex-shrink:0}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:13px 14px;border-radius:13px;border:1.5px solid var(--line2);background:var(--card2);text-align:left;font-weight:800}
+.opt small{display:block;color:var(--tx2);font-weight:600;font-size:12px;margin-top:2px}
+.opt.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.opt .pr{color:var(--acc);white-space:nowrap}
+label.f{display:block;font-size:12px;color:var(--tx2);margin:14px 2px 6px;font-weight:800}
+.box{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px}
+.box .bt{font-size:12px;color:var(--tx2);font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:14px}
+.kv span:first-child{color:var(--tx2)}
+.kv span:last-child{text-align:right}
+.hrow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.hrow:last-child{border-bottom:0}
+.hrow .r{color:var(--tx2);text-align:right}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));background:var(--card2);border:1px solid var(--line2);padding:11px 16px;border-radius:13px;z-index:70;font-weight:700;max-width:92%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.toast.err{border-color:var(--err);color:var(--err)}
+.fatal{padding:60px 24px;text-align:center;color:var(--tx2)}
+.fatal b{display:block;color:var(--tx);font-size:18px;margin-bottom:8px}
+.search{position:relative;margin-bottom:12px}
+.big{font-size:22px;font-weight:800}
+.mt{margin-top:12px}
+.muted{color:var(--tx2);font-size:13px}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<header class="top" id="top"></header>
+<main id="main"><div class="empty">Загрузка…</div></main>
+<nav class="tabs" id="tabs"></nav>
+
+<script>
+'use strict';
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { try { tg.ready(); tg.expand(); tg.setHeaderColor('#05090B'); tg.setBackgroundColor('#05090B'); } catch (e) {} }
+const qs = new URLSearchParams(location.search);
+let API = qs.get('api') || '';
+try { if (API) localStorage.setItem('rs_api', API); else API = localStorage.getItem('rs_api') || ''; } catch (e) {}
+const INIT = (tg && tg.initData) || '';
+
+const S = { tab: 'session', key: '', sessions: [], cfg: {}, actor: '', view: null, mode: null, clients: null, debts: null, q: '', showRest: false, busy: 0, stack: [], card: null };
+
+const $ = s => document.querySelector(s);
+const h = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = n => String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const plural = (n, f) => { n = Math.abs(n) % 100; const a = n % 10; if (n > 10 && n < 20) return f[2]; if (a > 1 && a < 5) return f[1]; if (a === 1) return f[0]; return f[2]; };
+const short = k => String(k || '').slice(0, 5);
+
+function busy(on) { S.busy += on ? 1 : -1; $('#bar').classList.toggle('on', S.busy > 0); }
+function toast(t, err) { const el = document.createElement('div'); el.className = 'toast' + (err ? ' err' : ''); el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), err ? 4000 : 1900); }
+function haptic(t) { try { tg.HapticFeedback.notificationOccurred(t || 'success'); } catch (e) {} }
+function confirmAsk(msg) { return new Promise(res => { if (tg && tg.showConfirm && tg.platform !== 'unknown') tg.showConfirm(msg, ok => res(!!ok)); else res(window.confirm(msg)); }); }
+function openLink(u) { if (!u) return; if (tg && /^https:\/\/t\.me\//.test(u) && tg.openTelegramLink) tg.openTelegramLink(u); else if (tg && tg.openLink) tg.openLink(u); else window.open(u, '_blank'); }
+
+async function call(action, data) {
+  busy(true);
+  try {
+    const r = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ action: action, initData: INIT }, data || {})) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'Ошибка');
+    return j.data || {};
+  } catch (e) {
+    if (e instanceof TypeError) throw new Error('Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.');
+    throw e;
+  } finally { busy(false); }
+}
+
+/** Действие с изменением данных: обновляет занятие и карточку */
+async function act(action, data, okMsg) {
+  try {
+    const d = await call(action, Object.assign({ refreshKey: S.key }, data || {}));
+    if (d.session && d.session.key === S.key) S.view = d.session;
+    if (d.client && S.card) S.card = d.client;
+    S.clients = null; S.debts = null;
+    haptic();
+    if (okMsg) toast(okMsg);
+    render();
+    if (S.card && S.cardEl) renderCard();
+    return d;
+  } catch (e) { haptic('error'); toast(e.message, true); return null; }
+}
+
+/* ---------- шторки ---------- */
+function pushSheet(html) {
+  const ov = document.createElement('div');
+  ov.className = 'ov';
+  ov.innerHTML = '<div class="sh">' + html + '</div>';
+  ov.addEventListener('click', e => { if (e.target === ov) popSheet(); });
+  document.body.appendChild(ov);
+  S.stack.push(ov);
+  if (tg && tg.BackButton) tg.BackButton.show();
+  return ov.firstChild;
+}
+function popSheet() {
+  const ov = S.stack.pop();
+  if (ov) { if (ov.firstChild === S.cardEl) { S.cardEl = null; S.card = null; } ov.remove(); }
+  if (!S.stack.length && tg && tg.BackButton) tg.BackButton.hide();
+}
+function closeAll() { while (S.stack.length) popSheet(); }
+if (tg && tg.BackButton) tg.BackButton.onClick(popSheet);
+const head = (title, sub) => `<div class="hd"><div><h2>${title}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div><button class="x" onclick="popSheet()">✕</button></div>`;
+
+/* ---------- старт ---------- */
+function fatal(msg) { $('#top').innerHTML = ''; $('#tabs').innerHTML = ''; $('#main').innerHTML = `<div class="fatal"><b>Не получилось открыть</b>${h(msg)}</div>`; }
+
+async function boot() {
+  if (!API) return fatal('Не задан адрес сервера. Откройте приложение кнопкой «Управление» в боте.');
+  if (!INIT) return fatal('Откройте приложение из Telegram – кнопкой «Управление» в боте.');
+  try {
+    const d = await call('init');
+    S.actor = d.actor; S.cfg = d.cfg; S.sessions = d.sessions; S.key = d.upcoming;
+    render();
+    await loadSession();
+  } catch (e) { fatal(e.message); }
+}
+async function loadSession() {
+  S.view = null; S.mode = null; S.showRest = false; render();
+  try { const d = await call('session', { key: S.key }); S.view = d.session; render(); }
+  catch (e) { toast(e.message, true); }
+}
+function go(dir) {
+  const i = S.sessions.findIndex(x => x.key === S.key);
+  const n = S.sessions[i + dir];
+  if (n) { S.key = n.key; loadSession(); }
+}
+function setTab(t) {
+  S.tab = t; render(); window.scrollTo(0, 0);
+  if (t === 'clients' && !S.clients) loadClients();
+  if (t === 'debts' && !S.debts) loadDebts();
+}
+async function loadClients() { try { const d = await call('clients'); S.clients = d.clients; render(); } catch (e) { toast(e.message, true); } }
+async function loadDebts() { try { const d = await call('debts'); S.debts = d.debts; render(); } catch (e) { toast(e.message, true); } }
+
+/* ---------- отрисовка ---------- */
+function render() {
+  renderTop();
+  renderTabs();
+  if (S.tab === 'session') renderSession();
+  else if (S.tab === 'clients') renderClients();
+  else renderDebts();
+}
+
+function renderTop() {
+  let html = `<div class="brand"><span><b>LITE FIT</b> · Растяжка</span><span>${h(S.actor)}</span></div>`;
+  if (S.tab === 'session' && S.key) {
+    const i = S.sessions.findIndex(x => x.key === S.key);
+    const v = S.view;
+    const title = v ? v.human : short(S.key);
+    const st = v ? v.status : '';
+    const sub = v ? `${v.time} · ${st === 'Проведено' ? 'проведено' : st === 'Отменено' ? 'отменено' : v.ended ? 'прошло, не закрыто' : v.started ? 'идёт сейчас' : 'запланировано'}` : '';
+    html += `<div class="datebar"><button class="arr" onclick="go(-1)" ${i <= 0 ? 'disabled' : ''}>‹</button><div class="dd"><div class="t">${h(title)}</div><div class="s">${h(sub)}</div></div><button class="arr" onclick="go(1)" ${i >= S.sessions.length - 1 ? 'disabled' : ''}>›</button></div>`;
+  } else {
+    html += `<div class="datebar"><div class="dd"><div class="t">${S.tab === 'clients' ? 'Клиенты' : 'Долги'}</div></div></div>`;
+  }
+  $('#top').innerHTML = html;
+}
+
+function renderTabs() {
+  const t = (id, ic, label, badge) => `<button class="${S.tab === id ? 'on' : ''}" onclick="setTab('${id}')"><span class="ic">${ic}</span>${label}${badge ? `<span class="badge">${badge}</span>` : ''}</button>`;
+  const debtN = S.debts ? S.debts.length : 0;
+  $('#tabs').innerHTML = t('session', '🧘', 'Занятие') + t('clients', '👥', 'Клиенты') + t('debts', '💳', 'Долги', debtN || '');
+}
+
+function abonChip(r) {
+  const a = r.abon;
+  if (r.type === 'Абонемент' && a) return `<span class="chip acc">абонемент · ост. ${a.left} из ${a.total}</span>`;
+  if (a && a.left > 0 && a.status === 'Активен') return `<span class="chip acc">абонемент · ост. ${a.left} из ${a.total}</span>`;
+  return `<span class="chip">разово</span>`;
+}
+function tgChip(r) {
+  if (r.tg) return '';
+  if (r.tgState === 'не подключён') return '<span class="chip">бот не подключён</span>';
+  if (r.tgState === 'бот заблокирован') return '<span class="chip err">бот заблокирован</span>';
+  return `<span class="chip">без Telegram${r.via && r.via !== 'Telegram' ? ' · ' + h(r.via) : ''}</span>`;
+}
+function metaChips(r, extra) {
+  const other = (r.debts || 0) - (r.attended && r.type === 'Разовое' && !r.pay ? 1 : 0);
+  return `<div class="meta">${abonChip(r)}${tgChip(r)}${r.late ? '<span class="chip warm">поздняя отмена</span>' : ''}${other > 0 ? `<span class="chip warm">${S.mode === 'book' || !S.view || !S.view.started ? 'долг' : 'старый долг'} ×${other}</span>` : ''}${extra || ''}</div>`;
+}
+
+function renderSession() {
+  const v = S.view;
+  const m = $('#main');
+  if (!v) { m.innerHTML = '<div class="empty">Загрузка…</div>'; return; }
+  const cancelled = v.status === 'Отменено', closed = v.status === 'Проведено';
+  const mode = S.mode || (v.started || closed ? 'mark' : 'book');
+  const isGo = r => r.answer === 'Буду' || r.answer === 'Без записи';
+  const going = v.rows.filter(isGo);
+  const offered = v.rows.filter(r => r.answer === 'Предложено');
+  const waiting = v.rows.filter(r => r.answer === 'Ожидание').sort((a, b) => a.queue - b.queue);
+  let html = '';
+  if (cancelled) html += `<div class="banner warm">🚫 Занятие отменено${v.comment ? ': ' + h(v.comment) : ''}</div>`;
+  if (closed) html += `<div class="banner acc">✓ Занятие закрыто. Отметки можно поправить – итоги пересчитаются при повторном закрытии.</div>`;
+
+  if (mode === 'book') {
+    html += `<div class="stats"><div class="stat hl"><div class="v">${going.length + offered.length}<small> / ${v.seats.limit}</small></div><div class="l">записано</div></div>` +
+      `<div class="stat"><div class="v">${Math.max(0, v.seats.free)}</div><div class="l">свободно${v.seats.reserved ? ` · бронь ${v.seats.reserved}` : ''}</div></div>` +
+      `<div class="stat"><div class="v">${waiting.length}</div><div class="l">в ожидании</div></div></div>`;
+  } else {
+    const came = v.rows.filter(r => r.attended);
+    const paid = came.filter(r => r.pay || r.type === 'Абонемент').length;
+    html += `<div class="stats"><div class="stat hl"><div class="v">${came.length}</div><div class="l">пришли</div></div>` +
+      `<div class="stat"><div class="v">${paid}<small> / ${came.length}</small></div><div class="l">оплачено</div></div>` +
+      `<div class="stat"><div class="v">${money(v.revenue)}</div><div class="l">выручка, ₽</div></div></div>`;
+  }
+  if (!cancelled) html += `<div class="sw"><button class="${mode === 'book' ? 'on' : ''}" onclick="S.mode='book';render()">Запись</button><button class="${mode === 'mark' ? 'on' : ''}" onclick="S.mode='mark';render()">Отметки</button></div>`;
+
+  if (mode === 'book' && !cancelled) {
+    const gAb = going.filter(r => r.type === 'Абонемент' || (r.abon && r.abon.left > 0 && r.abon.status === 'Активен'));
+    const gOne = going.filter(r => gAb.indexOf(r) < 0);
+    const noAns = v.rows.filter(r => !r.answer);
+    const no = v.rows.filter(r => r.answer === 'Не буду' || r.answer === 'Пропустил');
+    html += group('Будут · абонемент', gAb, rowBook) + group('Будут · разово', gOne, rowBook) +
+      group('Предложено место', offered, r => rowBook(r, `<span class="chip acc">ответ до ${h(r.offerUntil)}</span>`)) +
+      group('Лист ожидания', waiting, r => rowBook(r, `<span class="chip warm">№${r.queue}</span>`)) +
+      group('Не ответили', noAns, rowBook) +
+      group('Не будут', no, r => rowBook(r, r.answer === 'Пропустил' ? '<span class="chip">не ответил(а) на место</span>' : ''));
+    if (!v.rows.length) html += '<div class="empty">Клиентов пока нет. Добавьте первого во вкладке «Клиенты».</div>';
+    html += `<div class="acts"><button class="btn" onclick="openPicker(false)">＋ Записать клиента</button>` +
+      (!v.started && v.status === 'Запланировано' ? `<button class="btn warn" onclick="openCancel()">Отменить занятие</button>` : '') + `</div>`;
+  } else if (!cancelled) {
+    const main = v.rows.filter(r => isGo(r) || r.answer === 'Предложено' || r.attended);
+    const rest = v.rows.filter(r => main.indexOf(r) < 0);
+    html += group('Список на занятие', main, rowMark);
+    if (!main.length) html += '<div class="empty">Никто не записан. Отметьте пришедших кнопками ниже.</div>';
+    if (rest.length) {
+      if (S.showRest) html += group('Остальные клиенты', rest, rowMark);
+      else html += `<button class="more" onclick="S.showRest=true;render()">Показать остальных клиентов (${rest.length})</button>`;
+    }
+    html += `<div class="acts"><div class="g2"><button class="btn" onclick="openWalkin()">＋ Пришёл новый</button><button class="btn" onclick="openPicker(true)">＋ Из списка</button></div>` +
+      `<button class="btn pri" onclick="closeSes()">${closed ? 'Пересчитать итоги' : 'Закрыть занятие'}</button></div>`;
+  }
+  m.innerHTML = html;
+}
+
+function group(title, list, fn) {
+  if (!list.length) return '';
+  return `<div class="grp"><h3>${title}<span>${list.length}</span></h3><div class="list">${list.map(r => fn(r)).join('')}</div></div>`;
+}
+
+function rowBook(r, extra) {
+  const y = r.answer === 'Буду' || r.answer === 'Без записи' || r.answer === 'Предложено';
+  const n = r.answer === 'Не буду' || r.answer === 'Пропустил';
+  const w = r.answer === 'Ожидание';
+  return `<div class="row"><div class="who" onclick="openCard('${r.id}')"><div class="nm">${h(r.name)}</div>${metaChips(r, extra)}</div>` +
+    `<div class="seg"><button class="y ${y ? 'on' : ''}" onclick="ans('${r.id}','Буду')">${w ? 'Ждёт' : 'Будет'}</button><button class="n ${n ? 'on' : ''}" onclick="ans('${r.id}','Не буду')">Нет</button></div></div>`;
+}
+
+function rowMark(r) {
+  let payBtn = '';
+  if (r.type === 'Абонемент') payBtn = '';
+  else if (r.pay) payBtn = `<button class="pay paid" onclick="undoPay('${r.pay.id}','${h(r.name)}')">✓ ${money(r.pay.sum)}</button>`;
+  else payBtn = `<button class="pay ${r.attended ? 'due' : ''}" onclick="openPay('${r.id}','${S.key}')">💳 Оплата</button>`;
+  const extra = r.pay ? `<span class="chip acc">${h(r.pay.method)}</span>` : (r.attended && r.type === 'Разовое' ? '<span class="chip warm">не оплачено</span>' : '');
+  return `<div class="row"><div class="who" onclick="openCard('${r.id}')"><div class="nm">${h(r.name)}</div>${metaChips(r, extra)}</div>${payBtn}` +
+    `<button class="tog ${r.attended ? 'on' : ''}" onclick="att('${r.id}',${!r.attended})" aria-label="Была">✓</button></div>`;
+}
+
+/* ---------- действия по занятию ---------- */
+async function ans(id, value) {
+  const d = await act('answer', { key: S.key, id: id, value: value });
+  if (d && d.session) {
+    const r = d.session.rows.find(x => x.id === id);
+    if (r && r.answer === 'Ожидание') toast('Мест нет – клиент в листе ожидания №' + r.queue);
+  }
+}
+function att(id, val) { act('attend', { key: S.key, id: id, value: val }); }
+async function undoPay(payId, name) {
+  if (!(await confirmAsk('Отменить оплату: ' + name + '?'))) return;
+  act('undoPay', { payId: payId, withClient: !!S.card, id: S.card ? S.card.id : '' }, 'Оплата отменена');
+}
+async function closeSes() {
+  const v = S.view;
+  const came = v.rows.filter(r => r.attended).length;
+  const unpaid = v.rows.filter(r => r.attended && r.type === 'Разовое' && !r.pay).length;
+  const msg = `Закрыть занятие ${short(v.key)}?\n\nПришли: ${came}` + (unpaid ? `\nНе оплатили: ${unpaid} – попадут в «Долги»` : '');
+  if (!(await confirmAsk(msg))) return;
+  const d = await act('close', { key: S.key }, 'Занятие закрыто');
+  if (d) { const i = S.sessions.findIndex(x => x.key === S.key); if (i >= 0) S.sessions[i].status = 'Проведено'; }
+}
+function openCancel() {
+  const el = pushSheet(head('Отменить занятие', h(S.view.human) + ', ' + h(S.view.time)) +
+    `<p class="muted">Клиенты с Telegram получат сообщение об отмене. Абонементы продлятся на неделю. Клиентов без Telegram бот перечислит – им нужно сообщить лично.</p>` +
+    `<label class="f">Причина (увидят клиенты)</label><textarea id="cr" placeholder="Например: КДЦ закрыт в праздничный день"></textarea>` +
+    `<div class="acts"><button class="btn warn" id="cgo">Отменить занятие</button></div>`);
+  el.querySelector('#cgo').onclick = async () => {
+    const reason = el.querySelector('#cr').value.trim();
+    if (!(await confirmAsk('Точно отменить занятие? Клиенты сразу получат сообщение.'))) return;
+    const d = await act('cancel', { key: S.key, reason: reason }, 'Занятие отменено');
+    if (d) { popSheet(); const i = S.sessions.findIndex(x => x.key === S.key); if (i >= 0) S.sessions[i].status = 'Отменено'; }
+  };
+}
+
+/* ---------- оплата ---------- */
+function findRow(id) { return (S.view && S.view.rows.find(r => r.id === id)) || (S.card && S.card.id === id ? S.card : null); }
+function openPay(id, key, onlyAbon) {
+  const r = findRow(id) || { id: id, name: '' };
+  const c = S.cfg;
+  const st = { kind: onlyAbon ? 'abon' : 'single', method: '' };
+  const el = pushSheet(head('Оплата', h(r.name) + (key && !onlyAbon ? ' · занятие ' + short(key) : '')) + '<div id="pb"></div>');
+  const draw = () => {
+    el.querySelector('#pb').innerHTML =
+      `<div class="opts">` +
+      (onlyAbon ? '' : `<button class="opt ${st.kind === 'single' ? 'on' : ''}" data-k="single"><span>Разовое занятие<small>за ${short(key)}</small></span><span class="pr">${money(c.p1)} ₽</span></button>`) +
+      `<button class="opt ${st.kind === 'abon' ? 'on' : ''}" data-k="abon"><span>Абонемент на ${c.an} ${plural(c.an, ['занятие', 'занятия', 'занятий'])}<small>${money(c.pa / c.an)} ₽ за занятие · действует ${c.aw} ${plural(c.aw, ['неделю', 'недели', 'недель'])}${key && !onlyAbon ? ' · это занятие спишется с него' : ''}</small></span><span class="pr">${money(c.pa)} ₽</span></button></div>` +
+      `<label class="f">Способ оплаты</label><div class="g2"><button class="opt ${st.method === 'Наличные' ? 'on' : ''}" data-m="Наличные">💵 Наличные</button><button class="opt ${st.method === 'Перевод' ? 'on' : ''}" data-m="Перевод">📲 Перевод</button></div>` +
+      `<div class="acts"><button class="btn pri" id="pgo" ${st.method ? '' : 'disabled'}>Отметить оплату · ${money(st.kind === 'abon' ? c.pa : c.p1)} ₽</button></div>`;
+    el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { st.kind = b.dataset.k; draw(); });
+    el.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { st.method = b.dataset.m; draw(); });
+    el.querySelector('#pgo').onclick = async () => {
+      const d = await act('pay', { key: key || '', id: id, kind: st.kind, method: st.method, withClient: !!S.card }, 'Оплата отмечена');
+      if (d) popSheet();
+    };
+  };
+  draw();
+}
+
+/* ---------- добавить на занятие ---------- */
+function openWalkin() {
+  const el = pushSheet(head('Пришёл новый', 'Клиент сразу отметится на занятии ' + short(S.key)) + clientFields({ via: 'Telegram' }, true) +
+    `<div class="acts"><button class="btn pri" id="wgo">Добавить и отметить</button></div>`);
+  bindVia(el);
+  el.querySelector('#wgo').onclick = async () => {
+    const cl = readFields(el);
+    const d = await act('add', { key: S.key, client: cl, walkin: true }, 'Отмечен на занятии');
+    if (d) { popSheet(); if (d.addedId) openPay(d.addedId, S.key); }
+  };
+}
+
+function openPicker(walkin) {
+  const v = S.view;
+  const exclude = {};
+  v.rows.forEach(r => { if (walkin ? r.attended : (r.answer === 'Буду' || r.answer === 'Без записи' || r.answer === 'Ожидание' || r.answer === 'Предложено')) exclude[r.id] = 1; });
+  const el = pushSheet(head(walkin ? 'Отметить из списка' : 'Записать клиента', walkin ? 'Клиент пришёл без записи' : 'Запись на ' + short(S.key) + '. Если мест нет – попадёт в лист ожидания') +
+    `<div class="search"><input id="ps" placeholder="Имя или телефон" autocomplete="off"></div><div id="pl"><div class="empty">Загрузка…</div></div>`);
+  const draw = list => {
+    const q = el.querySelector('#ps').value.trim().toLowerCase();
+    const items = list.filter(c => !exclude[c.id] && (!q || c.name.toLowerCase().indexOf(q) >= 0 || c.phone.replace(/\D/g, '').indexOf(q.replace(/\D/g, '') || '§') >= 0));
+    el.querySelector('#pl').innerHTML = items.length ? `<div class="list">${items.map(c => `<div class="row" data-id="${c.id}"><div class="who"><div class="nm">${h(c.name)}</div><div class="meta"><span class="chip">${h(c.phone)}</span>${abonChip({ abon: c.abon })}</div></div><span style="color:var(--acc);font-weight:800">＋</span></div>`).join('')}</div>` : '<div class="empty">Никого не нашлось. Новый клиент добавляется во вкладке «Клиенты» или кнопкой «Пришёл новый».</div>';
+    el.querySelectorAll('[data-id]').forEach(row => row.onclick = async () => {
+      const d = await act('add', { key: S.key, id: row.dataset.id, walkin: walkin }, walkin ? 'Отмечен на занятии' : null);
+      if (d) {
+        popSheet();
+        if (!walkin && d.session) { const r = d.session.rows.find(x => x.id === row.dataset.id); toast(r && r.answer === 'Ожидание' ? 'Мест нет – в листе ожидания №' + r.queue : 'Записан на занятие'); }
+      }
+    });
+  };
+  const go = list => { el.querySelector('#ps').oninput = () => draw(list); draw(list); };
+  if (S.clients) go(S.clients);
+  else call('clients').then(d => { S.clients = d.clients; go(S.clients); }).catch(e => toast(e.message, true));
+}
+
+/* ---------- клиенты ---------- */
+function renderClients() {
+  const m = $('#main');
+  if (!S.clients) { m.innerHTML = '<div class="empty">Загрузка…</div>'; return; }
+  const q = S.q.trim().toLowerCase();
+  const qd = q.replace(/\D/g, '');
+  const list = S.clients.filter(c => !q || c.name.toLowerCase().indexOf(q) >= 0 || (qd && c.phone.replace(/\D/g, '').indexOf(qd) >= 0));
+  m.innerHTML = `<div class="search"><input id="cq" placeholder="Поиск: имя или телефон" value="${h(S.q)}" autocomplete="off"></div>` +
+    `<button class="btn pri" onclick="openForm()">＋ Новый клиент</button>` +
+    `<div class="grp"><h3>Все клиенты<span>${list.length}</span></h3>` +
+    (list.length ? `<div class="list">${list.map(c => {
+      const a = c.abon;
+      const ab = a ? (a.status === 'Активен' ? `<span class="chip acc">абонемент · ост. ${a.left} из ${a.total} · до ${short(a.until)}</span>` : a.status === 'Истёк' ? `<span class="chip warm">абонемент истёк</span>` : '<span class="chip">абонемент закончился</span>') : '';
+      return `<div class="row" onclick="openCard('${c.id}')"><div class="who"><div class="nm">${h(c.name)}</div><div class="meta"><span class="chip">${h(c.phone)}</span>${ab}${tgChip(c)}${c.pausedTo ? `<span class="chip">пауза до ${short(c.pausedTo)}</span>` : ''}${c.reminders ? '' : '<span class="chip">напоминания выкл.</span>'}${c.debts ? `<span class="chip warm">долг ×${c.debts}</span>` : ''}</div></div><span style="color:var(--tx3)">›</span></div>`;
+    }).join('')}</div>` : '<div class="empty">Никого не нашлось</div>') + '</div>';
+  const inp = $('#cq');
+  inp.oninput = () => { S.q = inp.value; const pos = inp.selectionStart; renderClients(); const n = $('#cq'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
+}
+
+async function openCard(id) {
+  S.card = { id: id, loading: true };
+  S.cardEl = pushSheet('<div class="empty">Загрузка…</div>');
+  try { const d = await call('client', { id: id }); if (S.card && S.card.id === id) { S.card = d.client; renderCard(); } }
+  catch (e) { toast(e.message, true); popSheet(); }
+}
+
+function renderCard() {
+  const c = S.card, el = S.cardEl;
+  if (!c || !el || c.loading) return;
+  const cfg = S.cfg;
+  const a = c.abon;
+  const fUsed = a && a.left > 0 ? a.freeze : 0;
+  const fLeft = Math.max(0, cfg.fmax - fUsed);
+  const tgLine = c.tg ? 'бот подключён' + (c.nick ? ' · @' + h(c.nick) : '') : c.tgState === 'не подключён' ? 'Telegram есть, бот не подключён' : c.tgState === 'бот заблокирован' ? 'бот заблокирован' : 'без Telegram';
+  let html = head(h(c.name), `<a href="tel:+${h(c.phoneRaw)}">${h(c.phone)}</a> · ${tgLine}`);
+  const links = [];
+  if (c.nick) links.push(`<button class="btn sm" onclick="openLink('https://t.me/${h(c.nick)}')">Telegram</button>`);
+  else if (c.via === 'Telegram' && c.phoneRaw) links.push(`<button class="btn sm" onclick="openLink('https://t.me/+${h(c.phoneRaw)}')">Telegram</button>`);
+  if (c.via === 'WhatsApp' || c.via === 'Звонок') links.push(`<button class="btn sm" onclick="openLink('https://wa.me/${h(c.phoneRaw)}')">WhatsApp</button>`);
+  if (c.linkUrl) links.push(`<button class="btn sm" onclick="openLink('${h(c.linkUrl)}')">${c.via === 'ВК' ? 'ВК' : c.via === 'MAX' ? 'MAX' : 'Профиль'}</button>`);
+  if (links.length) html += `<div class="g2">${links.join('')}</div>`;
+
+  // абонемент
+  html += `<div class="box"><div class="bt">Абонемент</div>`;
+  if (a && a.status === 'Активен') html += `<div class="big" style="color:var(--acc)">${a.left} из ${a.total}</div><div class="muted">осталось · действует до ${h(a.until)}${a.freeze ? ` · заморозка ${a.freeze} нед.` : ''}</div>`;
+  else if (a && a.status === 'Истёк') html += `<div class="big" style="color:var(--warm)">Истёк ${h(a.until)}</div><div class="muted">не использовано: ${a.left}. Срок можно продлить заморозкой.</div>`;
+  else html += `<div class="muted">${a ? 'Абонемент закончился' : 'Абонемента нет'} – занятия разово по ${money(cfg.p1)} ₽</div>`;
+  html += `<div class="g2 mt"><button class="btn sm" onclick="openPay('${c.id}','',true)">Продать абонемент</button>` +
+    (a && a.left > 0 ? `<button class="btn sm" onclick="writeOff()">Списать занятие</button>` : '<span></span>') + `</div>`;
+  if (c.pausedTo) html += `<div class="banner acc mt" style="margin-bottom:0">⏸ Пауза до ${h(c.pausedTo)} – напоминания не приходят</div><button class="btn sm mt" style="width:100%" onclick="unpause()">Снять паузу</button>`;
+  html += `<label class="f">${a && a.left > 0 ? `Заморозить абонемент (доступно ${fLeft} из ${cfg.fmax} нед.)` : 'Пауза (абонемента нет)'}</label><div class="g2">` +
+    [1, 2].map(w => `<button class="btn sm" ${a && a.left > 0 && w > fLeft ? 'disabled' : ''} onclick="freeze(${w})">На ${w} ${plural(w, ['неделю', 'недели', 'недель'])}</button>`).join('') + `</div></div>`;
+
+  // долги
+  if (c.debts.length) {
+    html += `<div class="box"><div class="bt" style="color:var(--warm)">Долги</div>` + c.debts.map(d => `<div class="hrow"><span>Разовое ${short(d.key)}</span><span class="r"><button class="pay due" style="height:34px" onclick="openPay('${c.id}','${d.key}')">${money(d.sum)} ₽ · оплатить</button></span></div>`).join('') + `</div>`;
+  }
+
+  // напоминания
+  html += `<div class="box"><div class="kv"><span>Напоминания</span><span><button class="btn sm" onclick="toggleRem(${!c.reminders})">${c.reminders ? '🔔 Включены' : '🔕 Выключены'}</button></span></div></div>`;
+
+  // данные
+  html += `<div class="box"><div class="bt">Данные</div>` +
+    kv('Связь', c.via) + kv('Ссылка', c.link) + kv('Откуда узнали', c.from) + kv('Метка', c.mark) + kv('Источник', c.source) + kv('В базе с', c.created) + kv('Комментарий', c.comment) +
+    `<button class="btn sm mt" style="width:100%" onclick="openForm(S.card)">✎ Изменить данные</button></div>`;
+
+  // история
+  if (c.hist.length) {
+    html += `<div class="box"><div class="bt">Занятия</div>` + c.hist.map(x => {
+      const st = x.attended ? '✓ был(а)' : x.answer === 'Не буду' ? (x.late ? 'отмена (поздняя)' : 'отмена') : x.answer === 'Ожидание' ? 'лист ожидания' : x.answer === 'Пропустил' ? 'не ответил(а) на место' : x.answer === 'Буду' ? 'записан(а)' : h(x.answer);
+      const t = x.attended ? (x.type === 'Абонемент' ? 'абонемент' : x.paid ? 'оплачено' : 'не оплачено') : '';
+      return `<div class="hrow"><span>${short(x.key)} · ${st}</span><span class="r" ${t === 'не оплачено' ? 'style="color:var(--warm)"' : ''}>${t}</span></div>`;
+    }).join('') + `</div>`;
+  }
+  if (c.pays.length) {
+    html += `<div class="box"><div class="bt">Оплаты</div>` + c.pays.map(p => `<div class="hrow"><span>${h(p.date)} · ${h(p.what)}<br><span class="muted">${money(p.sum)} ₽ · ${h(String(p.method || '').toLowerCase())} · ${h(p.by)}</span></span><span class="r"><button class="btn sm ghost" style="padding:6px 8px" onclick="undoPay('${p.id}','${h(p.what)}')">Отменить</button></span></div>`).join('') + `</div>`;
+  }
+  el.innerHTML = html;
+}
+function kv(k, v) { return v ? `<div class="kv"><span>${h(k)}</span><span>${h(v)}</span></div>` : ''; }
+
+async function writeOff() {
+  if (!(await confirmAsk('Списать одно занятие с абонемента вручную?'))) return;
+  act('writeOff', { id: S.card.id, withClient: true }, 'Списано');
+}
+async function freeze(w) {
+  const c = S.card;
+  const hasAb = c.abon && c.abon.left > 0;
+  if (!(await confirmAsk(hasAb ? `Заморозить абонемент на ${w} ${plural(w, ['неделю', 'недели', 'недель'])}? Срок продлится, напоминания на это время выключатся.` : `Поставить паузу на ${w} ${plural(w, ['неделю', 'недели', 'недель'])}? Напоминания на это время выключатся.`))) return;
+  act('freeze', { id: c.id, weeks: w, withClient: true }, hasAb ? 'Абонемент заморожен' : 'Пауза поставлена');
+}
+function unpause() { act('unpause', { id: S.card.id, withClient: true }, 'Пауза снята'); }
+function toggleRem(on) { act('reminders', { id: S.card.id, value: on, withClient: true }, on ? 'Напоминания включены' : 'Напоминания выключены'); }
+
+/* ---------- форма клиента ---------- */
+function clientFields(c, short_) {
+  c = c || {};
+  const via = c.via || 'Telegram';
+  return `<label class="f">Имя и фамилия</label><input id="fn" value="${h(c.name)}" autocomplete="off">` +
+    `<label class="f">Телефон</label><input id="fp" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" value="${h(c.phone)}" autocomplete="off">` +
+    `<label class="f">Как связаться</label><select id="fv">${['Telegram', 'WhatsApp', 'ВК', 'MAX', 'Звонок'].map(x => `<option ${x === via ? 'selected' : ''}>${x}</option>`).join('')}</select>` +
+    `<div id="flw" style="display:${via === 'ВК' || via === 'MAX' ? 'block' : 'none'}"><label class="f">Ссылка на профиль</label><input id="fl" placeholder="vk.ru/…" value="${h(c.link)}" autocomplete="off"></div>` +
+    (short_ ? '' : `<label class="f">Комментарий</label><textarea id="fc" placeholder="Только то, что нужно для занятий">${h(c.comment)}</textarea>`);
+}
+function bindVia(el) { const s = el.querySelector('#fv'); s.onchange = () => { el.querySelector('#flw').style.display = s.value === 'ВК' || s.value === 'MAX' ? 'block' : 'none'; }; }
+function readFields(el) {
+  const g = id => { const x = el.querySelector(id); return x ? x.value.trim() : ''; };
+  return { name: g('#fn'), phone: g('#fp'), via: g('#fv'), link: g('#fl'), comment: g('#fc') };
+}
+function openForm(c) {
+  const edit = !!(c && c.id);
+  const el = pushSheet(head(edit ? 'Изменить данные' : 'Новый клиент', edit ? '' : 'Клиент сразу начнёт получать напоминания, если подключит бота') +
+    clientFields(edit ? { name: c.name, phone: c.phone, via: c.via, link: c.link, comment: c.comment } : null) +
+    (c && c.tg ? '<p class="muted">Бот подключён – связь через Telegram.</p>' : '') +
+    `<div class="acts"><button class="btn pri" id="fgo">${edit ? 'Сохранить' : 'Добавить клиента'}</button></div>`);
+  bindVia(el);
+  el.querySelector('#fgo').onclick = async () => {
+    const cl = readFields(el);
+    if (edit) cl.id = c.id;
+    const wasCard = !!S.card;
+    const d = await act('saveClient', { client: cl, withClient: true }, edit ? 'Сохранено' : 'Клиент добавлен');
+    if (d) {
+      popSheet();
+      if (!edit && !wasCard && d.savedId) openCard(d.savedId);
+    }
+  };
+}
+
+/* ---------- долги ---------- */
+function renderDebts() {
+  const m = $('#main');
+  if (!S.debts) { m.innerHTML = '<div class="empty">Загрузка…</div>'; return; }
+  if (!S.debts.length) { m.innerHTML = '<div class="empty">Долгов нет 👌</div>'; return; }
+  const total = S.debts.reduce((s, d) => s + d.sum, 0);
+  const byClient = {};
+  S.debts.forEach(d => { (byClient[d.id] = byClient[d.id] || { name: d.name, list: [] }).list.push(d); });
+  m.innerHTML = `<div class="stats" style="grid-template-columns:1fr 1fr"><div class="stat"><div class="v" style="color:var(--warm)">${money(total)} ₽</div><div class="l">всего долгов</div></div><div class="stat"><div class="v">${Object.keys(byClient).length}</div><div class="l">${plural(Object.keys(byClient).length, ['клиент', 'клиента', 'клиентов'])}</div></div></div>` +
+    Object.keys(byClient).map(id => {
+      const g = byClient[id];
+      return `<div class="grp"><h3><span style="color:var(--tx);cursor:pointer" onclick="openCard('${id}')">${h(g.name)} ›</span><span>${money(g.list.reduce((s, d) => s + d.sum, 0))} ₽</span></h3><div class="list">` +
+        g.list.map(d => `<div class="row"><div class="who"><div class="nm">${short(d.key)}</div><div class="meta"><span class="chip warm">${money(d.sum)} ₽</span></div></div>` +
+          `<button class="pay" onclick="payDebt('${id}','${d.key}','Наличные')">💵 Наличные</button><button class="pay" onclick="payDebt('${id}','${d.key}','Перевод')">📲 Перевод</button></div>`).join('') + `</div></div>`;
+    }).join('');
+}
+async function payDebt(id, key, method) {
+  const d = await act('pay', { key: key, id: id, kind: 'single', method: method, refreshKey: '' }, 'Оплата отмечена');
+  if (d) loadDebts();
+}
+
+boot();
+</script>
+</body>
+</html>
