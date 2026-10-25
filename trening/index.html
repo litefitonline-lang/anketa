@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Тренировки">
-<title>Тренировки Lite Fit</title>
+<meta name="apple-mobile-web-app-title" content="Lite Fit">
+<title>Lite Fit</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -446,6 +446,8 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .rst{display:inline-flex;align-items:center;gap:6px;min-height:40px;margin:-4px 0 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 .rst svg{width:16px;height:16px}
 .topr{display:flex;align-items:center;gap:4px}
+.cabb{display:flex;align-items:center;gap:4px;height:40px;padding:0 12px 0 8px;border-radius:20px;border:1px solid var(--line2);font-size:13.5px;font-weight:800;color:var(--accent);text-decoration:none;margin-right:4px}
+.cabb svg{width:16px;height:16px}
 .qb{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:17px;font-weight:800;color:var(--accent)}
 .help h3{margin:20px 0 6px;font-size:16px;font-weight:800}
 .help h3:first-of-type{margin-top:4px}
@@ -759,6 +761,11 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.2 (25.10.2026). Сервер 4.19.0. Единый кабинет, шаг 1: значок и название на экране телефона – Lite Fit (как у кабинета),
+ *   область приложения – вся папка anketa, поэтому кабинет и тренировки открываются в одном окне. У клиента с кабинетом
+ *   (PRO, START, BASIC после PRO) вверху – кнопка «Кабинет»; если тренировки открыл кабинет (from=cab), а кабинет у клиента
+ *   уже есть, – страница сама возвращает в кабинет. Клиент BASIC: вкладки «Тренировки», «Прогресс» (что откроется в PRO и
+ *   «Хочу PRO» – заявка тренеру), «Тренер», «Награды», «Инструкция».
  * 4.0 (25.10.2026). Сервер 4.16.0. В карточке клиента у тренера – «Бот клиента»: подключён ли, что придёт в ближайшие 14 дней
  *   и что бот уже отправил (журнал с установки 4.16), и «Как работают уведомления» – что и когда получают клиенты FREE, BASIC,
  *   BASIC после PRO, PRO и START.
@@ -884,7 +891,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.1';
+var VERSION = '4.2';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -1222,6 +1229,7 @@ function syncText() {
   return S.loadedAt ? 'обновлено ' + new Date(S.loadedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '';
 }
 function topHtml() { return '<div class="top"><img src="' + LOGO + '" alt="Lite Fit"><div class="topr"><button class="sync' + (S.busy ? ' busy' : '') + '" id="sync" data-act="refresh" aria-label="Обновить"><span>' + esc(syncText()) + '</span>' + IC.sync + '</button>' +
+  (MODE === 'client' && M && M.cabk ? '<a class="cabb" href="../cabinet/?k=' + encodeURIComponent(M.cabk) + '">' + IC.back + 'Кабинет</a>' : '') +   // 4.2
   (MODE === 'client' ? '<button class="qb" data-act="help" aria-label="Как пользоваться" title="Как пользоваться">?</button>' : '') + '</div></div>'; }
 function paintSync() { var el = document.getElementById('sync'); if (el) { el.className = 'sync' + (S.busy ? ' busy' : ''); el.firstChild.textContent = syncText(); } }
 var KEEP_SCROLL = ['.ed-ref', '.md-l', '.vd-r', '#sugg'];     // 2.6: панели со своей прокруткой (прошлая тренировка справа, список клиентов)
@@ -2581,11 +2589,13 @@ try { PEND = JSON.parse(LS.get(PEND_KEY) || '{}') || {}; } catch (e) { PEND = {}
 function pendCount() { return Object.keys(PEND).length; }
 function pendSave() { LS.set(PEND_KEY, JSON.stringify(PEND)); if (M) { try { LS.set(MEM_C, JSON.stringify({ at: S.loadedAt, m: M })); } catch (e) {} } }
 function myOf(id) { return M ? M.list.filter(function (w) { return w.id === id; })[0] || null : null; }
+/** 4.2: клиент BASIC (не FREE) – вкладка «Прогресс» с тем, что откроется в PRO. */
+function isBasic() { return !!(M && !M.free && M.fmt === 'BASIC'); }
 function setMy(r) {
   var keep = {};
   if (M) M.list.forEach(function (w) { if (PEND[w.id] && w.items) keep[w.id] = w; });           // несохранённое не затираем ответом сервера
   var rdWas = {}; if (M && M.msgs) M.msgs.forEach(function (m) { if (m.rd) rdWas[m.id] = m.rd; });
-  M = { free: !!r.free, fend: r.fend || '', fwant: r.fwant || null, fowner: r.fowner || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
+  M = { fmt: r.fmt || '', cabk: r.cabk || '', free: !!r.free, fend: r.fend || '', fwant: r.fwant || null, fowner: r.fowner || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
     pay: r.pay || '', aw: r.aw || null, tg: r.tg || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
@@ -2685,6 +2695,9 @@ function loadMy(first, quiet) {
     if (r.auth) return;
     if (!r.ok) { S.offline = !!r.net; if (M) paintSync(); else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false; setMy(r); updCheck(r);
+    if (M.cabk && qs.get('from') === 'cab') {                               // 4.2: открыл кабинет, а кабинет у клиента уже есть – назад в кабинет
+      LS.del('lf_wko_' + CKEY.slice(0, 12)); location.replace('../cabinet/?k=' + encodeURIComponent(M.cabk)); return;
+    }
     if (r.cv !== undefined) CV.v = String(r.cv);
     cvArm();
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
@@ -3091,7 +3104,7 @@ function isIos() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navi
 function installHow() { return isIos() ? 'Safari: кнопка «Поделиться» внизу → «На экран „Домой“» → «Добавить».' : 'Chrome: меню ⋮ вверху справа → «Добавить на главный экран» или «Установить приложение».'; }
 function installCard() {
   if (standalone() || LS.get('lf_wk_inst_hide')) return '';
-  return '<div class="card install' + (INST_N < 3 ? ' pulse' : '') + '"><div class="ic">' + IC.home + '</div><div style="flex:1"><p><b>Добавьте тренировки на экран телефона</b></p><p>' + installHow() + '</p>' +
+  return '<div class="card install' + (INST_N < 3 ? ' pulse' : '') + '"><div class="ic">' + IC.home + '</div><div style="flex:1"><p><b>Добавьте Lite Fit на экран телефона</b></p><p>' + installHow() + '</p>' +
     (deferredInstall ? '<button class="btn sec sm mt" data-act="install">Добавить</button>' : '') + '</div><button class="x" data-act="hideInstall" aria-label="Скрыть">' + IC.x + '</button></div>';
 }
 /** Картинка в справке: карточка упражнения, цифрами отмечено, куда нажимать. Только для показа, не нажимается. */
@@ -3153,6 +3166,7 @@ function wantBtn(fmt, cls) {
   return '<button class="btn ' + (on ? 'sec' : cls || 'pri') + '" data-act="fwant" data-f="' + fmt + '"' + (on ? ' disabled' : '') + '>' + (on ? 'Заявка на ' + fmt + ' отправлена ✓' : 'Хочу ' + fmt) + '</button>';
 }
 function viewShow() {
+  if (isBasic()) return viewShowBasic();                                   // 4.2
   var bars = function (a) { return '<div class="rows">' + a.map(function (x) { return '<div class="row" style="min-height:0;padding:8px 0"><span class="mn"><b>' + x[0] + '</b><small>' + x[1] + '</small></span></div>'; }).join('') + '</div>'; };
   var chart = '<svg viewBox="0 0 300 90" style="width:100%;height:90px"><polyline points="0,20 40,28 80,26 120,40 160,46 200,52 240,62 300,70" fill="none" stroke="var(--accent)" stroke-width="3"/><line x1="0" y1="88" x2="300" y2="88" stroke="var(--line2)"/></svg>';
   return '<h1 class="hello">Прогресс</h1><p class="lead-p">Так выглядит кабинет Lite Fit на полном сопровождении. В FREE эти разделы закрыты – они открываются в START и PRO.</p>' +
@@ -3161,6 +3175,21 @@ function viewShow() {
     showCard('Замеры и фото', 'START', 'Стартовые замеры и фото – чтобы видеть изменения, а не гадать.', bars([['Талия', '84 → 80 см'], ['Бёдра', '101 → 98 см'], ['Фото', 'спереди, сбоку, сзади']])) +
     showCard('Шаги, гайды, итоги месяца', 'PRO', 'Норма шагов, гайды по разминке, растяжке и питанию, итоги месяца с коллажем фото.', bars([['Шаги', '8 400 из 8 000'], ['Гайды', 'разминка, растяжка, питание'], ['Итоги октября', 'тренировок 12 · −2,1 кг']])) +
     '<button class="btn sec" data-act="ctab" data-v="next" style="margin-top:4px">' + IC.next + 'Сравнить форматы</button>';
+}
+/** 4.2: клиент BASIC – что откроется в PRO и «Хочу PRO». */
+function viewShowBasic() {
+  var bars = function (a) { return '<div class="rows">' + a.map(function (x) { return '<div class="row" style="min-height:0;padding:8px 0"><span class="mn"><b>' + x[0] + '</b><small>' + x[1] + '</small></span></div>'; }).join('') + '</div>'; };
+  var chart = '<svg viewBox="0 0 300 90" style="width:100%;height:90px"><polyline points="0,20 40,28 80,26 120,40 160,46 200,52 240,62 300,70" fill="none" stroke="var(--accent)" stroke-width="3"/><line x1="0" y1="88" x2="300" y2="88" stroke="var(--line2)"/></svg>';
+  var w = M.fwant && M.fwant.fmt === 'PRO' ? M.fwant : null;
+  return '<h1 class="hello">Прогресс</h1><p class="lead-p">Ваш формат – BASIC: тренировки с тренером. Ниже – что ещё есть в кабинете Lite Fit на PRO, если захотите видеть не только тренировки, но и весь результат.</p>' +
+    (w ? '<div class="banner done"><b>Заявка на PRO отправлена ' + dm(w.at) + '.</b> Тренер' + (M.fowner ? ' ' + esc(M.fowner) : '') + ' напишет Вам и всё расскажет. Ссылка и все тренировки останутся теми же.</div>' : '') +
+    showCard('Дневник питания и вес', 'PRO', 'Норма КБЖУ под Вашу цель, дневник питания и вес каждый день.', bars([['Калории', '1 840 из 1 900 ккал'], ['Белки', '112 из 120 г'], ['Вес', '78,4 кг · −1,2 кг за 2 недели']])) +
+    showCard('Графики', 'PRO', 'Как меняются вес, питание и дисциплина – на графиках.', chart) +
+    showCard('Замеры и фото', 'PRO', 'Контрольные замеры и фото – чтобы видеть изменения, а не гадать.', bars([['Талия', '84 → 80 см'], ['Бёдра', '101 → 98 см'], ['Фото', 'спереди, сбоку, сзади']])) +
+    showCard('Шаги, гайды, итоги месяца', 'PRO', 'Норма шагов, гайды по разминке, растяжке и питанию, итоги месяца с коллажем фото.', bars([['Шаги', '8 400 из 8 000'], ['Гайды', 'разминка, растяжка, питание'], ['Итоги октября', 'тренировок 12 · −2,1 кг']])) +
+    '<div class="card offer rec"><div class="fs-h"><h3>PRO</h3><span class="pill ok">тренировки + питание</span></div><p class="sub">Всё, что есть в BASIC, и полное сопровождение результата.</p>' +
+    '<ul class="ofl">' + ['Тренировки и тренер – как сейчас', 'Норма КБЖУ и дневник питания', 'Вес, графики, контрольные замеры и фото', 'Шаги, гайды и итоги месяца'].map(function (x) { return '<li>' + IC.check + '<span>' + x + '</span></li>'; }).join('') + '</ul>' +
+    wantBtn('PRO', 'pri') + '</div>';
 }
 function viewNext() {
   var w = M.fwant, offer = function (fmt, tag, t, list, rec) {
@@ -3180,6 +3209,7 @@ function helpSections() {
   var old = {}, order = [];
   raw.split('<h3>').slice(1).forEach(function (x) { var i = x.indexOf('</h3>'); var t = x.slice(0, i); old[t] = x.slice(i + 5); order.push(t); });
   var tabs = old['Вкладки внизу'];
+  if (tabs && isBasic()) tabs = tabs.replace('<li><b>«Тренер»</b>', '<li><b>«Прогресс»</b> – что ещё есть в кабинете Lite Fit на PRO: питание, вес, замеры, фото, шаги. «Хочу PRO» – заявка тренеру.</li><li><b>«Тренер»</b>');   // 4.2
   if (tabs) old['Вкладки внизу'] = tabs.replace(/<\/ul>\s*$/, '<li><b>«Инструкция»</b> – все подсказки по разделам, открываются в любой момент.</li></ul>');
   if (!M || !M.free) return order.map(function (t) { return [t, old[t]]; });
   var L = [];
@@ -3485,6 +3515,7 @@ function paintBar() {
     var cu = msgUnread().length, cb = function (v, icon, t, n) { return '<button data-act="ctab" data-v="' + v + '" class="' + (S.ctab === v ? 'on' : '') + '">' + icon + '<span>' + t + '</span>' + (n ? '<i class="tb num">' + n + '</i>' : '') + '</button>'; };
     tabsEl.hidden = false;
     tabsEl.innerHTML = M.free ? '<nav style="grid-template-columns:repeat(5,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('show', IC.chart, 'Прогресс', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('next', IC.next, 'Что дальше', 0) + cb('help', IC.info, 'Инструкция', 0) + '</nav>'
+      : isBasic() ? '<nav style="grid-template-columns:repeat(5,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('show', IC.chart, 'Прогресс', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('aw', IC.award, 'Награды', 0) + cb('help', IC.info, 'Инструкция', 0) + '</nav>'   // 4.2
       : '<nav style="grid-template-columns:repeat(4,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('aw', IC.award, 'Награды', 0) + cb('help', IC.info, 'Инструкция', 0) + '</nav>';
   }
   barEl.hidden = !h; barEl.innerHTML = h ? '<div class="in">' + h + '</div>' : '';
@@ -3505,7 +3536,7 @@ function render() {
   } else {
     if (!M) return;
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
-    h += S.view === 'run' ? viewRun() : S.ctab === 'coach' ? viewCoach() : S.ctab === 'aw' ? viewAw() : S.ctab === 'help' ? viewHelp() : S.ctab === 'show' && M.free ? viewShow() : S.ctab === 'next' && M.free ? viewNext() : S.ctab === 'aw' && !M.free ? viewAw() : viewMy();
+    h += S.view === 'run' ? viewRun() : S.ctab === 'coach' ? viewCoach() : S.ctab === 'aw' ? viewAw() : S.ctab === 'help' ? viewHelp() : S.ctab === 'show' && (M.free || isBasic()) ? viewShow() : S.ctab === 'next' && M.free ? viewNext() : S.ctab === 'aw' && !M.free ? viewAw() : viewMy();
   }
   h += '<p class="ver">Lite Fit · тренировки ' + VERSION + '</p>';
   shell(MODE === 'trainer'); app.innerHTML = h; paintBar();
