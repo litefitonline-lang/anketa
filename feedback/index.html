@@ -149,6 +149,8 @@ var CONFIG = {
 };
 /* ================================================= */
 
+var PAGE = "4.2";                 // 4.2: три анкеты – PRO и BASIC (как раньше), START (&f=start), FREE (&f=free)
+var KIND = ((/[?&]f=(start|free)/i.exec(location.search) || [])[1] || "").toLowerCase();
 // шаги анкеты: ключи вопросов Google Формы (сервер узнаёт их по заголовкам), «*» – вопросы без своего места
 var LAYOUT = [
   {title:"Давайте знакомиться", lead:"Чтобы мы поняли, от кого ответы.", keys:["name","email","format"]},
@@ -157,6 +159,23 @@ var LAYOUT = [
   {title:"Поддержка и идеи", lead:"Ещё пара вопросов – и почти всё.", keys:["support","change","recommend","*"]},
   {title:"Ваш отзыв", lead:"Последний шаг.", keys:["consent","review"]}
 ];
+var LAYOUTS = {
+  main: LAYOUT,
+  start: [
+    {title:"Как прошёл Ваш START", lead:"Две недели позади – расскажите честно, как всё прошло. Это займёт 2–3 минуты, а тренеру поможет предложить, как продолжить.", keys:["name","score","expect","results"]},
+    {title:"Программа и кабинет", lead:"Пара вопросов о том, как Вам было заниматься.", keys:["program","cab","support"]},
+    {title:"Что было хорошо, а что – нет", lead:"Пишите как есть – любые замечания помогают нам становиться лучше.", keys:["liked","hard"]},
+    {title:"Что дальше", lead:"И последнее.", keys:["next","recommend","*","consent","review"]}
+  ],
+  free: [
+    {title:"Как Вам 3 тренировки", lead:"Расскажите честно, как всё прошло. Это займёт 2 минуты, а тренеру поможет понять, как Вам лучше продолжить.", keys:["name","score","load","app"]},
+    {title:"Что было хорошо, а что – нет", lead:"Пишите как есть – любые замечания помогают нам становиться лучше.", keys:["liked","hard"]},
+    {title:"Что дальше", lead:"Последний шаг.", keys:["next","why","recommend","*","consent","review"]}
+  ]
+};
+// обращение по имени на первом шаге
+var HELLO = { main: [LAYOUT[1].title, ", как прошёл ваш период с нами?"], start: ["Как прошёл Ваш START", ", как прошёл Ваш START?"], free: ["Как Вам 3 тренировки", ", как Вам 3 тренировки?"] };
+var TITLES = { main: "Lite Fit – как прошёл ваш период с нами", start: "Lite Fit – как прошёл Ваш START", free: "Lite Fit – как Вам 3 тренировки" };
 // подписи вопросов на странице (в самой Google Форме ничего не меняется)
 var LABEL = {
   name:     {label:"Имя и фамилия", ph:"Например: Анна Смирнова", ac:"name"},
@@ -174,10 +193,21 @@ var LABEL = {
   consent:  {label:"Можем ли мы использовать ваш отзыв в наших материалах?"},
   review:   {label:"Напишите пару слов отзывом", hint:"Это очень поможет тем, кто только думает начать", ph:"Ваш отзыв"}
 };
+// START и FREE: подписи – из самой формы, здесь только подсказки
+var LABEL2 = {
+  name:     {label:"Имя и фамилия", ph:"Например: Анна Смирнова", ac:"name"},
+  score:    {hint:"10 – лучше, чем ожидали"},
+  liked:    {ph:"Пару слов – как есть"},
+  hard:     {ph:"Если нет – так и напишите"},
+  why:      {hint:"Можно выбрать несколько"},
+  recommend:{hint:"1 – точно нет, 10 – обязательно порекомендую"},
+  review:   {hint:"Это очень поможет тем, кто только думает начать", ph:"Ваш отзыв"}
+};
+if (KIND && TITLES[KIND]) document.title = TITLES[KIND];
 
 var LOGO = "data:image/png;base64,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";
 var token = (/[?&]t=([a-z0-9]+)/i.exec(location.search) || [])[1] || "";
-var API = "", INFO = null, STEPS = [], state = {}, step = 0;
+var API = "", INFO = null, STEPS = [], state = {}, step = 0, LAY = LAYOUT, LAB = LABEL;
 
 document.body.style.margin = "0"; document.body.style.background = "#05090B";
 
@@ -217,7 +247,7 @@ function apiFromCabinet(){
   });
 }
 function getInfo(api){
-  return fetch(api + "?a=fb&t=" + encodeURIComponent(token)).then(function(r){ return r.json(); })
+  return fetch(api + "?a=fb&t=" + encodeURIComponent(token) + (KIND ? "&f=" + KIND : "")).then(function(r){ return r.json(); })
     .then(function(j){ if (!j.ok) throw new Error(j.error || "нет ответа"); API = api; return j; });
 }
 function load(){
@@ -231,27 +261,29 @@ function fail(msg){
   var w = el("div",{class:"lf-step"});
   w.appendChild(el("h2",{class:"lf-title"}, "Что-то пошло не так"));
   w.appendChild(el("p",{class:"lf-lead"}, msg + " Проверьте интернет и обновите страницу или заполните анкету в Google Форме."));
-  w.appendChild(el("a",{class:"lf-btn lf-primary",href:CONFIG.fallback,target:"_blank",rel:"noopener",style:"width:100%"}, "Открыть Google Форму"));
+  if (!KIND || (INFO && INFO.view)) w.appendChild(el("a",{class:"lf-btn lf-primary",href:(INFO && INFO.view) || CONFIG.fallback,target:"_blank",rel:"noopener",style:"width:100%"}, "Открыть Google Форму"));
   root.appendChild(w);
 }
 
 /* ---------- шаги из вопросов формы ---------- */
 function start(info){
   INFO = info;
+  KIND = LAYOUTS[info.kind] ? info.kind : "main"; LAY = LAYOUTS[KIND]; LAB = KIND === "main" ? LABEL : LABEL2;
+  if (TITLES[KIND]) document.title = TITLES[KIND];
   var items = info.form.items, auto = (info.client && info.client.auto) || [], byKey = {}, placed = {};
   items.forEach(function(it){ if (it.key) byKey[it.key] = it; });
   function field(it){
-    var L = LABEL[it.key] || {}, help = it.help && !L.hint ? it.help : L.hint;
+    var L = LAB[it.key] || {}, help = it.help && !L.hint ? it.help : L.hint;
     if (it.type === "scale" && (it.ll || it.rl)) help = "";
     return {key: it.key || it.entry, entry: it.entry, type: it.type, label: L.label || it.title, hint: help || "", ph: L.ph || "", ac: L.ac || "",
       req: it.req, options: (it.choices || []).map(function(c){ return {value:c}; }), other: it.other, lo: it.lo, hi: it.hi, ll: it.ll, rl: it.rl};
   }
   STEPS = [];
-  LAYOUT.forEach(function(s){
+  LAY.forEach(function(s){
     var f = [];
     s.keys.forEach(function(k){
       if (k === "*"){ items.forEach(function(it){ if (!it.key) { f.push(field(it)); placed[it.entry] = 1; } }); return; }
-      if (k === "email"){
+      if (k === "email" && LAB === LABEL){
         if (info.form.email && !(info.client && info.client.hasEmail)) f.push({key:"email", type:"email", label:LABEL.email.label, hint:LABEL.email.hint, ph:LABEL.email.ph, ac:"email", req:true});
         return;
       }
@@ -270,6 +302,7 @@ function start(info){
 }
 
 function showField(f){
+  if (f.key === "why") return /не готов/i.test(String(state.next || ""));   // FREE: «что мешает» – только если «пока не готов(а)»
   if (f.key === "review" && INFO) {
     var c = INFO.form.items.filter(function(x){ return x.key === "consent"; })[0];
     if (c) return /^\W*да/i.test(String(state.consent || ""));
@@ -291,10 +324,10 @@ function render(){
   wrap.appendChild(prog);
   wrap.appendChild(el("p",{class:"lf-stepnum"},"Шаг "+(step+1)+" из "+STEPS.length));
   var first = INFO.client && INFO.client.first;
-  var title = (step === 0 && first && s.title === LAYOUT[1].title) ? first + ", как прошёл ваш период с нами?" : s.title;
+  var hl = HELLO[KIND] || HELLO.main, title = (step === 0 && first && s.title === hl[0]) ? first + hl[1] : s.title;
   wrap.appendChild(el("h2",{class:"lf-title"}, esc(title)));
   if (s.lead) wrap.appendChild(el("p",{class:"lf-lead"}, esc(s.lead)));
-  if (step === 0 && INFO.bad) wrap.appendChild(el("p",{class:"lf-note"},"Ссылка устарела – ничего страшного, просто укажите имя и почту."));
+  if (step === 0 && INFO.bad) wrap.appendChild(el("p",{class:"lf-note"},"Ссылка устарела – ничего страшного, просто укажите " + (INFO.form && INFO.form.email ? "имя и почту." : "имя.")));
   if (step === 0 && INFO.done) wrap.appendChild(el("p",{class:"lf-note"},"Вы уже отвечали <b>"+esc(INFO.done)+"</b> – спасибо! Если хотите что-то дополнить, можно заполнить анкету ещё раз."));
   if (step === 0 && INFO.open === false) wrap.appendChild(el("p",{class:"lf-note"},"Анкета сейчас не принимает ответы – напишите, пожалуйста, вашему тренеру."));
 
@@ -373,7 +406,7 @@ function renderField(f){
         [].forEach.call(list.querySelectorAll(".lf-choice"), function(x){ x._paint && x._paint(); });
         if (otherInp){ var show = multi ? state[f.key].indexOf("__other__")!==-1 : state[f.key]==="__other__"; otherInp.classList.toggle("show", show); if (show && o.value==="__other__") otherInp.focus(); }
         q.classList.remove("invalid");
-        if (f.key === "consent") render();   // показать / скрыть поле отзыва
+        if (f.key === "consent" || f.key === "next") render();   // показать / скрыть поле отзыва и «что мешает»
       };
       b._paint = paint;
       list.appendChild(b);
@@ -435,12 +468,12 @@ function submit(btn){
   btn.disabled = true; btn.textContent = "Отправляем…";
   var errBox = root.querySelector(".lf-senderr"); errBox.classList.remove("show");
   fetch(API, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body: JSON.stringify({a:"fb", t:token, email:(state.email||"").trim(), fields:payload()})})
+    body: JSON.stringify({a:"fb", t:token, f:(KIND === "main" ? "" : KIND), email:(state.email||"").trim(), fields:payload()})})
     .then(function(r){ return r.json(); })
     .then(function(j){ if (j.ok) done(j); else throw new Error(j.error || "нет ответа"); })
     .catch(function(e){
       btn.disabled = false; btn.textContent = "Отправить ответы";
-      errBox.innerHTML = "Не получилось отправить: " + esc(e.message || e) + '. Попробуйте ещё раз или <a href="'+CONFIG.fallback+'" target="_blank" rel="noopener">заполните анкету здесь</a>.';
+      errBox.innerHTML = "Не получилось отправить: " + esc(e.message || e) + '. Попробуйте ещё раз' + (KIND === "main" || INFO.view ? ' или <a href="'+(INFO.view || CONFIG.fallback)+'" target="_blank" rel="noopener">заполните анкету здесь</a>' : '') + '.';
       errBox.classList.add("show");
     });
 }
@@ -451,7 +484,8 @@ function done(j){
   var w = el("div",{class:"lf-step lf-done"});
   w.appendChild(el("div",{class:"lf-done-ico"}, ICON.check));
   w.appendChild(el("h2",{class:"lf-title"}, "Спасибо" + (name ? ", " + esc(name) : "") + "!"));
-  w.appendChild(el("p",{class:"lf-lead"}, "Ваши ответы получены. Их прочитает вся команда Lite Fit, а ваш тренер учтёт их в дальнейшей работе."));
+  w.appendChild(el("p",{class:"lf-lead"}, KIND === "main" ? "Ваши ответы получены. Их прочитает вся команда Lite Fit, а ваш тренер учтёт их в дальнейшей работе."
+    : "Ваши ответы получены. Их прочитает вся команда Lite Fit, а Ваш тренер учтёт их, когда будет предлагать, как продолжить."));
   root.appendChild(w); scrollTop();
 }
 
