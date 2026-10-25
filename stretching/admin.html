@@ -483,13 +483,19 @@ function renderCard() {
   if (c.linkUrl) links.push(`<button class="btn sm" onclick="openLink('${h(c.linkUrl)}')">${c.via === 'ВК' ? 'ВК' : c.via === 'MAX' ? 'MAX' : 'Профиль'}</button>`);
   if (links.length) html += `<div class="g2">${links.join('')}</div>`;
 
+  // личная ссылка на бота
+  if (c.botLink) {
+    html += `<div class="box"><div class="bt">Подключить бота</div><div class="muted">Отправьте клиенту личную ссылку: он нажмёт «Старт» – и бот привяжется к этой карточке, даже если номер в Telegram другой.</div>` +
+      `<div class="g2 mt"><button class="btn sm" onclick="shareBot()">Отправить в Telegram</button><button class="btn sm" onclick="copyBot()">Скопировать ссылку</button></div></div>`;
+  }
+
   // абонемент
   html += `<div class="box"><div class="bt">Абонемент</div>`;
   if (a && a.status === 'Активен') html += `<div class="big" style="color:var(--acc)">${a.left} из ${a.total}</div><div class="muted">осталось · действует до ${h(a.until)}${a.freeze ? ` · заморозка ${a.freeze} нед.` : ''}</div>`;
   else if (a && a.status === 'Истёк') html += `<div class="big" style="color:var(--warm)">Истёк ${h(a.until)}</div><div class="muted">не использовано: ${a.left}. Срок можно продлить заморозкой.</div>`;
   else html += `<div class="muted">${a ? 'Абонемент закончился' : 'Абонемента нет'} – занятия разово по ${money(cfg.p1)} ₽</div>`;
   html += `<div class="g2 mt"><button class="btn sm" onclick="openPay('${c.id}','',true)">Продать абонемент</button>` +
-    (a && a.left > 0 ? `<button class="btn sm" onclick="writeOff()">Списать занятие</button>` : '<span></span>') + `</div>`;
+    (a && a.left > 0 ? `<button class="btn sm" onclick="writeOff()">Списать занятие</button>` : `<button class="btn sm" onclick="openTransfer()">Перенести абонемент</button>`) + `</div>`;
   if (c.pausedTo) html += `<div class="banner acc mt" style="margin-bottom:0">⏸ Пауза до ${h(c.pausedTo)} – напоминания не приходят</div><button class="btn sm mt" style="width:100%" onclick="unpause()">Снять паузу</button>`;
   html += `<label class="f">${a && a.left > 0 ? `Заморозить абонемент (доступно ${fLeft} из ${cfg.fmax} нед.)` : 'Пауза (абонемента нет)'}</label><div class="g2">` +
     [1, 2].map(w => `<button class="btn sm" ${a && a.left > 0 && w > fLeft ? 'disabled' : ''} onclick="freeze(${w})">На ${w} ${plural(w, ['неделю', 'недели', 'недель'])}</button>`).join('') + `</div></div>`;
@@ -518,7 +524,15 @@ function renderCard() {
   if (c.pays.length) {
     html += `<div class="box"><div class="bt">Оплаты</div>` + c.pays.map(p => `<div class="hrow"><span>${h(p.date)} · ${h(p.what)}<br><span class="muted">${money(p.sum)} ₽ · ${h(String(p.method || '').toLowerCase())} · ${h(p.by)}</span></span><span class="r"><button class="btn sm ghost" style="padding:6px 8px" onclick="undoPay('${p.id}','${h(p.what)}')">Отменить</button></span></div>`).join('') + `</div>`;
   }
+  html += `<div class="acts"><button class="btn warn" onclick="delClient()">Удалить клиента полностью</button></div>`;
   el.innerHTML = html;
+}
+async function delClient() {
+  const c = S.card;
+  if (!(await confirmAsk('Удалить ' + c.name + ' полностью? Удалятся карточка, записи, абонементы и оплаты. Это нельзя отменить.'))) return;
+  const id = c.id;
+  const d = await act('deleteClient', { id: id }, 'Клиент удалён');
+  if (d) { popSheet(); if (S.tab === 'clients') loadClients(); }
 }
 function kv(k, v) { return v ? `<div class="kv"><span>${h(k)}</span><span>${h(v)}</span></div>` : ''; }
 
@@ -531,6 +545,32 @@ async function freeze(w) {
   const hasAb = c.abon && c.abon.left > 0;
   if (!(await confirmAsk(hasAb ? `Заморозить абонемент на ${w} ${plural(w, ['неделю', 'недели', 'недель'])}? Срок продлится, напоминания на это время выключатся.` : `Поставить паузу на ${w} ${plural(w, ['неделю', 'недели', 'недель'])}? Напоминания на это время выключатся.`))) return;
   act('freeze', { id: c.id, weeks: w, withClient: true }, hasAb ? 'Абонемент заморожен' : 'Пауза поставлена');
+}
+function botMsg() { return 'Здравствуйте! Это бот записи на растяжку с Дарьей · Lite Fit. Нажмите ссылку и «Старт» – бот будет напоминать о занятиях и записывать одной кнопкой: '; }
+function shareBot() { const c = S.card; openLink('https://t.me/share/url?url=' + encodeURIComponent(c.botLink) + '&text=' + encodeURIComponent(botMsg())); }
+async function copyBot() {
+  const t = botMsg() + S.card.botLink;
+  try { await navigator.clipboard.writeText(t); toast('Скопировано'); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Скопировано'); } catch (x) { toast('Не получилось скопировать', true); } ta.remove(); }
+}
+function openTransfer() {
+  const cfg = S.cfg;
+  const d = new Date(Date.now() + (cfg.aw * 7 - 1) * 864e5);
+  const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const st = { left: cfg.an };
+  const el = pushSheet(head('Перенести абонемент', 'Для абонемента, оплаченного до запуска системы. Запись об оплате не создаётся') + '<div id="tb"></div>');
+  const draw = () => {
+    el.querySelector('#tb').innerHTML = `<label class="f">Сколько занятий осталось</label><div class="g2" style="grid-template-columns:repeat(${cfg.an},1fr)">` +
+      Array.from({ length: cfg.an }, (_, i) => i + 1).map(n => `<button class="opt ${st.left === n ? 'on' : ''}" data-n="${n}" style="justify-content:center">${n}</button>`).join('') + `</div>` +
+      `<label class="f">Действует до</label><input type="date" id="tu" value="${st.until || iso}">` +
+      `<div class="acts"><button class="btn pri" id="tgo">Перенести</button></div>`;
+    el.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { st.until = el.querySelector('#tu').value; st.left = Number(b.dataset.n); draw(); });
+    el.querySelector('#tgo').onclick = async () => {
+      const d2 = await act('transferAbon', { id: S.card.id, left: st.left, until: el.querySelector('#tu').value, withClient: true }, 'Абонемент перенесён');
+      if (d2) popSheet();
+    };
+  };
+  draw();
 }
 function unpause() { act('unpause', { id: S.card.id, withClient: true }, 'Пауза снята'); }
 function toggleRem(on) { act('reminders', { id: S.card.id, value: on, withClient: true }, on ? 'Напоминания включены' : 'Напоминания выключены'); }
