@@ -666,6 +666,12 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .banner.draft .mn{flex:1 1 200px}
 .banner.draft .btn{width:auto;flex:0 0 auto;padding:0 14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* 3.0: наборы FREE */
+.fsg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:6px}
+.fsg .card{margin:0}
+.fs-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.fs-h h3{margin:0}
+.fwc .rows{margin-top:6px}
 /* 2.9: общий кабинет тренера и тренировка без перехода */
 body.emb .tabs{display:none!important}
 body.emb .top img{display:none}
@@ -702,6 +708,12 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 3.1 (25.10.2026). Сервер 4.14.2. FREE: набор выбирается один раз – кнопки «Переключить на дома / в зале» больше нет;
+ *   подходы и повторы тренер правит в самих тренировках. Видимость – за 2 дня до даты и 1 день после.
+ * 3.0 (25.10.2026). Сервер 4.14.0. FREE «3 тренировки бесплатно»: раздел «Наборы FREE» (в меню общего кабинета) – 4 набора
+ *   (зал / дом × мужчины / женщины) по 3 тренировки, составляются тем же редактором, можно взять за основу тренировку клиента.
+ *   В карточке клиента FREE – «FREE · 3 тренировки»: поставить набор (пол, где, дата первой; даты – +2 и +4 дня) или
+ *   переключить «зал / дом» (невыполненные меняются, выполненные остаются). Наборы не видны в «Тренировках» и «Календаре».
  * 2.9 (25.10.2026). Сервер 4.13.4 (только версия страницы). Общий кабинет тренера: у тренера страница открывается внутри
  *   кабинета (…/cabinet/trainer.html, ?embed=1) – без своего меню, разделы переключает кабинет. Открыли тренировки по старой
  *   ссылке тренера (?t=…, в том числе из Telegram с ?w=) – страница сама переходит в общий кабинет (?solo=1 – по-старому).
@@ -791,7 +803,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '2.9';
+var VERSION = '3.1';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -820,7 +832,7 @@ if (MODE === 'trainer' && window.top === window && qs.get('solo') !== '1') {
 }
 /** Сообщение общему кабинету (только внутри него). */
 function toShell(o) { if (!EMBED) return; o.lf = 1; o.app = 'B'; try { window.parent.postMessage(o, location.origin); } catch (e) {} }
-var SEC_OF = { clients: 'train', cal: 'cal', coms: 'coms', base: 'base' }, TAB_OF = { train: 'clients', cal: 'cal', coms: 'coms', base: 'base' }, PEND_OPEN = '';
+var SEC_OF = { clients: 'train', cal: 'cal', coms: 'coms', base: 'base', fsets: 'fsets' }, TAB_OF = { train: 'clients', cal: 'cal', coms: 'coms', base: 'base', fsets: 'fsets' }, PEND_OPEN = '';
 window.addEventListener('message', function (e) {
   if (!EMBED || e.origin !== location.origin || !e.data || e.data.lf !== 1 || e.data.to !== 'B') return;
   var m = e.data;
@@ -1047,7 +1059,7 @@ function post(body) {
   });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1 };
+var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -1221,7 +1233,7 @@ function exByName(n) { n = norm(n); return D.ex.filter(function (e) { return nor
 function clientOf(id) { return D.clients.filter(function (c) { return String(c.id) === String(id); })[0] || null; }
 function sumOf(id) { return D.w.filter(function (w) { return w.id === id; })[0] || null; }
 function wList(cid) { return D.w.filter(function (w) { return w.cid === String(cid); }).sort(wSort); }
-function shown(c) { return !D.admin || S.own === '*' || c.owner === S.own; }
+function shown(c) { return !c.tpl && (!D.admin || S.own === '*' || c.owner === S.own); }   // 3.0: наборы FREE – не клиенты
 /* ---------- пакеты и номера тренировок (так же считает сервер, wkLabels_) ---------- */
 function packsOf(c) { return c && c.packs instanceof Array ? c.packs : []; }
 function baseOf(c) { return c && c.base !== '' && c.base != null ? +c.base : (c && +c.start > 0 ? +c.start - 1 : 0); }
@@ -1401,7 +1413,7 @@ function nmNeed(cid, m, miss) {
     call('nm', { cid: cid, m: m }, true).then(function (r) {
       if (!r || !r.ok || !r.nm) { if (!r || r === NET) delete NMQ[key]; return; }
       Object.keys(r.nm).forEach(function (id) { NM[id] = r.nm[id]; });
-      if (S.view === 'client' && String(S.cid) === String(cid) && S.calM === m && bigCal()) rerenderKeep();
+      if ((S.view === 'client' && String(S.cid) === String(cid) && S.calM === m && bigCal()) || (S.view === 'home' && S.tab === 'fsets')) rerenderKeep();
     });
   }, 0);
 }
@@ -1481,12 +1493,64 @@ function peekSheet(id, from) {
   if (def < TODAY) def = TODAY;
   var acts = '<button class="btn pri" data-act="editW" data-id="' + esc(id) + '" data-from="' + from + '">Открыть тренировку</button>' +
     '<div class="pk-c"><h3>Скопировать на дату</h3><div class="grid2">' +
-    fs('pkCid', 'Кому', D.clients.filter(function (c) { return !c.arch || c.id === w.cid; }).map(function (c) { return [c.id, c.name]; }), w.cid) +
+    fs('pkCid', 'Кому', D.clients.filter(function (c) { return !c.tpl && (!c.arch || c.id === w.cid); }).map(function (c) { return [c.id, c.name]; }), w.cid) +
     fi('pkDate', 'Дата', def, 'date') + '</div><p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn sec" data-act="peekCopy" data-id="' + esc(id) + '" data-from="' + from + '">' + IC.copy + 'Скопировать</button>' +
     '<p class="note" style="margin:6px 0 0">Копия откроется для проверки: упражнения, подходы и веса переносятся, результат клиента нет. Сохраните её – и клиент увидит.</p></div>';
   sheet('Тренировка', '<div id="pkBox">' + peekBody(w, f) + '</div>' + acts);
   if (!f) peekLoad(id).then(function (full) { var b = document.getElementById('pkBox'); if (b && full) b.innerHTML = peekBody(w, full); });
+}
+/* ---------- 3.0: наборы FREE и тренировки клиента FREE ---------- */
+var FSETS = [['fgm', 'Зал · мужчины'], ['fgw', 'Зал · женщины'], ['fhm', 'Дом · мужчины'], ['fhw', 'Дом · женщины']], FDAY0 = '2099-01-0';
+function isTpl(c) { return !!c && !!c.tpl; }
+function tplOf(set) { return D.w.filter(function (w) { return w.cid === set; }).sort(wSort).slice(0, 3); }
+function tplReady(set) { return tplOf(set).length >= 3; }
+function setName(set) { var x = FSETS.filter(function (s) { return s[0] === set; })[0]; return x ? x[1] : set; }
+function viewFsets() {
+  var h = '<h1 class="hello">Наборы FREE</h1><p class="lead-p">По 3 тренировки для «3 тренировки бесплатно». Клиент выбирает, где тренируется – в зале или дома, ' +
+    'и получает тренировки своего набора: в день выбора, через 2 и через 4 дня. Набор выбирается один раз. Правка набора меняет только будущие выдачи – у клиентов, которым набор уже выдан, тренировки остаются прежними, их подходы и повторы правьте в самих тренировках.</p><div class="fsg">';
+  FSETS.forEach(function (s) {
+    var l = tplOf(s[0]), ok = l.length >= 3;
+    h += '<div class="card"><div class="fs-h"><h3>' + esc(s[1]) + '</h3><span class="pill' + (ok ? ' ok' : ' warn') + '">' + (ok ? 'готов' : 'составлено ' + l.length + ' из 3') + '</span></div><div class="rows">';
+    for (var n = 0; n < 3; n++) {
+      var w = l[n];
+      h += w ? '<button class="row" data-act="editW" data-id="' + esc(w.id) + '" data-from="fsets"><span class="dt"><b class="num">' + (n + 1) + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + (n + 1) + '</b><small>' + exWord(w.n) + (NM[w.id] ? ' · ' + esc(NM[w.id].slice(0, 3).join(', ')) : '') + '</small></span><span class="chev">›</span></button>'
+        : '<button class="row" data-act="tplNew" data-set="' + s[0] + '"><span class="dt"><b class="num">' + (n + 1) + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + (n + 1) + ' – не составлена</b><small>Нажмите, чтобы составить</small></span><span class="chev">+</span></button>';
+      if (!w) break;
+    }
+    h += '</div></div>';
+  });
+  h += '</div><p class="note">Составляют все тренеры. Тренировку набора открываете и правите так же, как тренировку клиента; «Скопировать на другую дату или клиенту» – выдать её любому клиенту.</p>';
+  FSETS.forEach(function (s) { var miss = tplOf(s[0]).filter(function (w) { return !NM[w.id]; }).length; if (miss) nmNeed(s[0], '2099-01', miss); });
+  return h;
+}
+/** Новая тренировка набора: пустая или копия любой тренировки клиента. */
+function tplForm(set) {
+  var used = tplOf(set).map(function (w) { return w.date; }), date = '';
+  for (var n = 1; n <= 3 && !date; n++) if (used.indexOf(FDAY0 + n) < 0) date = FDAY0 + n;
+  if (!date) return toast('В наборе уже 3 тренировки', 'bad');
+  S.tplNew = { set: set, date: date };
+  var src = D.w.filter(function (w) { var c = clientOf(w.cid); return c && !c.tpl && shown(c); }).sort(function (a, b) { return wSort(b, a); }).slice(0, 40);
+  sheet('Набор FREE', '<h2>' + esc(setName(set)) + ' – тренировка ' + (used.length + 1) + '</h2><p class="lead">Начните с пустой или возьмите за основу тренировку клиента – упражнения, подходы и веса перенесутся.</p>' +
+    (src.length ? fs('tpFrom', 'С чего начать', [['', 'Пустая тренировка']].concat(src.map(function (w) { var c = clientOf(w.cid); return [w.id, (c ? c.name + ' · ' : '') + numFor(w) + ' от ' + dm(w.date) + ' · ' + exWord(w.n)]; })), '') : '') +
+    '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="tplGo">Дальше</button>');
+}
+/** Карточка FREE в карточке клиента тренировок: набор и даты или «Поставить 3 тренировки». */
+function freeCardW(c) {
+  if (!c || isTpl(c) || !(c.format === 'FREE' || c.fw)) return '';
+  var fw = c.fw, h = '<div class="card fwc"><div class="fs-h"><h3>FREE · 3 тренировки</h3><span class="pill warn">FREE</span></div>';
+  if (fw) {
+    var l = (fw.ids || []).map(function (id) { return sumOf(id); });
+    h += '<p class="sub">Набор: <b>' + esc(setName((fw.place === 'дом' ? 'fh' : 'fg') + (fw.sex === 'Ж' ? 'w' : 'm'))) + '</b>' + (fw.by === 'клиент' ? ' – выбрал(а) клиент' : '') + '.</p><div class="rows">' +
+      l.map(function (w, i) { return w ? wRow(w, 'editW') : '<div class="row"><span class="mn"><b>Тренировка ' + (i + 1) + '</b><small>не найдена</small></span></div>'; }).join('') + '</div>';
+    h += '<p class="note" style="margin:6px 0 0">Набор выбирается один раз. Подходы, повторы и дату правьте в самой тренировке – откройте её.</p>';
+  } else {
+    h += '<p class="sub">Клиент выберет в кабинете, где тренируется, – и получит 3 тренировки сам. Можно поставить и сейчас:</p><div class="grid2">' +
+      fs('fwSex', 'Пол', [['', '– выберите –'], ['Ж', 'женщина'], ['М', 'мужчина']], '') + fs('fwPlace', 'Где', [['', '– выберите –'], ['зал', 'в зале'], ['дом', 'дома']], '') + '</div>' +
+      fi('fwStart', 'Первая тренировка', TODAY, 'date', 'min="' + TODAY + '"') + '<p class="ferr" id="ferr" hidden></p>' +
+      '<button class="btn pri sm mt" data-act="freeSet">Поставить 3 тренировки</button><p class="note" style="margin:6px 0 0">Даты: первая, через 2 и через 4 дня. Каждая видна клиенту за 2 дня до своей даты и ещё день после. Набор выбирается один раз.</p>';
+  }
+  return h + '</div>';
 }
 function shownW(w) { var c = clientOf(w.cid); return !!c && shown(c); }
 function dayList(cid) {
@@ -1667,6 +1731,7 @@ function viewClient() {
     '<div class="meta">' + (c.format ? '<span class="pill">' + esc(c.format) + '</span>' : '') + '<span class="pill">Тренировок: <b class="num">' + l.length + '</b></span><span class="pill">Выполнено: <b class="num">' + dn + '</b></span></div>';
   var nb = '<button class="btn pri" data-act="newW" style="margin-top:14px">' + IC.plus + 'Новая тренировка на ' + dMon(S.calDay) + '</button>';
   BIGR = bigCal();
+  h += freeCardW(c);                                                       // 3.0: FREE · 3 тренировки
   if (BIGR) h += '<div class="card calw"><div class="calw-a">' + calHtml(c.id, true) + '</div><div class="calw-b">' + dayList(c.id) + nb + '</div></div><div class="cv"><div class="cv-a">' + pkCard(c);   // 2.7
   else h += '<div class="cv"><div class="cv-a">' + pkCard(c) + '<div class="card">' + calHtml(c.id) + dayList(c.id) + nb + '</div>';
   h += '<div id="msgBox">' + msgCard(c) + '</div>';
@@ -1781,7 +1846,7 @@ function newWForm() {
 function copyForm() {
   var w = S.draft;
   sheet('Копия тренировки', '<h2>Скопировать тренировку</h2><p class="lead">Копия откроется для правок: упражнения, подходы и веса переносятся, результат клиента нет.</p>' +
-    fs('kCid', 'Кому', D.clients.filter(function (c) { return !c.arch; }).map(function (c) { return [c.id, c.name]; }), w.cid) + fi('kDate', 'Дата новой тренировки', shift(w.date, 7), 'date') +
+    fs('kCid', 'Кому', D.clients.filter(function (c) { return !c.arch && !c.tpl; }).map(function (c) { return [c.id, c.name]; }), isTpl(clientOf(w.cid)) ? '' : w.cid) + fi('kDate', 'Дата новой тренировки', isTpl(clientOf(w.cid)) ? TODAY : shift(w.date, 7), 'date') +
     '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="copyGo">Создать копию</button>');
 }
 
@@ -1879,16 +1944,16 @@ function suggHtml() {
   return h + '</div>';
 }
 function viewEdit() {
-  var w = S.draft, c = clientOf(w.cid), ac = access(w), nch = chgCount(w), RF = refParts(w), W = wide();
-  var h = '<div class="ed' + (RF.panel && W ? ' has-ref' : '') + '"><div class="ed-m"><div class="ed-head"><button class="back" data-act="editBack">' + IC.back + (S.ret === 'cal' ? 'Календарь' : S.ret === 'coms' ? 'Комментарии' : esc(c.name)) + '</button><h1 class="hello" id="wTitle">Тренировка ' + numFor(w) + '</h1>' +
+  var w = S.draft, c = clientOf(w.cid), ac = access(w), nch = chgCount(w), RF = refParts(w), W = wide(), TP = isTpl(c);
+  var h = '<div class="ed' + (RF.panel && W ? ' has-ref' : '') + '"><div class="ed-m"><div class="ed-head"><button class="back" data-act="editBack">' + IC.back + (S.ret === 'fsets' ? 'Наборы FREE' : S.ret === 'cal' ? 'Календарь' : S.ret === 'coms' ? 'Комментарии' : esc(c.name)) + '</button><h1 class="hello" id="wTitle">Тренировка ' + numFor(w) + '</h1>' +
     '<div class="meta"><span class="pill">' + esc(c.name) + '</span><span class="pill">' + exWord(w.items.length) + '</span>' + (w.done ? '<span class="pill ok">выполнена ' + dm(w.doneAt || w.date) + '</span>' : '') +
     (nch.c ? '<span class="pill warn">клиент изменил: ' + nch.c + '</span>' : '') + (nch.m ? '<span class="pill warn">не выполнено: ' + nch.m + '</span>' : '') +
-    runPill(w) + '<span class="pill" id="accPill">' + accTxt(ac) + '</span></div>';
-  if (!S.isNew) h += '<div class="ed-top"><button class="btn sec sm" data-act="moveW">' + IC.cal + 'Перенести</button><button class="btn sec sm" data-act="copyW">' + IC.copy + 'Копировать</button></div>';
+    runPill(w) + (TP ? '<span class="pill warn">набор FREE</span>' : '<span class="pill" id="accPill">' + accTxt(ac) + '</span>') + '</div>';
+  if (!S.isNew) h += '<div class="ed-top">' + (TP ? '' : '<button class="btn sec sm" data-act="moveW">' + IC.cal + 'Перенести</button>') + '<button class="btn sec sm" data-act="copyW">' + IC.copy + 'Копировать</button></div>';
   var lb = numFor(w);
   if (lb === 'сверх пакета') h += '<div class="banner warn">Эта тренировка сверх пакета: пакет закончился или все его тренировки уже выполнены. Оформите клиенту новый пакет в его карточке.</div>';
   h += comsTop(w);
-  h += '<div class="stack" style="margin-bottom:14px">' + fi('wDate', 'Дата тренировки', w.date, 'date', 'data-f="date"');
+  h += '<div class="stack" style="margin-bottom:14px">' + (TP ? '<p class="note" style="margin:0">Тренировка ' + ((tplOf(w.cid).map(function (x) { return x.id; }).indexOf(w.id) + 1) || (tplOf(w.cid).length + 1)) + ' набора «' + esc(setName(w.cid)) + '». Клиенту даты ставятся сами.</p>' : fi('wDate', 'Дата тренировки', w.date, 'date', 'data-f="date"'));
   if (w.note || S.open.note) h += ft('wNote', 'Заметка клиенту ко всей тренировке', w.note, 2, 'maxlength="600" data-f="note"');
   else h += '<button class="txtb" data-act="openNote">' + IC.note + 'Добавить заметку ко всей тренировке</button>';
   h += RF.btn + '</div></div>' + (RF.panel && !W ? RF.panel : '') + '<div class="ed-grid">';
@@ -1957,7 +2022,7 @@ function openEditor(w, isNew, dirty, refId) {
   closeSheet(); render(); window.scrollTo(0, 0); loadHints(); loadRef();
 }
 function dropEdit() { S.draft = null; S.dirty = false; S.isNew = false; S.saving = false; S.q = ''; S.open = {}; S.del = false; S.hints = null; S.ref = null; }
-function leaveEdit() { dropEdit(); S.view = S.ret === 'cal' || S.ret === 'coms' ? 'home' : 'client'; closeSheet(); render(); window.scrollTo(0, 0); if (S.view === 'home' && S.tab === 'coms') loadComs(); }
+function leaveEdit() { dropEdit(); if (S.ret === 'fsets') { S.tab = 'fsets'; S.cid = null; } S.view = S.ret === 'cal' || S.ret === 'coms' || S.ret === 'fsets' ? 'home' : 'client'; closeSheet(); render(); window.scrollTo(0, 0); if (S.view === 'home' && S.tab === 'coms') loadComs(); }
 /* ---------- черновик тренировки (2.3): всё набранное лежит в телефоне, пока сервер не подтвердит сохранение ---------- */
 var DRAFT_KEY = 'lf_wk_drafts_' + TKEY.slice(0, 10), draftT = null, draftBusy = false;
 function draftsAll() { try { return JSON.parse(LS.get(DRAFT_KEY) || '{}') || {}; } catch (e) { return {}; } }
@@ -3097,7 +3162,7 @@ function render() {
       if (S.view === 'client') S.tab = 'clients';
       if (wide() && S.tab === 'clients') h += '<div class="md"><div class="md-l">' + viewClients() + '</div><div class="md-r">' + (S.view === 'client' ? viewClient() :
         '<div class="md-0"><h3>Выберите клиента</h3><p>Слева – список клиентов. Справа откроются календарь клиента, его тренировки и настройки.</p></div>') + '</div></div>';
-      else h += S.view === 'client' ? viewClient() : S.tab === 'base' ? viewBase() : S.tab === 'cal' ? viewCal() : S.tab === 'coms' ? viewComs() : viewClients();
+      else h += S.view === 'client' ? viewClient() : S.tab === 'fsets' ? viewFsets() : S.tab === 'base' ? viewBase() : S.tab === 'cal' ? viewCal() : S.tab === 'coms' ? viewComs() : viewClients();
     }
   } else {
     if (!M) return;
@@ -3161,6 +3226,29 @@ var ACT = {
   calPrev: function () { var d = pd(S.calM + '-01'); d.setMonth(d.getMonth() - 1); S.calM = ymd(d).slice(0, 7); rerenderKeep(); },
   calNext: function () { var d = pd(S.calM + '-01'); d.setMonth(d.getMonth() + 1); S.calM = ymd(d).slice(0, 7); rerenderKeep(); },
   calDay: function (b) { S.calDay = b.getAttribute('data-d'); rerenderKeep(); },
+  tplNew: function (b) { tplForm(b.getAttribute('data-set')); },
+  tplGo: function () {
+    var t = S.tplNew, from = val('tpFrom');
+    if (!t) return closeSheet();
+    var open = function (src) { S.ret = 'fsets'; openEditor({ id: uid('n'), cid: t.set, date: t.date, note: src ? src.note || '' : '', done: false, doneAt: '', items: src ? cloneItems(src) : [] }, true, !!src); if (src) toast('Основа готова – поправьте и сохраните'); };
+    if (!from) return open(null);
+    peekLoad(from).then(function (f) { if (!f) return ferr('Тренировка не загрузилась – попробуйте ещё раз.'); open(f); });
+  },
+  freeSet: function (b) {
+    var c = clientOf(S.cid); if (!c) return;
+    var ferr = function (t) { var e = document.getElementById('ferr'); if (e) { e.textContent = t; e.hidden = false; } else toast(t, 'bad'); };
+    var sex = b.getAttribute('data-sex') || val('fwSex'), place = b.getAttribute('data-place') || val('fwPlace'), start = val('fwStart') || TODAY;
+    if (!sex) return ferr('Выберите пол.');
+    if (!place) return ferr('Выберите, где тренируется клиент.');
+    var set = (place === 'дом' ? 'fh' : 'fg') + (sex === 'Ж' ? 'w' : 'm');
+    if (!tplReady(set)) return ferr('Набор «' + setName(set) + '» ещё не составлен – раздел «Наборы FREE».');
+    b.disabled = true; b.textContent = 'Ставлю тренировки…';
+    call('freeset', { cid: c.id, sex: sex, place: place, start: start }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = 'Повторить'; toast(errText(r), 'bad'); return; }
+      c.fw = r.fw; toast(r.msg || 'Готово'); loadList();
+    });
+  },
   goCab: function () { if (S.cid) toShell({ type: 'go', s: 'clients', cid: S.cid }); },   // 2.9: та же карточка в кабинете тренера
   wPeek: function (b) { var id = b.getAttribute('data-id'), w = sumOf(id); if (!w) return; if (w.date.slice(0, 7) === S.calM) S.calDay = w.date; peekSheet(id, S.view === 'client' ? 'client' : 'cal'); },
   peekCopy: function (b) {
@@ -3240,13 +3328,13 @@ var ACT = {
   editW: function (b) {
     var id = b.getAttribute('data-id'), s = sumOf(id), dr = draftsAll()[id];
     if (!s) return;
-    if (dr) { S.cid = s.cid; S.ret = b.getAttribute('data-from') === 'cal' ? 'cal' : b.getAttribute('data-from') === 'coms' ? 'coms' : 'client'; openEditor(clone(dr.w), false, true); toast('Открыта Ваша несохранённая версия – сохраните её'); return; }
+    if (dr) { S.cid = s.cid; S.ret = b.getAttribute('data-from') === 'cal' ? 'cal' : b.getAttribute('data-from') === 'coms' ? 'coms' : b.getAttribute('data-from') === 'fsets' ? 'fsets' : 'client'; openEditor(clone(dr.w), false, true); toast('Открыта Ваша несохранённая версия – сохраните её'); return; }
     var from = b.getAttribute('data-from');
-    S.cid = s.cid; S.ret = from === 'cal' ? 'cal' : from === 'coms' ? 'coms' : 'client';
+    S.cid = s.cid; S.ret = from === 'cal' ? 'cal' : from === 'coms' ? 'coms' : from === 'fsets' ? 'fsets' : 'client';
     var go = function (full) { var w = clone(full); w.row = s.row; w.date = s.date; openEditor(w, false, false); };
     if (FULL[id]) return go(FULL[id]);
     S.view = 'load'; render(); window.scrollTo(0, 0);
-    needFull(id).then(function (full) { if (S.view !== 'load') return; if (full) go(full); else { S.view = S.ret === 'cal' || S.ret === 'coms' ? 'home' : 'client'; render(); } });
+    needFull(id).then(function (full) { if (S.view !== 'load') return; if (full) go(full); else { S.view = S.ret === 'cal' || S.ret === 'coms' || S.ret === 'fsets' ? 'home' : 'client'; render(); } });
   },
   editBack: function () {
     if (S.saving) return;
