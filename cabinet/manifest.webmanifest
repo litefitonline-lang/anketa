@@ -1,7 +1,8 @@
 {
   "name": "Кабинет Lite Fit",
   "short_name": "Lite Fit",
-  "description": "Личный кабинет клиента Lite Fit: питание, шаги, вес, тренировки, замеры и фото",
+  "description": "Lite Fit: тренировки, питание, прогресс и связь с тренером",
+  "scope": "../",
   "display": "standalone",
   "background_color": "#05090B",
   "theme_color": "#05090B",
