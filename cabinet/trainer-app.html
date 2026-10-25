@@ -555,6 +555,8 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 62px)}
 body.emb .tabs{display:none!important}
 body.emb .app{padding-bottom:calc(var(--safe-b) + 40px)}
 body.emb .toast{bottom:calc(var(--safe-b) + 20px)}
+body.emb.has-sheet .toast{bottom:auto}
+.fld textarea+span{top:1px;left:1px;right:16px;padding:8px 14px 5px;background:var(--bg);border-radius:13px 0 0 0;z-index:1}
 body.emb .top img{display:none}
 body.emb .top{justify-content:flex-end}
 body.emb .top:has(.back){justify-content:space-between}
@@ -742,6 +744,9 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.9.1 (25.10.2026). «Скопировано» в окне больше не растягивается на весь экран (общий кабинет); подпись над текстом
+ *   («Готовое сообщение клиенту») стоит на своей плашке – прокручиваемый текст под неё не заезжает. FREE: подсказки – бот сам
+ *   спрашивает клиента «в зале или дома» и ставит 3 тренировки (сервер тренировок 4.14.3).
  * 1.9 (25.10.2026). FREE: в карточке клиента FREE – набор тренировок (зал / дом, дата первой) или «набор не выбран»,
  *   кнопка «Тренировки» – поставить или переключить набор в приложении тренировок (lite-fit-trainer 3.11.0).
  * 1.8.2 (25.10.2026). Владелец переключает «Все клиенты» / «Кабинет Андрея» / «Кабинет Дарьи» (было «Как видит …»).
@@ -784,7 +789,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.9';
-var PATCH = '';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
+var PATCH = '.1';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -2329,7 +2334,7 @@ function viewFree() {
   var h = '<h2 class="sec-title">Free · 3 тренировки</h2>', ff = freshFree(), mine = myFree();
   var was = byRank(D.clients.filter(function (c) { return !isFree(c) && c.free && c.free.at; }));
   h += '<p class="muted" style="font-size:13px;margin:-4px 2px 12px">Заявки FREE: взять клиента, выдать доступ, перевести в START, BASIC или PRO. FREE даётся клиенту один раз.</p>';
-  if (FREE_SOON) h += '<div class="banner">Кабинет FREE с тремя тренировками ещё готовится. Если клиент уже открыл бота, бот ответит, что тренировки скоро откроются.</div>';
+  if (FREE_SOON) h += '<div class="banner">Тренировки FREE ставятся сами: после «Старт» бот спросит клиента, где ему удобнее заниматься (для зала – ещё пол), и сразу поставит 3 тренировки. Клиенту без Telegram поставьте их сами – кнопка «Поставить тренировки».</div>';
   h += '<div class="grp">Новые заявки FREE · ' + ff.length + '</div>';
   h += ff.length ? ff.map(function (f) { return freeCard(f, true, false).replace('<h3>FREE · 3 тренировки</h3>', '<h3>' + esc(f.name) + '</h3>'); }).join('')
     : '<div class="card"><p class="muted" style="margin:0">Новых заявок FREE нет. Когда клиент выберет в анкете «3 тренировки бесплатно», заявка появится здесь.</p></div>';
@@ -2669,7 +2674,7 @@ var ACT = {
       var lead = r.mode === 'tg' ? 'Отправьте клиенту это сообщение – в Telegram' + (x && x.phone ? ' по номеру ' + esc(x.phone) : '') + '. Он откроет ссылку и нажмёт «Старт».'
         : 'Отправьте сообщение туда, где клиент на связи' + (a.alt ? ': ' + esc(a.alt) : '') + '. Ссылка личная – только этому клиенту.';
       if (r.noBot && mode === 'tg') lead = 'Бот клиентов не подключён – в сообщении ссылка на кабинет. ' + lead;
-      resultSheet(r.again ? 'Сообщение со ссылкой' : 'Доступ выдан', lead, r, FREE_SOON ? '<div class="banner">Кабинет FREE с тремя тренировками ещё готовится – до этого бот ответит клиенту, что тренировки скоро откроются.</div>' : '');
+      resultSheet(r.again ? 'Сообщение со ссылкой' : 'Доступ выдан', lead, r, '<div class="banner">' + (r.mode === 'tg' && !r.noBot ? 'После «Старт» бот сам спросит клиента, где ему удобнее заниматься, и сразу поставит 3 тренировки – Вам ничего делать не нужно. Какой набор выбран, придёт сообщением.' : 'Клиент без Telegram: поставьте ему 3 тренировки сами – кнопка «Поставить тренировки» в карточке.') + '</div>');
     });
   },
   fmtForm: function () { var c = cur(); if (c) fmtForm(c); },
