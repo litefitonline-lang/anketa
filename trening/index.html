@@ -690,6 +690,15 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .fslot{border-bottom:1px solid var(--line);padding-bottom:4px}
 .fslot:last-child{border-bottom:0}
 .fslot .row{border-bottom:0}
+.fs-n{display:flex;align-items:center;gap:8px;padding:12px 0 2px;font-size:13px;color:var(--muted);font-weight:700}
+.fs-n .num{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;border:1px solid var(--line2);color:var(--text);font-size:14px}
+.fopt{display:flex;align-items:center;gap:6px;border-radius:12px;margin:4px 0;padding-left:4px}
+.fopt.on{background:rgba(62,214,206,.06)}
+.fopt .row{flex:1;min-width:0}
+.frad{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+.frad i{width:22px;height:22px;border-radius:50%;border:2px solid var(--line2);display:block;position:relative}
+.fopt.on .frad i{border-color:var(--accent)}
+.fopt.on .frad i::after{content:'';position:absolute;inset:4px;border-radius:50%;background:var(--accent)}
 .fsub{margin:0 0 8px 54px;font-size:13px}
 .st-ok{color:var(--accent)}
 .fs-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
@@ -731,6 +740,8 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 3.7 (25.10.2026). Сервер 4.14.8. «Наборы FREE»: если у номера есть своя тренировка, тренер кружком отмечает, какая приходит
+ *   клиентам – своя или набора Lite Fit (удалять свою для этого не нужно).
  * 3.6 (25.10.2026). Сервер 4.14.7. «Наборы FREE»: у каждого номера – тренировка набора Lite Fit (не удаляется, смотреть,
  *   «Составить свою на основе этой»; владелец может изменить) и своя тренировка тренера, если он её составил, – она и
  *   приходит его клиентам; удалил свою – снова приходит тренировка набора. В редакторе тренировок набора нет «Прошлой
@@ -845,7 +856,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '3.6';
+var VERSION = '3.7';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -1101,7 +1112,7 @@ function post(body) {
   });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1 };
+var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -1264,7 +1275,7 @@ var D = null;                    // { trainer, admin, today, def, cats, clients,
 var FULL = {};                   // тренировки целиком: { id: { id, cid, date, note, done, doneAt, items } }
 function sumObj(a) { return { id: a[0], cid: String(a[1]), date: a[2], done: !!a[3], doneAt: a[4] || '', n: a[5] || 0, c: a[6] || 0, m: a[7] || 0, row: a[8] || 0, k: a[9] || 0, u: +a[10] || 0, dur: +a[11] || 0 }; }
 function setList(r) {
-  D = { trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], grps: r.grps || DEF_GRPS, band: r.band || DEF_BAND, clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj), vbase: r.vbase || '' };
+  D = { fuse: r.fuse || {}, trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], grps: r.grps || DEF_GRPS, band: r.band || DEF_BAND, clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj), vbase: r.vbase || '' };
   TODAY = D.today || TODAY;
   (r.full || []).forEach(function (w) { FULL[w.id] = w; });
   if (D.admin && S.own === '') S.own = D.clients.some(function (c) { return c.owner === D.trainer; }) ? D.trainer : '*';
@@ -1567,20 +1578,23 @@ function tplOf(set) { return D.w.filter(function (w) { return w.cid === set; }).
 function tplReady(set) { return tplOf(set).length >= 3; }
 function setName(set) { var c = clientOf(set), k = (c && c.kind) || set, x = FSETS.filter(function (s) { return s[0] === k; })[0]; return x ? x[1] : set; }
 function viewFsets() {
-  var h = '<h1 class="hello">Наборы FREE</h1><p class="lead-p">Новому клиенту FREE приходят 3 тренировки – по умолчанию из набора Lite Fit. Хотите свою – составьте её под нужным номером: ' +
-    'она заменит тренировку набора для Ваших новых клиентов. Удалите свою – снова будет приходить тренировка набора. Тренировки набора Lite Fit не удаляются.</p><div class="fsg">';
-  var row = function (w, act, n, t) {
-    return '<button class="row" data-act="' + act + '" data-id="' + esc(w.id) + '" data-from="fsets"><span class="dt"><b class="num">' + n + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + n + ' · ' + t + '</b><small>' +
-      exWord(w.n) + (NM[w.id] ? ' · ' + esc(NM[w.id].slice(0, 3).join(', ')) : '') + ' · <span class="st-ok">приходит клиентам</span></small></span><span class="chev">›</span></button>';
+  var h = '<h1 class="hello">Наборы FREE</h1><p class="lead-p">Новому клиенту FREE приходят 3 тренировки – по умолчанию из набора Lite Fit. Хотите свою – составьте её под нужным номером. ' +
+    'Под каждым номером кружком отметьте, какая тренировка приходит Вашим новым клиентам: своя или из набора Lite Fit. Тренировки набора Lite Fit не удаляются.</p><div class="fsg">';
+  var row = function (w, act, n, t, on, pick) {
+    var b = '<button class="row" data-act="' + act + '" data-id="' + esc(w.id) + '" data-from="fsets">' + (pick ? '' : '<span class="dt"><b class="num">' + n + '</b><small>трен.</small></span>') + '<span class="mn"><b>' + (pick ? '' : 'Тренировка ' + n + ' · ') + t + '</b><small>' +
+      exWord(w.n) + (NM[w.id] ? ' · ' + esc(NM[w.id].slice(0, 3).join(', ')) : '') + ' · ' + (on ? '<span class="st-ok">приходит клиентам</span>' : 'не приходит') + '</small></span><span class="chev">›</span></button>';
+    return pick ? '<div class="fopt' + (on ? ' on' : '') + '"><button class="frad" data-act="fuse" data-k="' + pick[0] + '" data-n="' + n + '" data-v="' + pick[1] + '" aria-pressed="' + on + '" aria-label="Приходит клиентам: ' + t + '"><i></i></button>' + b + '</div>' : b;
   };
   FSETS.forEach(function (s) {
     var oid = myTpl(s[0]), bid = baseTpl(s[0]), aid = baseTpl(altKind(s[0])), rows = '', mineN = 0, missN = 0;
     for (var n = 1; n <= 3; n++) {
       var o = slotW(oid, n), b = slotW(bid, n) || slotW(aid, n);
       if (o) mineN++; else if (!b) missN++;
-      rows += '<div class="fslot">' + (o ? row(o, 'editW', n, 'своя') : b ? row(b, 'tplView', n, 'набор Lite Fit')
+      var useB = o && b && D.fuse[s[0] + n] === 'base';
+      if (o && useB) mineN--;
+      rows += '<div class="fslot">' + (o && b ? '<div class="fs-n"><b class="num">' + n + '</b> Тренировка ' + n + ' – что приходит клиентам:</div>' + row(o, 'editW', n, 'Своя', !useB, [s[0], 'own']) + row(b, 'tplView', n, 'Набор Lite Fit', useB, [s[0], 'base'])
+        : o ? row(o, 'editW', n, 'своя', true) : b ? row(b, 'tplView', n, 'набор Lite Fit', true)
         : '<div class="row lk"><span class="dt"><b class="num">' + n + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + n + ' – нет</b><small class="st-warn">клиентам нечего выдать – составьте свою</small></span></div>') +
-        (o && b ? '<button class="txtb fsub" data-act="tplView" data-id="' + esc(b.id) + '">Набор Lite Fit, тренировка ' + n + ' – сейчас не приходит, посмотреть</button>' : '') +
         (!o && oid ? '<button class="txtb fsub" data-act="tplNew" data-set="' + oid + '" data-n="' + n + '"' + (b ? ' data-from="' + esc(b.id) + '"' : '') + '>' + IC.plus + 'Составить свою тренировку ' + n + '</button>' : '') + '</div>';
     }
     h += '<div class="card"><div class="fs-h"><h3>' + esc(s[1]) + '</h3><span class="pill' + (missN ? ' warn' : ' ok') + '">' + (missN ? 'не хватает: ' + missN : mineN ? 'своих: ' + mineN + ' из 3' : 'набор Lite Fit') + '</span></div><div class="rows">' + rows + '</div></div>';
@@ -1595,9 +1609,9 @@ function tplView(id) {
   var f = FULL[id] || null, n = Number(String(w.date).slice(-1)) || 1, c = clientOf(w.cid), own = c ? myTpl(c.kind) : '', has = slotW(own, n);
   var body = function (full) { return peekBody(w, full).replace(/<div class="pk-h">[\s\S]*?<\/small><\/div>/, '<div class="pk-h"><b>' + esc(setName(w.cid)) + ' · тренировка ' + n + '</b><small>набор Lite Fit</small></div>'); };
   sheet('Набор Lite Fit', '<div id="pkBox">' + body(f) + '</div>' +
-    (has ? '<p class="note">У Вас уже есть своя тренировка ' + n + ' – она и приходит клиентам. Удалите её, чтобы снова приходила эта.</p>'
+    (has ? '<p class="note">У Вас есть своя тренировка ' + n + '. Какая из двух приходит клиентам – отмечаете кружком в «Наборах FREE».</p>'
       : own ? '<button class="btn pri" data-act="tplNew" data-set="' + esc(own) + '" data-n="' + n + '" data-from="' + esc(id) + '">Составить свою на основе этой</button>' : '') +
-    (D.admin ? '<button class="btn sec mt" data-act="editW" data-id="' + esc(id) + '" data-from="fsets">Изменить набор Lite Fit (для всех тренеров)</button>' : '') +
+    (D.admin ? '<button class="btn sec mt" data-act="editW" data-id="' + esc(id) + '" data-from="fsets">Изменить эту тренировку набора Lite Fit</button><p class="note">Только для владельца: правка меняет набор Lite Fit у всех тренеров – у тех, кому он приходит.</p>' : '') +
     '<p class="note" style="margin-top:10px">Тренировки набора Lite Fit не удаляются.</p>');
   if (!f) peekLoad(id).then(function (full) { var b = document.getElementById('pkBox'); if (b && full) b.innerHTML = body(full); });
 }
@@ -3411,6 +3425,17 @@ var ACT = {
   calDay: function (b) { S.calDay = b.getAttribute('data-d'); rerenderKeep(); },
   tplNew: function (b) { tplForm(b.getAttribute('data-set'), Number(b.getAttribute('data-n')) || 0, b.getAttribute('data-from') || ''); },
   tplView: function (b) { tplView(b.getAttribute('data-id')); },
+  fuse: function (b) {
+    var k = b.getAttribute('data-k'), n = b.getAttribute('data-n'), v = b.getAttribute('data-v'), was = D.fuse[k + n];
+    if ((was === 'base' ? 'base' : 'own') === v) return;
+    D.fuse[k + n] = v; rerenderKeep();
+    call('fuse', { kind: k, n: Number(n), use: v }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { D.fuse[k + n] = was; rerenderKeep(); return toast(errText(r), 'bad'); }
+      if (r.fuse) D.fuse = r.fuse;
+      toast(r.msg || 'Готово');
+    });
+  },
   tplPutForm: function (b) { if (S.dirty && S.view === 'edit') return toast('Сначала сохраните изменения', 'bad'); tplPutForm(b.getAttribute('data-id')); },
   tplPutGo: function (b) {
     var kinds = FSETS.map(function (s) { return s[0]; }).filter(function (k) { var e = document.getElementById('tpk_' + k); return e && e.checked; });
