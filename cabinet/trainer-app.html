@@ -742,6 +742,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.9 (25.10.2026). FREE: в карточке клиента FREE – набор тренировок (зал / дом, дата первой) или «набор не выбран»,
+ *   кнопка «Тренировки» – поставить или переключить набор в приложении тренировок (lite-fit-trainer 3.11.0).
  * 1.8.2 (25.10.2026). Владелец переключает «Все клиенты» / «Кабинет Андрея» / «Кабинет Дарьи» (было «Как видит …»).
  * 1.8.1 (25.10.2026). Отдельно эта страница больше не открывается: по прямой ссылке – сразу общий кабинет (trainer.html).
  * 1.8 (25.10.2026). Общий кабинет тренера: эта страница (cabinet/trainer-app.html) открывается внутри общего кабинета
@@ -781,8 +783,8 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '1.8';
-var PATCH = '.2';               // 1.8.1: отдельно не открывается; 1.8.2: «Кабинет Андрея» вместо «Как видит Андрей»                // правка страницы без смены версии сервера
+var VERSION = '1.9';
+var PATCH = '';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -2296,6 +2298,8 @@ function freeCard(x, fresh, inList) {
   if (x.phone) rows += kv('Телефон', '<a href="tel:' + esc(x.phone.replace(/[^\d+]/g, '')) + '" style="color:var(--accent);text-decoration:none">' + esc(x.phone) + '</a>');
   var st = '', cls = '';
   if (!fresh) {
+    if (fr.wk) rows += kv('Тренировки', esc((fr.wk.place === 'дом' ? 'дома' : 'в зале') + ' · с ' + dm(fr.wk.start) + (fr.wk.by === 'клиент' ? ' · выбрал клиент' : '')));
+    else rows += kv('Тренировки', '<span style="color:var(--warm)">набор не выбран</span>');
     if (!fr.given) { st = 'Доступ ещё не выдан'; cls = 'warm'; }
     else if (fr.mode === 'cab') { st = 'Доступ выдан ' + dm(fr.given) + ' – ссылка на кабинет'; cls = 'ok'; }
     else if (x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' · бот подключён'; cls = 'ok'; }
@@ -2314,7 +2318,8 @@ function freeCard(x, fresh, inList) {
     }
   } else if (!x.arch) {
     h += '<div class="btns">' + '<button class="btn ' + (fr.given ? 'sec' : 'pri') + '" data-act="freeGiveForm" data-id="' + x.id + '">' + (fr.given ? 'Сообщение со ссылкой' : 'Выдать доступ') + '</button>' +
-      '<button class="btn sec" data-act="fmtFormId" data-id="' + x.id + '">В START / BASIC / PRO</button></div>';
+      '<button class="btn sec" data-act="fmtFormId" data-id="' + x.id + '">В START / BASIC / PRO</button>' +
+      (EMBED ? '<button class="btn sec" data-act="goTrainId" data-id="' + x.id + '">' + (fr.wk ? 'Тренировки клиента' : 'Поставить тренировки') + '</button>' : '') + '</div>';
     if (D.admin && !D.as && D.trainers.length > 1) h += '<div class="asg">' + fs('asg' + x.id, 'Передать другому тренеру', D.trainers.map(function (n) { return [n, n]; }), x.owner || D.trainer) +
       '<button class="btn sec" data-act="freeAssign" data-id="' + x.id + '">Передать</button></div>';
   }
@@ -2643,6 +2648,7 @@ var ACT = {
     });
   },
 
+  goTrainId: function (t) { toShell({ type: 'go', s: 'train', cid: t.getAttribute('data-id') }); },
   goTrain: function () { var c = cur(); if (c) toShell({ type: 'go', s: 'train', cid: c.id }); },   // 1.8: тренировки клиента – в общем кабинете
   /* --- 1.7: FREE и формат --- */
   freeTake: function (t) {
