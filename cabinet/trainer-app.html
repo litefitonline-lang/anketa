@@ -791,7 +791,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.9';
-var PATCH = '.4';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
+var PATCH = '.5';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -1008,7 +1008,7 @@ function wantCard(c) { return c.table ? !c.loaded || !!c.stale : !c.loaded && !c
 function setList(r, have) {
   var old = {};
   if (D) D.clients.forEach(function (c) { if (c.loaded) old[c.id] = c; });
-  D = { trainer: r.trainer, admin: !!r.admin, as: r.as || '', trainers: r.trainers || [], today: r.today, clients: r.clients || [], fresh: r.fresh || [], tasks: r.tasks || [], lists: r.lists || {}, botUser: r.botUser || '' };
+  D = { trainer: r.trainer, admin: !!r.admin, as: r.as || '', trainers: r.trainers || [], today: r.today, clients: r.clients || [], fresh: r.fresh || [], tasks: r.tasks || [], lists: r.lists || {}, botUser: r.botUser || '', vk: !!r.vk };
   TODAY = D.today; T = dn(TODAY);
   var st = null;
   if (r.stale instanceof Array) { st = {}; r.stale.forEach(function (id) { st[id] = true; }); }
@@ -1138,8 +1138,8 @@ function summ(c) {
     var fr = c.free || {};
     o.state = 'nocab';
     if (!fr.given) { o.text = 'FREE: доступ не выдан'; o.cls = 'warm'; o.alerts.push({ text: 'FREE: выдайте доступ – клиент ждёт ссылку', sub: 'over' }); }
-    else if (fr.mode === 'tg' && !c.bot) { o.text = 'FREE: бот не подключён'; o.cls = 'warm'; if (dn(fr.given) < T) o.alerts.push({ text: 'FREE: доступ выдан ' + dm(fr.given) + ', а бот не подключён – напишите клиенту', sub: 'over' }); }
-    else { o.text = fr.mode === 'cab' ? 'FREE: ссылка на кабинет' : 'FREE: бот подключён'; o.cls = ''; }
+    else if ((fr.mode === 'tg' || fr.mode === 'vk') && !c.bot) { var vkm = fr.mode === 'vk'; o.text = vkm ? 'FREE: ВКонтакте не подключён' : 'FREE: бот не подключён'; o.cls = 'warm'; if (dn(fr.given) < T) o.alerts.push({ text: 'FREE: доступ выдан ' + dm(fr.given) + ', а ' + (vkm ? 'ВКонтакте' : 'бот') + ' не подключён – напишите клиенту', sub: 'over' }); }
+    else { o.text = fr.mode === 'cab' && !c.bot ? 'FREE: ссылка на кабинет' : c.vk ? 'FREE: ВКонтакте подключён' : 'FREE: бот подключён'; o.cls = ''; }
     return o;
   }
   var act = c.status === ST_ACTIVE;
@@ -2113,8 +2113,8 @@ function subCare(c) {
     fs('rTz', 'Часовой пояс', L0.tz || [['', 'Москва']], c.remind.tz || '', 'data-ch="remTz"') + '</div></div>';
 
   h += '<div class="card"><h3>Кабинет и бот</h3><p class="sub">' + (!c.key ? 'Кабинет ещё не выдан: нажмите «Ссылка на кабинет» – получите готовое сообщение клиенту.' : c.blocked ? 'Клиент заблокировал бота ' + dm(c.blocked) + ' – напоминания не приходят. Попросите разблокировать или отправьте ссылку заново.'
-    : c.bot ? 'Клиент подключил бота – напоминания и итоги приходят.' : 'Клиент ещё не подключил бота: напоминания не приходят. Отправьте ему ссылку.') + '</p>' +
-    '<div class="btns" style="margin-top:0"><button class="btn sec" data-act="cabLink">Ссылка на кабинет</button><button class="btn danger" data-act="cabReset">Сбросить и выдать заново</button></div></div>';
+    : c.bot ? (c.vk ? 'Клиент подключил ВКонтакте – напоминания и итоги приходят туда.' : 'Клиент подключил бота – напоминания и итоги приходят.') : 'Клиент ещё не подключил бота: напоминания не приходят. Отправьте ему ссылку.') + '</p>' +
+    '<div class="btns" style="margin-top:0"><button class="btn sec" data-act="cabLink">Ссылка на кабинет</button>' + (D.vk ? '<button class="btn sec" data-act="vkLink">Ссылка на ВКонтакте</button>' : '') + '<button class="btn danger" data-act="cabReset">Сбросить и выдать заново</button></div></div>';
   return h;
 }
 function msgBox(id, text, hgt, label) {
@@ -2312,9 +2312,9 @@ function freeCard(x, fresh, inList) {
     if (fr.wk) rows += kv('Тренировки', esc((fr.wk.place === 'дом' ? 'дома' : 'в зале') + ' · с ' + dm(fr.wk.start) + (fr.wk.by === 'клиент' ? ' · выбрал клиент' : '')));
     else rows += kv('Тренировки', '<span style="color:var(--warm)">набор не выбран</span>');
     if (!fr.given) { st = 'Доступ ещё не выдан'; cls = 'warm'; }
-    else if (fr.mode === 'cab') { st = 'Доступ выдан ' + dm(fr.given) + ' – ссылка на кабинет'; cls = 'ok'; }
-    else if (x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' · бот подключён'; cls = 'ok'; }
-    else { st = 'Доступ выдан ' + dm(fr.given) + ' · клиент ещё не открыл бота'; cls = 'warm'; }
+    else if (fr.mode === 'cab' && !x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' – ссылка на кабинет'; cls = 'ok'; }
+    else if (x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' · ' + (x.vk ? 'ВКонтакте подключён' : 'бот подключён'); cls = 'ok'; }
+    else { st = 'Доступ выдан ' + dm(fr.given) + ' · клиент ещё не открыл ' + (fr.mode === 'vk' ? 'ВКонтакте' : 'бота'); cls = 'warm'; }
   }
   var h = '<div class="card"><div class="frh"><h3>' + (inList ? '<button data-open="' + x.id + '" data-sub="over" style="text-align:left;font-weight:800">' + esc(x.name) + ' <span class="chev">›</span></button>' : 'FREE · 3 тренировки') + '</h3><span class="tag free">FREE</span></div>' +
     '<p class="sub" style="margin:4px 0 10px">' + (a.at ? 'Анкета ' + (a.at === TODAY ? 'сегодня' : dm(a.at)) : 'Анкета') + (fresh || !D.admin || !x.owner ? '' : ' · тренер ' + esc(x.owner)) + '</p>' +
@@ -2355,13 +2355,14 @@ function viewFree() {
 function anyOf(id) { return clientOf(id) || freshOf(id); }
 function freeGiveForm(id) {
   var x = anyOf(id); if (!x) return;
-  var a = x.an || {}, fr = x.free || {}, noBot = !D.botUser, cabFirst = !!a.alt || noBot;
+  var a = x.an || {}, fr = x.free || {}, noBot = !D.botUser, cabFirst = !!a.alt || noBot, vkFirst = D.vk && cabFirst;
   S.freeId = String(id);
   sheet('Выдать доступ', '<h2>' + esc(x.name) + '</h2><p class="lead">' + (fr.given ? 'Доступ уже выдан ' + dm(fr.given) + '. Можно ещё раз получить сообщение со ссылкой – ссылка та же.' : 'Клиент получит личный кабинет FREE. Выберите, как отправить ссылку.') + '</p>' +
     (a.alt ? '<div class="banner warn">📵 <b>Нет Telegram</b> – связь: ' + esc(a.alt) + '. Отправьте ссылку на кабинет туда.</div>' : '') +
     (noBot ? '' : '<button class="btn ' + (cabFirst ? 'sec' : 'pri') + '" data-act="freeGive" data-mode="tg">Ссылка на бота – клиент в Telegram</button>') +
-    '<button class="btn ' + (cabFirst ? 'pri' : 'sec') + '" data-act="freeGive" data-mode="cab">Ссылка на кабинет – нет Telegram</button>' +
-    '<p class="note" style="margin:0">Через бота клиенту приходят напоминания о тренировках и ответы тренера. По ссылке на кабинет – только кабинет, без напоминаний.</p><p class="ferr" id="ferr"></p>');
+    (D.vk ? '<button class="btn ' + (vkFirst ? 'pri' : 'sec') + '" data-act="freeGive" data-mode="vk">Ссылка на ВКонтакте – нет Telegram</button>' : '') +
+    '<button class="btn ' + (cabFirst && !vkFirst ? 'pri' : 'sec') + '" data-act="freeGive" data-mode="cab">Ссылка на кабинет – нет ' + (D.vk ? 'ни Telegram, ни ВКонтакте' : 'Telegram') + '</button>' +
+    '<p class="note" style="margin:0">Через бота' + (D.vk ? ' в Telegram или ВКонтакте' : '') + ' клиенту приходят напоминания о тренировках и ответы тренера. По ссылке на кабинет – только кабинет, без напоминаний.</p><p class="ferr" id="ferr"></p>');
 }
 
 /* ---------- 1.7: сменить формат ---------- */
@@ -2677,10 +2678,11 @@ var ACT = {
     send('freegive', { id: id, mode: mode }, { wait: 'Готовлю ссылку…', title: 'Выдать доступ' }).then(function (r) {
       if (!r) return;
       render();
-      var lead = r.mode === 'tg' ? 'Отправьте клиенту это сообщение – в Telegram' + (x && x.phone ? ' по номеру ' + esc(x.phone) : '') + '. Он откроет ссылку и нажмёт «Старт».'
+      var lead = r.mode === 'vk' ? 'Отправьте клиенту это сообщение туда, где он на связи' + (a.alt ? ': ' + esc(a.alt) : '') + '. Он откроет ссылку ВКонтакте и нажмёт «Начать».'
+        : r.mode === 'tg' ? 'Отправьте клиенту это сообщение – в Telegram' + (x && x.phone ? ' по номеру ' + esc(x.phone) : '') + '. Он откроет ссылку и нажмёт «Старт».'
         : 'Отправьте сообщение туда, где клиент на связи' + (a.alt ? ': ' + esc(a.alt) : '') + '. Ссылка личная – только этому клиенту.';
       if (r.noBot && mode === 'tg') lead = 'Бот клиентов не подключён – в сообщении ссылка на кабинет. ' + lead;
-      resultSheet(r.again ? 'Сообщение со ссылкой' : 'Доступ выдан', lead, r, '<div class="banner">' + (r.mode === 'tg' && !r.noBot ? 'После «Старт» бот сам спросит клиента, где ему удобнее заниматься, и сразу поставит 3 тренировки – Вам ничего делать не нужно. Какой набор выбран, придёт сообщением.' : 'Клиент без Telegram: поставьте ему 3 тренировки сами – кнопка «Поставить тренировки» в карточке.') + '</div>');
+      resultSheet(r.again ? 'Сообщение со ссылкой' : 'Доступ выдан', lead, r, '<div class="banner">' + (r.mode === 'vk' ? 'После «Начать» бот ВКонтакте сам спросит клиента, где ему удобнее заниматься, и поставит 3 тренировки – Вам ничего делать не нужно. Бот ВКонтакте отвечает в течение 5 минут.' : r.mode === 'tg' && !r.noBot ? 'После «Старт» бот сам спросит клиента, где ему удобнее заниматься, и сразу поставит 3 тренировки – Вам ничего делать не нужно. Какой набор выбран, придёт сообщением.' : 'Клиент без Telegram: поставьте ему 3 тренировки сами – кнопка «Поставить тренировки» в карточке.') + '</div>');
     });
   },
   fmtForm: function () { var c = cur(); if (c) fmtForm(c); },
@@ -2720,7 +2722,7 @@ var ACT = {
   /* --- сообщение клиенту, кабинет, обратная связь --- */
   msgForm: function () {
     var c = cur();
-    if (!c.bot) return sheet('Сообщение клиенту', '<h2>Бот не подключён</h2><p class="lead">Написать от имени бота можно, когда клиент откроет ссылку и нажмёт «Старт». Отправьте ему сообщение со ссылкой на кабинет.</p><button class="btn pri" data-act="cabLink">Ссылка на кабинет</button>');
+    if (!c.bot) return sheet('Сообщение клиенту', '<h2>Бот не подключён</h2><p class="lead">Написать от имени бота можно, когда клиент откроет ссылку и нажмёт «Старт». Отправьте ему сообщение со ссылкой на кабинет.</p><button class="btn pri" data-act="cabLink">Ссылка на кабинет</button>' + (D.vk ? '<button class="btn sec" data-act="vkLink">Ссылка на ВКонтакте – нет Telegram</button>' : ''));
     sheet('Сообщение клиенту', '<h2>Сообщение клиенту</h2><p class="lead">' + esc(c.name) + '. Сообщение придёт от бота Lite Fit с кнопками «Открыть кабинет» и «Написать тренеру». Копия уйдёт в рабочий чат.</p>' +
       ft('msgTxt', 'Текст сообщения', '', 6, 'maxlength="3500"') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="msgSend">Отправить</button>');
   },
@@ -2735,6 +2737,16 @@ var ACT = {
     send('cablink', { id: c.id }, { wait: 'Готовлю ссылку…', title: 'Кабинет клиента' }).then(function (r) {
       if (!r) return;
       render(); resultSheet('Ссылка на кабинет', esc(c.name) + '. ' + (r.bot && r.bot.linked ? 'Бот уже подключён: кабинет у клиента открывается по кнопке в боте. Сообщение пригодится, если он потерял ссылку.' : 'Клиент ещё не подключил бота. Отправьте ему это сообщение.'), r);
+    });
+  },
+  vkLink: function () {                                                      // 1.9.5: клиент без Telegram – сообщения сообщества ВКонтакте
+    var c = cur(); if (!c) return;
+    send('vklink', { id: c.id }, { wait: 'Готовлю ссылку…', title: 'ВКонтакте' }).then(function (r) {
+      if (!r) return;
+      render();
+      resultSheet('Ссылка на ВКонтакте', esc(c.name) + '. ' + (r.linked ? 'ВКонтакте у клиента уже подключён – сообщение пригодится, если он удалил чат.'
+        : 'Отправьте сообщение туда, где клиент на связи. Он откроет ссылку и нажмёт «Начать» – напоминания и ответы тренера пойдут во ВКонтакте.' +
+          (r.tgLinked ? ' Сейчас у клиента подключён Telegram – после ВКонтакте сообщения будут приходить только туда.' : '')), r);
     });
   },
   cabReset: function () {
