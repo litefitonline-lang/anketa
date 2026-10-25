@@ -680,6 +680,18 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 /* 3.0: наборы FREE */
 .fsg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:6px}
 .fsg .card{margin:0}
+.hsec details{border:1px solid var(--line);border-radius:14px;background:var(--card);margin:0 0 10px}
+.hsec summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:0 16px;font-size:16px;font-weight:800}
+.hsec summary::-webkit-details-marker{display:none}
+.hsec summary .chv{font-style:normal;color:var(--accent);font-size:20px;transition:transform .2s}
+.hsec details[open] summary .chv{transform:rotate(90deg)}
+.hsec .bd{padding:0 16px 14px}
+.hsec .bd>p:first-child{margin-top:0}
+.fslot{border-bottom:1px solid var(--line);padding-bottom:4px}
+.fslot:last-child{border-bottom:0}
+.fslot .row{border-bottom:0}
+.fsub{margin:0 0 8px 54px;font-size:13px}
+.st-ok{color:var(--accent)}
 .fs-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .fs-h h3{margin:0}
 .fwc .rows{margin-top:6px}
@@ -719,6 +731,14 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 3.6 (25.10.2026). Сервер 4.14.7. «Наборы FREE»: у каждого номера – тренировка набора Lite Fit (не удаляется, смотреть,
+ *   «Составить свою на основе этой»; владелец может изменить) и своя тренировка тренера, если он её составил, – она и
+ *   приходит его клиентам; удалил свою – снова приходит тренировка набора. В редакторе тренировок набора нет «Прошлой
+ *   тренировки». Клиент: вкладка «Инструкция» внизу – все подсказки по разделам (раскрываются по нажатию); у клиента FREE
+ *   ещё разделы «С чего начать», «Как открываются тренировки», «Перенос тренировки», «Разминка», «Как подобрать вес»,
+ *   «Вопросы тренеру». Кнопки «?» и «Как пользоваться приложением» открывают эту вкладку.
+ * 3.5 (25.10.2026). Сервер 4.14.6. Клиент FREE сам переносит не начатую тренировку: «Перенести на другой день» в тренировке и
+ *   в окне закрытой – день с сегодня до последнего дня FREE (7 дней), следующие сдвинутся сами; тренеру придёт сообщение.
  * 3.4 (25.10.2026). Сервер 4.14.5. Наборов FREE снова 4 (дом – тоже мужчины / женщины). «В наборы FREE…» в редакторе и в окне
  *   тренировки: любая тренировка галочками ставится тренировкой № 1–3 в свои наборы. Клиент FREE: список «Ваши 3 тренировки»
  *   по порядку; выполненная видна, пока не начата следующая, потом закрыта и размыта; вернулся к списку – список обновляется.
@@ -825,7 +845,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '3.4';
+var VERSION = '3.6';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -1538,37 +1558,62 @@ function tplPutForm(id) {
 var FSETS = [['fgm', 'Зал · мужчины'], ['fgw', 'Зал · женщины'], ['fhm', 'Дом · мужчины'], ['fhw', 'Дом · женщины']], FDAY0 = '2099-01-0';
 function fsetOf(place, sex) { return 'f' + (place === 'дом' ? 'h' : 'g') + (sex === 'Ж' ? 'w' : 'm'); }
 function isTpl(c) { return !!c && !!c.tpl; }
-function myTpl(kind) { var c = D && D.clients.filter(function (x) { return x.tpl && x.kind === kind; })[0]; return c ? c.id : kind; }
+function myTpl(kind) { var c = D && D.clients.filter(function (x) { return x.tpl && !x.base && x.kind === kind; })[0]; return c ? c.id : ''; }
+function baseTpl(kind) { var c = D && D.clients.filter(function (x) { return x.tpl && x.base && x.kind === kind; })[0]; return c ? c.id : ''; }
+function altKind(k) { return k === 'fhw' ? 'fhm' : k === 'fhm' ? 'fhw' : ''; }
+function slotW(cid, n) { return cid ? D.w.filter(function (w) { return w.cid === cid && w.date === FDAY0 + n; }).sort(wSort)[0] || null : null; }
+function isBaseW(w) { var c = w && clientOf(w.cid); return !!(c && c.tpl && c.base); }
 function tplOf(set) { return D.w.filter(function (w) { return w.cid === set; }).sort(wSort).slice(0, 3); }
 function tplReady(set) { return tplOf(set).length >= 3; }
 function setName(set) { var c = clientOf(set), k = (c && c.kind) || set, x = FSETS.filter(function (s) { return s[0] === k; })[0]; return x ? x[1] : set; }
 function viewFsets() {
-  var h = '<h1 class="hello">Мои наборы FREE</h1><p class="lead-p">По 3 тренировки для «3 тренировки бесплатно». Это Ваши наборы: правьте упражнения, подходы и повторы под себя – ' +
-    'Ваши новые клиенты FREE получат их именно такими (в день выбора, через 2 и через 4 дня). У клиентов, которым набор уже выдан, тренировки не меняются – их правьте в самих тренировках клиента.</p><div class="fsg">';
+  var h = '<h1 class="hello">Наборы FREE</h1><p class="lead-p">Новому клиенту FREE приходят 3 тренировки – по умолчанию из набора Lite Fit. Хотите свою – составьте её под нужным номером: ' +
+    'она заменит тренировку набора для Ваших новых клиентов. Удалите свою – снова будет приходить тренировка набора. Тренировки набора Lite Fit не удаляются.</p><div class="fsg">';
+  var row = function (w, act, n, t) {
+    return '<button class="row" data-act="' + act + '" data-id="' + esc(w.id) + '" data-from="fsets"><span class="dt"><b class="num">' + n + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + n + ' · ' + t + '</b><small>' +
+      exWord(w.n) + (NM[w.id] ? ' · ' + esc(NM[w.id].slice(0, 3).join(', ')) : '') + ' · <span class="st-ok">приходит клиентам</span></small></span><span class="chev">›</span></button>';
+  };
   FSETS.forEach(function (s) {
-    var id = myTpl(s[0]), l = tplOf(id), ok = l.length >= 3;
-    h += '<div class="card"><div class="fs-h"><h3>' + esc(s[1]) + '</h3><span class="pill' + (ok ? ' ok' : ' warn') + '">' + (ok ? 'готов' : 'составлено ' + l.length + ' из 3') + '</span></div><div class="rows">';
-    for (var n = 0; n < 3; n++) {
-      var w = l.filter(function (x) { return x.date === FDAY0 + (n + 1); })[0] || null;   // 3.4: по номеру (дате набора), без сдвига
-      h += w ? '<button class="row" data-act="editW" data-id="' + esc(w.id) + '" data-from="fsets"><span class="dt"><b class="num">' + (n + 1) + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + (n + 1) + '</b><small>' + exWord(w.n) + (NM[w.id] ? ' · ' + esc(NM[w.id].slice(0, 3).join(', ')) : '') + '</small></span><span class="chev">›</span></button>'
-        : '<button class="row" data-act="tplNew" data-set="' + id + '" data-n="' + (n + 1) + '"><span class="dt"><b class="num">' + (n + 1) + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + (n + 1) + ' – не составлена</b><small>Нажмите, чтобы составить</small></span><span class="chev">+</span></button>';
+    var oid = myTpl(s[0]), bid = baseTpl(s[0]), aid = baseTpl(altKind(s[0])), rows = '', mineN = 0, missN = 0;
+    for (var n = 1; n <= 3; n++) {
+      var o = slotW(oid, n), b = slotW(bid, n) || slotW(aid, n);
+      if (o) mineN++; else if (!b) missN++;
+      rows += '<div class="fslot">' + (o ? row(o, 'editW', n, 'своя') : b ? row(b, 'tplView', n, 'набор Lite Fit')
+        : '<div class="row lk"><span class="dt"><b class="num">' + n + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + n + ' – нет</b><small class="st-warn">клиентам нечего выдать – составьте свою</small></span></div>') +
+        (o && b ? '<button class="txtb fsub" data-act="tplView" data-id="' + esc(b.id) + '">Набор Lite Fit, тренировка ' + n + ' – сейчас не приходит, посмотреть</button>' : '') +
+        (!o && oid ? '<button class="txtb fsub" data-act="tplNew" data-set="' + oid + '" data-n="' + n + '"' + (b ? ' data-from="' + esc(b.id) + '"' : '') + '>' + IC.plus + 'Составить свою тренировку ' + n + '</button>' : '') + '</div>';
     }
-    h += '</div></div>';
+    h += '<div class="card"><div class="fs-h"><h3>' + esc(s[1]) + '</h3><span class="pill' + (missN ? ' warn' : ' ok') + '">' + (missN ? 'не хватает: ' + missN : mineN ? 'своих: ' + mineN + ' из 3' : 'набор Lite Fit') + '</span></div><div class="rows">' + rows + '</div></div>';
   });
-  h += '</div><p class="note">Тренировку набора открываете и правите так же, как тренировку клиента. Другие тренеры видят только свои наборы.</p>';
-  FSETS.forEach(function (s) { var id = myTpl(s[0]), miss = tplOf(id).filter(function (w) { return !NM[w.id]; }).length; if (miss) nmNeed(id, '2099-01', miss); });
+  h += '</div><p class="note">Свою тренировку открываете и правите так же, как тренировку клиента. Другие тренеры видят только свои тренировки и набор Lite Fit.</p>';
+  FSETS.forEach(function (s) { [myTpl(s[0]), baseTpl(s[0])].forEach(function (id) { if (!id) return; var miss = tplOf(id).filter(function (w) { return !NM[w.id]; }).length; if (miss) nmNeed(id, '2099-01', miss); }); });
   return h;
 }
+/** 3.6: тренировка набора Lite Fit – посмотреть и составить свою на её основе. */
+function tplView(id) {
+  var w = sumOf(id); if (!w) return;
+  var f = FULL[id] || null, n = Number(String(w.date).slice(-1)) || 1, c = clientOf(w.cid), own = c ? myTpl(c.kind) : '', has = slotW(own, n);
+  var body = function (full) { return peekBody(w, full).replace(/<div class="pk-h">[\s\S]*?<\/small><\/div>/, '<div class="pk-h"><b>' + esc(setName(w.cid)) + ' · тренировка ' + n + '</b><small>набор Lite Fit</small></div>'); };
+  sheet('Набор Lite Fit', '<div id="pkBox">' + body(f) + '</div>' +
+    (has ? '<p class="note">У Вас уже есть своя тренировка ' + n + ' – она и приходит клиентам. Удалите её, чтобы снова приходила эта.</p>'
+      : own ? '<button class="btn pri" data-act="tplNew" data-set="' + esc(own) + '" data-n="' + n + '" data-from="' + esc(id) + '">Составить свою на основе этой</button>' : '') +
+    (D.admin ? '<button class="btn sec mt" data-act="editW" data-id="' + esc(id) + '" data-from="fsets">Изменить набор Lite Fit (для всех тренеров)</button>' : '') +
+    '<p class="note" style="margin-top:10px">Тренировки набора Lite Fit не удаляются.</p>');
+  if (!f) peekLoad(id).then(function (full) { var b = document.getElementById('pkBox'); if (b && full) b.innerHTML = body(full); });
+}
 /** Новая тренировка набора: пустая или копия любой тренировки клиента. */
-function tplForm(set, slot) {
+function tplForm(set, slot, from) {
   var used = tplOf(set).map(function (w) { return w.date; }), date = '';
-  if (slot && used.indexOf(FDAY0 + slot) < 0) date = FDAY0 + slot;
+  if (slot && used.indexOf(FDAY0 + slot) >= 0) return toast('Своя тренировка ' + slot + ' уже есть – откройте её', 'bad');
+  if (slot) date = FDAY0 + slot;
   for (var n = 1; n <= 3 && !date; n++) if (used.indexOf(FDAY0 + n) < 0) date = FDAY0 + n;
   if (!date) return toast('В наборе уже 3 тренировки', 'bad');
   S.tplNew = { set: set, date: date };
+  var c0 = clientOf(set), k = c0 ? c0.kind : '', base = FSETS.map(function (x) { var b = slotW(baseTpl(x[0]), Number(date.slice(-1))); return b ? [b.id, 'Набор Lite Fit · ' + x[1] + ' · тренировка ' + date.slice(-1)] : null; }).filter(Boolean);
+  base.sort(function (a, b) { return (a[0] === baseTpl(k) ? -1 : 0) - (b[0] === baseTpl(k) ? -1 : 0); });
   var src = D.w.filter(function (w) { var c = clientOf(w.cid); return c && !c.tpl && shown(c); }).sort(function (a, b) { return wSort(b, a); }).slice(0, 40);
-  sheet('Набор FREE', '<h2>' + esc(setName(set)) + ' – тренировка ' + date.slice(-1) + '</h2><p class="lead">Начните с пустой или возьмите за основу тренировку клиента – упражнения, подходы и веса перенесутся.</p>' +
-    (src.length ? fs('tpFrom', 'С чего начать', [['', 'Пустая тренировка']].concat(src.map(function (w) { var c = clientOf(w.cid); return [w.id, (c ? c.name + ' · ' : '') + numFor(w) + ' от ' + dm(w.date) + ' · ' + exWord(w.n)]; })), '') : '') +
+  sheet('Своя тренировка', '<h2>' + esc(setName(set)) + ' – своя тренировка ' + date.slice(-1) + '</h2><p class="lead">Начните с тренировки набора Lite Fit, с пустой или с тренировки клиента – упражнения, подходы и веса перенесутся. Сохраните – и она будет приходить Вашим новым клиентам вместо тренировки набора.</p>' +
+    fs('tpFrom', 'С чего начать', base.concat([['', 'Пустая тренировка']]).concat(src.map(function (w) { var c = clientOf(w.cid); return [w.id, (c ? c.name + ' · ' : '') + numFor(w) + ' от ' + dm(w.date) + ' · ' + exWord(w.n)]; })), from || (base[0] ? base[0][0] : '')) +
     '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="tplGo">Дальше</button>');
 }
 /** Карточка FREE в карточке клиента тренировок: набор и даты или «Поставить 3 тренировки». */
@@ -1984,7 +2029,7 @@ function viewEdit() {
   var h = '<div class="ed' + (RF.panel && W ? ' has-ref' : '') + '"><div class="ed-m"><div class="ed-head"><button class="back" data-act="editBack">' + IC.back + (S.ret === 'fsets' ? 'Наборы FREE' : S.ret === 'cal' ? 'Календарь' : S.ret === 'coms' ? 'Комментарии' : esc(c.name)) + '</button><h1 class="hello" id="wTitle">Тренировка ' + (TP ? (Number(String(w.date).slice(-1)) || 1) : numFor(w)) + '</h1>' +
     '<div class="meta"><span class="pill">' + esc(c.name) + '</span><span class="pill">' + exWord(w.items.length) + '</span>' + (w.done ? '<span class="pill ok">выполнена ' + dm(w.doneAt || w.date) + '</span>' : '') +
     (nch.c ? '<span class="pill warn">клиент изменил: ' + nch.c + '</span>' : '') + (nch.m ? '<span class="pill warn">не выполнено: ' + nch.m + '</span>' : '') +
-    runPill(w) + (TP ? '<span class="pill warn">набор FREE</span>' : '<span class="pill" id="accPill">' + accTxt(ac) + '</span>') + '</div>';
+    runPill(w) + (TP ? '<span class="pill warn">' + (isBaseW(w) ? 'набор Lite Fit – для всех тренеров' : 'своя тренировка набора') + '</span>' : '<span class="pill" id="accPill">' + accTxt(ac) + '</span>') + '</div>';
   if (!S.isNew) h += '<div class="ed-top">' + (TP ? '' : '<button class="btn sec sm" data-act="moveW">' + IC.cal + 'Перенести</button>') + '<button class="btn sec sm" data-act="copyW">' + IC.copy + 'Копировать</button></div>';
   var lb = numFor(w);
   if (lb === 'сверх пакета') h += '<div class="banner warn">Эта тренировка сверх пакета: пакет закончился или все его тренировки уже выполнены. Оформите клиенту новый пакет в его карточке.</div>';
@@ -2004,7 +2049,8 @@ function viewEdit() {
   });
   h += '<div class="card" id="addCard"><h3>' + (w.items.length ? 'Следующее упражнение' : 'Первое упражнение') + '</h3><p class="sub">Выберите группу мышц или начните вводить название – подсказка появится по первым буквам.</p><div id="pickF">' + pickChips() + '</div>' +
     fi('exQ', 'Название упражнения', S.q, 'text', 'autocomplete="off" autocorrect="off" data-f="q"') + '<div class="sugg" id="sugg">' + suggHtml() + '</div></div></div></div>' + (RF.panel && W ? '<div class="ed-ref">' + RF.panel + '</div>' : '') + '</div>';
-  if (!S.isNew) h += '<div class="ed-acts"><button class="btn sec" data-act="copyW">' + IC.copy + 'Скопировать на другую дату или клиенту</button><button class="btn sec" data-act="tplPutForm" data-id="' + esc(w.id) + '">В мои наборы FREE…</button><button class="btn danger" data-act="delW">' + (S.del ? 'Точно удалить? Нажмите ещё раз' : 'Удалить тренировку') + '</button></div>';
+  if (!S.isNew) h += '<div class="ed-acts"><button class="btn sec" data-act="copyW">' + IC.copy + 'Скопировать на другую дату или клиенту</button><button class="btn sec" data-act="tplPutForm" data-id="' + esc(w.id) + '">В мои наборы FREE…</button>' +
+    (isBaseW(w) ? '' : '<button class="btn danger" data-act="delW">' + (S.del ? (TP ? 'Точно удалить? Клиентам будет приходить тренировка набора Lite Fit' : 'Точно удалить? Нажмите ещё раз') : TP ? 'Удалить свою тренировку' : 'Удалить тренировку') + '</button>') + '</div>';
   return h;
 }
 function markDirty() { if (!S.dirty) { S.dirty = true; paintBar(); } draftSoon(); }
@@ -2040,6 +2086,7 @@ function refBody(r) {
 }
 /** { btn – кнопка «показать», panel – сама панель }. Пусто, если у клиента других тренировок нет. */
 function refParts(w) {
+  if (isTpl(clientOf(w.cid))) return { btn: '', panel: '' };               // 3.6: в тренировке набора «Прошлой тренировки» нет
   var l = refList(w), R = S.ref || {};
   if (!l.length || !R.id) return { btn: '', panel: '' };
   var cur = sumOf(R.id);
@@ -2431,7 +2478,7 @@ function setMy(r) {
   var keep = {};
   if (M) M.list.forEach(function (w) { if (PEND[w.id] && w.items) keep[w.id] = w; });           // несохранённое не затираем ответом сервера
   var rdWas = {}; if (M && M.msgs) M.msgs.forEach(function (m) { if (m.rd) rdWas[m.id] = m.rd; });
-  M = { free: !!r.free, name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
+  M = { free: !!r.free, fend: r.fend || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
     pay: r.pay || '', aw: r.aw || null, tg: r.tg || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
@@ -2890,13 +2937,24 @@ function freeRow(w) {
   if (w.st === 'open') return wRow(w, 'runW');
   if (w.st === 'lock' || w.st === 'gone') return lockRow(w);
   var d = pd(w.date);
-  return '<div class="row lk"><span class="dt"><b class="num">' + d.getDate() + '</b><small>' + MONS[d.getMonth()] + '</small></span><span class="mn"><b>' + titleOf(w) + '</b><small>откроется ' + dm(w.from) + '</small><span class="blurl" aria-hidden="true">Упражнение · 3 × 15 · Упражнение · 3 × 12</span></span>' + IC.lock + '</div>';
+  return '<button class="row lk lkb" data-act="lockedW" data-id="' + esc(w.id) + '"><span class="dt"><b class="num">' + d.getDate() + '</b><small>' + MONS[d.getMonth()] + '</small></span><span class="mn"><b>' + titleOf(w) + '</b><small>откроется ' + dm(w.from) + '</small><span class="blurl" aria-hidden="true">Упражнение · 3 × 15 · Упражнение · 3 × 12</span></span>' + IC.lock + '</button>';
+}
+/** 3.5: клиент FREE переносит тренировку сам. */
+function fmoveForm(w) {
+  var min = TODAY, max = M.fend || '';
+  sheet('Перенести тренировку', '<h2>Перенести ' + titleOf(w).replace('Тренировка', 'тренировку') + '</h2><p class="lead">Сейчас – ' + esc(longDate(w.date)) + '. Выберите новый день' +
+    (max ? ': с сегодня до ' + esc(dMon(max)) + ' – все 3 тренировки проходят за 7 дней' : '') + '.</p>' +
+    fi('fmDate', 'Новая дата', w.date, 'date', 'min="' + min + '"' + (max ? ' max="' + max + '"' : '')) +
+    '<p class="note" style="margin:6px 0 12px">Если следующая тренировка окажется в тот же день или раньше, она сама сдвинется на день позже. Тренер получит уведомление.</p>' +
+    '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="fmoveGo" data-id="' + esc(w.id) + '">' + IC.cal + 'Перенести</button><button class="btn sec mt" data-act="close">Отмена</button>');
 }
 function lockSheet(w) {
   var fake = ['Упражнение для ног', 'Упражнение для спины', 'Упражнение для груди', 'Упражнение для плеч', 'Упражнение для пресса'];
   sheet(titleOf(w), '<h2>' + titleOf(w) + '</h2><div class="lkprev" aria-hidden="true">' + fake.map(function (t, i) { return '<div class="row" style="min-height:0;padding:9px 0"><span class="mn"><b>' + t + '</b><small>3 подхода по ' + (i % 2 ? 12 : 15) + '</small></span></div>'; }).join('') + '</div>' +
     (w.st === 'gone' ? '<p class="lead">Тренировка выполнена и закрыта – Вы начали следующую. Результат сохранён, тренер его видит.</p>'
+      : w.st === 'soon' ? '<p class="lead">Откроется ' + esc(longDate(w.from)) + ' – за день до своей даты (' + longDate(w.date) + ').</p>'
       : '<p class="lead">Откроется, когда Вы выполните тренировку ' + (w.after || 1) + ', – не раньше чем за день до своей даты (' + longDate(w.date) + ').</p>') +
+    (w.st !== 'gone' && !w.done ? '<button class="btn sec" data-act="fmoveForm" data-id="' + esc(w.id) + '" style="margin-bottom:10px">' + IC.cal + 'Перенести на другой день</button>' : '') +
     '<p class="note">Тренировки идут по очереди: так нагрузка растёт постепенно, а тренер видит результат каждой и подстраивает следующую.</p><button class="btn pri mt" data-act="close">Понятно</button>');
 }
 /** 3.3: клиенту FREE при первом открытии – с чего начать и как выполнять. */
@@ -2904,7 +2962,7 @@ function introHtml() {
   return '<div class="help"><h2>Добро пожаловать в Lite Fit!</h2><p class="lead">Здесь Ваши 3 бесплатные тренировки. Пара минут – и Вы готовы к первой.</p>' +
     (standalone() ? '' : '<div class="card install pulse" style="margin:12px 0"><div class="ic">' + IC.home + '</div><div style="flex:1"><p><b>1. Добавьте приложение на экран телефона</b></p><p>' + installHow() + '</p>' +
       (deferredInstall ? '<button class="btn sec sm mt" data-act="install">Добавить</button>' : '') + '</div></div>') +
-    '<h3>' + (standalone() ? '1' : '2') + '. Тренировки открываются по очереди</h3><p>Каждая открывается за день до своей даты и после того, как выполнена предыдущая. Выполненная тренировка видна, пока Вы не начнёте следующую. Даты – в списке и в боте, в день тренировки бот пришлёт напоминание.</p>' +
+    '<h3>' + (standalone() ? '1' : '2') + '. Тренировки открываются по очереди</h3><p>Каждая открывается за день до своей даты и после того, как выполнена предыдущая. Выполненная тренировка видна, пока Вы не начнёте следующую. Даты – в списке и в боте, в день тренировки бот пришлёт напоминание. Не получается в свой день – перенесите тренировку сами: «Перенести на другой день» (все 3 – за 7 дней).</p>' +
     '<h3>' + (standalone() ? '2' : '3') + '. Перед тренировкой – суставная разминка</h3><p>5–7 минут: плавные вращения головой, плечами, локтями, кистями, тазом, коленями и стопами – по 8–10 раз в каждую сторону.</p>' +
     '<h3>' + (standalone() ? '3' : '4') + '. Как выполнять</h3><ol class="hl">' +
     '<li>Откройте тренировку и нажмите <b>«Начать тренировку»</b> внизу – пойдёт время.</li>' +
@@ -2915,7 +2973,8 @@ function introHtml() {
     '<h3>' + (standalone() ? '4' : '5') + '. Как подобрать вес</h3><p>Вес подбирайте так, чтобы в запасе оставалось ещё <b>3–5 повторений</b>: последние повторы даются с усилием, но не «в упор». ' +
     'Начните с лёгкого и прибавляйте от подхода к подходу. В графу «Вес» впишите, с каким работали, – тренер подскажет, куда двигаться.</p>' +
     '<h3>' + (standalone() ? '5' : '6') + '. Вопросы тренеру</h3><p>Под каждым упражнением – «Комментарий тренеру» и «Фото/видео тренеру». Ответ придёт сюда, во вкладку «Тренер», и в Telegram.</p>' +
-    '<button class="btn pri mt" data-act="introOk" style="margin-top:20px">Понятно, начать</button><button class="btn sec mt" data-act="help">Подробная инструкция</button></div>';
+    '<p class="note" style="margin-top:14px">Все подсказки по разделам – во вкладке <b>«Инструкция»</b> внизу экрана, открывайте в любой момент.</p>' +
+    '<button class="btn pri mt" data-act="introOk" style="margin-top:14px">Понятно, начать</button><button class="btn sec mt" data-act="help">Открыть инструкцию</button></div>';
 }
 function introCheck() { if (MODE === 'client' && M && M.free && !LS.get('lf_wk_free_intro')) { LS.set('lf_wk_free_intro', '1'); sheet('С чего начать', introHtml()); } }
 window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; if (MODE === 'client' && M && S.view === 'home') rerenderKeep(); });
@@ -2962,6 +3021,46 @@ function helpHtml() {
     '<li>Завершили раньше времени – внизу «Снять отметку о выполнении», и продолжайте.</li>' +
     '<li>Пропал интернет – отмечайте дальше: всё сохраняется в телефоне и отправится само, когда связь появится. Вверху будет написано «есть несохранённое».</li></ul>' +
     '<button class="btn pri mt" data-act="close" style="margin-top:20px">Понятно</button></div>';
+}
+/** 3.6: инструкция по разделам – [заголовок, html]. Общие разделы берутся из helpHtml, у клиента FREE – свои вдобавок. */
+function helpSections() {
+  var raw = helpHtml().replace(/^<div class="help"><h2>[^<]*<\/h2>/, '').replace(/<button class="btn pri mt" data-act="close"[^>]*>[^<]*<\/button><\/div>$/, '');
+  var old = {}, order = [];
+  raw.split('<h3>').slice(1).forEach(function (x) { var i = x.indexOf('</h3>'); var t = x.slice(0, i); old[t] = x.slice(i + 5); order.push(t); });
+  var tabs = old['Вкладки внизу'];
+  if (tabs) old['Вкладки внизу'] = tabs.replace(/<\/ul>\s*$/, '<li><b>«Инструкция»</b> – все подсказки по разделам, открываются в любой момент.</li></ul>');
+  if (!M || !M.free) return order.map(function (t) { return [t, old[t]]; });
+  var L = [];
+  L.push(['С чего начать', '<p>Здесь Ваши 3 бесплатные тренировки. Первым делом добавьте приложение на экран телефона.</p>' + (old['Приложение на экране телефона'] || '') +
+    '<p>Дальше откройте тренировку на сегодня и нажмите <b>«Начать тренировку»</b>. Что делать на тренировке – в разделе «На тренировке».</p>']);
+  L.push(['Как открываются тренировки', '<ul><li>Тренировки открываются <b>по очереди</b>: каждая – за день до своей даты и после того, как выполнена предыдущая.</li>' +
+    '<li>Следующие видны в списке размытыми, с замком. Нажмите на них – увидите, когда откроются.</li>' +
+    '<li>Выполненная тренировка остаётся открытой, пока Вы не начнёте следующую. Начали следующую – прошлая закрывается. Результат сохранён, тренер его видит.</li>' +
+    '<li>Пропущенная тренировка закрывается через день после своей даты.</li>' +
+    '<li>Все 3 тренировки – за 7 дней' + (M.fend ? ', до ' + dMon(M.fend) : '') + '. В день тренировки бот пришлёт напоминание.</li></ul>']);
+  L.push(['Перенос тренировки', '<p>Не получается в свой день – перенесите тренировку сами: откройте её и нажмите <b>«Не получается сегодня? Перенести на другой день»</b> или нажмите на закрытую тренировку в списке → <b>«Перенести на другой день»</b>.</p><ul>' +
+    '<li>Новый день – не раньше сегодняшнего и не раньше следующего дня после предыдущей тренировки. Можно и подряд, день за днём.</li>' +
+    '<li>Все 3 тренировки нужно пройти за 7 дней от первой' + (M.fend ? ' – до ' + dMon(M.fend) : '') + '. Позже выбрать нельзя, приложение подскажет крайний день.</li>' +
+    '<li>Если следующая тренировка окажется в тот же день или раньше, она сама сдвинется на день позже. Например: первую перенесли с 25.10 на 27.10 – вторая сама встанет на 28.10.</li>' +
+    '<li>Начатую или выполненную тренировку перенести нельзя.</li>' +
+    '<li>Тренер получит уведомление о переносе.</li>' +
+    '<li>Порядок не меняется: тренировка откроется за день до своей новой даты.</li></ul>']);
+  L.push(['Перед тренировкой – разминка', '<p>5–7 минут суставной разминки: плавные вращения головой, плечами, локтями, кистями, тазом, коленями и стопами – по 8–10 раз в каждую сторону. Так суставы и мышцы готовы к нагрузке.</p>']);
+  if (old['На тренировке']) L.push(['На тренировке', old['На тренировке'] + '<p><b>Суперсет</b> – упражнения подряд без отдыха, отдых после круга. Между подходами отдыхайте 1–2 минуты.</p>']);
+  L.push(['Как подобрать вес', '<p>Вес подбирайте так, чтобы в запасе оставалось ещё <b>3–5 повторений</b>: последние повторы даются с усилием, но не «в упор» – тренируемся не до отказа.</p>' +
+    '<p>Начните с лёгкого и прибавляйте от подхода к подходу. В графу «Вес» впишите, с каким работали, – тренер подскажет, куда двигаться.</p>']);
+  if (old['Какие мышцы работают']) L.push(['Какие мышцы работают', old['Какие мышцы работают']]);
+  L.push(['Вопросы тренеру', '<ul><li><b>«Комментарий тренеру»</b> под упражнением – если что-то не получается, неудобно или нужен совет.</li><li><b>«Фото/видео тренеру»</b> – чтобы тренер проверил технику.</li>' +
+    '<li>Ответ придёт во вкладку <b>«Тренер»</b> и в Telegram.</li></ul>']);
+  if (old['Вкладки внизу']) L.push(['Вкладки внизу', old['Вкладки внизу']]);
+  if (old['Если что-то пошло не так']) L.push(['Если что-то пошло не так', old['Если что-то пошло не так']]);
+  return L;
+}
+function viewHelp() {
+  var L = helpSections();
+  return '<h1 class="hello">Инструкция</h1><p class="lead-p">Нажмите на раздел, чтобы открыть.</p><div class="help hsec">' + L.map(function (x, i) {
+    return '<details' + (i === 0 && !S.helpOpen ? ' open' : '') + '><summary><span>' + esc(x[0]) + '</span><i class="chv" aria-hidden="true">›</i></summary><div class="bd">' + x[1] + '</div></details>';
+  }).join('') + '</div>';
 }
 function runSets(it, i) {
   var u = it.sec ? 'Секунды' : 'Повторы';
@@ -3011,6 +3110,7 @@ function viewRun() {
   var h = '<button class="back" data-act="myHome">' + IC.back + 'Тренировки</button><h1 class="hello">' + titleOf(w) + '</h1>' +
     '<div class="meta"><span class="pill">' + cap(longDate(w.date)) + '</span><span class="pill" id="prog">Подходов: <b class="num">' + p.ok + '</b> из ' + p.tot + '</span>' +
     (w.ts && !w.done ? '<span class="pill ok">начата в ' + hm(w.ts) + '</span>' : '') + '</div>';
+  if (M.free && !w.done && !w.ts && !M.closed) h += '<button class="rst" data-act="fmoveForm" data-id="' + esc(w.id) + '">' + IC.cal + 'Не получается сегодня? Перенести на другой день</button>';   // 3.5
   if (canReset(w)) h += '<button class="rst" data-act="restart">' + IC.restart + 'Начали случайно? Сбросить и начать заново</button>';
   if (w.done) h += '<div class="banner done"><b>Тренировка выполнена ' + dm(w.doneAt || w.date) + (w.ts && w.te ? ' за ' + fmtDur((w.te - w.ts) / 60000) : '') + '.</b> Результат можно поправить, тренер увидит изменения.</div>';
   else if (!w.ts && !M.closed) h += '<div class="banner">Когда будете готовы, нажмите <b>«Начать тренировку»</b> внизу – пойдёт время. У каждого упражнения есть кнопки <b>«Видео»</b> и <b>«Описание»</b> – посмотрите технику перед первым подходом.</div>';
@@ -3230,7 +3330,7 @@ function paintBar() {
   if (MODE === 'client' && M && S.view === 'home') {                     // клиент: вкладки внизу
     var cu = msgUnread().length, cb = function (v, icon, t, n) { return '<button data-act="ctab" data-v="' + v + '" class="' + (S.ctab === v ? 'on' : '') + '">' + icon + '<span>' + t + '</span>' + (n ? '<i class="tb num">' + n + '</i>' : '') + '</button>'; };
     tabsEl.hidden = false;
-    tabsEl.innerHTML = '<nav style="grid-template-columns:repeat(3,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('aw', IC.award, 'Награды', 0) + '</nav>';
+    tabsEl.innerHTML = '<nav style="grid-template-columns:repeat(4,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('aw', IC.award, 'Награды', 0) + cb('help', IC.info, 'Инструкция', 0) + '</nav>';
   }
   barEl.hidden = !h; barEl.innerHTML = h ? '<div class="in">' + h + '</div>' : '';
 }
@@ -3250,7 +3350,7 @@ function render() {
   } else {
     if (!M) return;
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
-    h += S.view === 'run' ? viewRun() : S.ctab === 'coach' ? viewCoach() : S.ctab === 'aw' ? viewAw() : viewMy();
+    h += S.view === 'run' ? viewRun() : S.ctab === 'coach' ? viewCoach() : S.ctab === 'aw' ? viewAw() : S.ctab === 'help' ? viewHelp() : viewMy();
   }
   h += '<p class="ver">Lite Fit · тренировки ' + VERSION + '</p>';
   shell(MODE === 'trainer'); app.innerHTML = h; paintBar();
@@ -3309,7 +3409,8 @@ var ACT = {
   calPrev: function () { var d = pd(S.calM + '-01'); d.setMonth(d.getMonth() - 1); S.calM = ymd(d).slice(0, 7); rerenderKeep(); },
   calNext: function () { var d = pd(S.calM + '-01'); d.setMonth(d.getMonth() + 1); S.calM = ymd(d).slice(0, 7); rerenderKeep(); },
   calDay: function (b) { S.calDay = b.getAttribute('data-d'); rerenderKeep(); },
-  tplNew: function (b) { tplForm(b.getAttribute('data-set'), Number(b.getAttribute('data-n')) || 0); },
+  tplNew: function (b) { tplForm(b.getAttribute('data-set'), Number(b.getAttribute('data-n')) || 0, b.getAttribute('data-from') || ''); },
+  tplView: function (b) { tplView(b.getAttribute('data-id')); },
   tplPutForm: function (b) { if (S.dirty && S.view === 'edit') return toast('Сначала сохраните изменения', 'bad'); tplPutForm(b.getAttribute('data-id')); },
   tplPutGo: function (b) {
     var kinds = FSETS.map(function (s) { return s[0]; }).filter(function (k) { var e = document.getElementById('tpk_' + k); return e && e.checked; });
@@ -3673,9 +3774,20 @@ var ACT = {
   },
   video: function (b) { var it = runItemOf(b); if (!it) return; S.vid = S.vid === it.id ? '' : it.id; rerenderKeep(); },
   showDesc: function (b) { var it = runItemOf(b); if (!it) return; S.open['d' + it.id] = !S.open['d' + it.id]; rerenderKeep(); },
-  help: function () { sheet('Как пользоваться', helpHtml()); },
+  help: function () { if (MODE === 'client' && M) { S.ctab = 'help'; S.view = 'home'; S.run = null; closeSheet(); render(); window.scrollTo(0, 0); return; } sheet('Как пользоваться', helpHtml()); },   // 3.6: вкладка «Инструкция»
   introOk: function () { closeSheet(); },
   lockedW: function (b) { var w = myOf(b.getAttribute('data-id')); if (w) lockSheet(w); },
+  fmoveForm: function (b) { var w = myOf(b.getAttribute('data-id')); if (w) fmoveForm(w); },
+  fmoveGo: function (b) {
+    var d = val('fmDate'), id = b.getAttribute('data-id');
+    if (!isYmd(d)) return ferr('Выберите дату.');
+    b.disabled = true;
+    ccall('fmove', { id: id, date: d }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; return ferr(errText(r)); }
+      setMy(r); closeSheet(); if (S.view === 'run' && !myOf(S.run)) S.view = 'home'; render(); toast(r.msg || 'Перенесено');
+    });
+  },
   mOpen: function (b) { var it = runItemOf(b); if (!it) return; S.open['m' + it.id] = !S.open['m' + it.id]; medPaint(it.id); },
   mPick: function (b) {
     var w = myOf(S.run), it = runItemOf(b), m = b.getAttribute('data-m'); if (!w || !it || M.closed) return;
