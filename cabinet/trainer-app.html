@@ -791,7 +791,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.9';
-var PATCH = '.5';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
+var PATCH = '.7';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -1806,9 +1806,18 @@ function noCabCard(c) {
     (c.trialUsed ? '' : '<button class="btn pri" data-act="trialForm" style="height:48px">Включить пробный кабинет</button>') +
     '<button class="btn sec mt" data-act="createForm" style="height:48px">Перевести на PRO без пробного</button></div>';
 }
+/** 1.9.6: единый кабинет – ссылка на новый кабинет (один значок Lite Fit) и инструкция клиенту. */
+function newCabCard(c) {
+  if (c.arch || isFree(c) || c.tk === false) return '';                   // 1.9.7: только кабинет – значок уже Lite Fit
+  var nl = c.nl;
+  return '<div class="card"><h3>Новый кабинет Lite Fit</h3><p class="sub">' + (nl ? 'Ссылка отправлена ' + dm(nl.at) + (nl.by ? ' · ' + esc(nl.by) : '') + '. Клиент открывает её и добавляет Lite Fit на экран – вместо старого значка.'
+    : 'Кабинет и тренировки теперь – одно приложение со значком Lite Fit. Отправьте клиенту ссылку и инструкцию: он один раз добавит Lite Fit на экран, а старый значок «Тренировки» удалит.') + '</p>' +
+    '<div class="btns" style="margin-top:0">' + (c.bot ? '<button class="btn ' + (nl ? 'sec' : 'pri') + '" data-act="nlSend">' + (nl ? 'Отправить ещё раз' : 'Отправить ссылку на новый кабинет') + '</button>' : '') +
+    '<button class="btn sec" data-act="nlText">' + (c.bot ? 'Текст со ссылкой' : 'Сообщение со ссылкой – бот не подключён') + '</button></div></div>';
+}
 function subOver(c) {
-  if (!c.table) return alertsCard(c) + noCabCard(c) + aboutCard(c) + taskCard(c);
-  var h = alertsCard(c);
+  if (!c.table) return alertsCard(c) + noCabCard(c) + newCabCard(c) + aboutCard(c) + taskCard(c);
+  var h = alertsCard(c) + newCabCard(c);
   if (!c.start) return h + '<div class="card"><p class="muted" style="margin:0">В дневнике клиента нет дат. Напишите Артёму.</p></div>' + aboutCard(c) + taskCard(c);
   var list = [2, 1, 0].map(function (i) { return { y: ymd(T - i), i: i }; }).filter(function (x) { return dn(x.y) >= dn(c.start) && dn(x.y) <= dn(c.end); });
   if (!list.length) return h + '<div class="card"><p class="muted" style="margin:0">' + (T < dn(c.start) ? 'Ведение начнётся ' + longDate(c.start) + '. Данных пока нет.' : 'Дневник закончился ' + longDate(c.end) + '.') + '</p></div>' + weightBlock(c) + aboutCard(c) + taskCard(c);
@@ -2730,6 +2739,17 @@ var ACT = {
     var c = cur(), text = val('msgTxt');
     if (text.length < 2) return ferr('Напишите сообщение.');
     send('msg', { id: c.id, text: text }, { btn: t }).then(finish);
+  },
+  nlSend: function (t) {                                                    // 1.9.6
+    var c = cur(); if (!c) return;
+    send('newlink', { id: c.id, send: true }, { btn: t }).then(function (r) { if (!r) return; c.nl = r.nl || c.nl; done('Ссылка отправлена клиенту ' + (c.vk ? 'во ВКонтакте' : 'в бот')); });
+  },
+  nlText: function () {
+    var c = cur(); if (!c) return;
+    send('newlink', { id: c.id }, { wait: 'Готовлю ссылку…', title: 'Новый кабинет' }).then(function (r) {
+      if (!r) return;
+      render(); resultSheet('Ссылка на новый кабинет', esc(c.name) + '. Отправьте это сообщение туда, где клиент на связи. Ссылка ведёт в его кабинет: у FREE и BASIC без кабинета она сама откроет тренировки.', r);
+    });
   },
   cabLink: function () {
     var c = cur();

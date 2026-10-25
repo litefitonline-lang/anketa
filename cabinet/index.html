@@ -376,6 +376,18 @@ details.card[open]>summary{margin-bottom:12px}
 .sync.pend svg{color:var(--warm)}
 
 /* установка на экран */
+.wkf{position:fixed;inset:0;z-index:60;background:var(--bg);padding:var(--safe-t) 0 var(--safe-b)}
+.wkf iframe{display:block;width:100%;height:100%;border:0;background:var(--bg)}
+.nv{border-color:var(--accent)!important}
+.nv-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.nv h3{margin:0 0 6px;font-size:16px}
+.nv p{margin:0;font-size:14px;line-height:1.5}
+.nv ol{margin:8px 0 12px;padding-left:20px;font-size:14px;line-height:1.5}
+.nv ol li{margin:3px 0}
+.nv input{display:block;width:100%;height:40px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--muted);padding:0 12px;font:inherit;font-size:12.5px;margin:0 0 10px}
+.nv .btn{height:46px;font-size:15px}
+.nv .nv-n{margin-top:8px;font-size:12.5px;color:var(--muted)}
+.nv-x{flex:none;width:32px;height:32px;margin:-6px -6px 0 0;border-radius:50%;display:grid;place-items:center;color:var(--dim);font-size:22px;line-height:1;background:none;border:0;cursor:pointer}
 .install{display:flex;gap:12px;align-items:flex-start}
 .install .ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;color:var(--accent)}
 .install .ic svg{width:20px;height:20px}
@@ -456,7 +468,13 @@ details.card[open]>summary{margin-bottom:12px}
 'use strict';
 
 /* ================= НАСТРОЙКИ ================= */
-/* 3.1 (25.10.2026): единый кабинет, шаг 1 (сервер 4.3.5). Ссылка на кабинет – одна для всех форматов: у клиента без кабинета
+/* 3.3 (25.10.2026): единый кабинет, шаг 3 – «Открыть тренировки» открывает приложение тренировок внутри кабинета (на весь
+ * экран, поверх кабинета; «‹ Кабинет» и кнопка «назад» на Android возвращают обратно). Так тренировки остаются в одном окне
+ * и со старого значка кабинета на iPhone – переустанавливать его не нужно. Карточки «Есть новая версия» в кабинете больше нет
+ * (значок кабинета – уже Lite Fit); она осталась только у старого значка «Тренировки».
+ * 3.2 (25.10.2026): единый кабинет, шаг 2 – кабинет открыт со старого значка (как приложение, в адресе нет метки u=1 новой
+ * ссылки): вверху «Сегодня» карточка «Есть новая версия Lite Fit» – как заменить значок и «Скопировать ссылку». Крестик – скрыть.
+ * 3.1 (25.10.2026): единый кабинет, шаг 1 (сервер 4.3.5). Ссылка на кабинет – одна для всех форматов: у клиента без кабинета
  * с питанием (FREE, BASIC) сервер отвечает go:'wk' – страница сразу открывает тренировки по тому же ключу (и запоминает это,
  * следующий раз – без запроса); тренировки сами вернут клиента сюда, когда кабинет появится (перевели в START или PRO).
  * Ключ тренировок у клиента с кабинетом – go:'cab', страница открывается с ключом кабинета. Во вкладке «Тренировки» –
@@ -468,7 +486,7 @@ details.card[open]>summary{margin-bottom:12px}
  * «Прогресс», «Замеры», «Фото» – замок «в PRO», данные сохранены. «Вернуться в PRO» – заявка тренеру. У PRO и пробного – без изменений.
  * 2.9.0 (19.10.2026): баллы и медали – карточка вверху «Сегодня» и окно «Баллы и медали» (как начисляются, этот месяц,
  * все медали, главная награда из приложения тренировок – { a:'wk', op:'pts' }, нужен lite-fit-trenirovki 4.13). */
-var VERSION = '3.1';
+var VERSION = '3.3';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var LIM = { w: [30, 250, 'Вес'], kcal: [0, 10000, 'Калории'], p: [0, 1000, 'Белки'], f: [0, 1000, 'Жиры'], c: [0, 1500, 'Углеводы'], steps: [0, 100000, 'Шаги'] };
@@ -479,6 +497,7 @@ var TYPES = { 'Тренировка': '', 'Кардио': 'cardio', 'Созво�
 var qs = new URLSearchParams(location.search);
 var DEMO = qs.has('demo');
 var KEY = (qs.get('k') || '').trim().toLowerCase();
+var NV_NEW = qs.has('u');                                                   // 3.2: открыто по новой ссылке
 var LS = {
   get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
@@ -872,7 +891,7 @@ function refresh(first) {
     } else if (r && r.go === 'wk' && !DEMO) {                             // 3.1: кабинета с питанием нет – тренировки
       LS.set(WKO, '1'); LS.del(CACHE); toWk();
     } else if (r && r.go === 'cab' && r.k && !DEMO) {                     // 3.1: открыли ключом тренировок – ключ кабинета
-      LS.set('lf_k', r.k); location.replace(location.pathname + '?k=' + encodeURIComponent(r.k));
+      LS.set('lf_k', r.k); location.replace(location.pathname + '?k=' + encodeURIComponent(r.k) + (NV_NEW ? '&u=1' : ''));
     } else if (r && r.net) {
       paintSync();
       if (!D) screen('Нет связи', 'Проверьте интернет и попробуйте ещё раз.', true);
@@ -946,7 +965,7 @@ function proBtn(cls) {
 }
 /** 3.0: экраны кабинета BASIC – тренировки в приложении тренировок, остальное с замком «в PRO». */
 function viewBasic(tab) {
-  var open = '<a class="btn pri" href="../trening/?k=' + encodeURIComponent(KEY) + '">' + IC.train + 'Открыть тренировки</a>';
+  var open = '<button class="btn pri" data-act="wkOpen">' + IC.train + 'Открыть тренировки</button>';   // 3.3: внутри кабинета
   if (tab === 'today') return '<div class="banner trial"><b>Ваш формат – BASIC.</b> Тренировки продолжаются с тренером в приложении тренировок. Питание, вес, замеры и фото – в PRO: ' +
       'все Ваши данные сохранены и откроются, когда вернётесь.</div>' +
     '<div class="card"><h3>Тренировки</h3><p class="sub">Программа по датам, видео упражнений, отметки и комментарии тренеру.</p>' + open + '</div>' +
@@ -1019,7 +1038,7 @@ function paintTabs() {
 function render() {
   if (!D) return;
   paintTabs();
-  var body = basic() ? viewBasic(S.tab) : S.tab === 'train' ? viewTrain() : S.tab === 'prog' ? viewProg() : S.tab === 'meas' ? viewMeas() : S.tab === 'photo' ? viewPhoto() : viewToday();
+  var body = (basic() ? viewBasic(S.tab) : S.tab === 'train' ? viewTrain() : S.tab === 'prog' ? viewProg() : S.tab === 'meas' ? viewMeas() : S.tab === 'photo' ? viewPhoto() : viewToday());
   app.innerHTML = header() + '<div class="view">' + body + '</div>';
   var chip = $('.chips .on'); if (chip) chip.parentNode.scrollLeft = Math.max(chip.offsetLeft - chip.parentNode.offsetLeft - 24, 0);
   if (S.tab === 'photo') loadPhotoThumbs();
@@ -1040,6 +1059,48 @@ function curDay() {
   return S.day;
 }
 
+/* ---------- «Есть новая версия»: старый значок на экране (открыто как приложение по ссылке без метки новой версии) ---------- */
+function nvStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+function nvCard(link) {
+  if (!link || NV_NEW || !nvStandalone() || LS.get('lf_nv_hide') === '1') return '';
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var steps = ['Нажмите «Скопировать ссылку».', ios ? 'Откройте Safari, вставьте ссылку в адресную строку и откройте её.' : 'Откройте Chrome, вставьте ссылку в адресную строку и откройте её.',
+    ios ? 'Внизу «Поделиться» → «На экран „Домой“» → «Добавить».' : 'Меню ⋮ → «Добавить на главный экран» или «Установить приложение».',
+    ios ? 'Старый значок удалите: нажмите на него и подержите → «Удалить закладку».' : 'Старый значок удалите: нажмите на него и подержите → «Удалить».'];
+  return '<div class="card nv"><div class="nv-h"><h3>Есть новая версия Lite Fit</h3><button class="nv-x" data-act="nvHide" aria-label="Скрыть">×</button></div>' +
+    '<p>Кабинет и тренировки теперь – одно приложение со значком Lite Fit. Обновите значок на экране – это займёт минуту:</p>' +
+    '<ol>' + steps.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+    '<input id="nvLink" readonly value="' + esc(link) + '" aria-label="Ваша ссылка">' +
+    '<button class="btn pri" data-act="nvCopy">Скопировать ссылку</button>' +
+    '<p class="nv-n">Ссылка личная – не пересылайте её. Тренировки, сообщения тренера и данные кабинета сохранятся.</p></div>';
+}
+function nvCopy() {
+  var el = document.getElementById('nvLink'), v = el ? el.value : '';
+  var ok = function () { toast('Ссылка скопирована'); };
+  var fb = function () { try { el.focus(); el.select(); el.setSelectionRange(0, v.length); if (document.execCommand('copy')) return ok(); } catch (e) {} toast('Выделите ссылку и скопируйте её'); };
+  try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, fb); else fb(); } catch (e) { fb(); }
+}
+function nvHide() { LS.set('lf_nv_hide', '1'); }
+/* ---------- 3.3: тренировки внутри кабинета ---------- */
+function wkOpen() {
+  if (document.getElementById('wkf') || DEMO) return;
+  var d = document.createElement('div');
+  d.id = 'wkf'; d.className = 'wkf';
+  d.innerHTML = '<iframe src="../trening/?k=' + encodeURIComponent(KEY) + '&in=1" title="Тренировки" allow="clipboard-write; fullscreen; autoplay; camera" allowfullscreen></iframe>';
+  document.body.appendChild(d);
+  document.documentElement.style.overflow = 'hidden';
+  try { history.pushState({ wkf: 1 }, ''); } catch (e) {}
+}
+function wkClose(fromPop) {
+  var d = document.getElementById('wkf');
+  if (!d) return;
+  d.parentNode.removeChild(d);
+  document.documentElement.style.overflow = '';
+  if (!fromPop) { try { if (history.state && history.state.wkf) history.back(); } catch (e) {} }
+  ptsLoad(false);                                                          // тренировки могли добавить баллы
+}
+window.addEventListener('popstate', function () { if (document.getElementById('wkf')) wkClose(true); });
+window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.lf === 1 && e.data.type === 'wkClose') wkClose(false); });
 function viewToday() {
   var day = curDay(), v = byDate[day] || {}, list = editDays();
   var canEdit = list.some(function (x) { return x.ymd === day && x.ok; });
@@ -1274,7 +1335,7 @@ function viewTrain() {
   var done = past.filter(function (x) { return x.done; }).length;
   var h = '<h2 class="sec-title">Тренировки</h2>' +                                         // 3.1: приложение тренировок – в том же окне
     '<div class="card"><p class="sub" style="margin:0 0 12px">Тренировки с видео упражнений, отметками подходов и вопросами тренеру – в приложении тренировок.</p>' +
-    '<a class="btn pri" href="../trening/?k=' + encodeURIComponent(KEY) + '">' + IC.train + 'Открыть тренировки</a></div>';
+    '<button class="btn pri" data-act="wkOpen">' + IC.train + 'Открыть тренировки</button></div>';   // 3.3
   if (locked('plan')) return h + lockCard('План тренировок', 'В PRO тренер ставит ваши тренировки по датам: что делать и когда. В день тренировки бот присылает напоминание, а вы отмечаете выполнение и длительность.') + guidesCard();
   if (!plan.length) return h + '<div class="card"><p class="muted" style="margin:0">На ближайшие две недели тренер ещё не поставил тренировки. Как только план появится – он будет здесь, а в день тренировки придёт напоминание.</p></div>';
   if (past.length) h += '<div class="stats"><div class="stat hl"><div class="k">Выполнено</div><div class="v num">' + done + ' <small>из ' + past.length + '</small></div></div>' +
@@ -1909,6 +1970,9 @@ document.addEventListener('click', function (e) {
   else if (act === 'measFix') { S.measureFix = true; render(); }
   else if (act === 'measFixCancel') { S.measureFix = false; render(); }
   else if (act === 'collage') makeCollage();
+  else if (act === 'wkOpen') wkOpen();
+  else if (act === 'nvCopy') nvCopy();
+  else if (act === 'nvHide') { nvHide(); render(); }
   else if (act === 'hideInstall') { LS.set('lf_inst_hide', '1'); render(); }
   else if (act === 'howto') openHow();
   else if (act === 'hideHow') { LS.set('lf_how_hide', '1'); render(); }
