@@ -744,6 +744,7 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.9.2 (25.10.2026). FREE: в карточке клиента – «Заявка: хочет START / BASIC / PRO» (клиент нажал «Хочу …» в приложении тренировок).
  * 1.9.1 (25.10.2026). «Скопировано» в окне больше не растягивается на весь экран (общий кабинет); подпись над текстом
  *   («Готовое сообщение клиенту») стоит на своей плашке – прокручиваемый текст под неё не заезжает. FREE: подсказки – бот сам
  *   спрашивает клиента «в зале или дома» и ставит 3 тренировки (сервер тренировок 4.14.3).
@@ -789,7 +790,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '1.9';
-var PATCH = '.1';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
+var PATCH = '.2';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -2303,6 +2304,7 @@ function freeCard(x, fresh, inList) {
   if (x.phone) rows += kv('Телефон', '<a href="tel:' + esc(x.phone.replace(/[^\d+]/g, '')) + '" style="color:var(--accent);text-decoration:none">' + esc(x.phone) + '</a>');
   var st = '', cls = '';
   if (!fresh) {
+    if (fr.want) rows += kv('Заявка', '<span style="color:var(--accent);font-weight:800">🔥 хочет ' + esc(fr.want.fmt) + ' · ' + dm(fr.want.at) + '</span>');   // 1.9.2
     if (fr.wk) rows += kv('Тренировки', esc((fr.wk.place === 'дом' ? 'дома' : 'в зале') + ' · с ' + dm(fr.wk.start) + (fr.wk.by === 'клиент' ? ' · выбрал клиент' : '')));
     else rows += kv('Тренировки', '<span style="color:var(--warm)">набор не выбран</span>');
     if (!fr.given) { st = 'Доступ ещё не выдан'; cls = 'warm'; }
