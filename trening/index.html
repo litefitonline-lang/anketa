@@ -680,6 +680,13 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 /* 3.0: наборы FREE */
 .fsg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:6px}
 .fsg .card{margin:0}
+.ftop .medal.sm{width:52px}
+.shw h3{display:flex;align-items:center;gap:8px}
+.shw h3 svg{width:18px;height:18px;color:var(--dim)}
+.offer.rec{border-color:var(--accent)}
+.ofl{list-style:none;padding:0;margin:8px 0 14px}
+.ofl li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.45;margin-bottom:6px}
+.ofl li svg{flex:none;width:18px;height:18px;color:var(--accent);margin-top:2px}
 .hsec details{border:1px solid var(--line);border-radius:14px;background:var(--card);margin:0 0 10px}
 .hsec summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:0 16px;font-size:16px;font-weight:800}
 .hsec summary::-webkit-details-marker{display:none}
@@ -740,6 +747,10 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 3.8 (25.10.2026). Сервер 4.14.9. Шаг 4 – кабинет FREE: у клиента FREE вкладки «Тренировки», «Прогресс», «Тренер», «Что дальше»,
+ *   «Инструкция». Вверху «Тренировок» – прогресс «N из 3», сколько дней осталось и медаль «3 из 3». «Прогресс» – витрина
+ *   кабинета Lite Fit (питание и вес, графики, замеры и фото – «в START», шаги, гайды, итоги месяца – «в PRO»): размытые
+ *   примеры с замком и «Хочу START / PRO». «Что дальше» – START, BASIC и PRO с кнопками «Хочу …»: заявка тренеру.
  * 3.7 (25.10.2026). Сервер 4.14.8. «Наборы FREE»: если у номера есть своя тренировка, тренер кружком отмечает, какая приходит
  *   клиентам – своя или набора Lite Fit (удалять свою для этого не нужно).
  * 3.6 (25.10.2026). Сервер 4.14.7. «Наборы FREE»: у каждого номера – тренировка набора Lite Fit (не удаляется, смотреть,
@@ -856,7 +867,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '3.7';
+var VERSION = '3.8';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), barEl = document.getElementById('bar'), toastEl = document.getElementById('toast');
@@ -942,6 +953,8 @@ var IC = {
   sync: ic('<path d="M20 12a8 8 0 01-13.7 5.6M4 12a8 8 0 0113.7-5.6"/><path d="M18 3v4h-4M6 21v-4h4"/>', 1.8),
   check2: ic('<path d="M2.5 12.5l4 4L15 8M10 15.5l1 1L21.5 8"/>', 2.2), reply: ic('<path d="M10 8L5 12.5l5 4.5"/><path d="M5.5 12.5H14a5 5 0 015 5V19"/>', 2),
   coach: ic('<circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.8 3.4-6 7-6s6.4 2.2 7 6"/><path d="M16.5 3.8l1.6-1.3M18.8 6.3l1.9-.4"/>', 1.8),
+  chart: ic('<path d="M4 19.5h16"/><path d="M5.5 15.5l4-4.5 3.5 3 5.5-7"/>', 2),
+  next: ic('<path d="M5 12h13"/><path d="M13 6.5l5.5 5.5-5.5 5.5"/>', 2),
   award: ic('<circle cx="12" cy="14.5" r="5.5"/><path d="M8.5 10L6 3h4l2 4.5L14 3h4l-2.5 7"/><path d="M12 12.3l.8 1.6 1.7.2-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.2z"/>', 1.6),
   edit: ic('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>', 1.8), link: ic('<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>', 1.8)
 };
@@ -2492,7 +2505,7 @@ function setMy(r) {
   var keep = {};
   if (M) M.list.forEach(function (w) { if (PEND[w.id] && w.items) keep[w.id] = w; });           // несохранённое не затираем ответом сервера
   var rdWas = {}; if (M && M.msgs) M.msgs.forEach(function (m) { if (m.rd) rdWas[m.id] = m.rd; });
-  M = { free: !!r.free, fend: r.fend || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
+  M = { free: !!r.free, fend: r.fend || '', fwant: r.fwant || null, fowner: r.fowner || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
     pay: r.pay || '', aw: r.aw || null, tg: r.tg || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
@@ -2646,7 +2659,8 @@ function viewMy() {
       (pk.f ? '<p class="note" style="margin:6px 0 0">С учётом заморозки ' + daysWord(pk.f) + '.</p>' : '') +
       (M.pay && M.pay >= pk.s && M.pay >= TODAY ? '<p class="pk-pay">Оплата следующего пакета – <b>' + dMon(M.pay) + '</b></p>' : '') + awStrip() + '</div>';
     h += '<div class="meta"><span class="pill">Всего выполнено тренировок: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
-  } else h += '<div class="meta"><span class="pill">Всего: <b class="num">' + M.total + '</b></span><span class="pill">Выполнено: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
+  } else if (!M.free) h += '<div class="meta"><span class="pill">Всего: <b class="num">' + M.total + '</b></span><span class="pill">Выполнено: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
+  if (M.free) h += freeTop(true);                                           // 3.8: FREE – N из 3, дни, медаль
   h += coachBanner() + installCard() + tgCard();
   if (M.closed) h += '<div class="banner warn">Ведение завершено: тренировки открыты для просмотра, новые отметки не принимаются.</div>';
   h += '<h2 class="sec-title" style="margin-top:0">Сегодня, ' + dMon(TODAY) + '</h2>';
@@ -3036,6 +3050,50 @@ function helpHtml() {
     '<li>Пропал интернет – отмечайте дальше: всё сохраняется в телефоне и отправится само, когда связь появится. Вверху будет написано «есть несохранённое».</li></ul>' +
     '<button class="btn pri mt" data-act="close" style="margin-top:20px">Понятно</button></div>';
 }
+/* ---------- 3.8: кабинет FREE – прогресс, витрина, «Что дальше» ---------- */
+function freeStat() {
+  var done = M.list.filter(function (w) { return w.done; }).length, left = M.fend ? Math.round((pd(M.fend) - pd(TODAY)) / 864e5) + 1 : 0;
+  return { done: Math.min(done, 3), left: left, over: !!M.fend && TODAY > M.fend, all: done >= 3 };
+}
+function freeTop(btn) {
+  var f = freeStat(), pc = Math.round(f.done * 100 / 3);
+  var sub = f.all ? 'Все 3 тренировки выполнены. Отличное начало!' : f.over ? 'Срок FREE закончился – выполнено ' + f.done + ' из 3.' : 'Выполните все 3 до ' + dMon(M.fend) + ' – и медаль Ваша.';
+  return '<div class="card ftop"><div class="aw-row">' + medalSvg('sm', !f.all) + '<span class="mn"><b>' + (f.all ? 'Медаль «3 из 3» – Ваша!' : 'Медаль «3 из 3»') + '</b><small>' + sub + '</small></span></div>' +
+    '<div class="pk-bar" style="margin-top:12px"><i style="width:' + pc + '%"></i></div><div class="pk-n"><span>Выполнено <b class="num">' + f.done + '</b> из 3</span><span>' +
+    (f.all || f.over ? 'FREE завершён' : f.left > 0 ? 'осталось ' + daysWord(f.left) : '') + '</span></div>' +
+    (btn && (f.all || f.over) ? '<button class="btn pri mt" data-act="ctab" data-v="next">' + IC.next + 'Что дальше</button>' : '') + '</div>';
+}
+/** Размытый пример раздела кабинета: заголовок, замок, формат, «Хочу …». */
+function showCard(t, fmt, sub, body) {
+  return '<div class="card shw"><div class="fs-h"><h3>' + IC.lock + esc(t) + '</h3><span class="pill warn">в ' + fmt + '</span></div><p class="sub">' + sub + '</p>' +
+    '<div class="lkprev" aria-hidden="true">' + body + '</div>' + wantBtn(fmt, 'sec') + '</div>';
+}
+function wantBtn(fmt, cls) {
+  var on = M.fwant && M.fwant.fmt === fmt;
+  return '<button class="btn ' + (on ? 'sec' : cls || 'pri') + '" data-act="fwant" data-f="' + fmt + '"' + (on ? ' disabled' : '') + '>' + (on ? 'Заявка на ' + fmt + ' отправлена ✓' : 'Хочу ' + fmt) + '</button>';
+}
+function viewShow() {
+  var bars = function (a) { return '<div class="rows">' + a.map(function (x) { return '<div class="row" style="min-height:0;padding:8px 0"><span class="mn"><b>' + x[0] + '</b><small>' + x[1] + '</small></span></div>'; }).join('') + '</div>'; };
+  var chart = '<svg viewBox="0 0 300 90" style="width:100%;height:90px"><polyline points="0,20 40,28 80,26 120,40 160,46 200,52 240,62 300,70" fill="none" stroke="var(--accent)" stroke-width="3"/><line x1="0" y1="88" x2="300" y2="88" stroke="var(--line2)"/></svg>';
+  return '<h1 class="hello">Прогресс</h1><p class="lead-p">Так выглядит кабинет Lite Fit на полном сопровождении. В FREE эти разделы закрыты – они открываются в START и PRO.</p>' +
+    showCard('Дневник питания и вес', 'START', 'Норма КБЖУ под Вашу цель, дневник питания и вес каждый день.', bars([['Калории', '1 840 из 1 900 ккал'], ['Белки', '112 из 120 г'], ['Вес', '78,4 кг · −1,2 кг за 2 недели']])) +
+    showCard('Графики', 'START', 'Как меняются вес, питание и дисциплина – на графиках.', chart) +
+    showCard('Замеры и фото', 'START', 'Стартовые замеры и фото – чтобы видеть изменения, а не гадать.', bars([['Талия', '84 → 80 см'], ['Бёдра', '101 → 98 см'], ['Фото', 'спереди, сбоку, сзади']])) +
+    showCard('Шаги, гайды, итоги месяца', 'PRO', 'Норма шагов, гайды по разминке, растяжке и питанию, итоги месяца с коллажем фото.', bars([['Шаги', '8 400 из 8 000'], ['Гайды', 'разминка, растяжка, питание'], ['Итоги октября', 'тренировок 12 · −2,1 кг']])) +
+    '<button class="btn sec" data-act="ctab" data-v="next" style="margin-top:4px">' + IC.next + 'Сравнить форматы</button>';
+}
+function viewNext() {
+  var w = M.fwant, offer = function (fmt, tag, t, list, rec) {
+    return '<div class="card offer' + (rec ? ' rec' : '') + '"><div class="fs-h"><h3>' + fmt + '</h3><span class="pill' + (rec ? ' ok' : '') + '">' + tag + '</span></div><p class="sub">' + t + '</p>' +
+      '<ul class="ofl">' + list.map(function (x) { return '<li>' + IC.check + '<span>' + x + '</span></li>'; }).join('') + '</ul>' + wantBtn(fmt, rec ? 'pri' : 'sec') + '</div>';
+  };
+  return '<h1 class="hello">Что дальше</h1>' + freeTop(false) +
+    (w ? '<div class="banner done"><b>Заявка на ' + esc(w.fmt) + ' отправлена ' + dm(w.at) + '.</b> Тренер' + (M.fowner ? ' ' + esc(M.fowner) : '') + ' напишет Вам и всё расскажет. Передумали – выберите другой формат.</div>'
+      : '<p class="lead-p">Понравилось? Продолжайте с тренером: выберите формат – тренер' + (M.fowner ? ' ' + esc(M.fowner) : '') + ' получит заявку, напишет Вам и всё расскажет. Ссылка, бот и все тренировки останутся теми же.</p>') +
+    offer('START', 'следующий шаг · 14 дней', 'Не просто начать тренироваться. Начать так, чтобы продолжить.', ['Индивидуальная программа в приложении', '4–6 тренировок с поддержкой тренера', 'Дневник питания и вес, стартовые замеры и фото', 'Корректировка программы по ходу', 'Финальный разбор и рекомендация, как двигаться дальше'], true) +
+    offer('BASIC', 'тренировки', 'Полноценное сопровождение тренировок.', ['Программа под Вашу цель и тренировки по пакету', 'Тренер видит каждую тренировку и отвечает на комментарии', 'Нагрузка растёт вместе с Вами', 'Медали за дисциплину и скидка на следующие пакеты']) +
+    offer('PRO', 'тренировки + питание', 'Тренировки, питание и расширенное сопровождение.', ['Всё из BASIC', 'Норма КБЖУ и дневник питания', 'Вес, графики, контрольные замеры и фото', 'Шаги, гайды и итоги месяца']);
+}
 /** 3.6: инструкция по разделам – [заголовок, html]. Общие разделы берутся из helpHtml, у клиента FREE – свои вдобавок. */
 function helpSections() {
   var raw = helpHtml().replace(/^<div class="help"><h2>[^<]*<\/h2>/, '').replace(/<button class="btn pri mt" data-act="close"[^>]*>[^<]*<\/button><\/div>$/, '');
@@ -3066,7 +3124,9 @@ function helpSections() {
   if (old['Какие мышцы работают']) L.push(['Какие мышцы работают', old['Какие мышцы работают']]);
   L.push(['Вопросы тренеру', '<ul><li><b>«Комментарий тренеру»</b> под упражнением – если что-то не получается, неудобно или нужен совет.</li><li><b>«Фото/видео тренеру»</b> – чтобы тренер проверил технику.</li>' +
     '<li>Ответ придёт во вкладку <b>«Тренер»</b> и в Telegram.</li></ul>']);
-  if (old['Вкладки внизу']) L.push(['Вкладки внизу', old['Вкладки внизу']]);
+  L.push(['Вкладки внизу', '<ul><li><b>«Тренировки»</b> – Ваши 3 тренировки, прогресс «N из 3» и медаль.</li><li><b>«Прогресс»</b> – как выглядит кабинет Lite Fit на полном сопровождении: питание, вес, замеры, фото (открываются в START и PRO).</li>' +
+    '<li><b>«Тренер»</b> – ответы на Ваши комментарии и сообщения тренера.</li><li><b>«Что дальше»</b> – форматы START, BASIC и PRO. Нажмите «Хочу …» – тренер получит заявку и напишет Вам.</li><li><b>«Инструкция»</b> – эта страница.</li></ul>']);
+  L.push(['Что дальше после FREE', '<p>Во вкладке <b>«Что дальше»</b> – форматы START, BASIC и PRO. Нажмите <b>«Хочу …»</b> у подходящего – тренер получит заявку и напишет Вам. Ссылка, бот и все тренировки останутся теми же.</p>']);
   if (old['Если что-то пошло не так']) L.push(['Если что-то пошло не так', old['Если что-то пошло не так']]);
   return L;
 }
@@ -3344,7 +3404,8 @@ function paintBar() {
   if (MODE === 'client' && M && S.view === 'home') {                     // клиент: вкладки внизу
     var cu = msgUnread().length, cb = function (v, icon, t, n) { return '<button data-act="ctab" data-v="' + v + '" class="' + (S.ctab === v ? 'on' : '') + '">' + icon + '<span>' + t + '</span>' + (n ? '<i class="tb num">' + n + '</i>' : '') + '</button>'; };
     tabsEl.hidden = false;
-    tabsEl.innerHTML = '<nav style="grid-template-columns:repeat(4,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('aw', IC.award, 'Награды', 0) + cb('help', IC.info, 'Инструкция', 0) + '</nav>';
+    tabsEl.innerHTML = M.free ? '<nav style="grid-template-columns:repeat(5,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('show', IC.chart, 'Прогресс', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('next', IC.next, 'Что дальше', 0) + cb('help', IC.info, 'Инструкция', 0) + '</nav>'
+      : '<nav style="grid-template-columns:repeat(4,1fr)">' + cb('w', IC.base, 'Тренировки', 0) + cb('coach', IC.coach, 'Тренер', cu) + cb('aw', IC.award, 'Награды', 0) + cb('help', IC.info, 'Инструкция', 0) + '</nav>';
   }
   barEl.hidden = !h; barEl.innerHTML = h ? '<div class="in">' + h + '</div>' : '';
 }
@@ -3364,7 +3425,7 @@ function render() {
   } else {
     if (!M) return;
     if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
-    h += S.view === 'run' ? viewRun() : S.ctab === 'coach' ? viewCoach() : S.ctab === 'aw' ? viewAw() : S.ctab === 'help' ? viewHelp() : viewMy();
+    h += S.view === 'run' ? viewRun() : S.ctab === 'coach' ? viewCoach() : S.ctab === 'aw' ? viewAw() : S.ctab === 'help' ? viewHelp() : S.ctab === 'show' && M.free ? viewShow() : S.ctab === 'next' && M.free ? viewNext() : viewMy();
   }
   h += '<p class="ver">Lite Fit · тренировки ' + VERSION + '</p>';
   shell(MODE === 'trainer'); app.innerHTML = h; paintBar();
@@ -3802,6 +3863,15 @@ var ACT = {
   help: function () { if (MODE === 'client' && M) { S.ctab = 'help'; S.view = 'home'; S.run = null; closeSheet(); render(); window.scrollTo(0, 0); return; } sheet('Как пользоваться', helpHtml()); },   // 3.6: вкладка «Инструкция»
   introOk: function () { closeSheet(); },
   lockedW: function (b) { var w = myOf(b.getAttribute('data-id')); if (w) lockSheet(w); },
+  fwant: function (b) {
+    var f = b.getAttribute('data-f');
+    b.disabled = true; b.textContent = 'Отправляю заявку…';
+    ccall('fwant', { fmt: f }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = 'Хочу ' + f; return toast(errText(r), 'bad'); }
+      M.fwant = r.fwant; pendSave(); rerenderKeep(); toast(r.msg || 'Заявка отправлена');
+    });
+  },
   fmoveForm: function (b) { var w = myOf(b.getAttribute('data-id')); if (w) fmoveForm(w); },
   fmoveGo: function (b) {
     var d = val('fmDate'), id = b.getAttribute('data-id');
