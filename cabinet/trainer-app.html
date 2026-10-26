@@ -744,6 +744,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.9.8 (26.10.2026). FREE: в карточке клиента – «Подписка на канал»: есть / нет / отписался (lite-fit-trainer 3.11.7, бот
+ *   проверяет подписку сам – lite-fit-trenirovki 4.20.0).
  * 1.9.3 (25.10.2026). Перевод в START: окно называется «START – кабинет на 14 дней», без слова «пробный».
  * 1.9.2 (25.10.2026). FREE: в карточке клиента – «Заявка: хочет START / BASIC / PRO» (клиент нажал «Хочу …» в приложении тренировок).
  * 1.9.1 (25.10.2026). «Скопировано» в окне больше не растягивается на весь экран (общий кабинет); подпись над текстом
@@ -2319,6 +2321,8 @@ function freeCard(x, fresh, inList) {
   if (!fresh) {
     if (fr.want) rows += kv('Заявка', '<span style="color:var(--accent);font-weight:800">🔥 хочет ' + esc(fr.want.fmt) + ' · ' + dm(fr.want.at) + '</span>');   // 1.9.2
     if (fr.wk) rows += kv('Тренировки', esc((fr.wk.place === 'дом' ? 'дома' : 'в зале') + ' · с ' + dm(fr.wk.start) + (fr.wk.by === 'клиент' ? ' · выбрал клиент' : '')));
+    if (fr.sub) rows += kv('Подписка на канал', fr.sub.s === 'yes' ? '<span style="color:var(--accent)">есть</span>'   // 1.9.8
+      : '<span style="color:var(--warm)">' + (fr.sub.s === 'left' ? 'отписался(лась)' : 'нет') + (fr.sub.at ? ' · ' + esc(fr.sub.at.slice(0, 5)) : '') + ' – бот ждёт подписку</span>');
     else rows += kv('Тренировки', '<span style="color:var(--warm)">набор не выбран</span>');
     if (!fr.given) { st = 'Доступ ещё не выдан'; cls = 'warm'; }
     else if (fr.mode === 'cab' && !x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' – ссылка на кабинет'; cls = 'ok'; }
