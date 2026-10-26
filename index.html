@@ -37,6 +37,10 @@
 @media (max-width:360px){#lf-anketa .lf-dot{width:38px!important;height:31px!important}#lf-anketa .lf-link{margin:0 3px!important}}
 #lf-anketa .lf-note{margin:-8px 0 20px!important;padding:14px 16px!important;border-radius:16px!important;border:1px solid #2A4B4D!important;background:rgba(62,214,206,.05)!important;font-size:14px!important;line-height:1.5!important}
 #lf-anketa .lf-note b{color:#3ED6CE!important;font-weight:700!important}
+#lf-anketa .lf-sub{margin:0 0 22px!important;border-color:#3ED6CE!important;background:rgba(62,214,206,.08)!important;box-shadow:0 0 22px -10px rgba(62,214,206,.55)!important}
+#lf-anketa .lf-sub p{margin:0 0 8px!important;color:#C9D6D7!important}
+#lf-anketa .lf-sub p.lf-sub-t{font-size:15.5px!important;margin-bottom:6px!important}
+#lf-anketa .lf-sub .lf-sub-b{display:flex!important;width:100%!important;margin-top:12px!important;text-decoration:none!important}
 
 /* заголовок шага */
 #lf-anketa .lf-title{font-size:clamp(26px,7.4vw,32px)!important;line-height:1.15!important;font-weight:800!important;letter-spacing:-.02em!important;margin-bottom:10px!important}
@@ -137,7 +141,7 @@ var CONFIG = {
   tgUrl: "https://t.me/lite_fit_online",
   maxUrl: "https://max.ru/join/BkXc82YgFe0TWviNnV1Nksk87Oi8FGVYEr8cqrwchjc",
   // версия страницы анкеты
-  version: "4.1",
+  version: "4.2",
   // ID полей Google Формы (entry.…)
   ids: {
     email:        "emailAddress",
@@ -240,7 +244,7 @@ var STEPS = [
       {key:"nutritionNote", type:"note", when:function(){ return (state.expect||[]).indexOf(NUTRITION)!==-1; },
        html:"Вы отметили питание – оно входит в формат <b>PRO</b>. Можно начать сразу с него, а можно пройти START и перейти в PRO после финального разбора. Сомневаетесь – выберите «Не знаю», тренер подскажет."},
       {key:"format", type:"radio", plan:true, aria:"Формат ведения", req:true, options:[
-        {value:"3 тренировки бесплатно", tag:"FREE", badge:"бесплатно", label:"3 тренировки, чтобы попробовать", sub:"Ссылку на тренировки тренер пришлёт в Telegram"},
+        {value:"3 тренировки бесплатно", tag:"FREE", badge:"бесплатно", label:"3 тренировки, чтобы попробовать", sub:"Ссылку на тренировки тренер пришлёт в Telegram. Условие одно – подписка на наш канал"},
         {value:"Lite Fit START - первый шаг на 14 дней", tag:"START", badge:"14 дней", label:"Первый шаг к тренировкам"},
         {value:"BASIC - полноценное сопровождение тренировок", tag:"BASIC", label:"Полноценное сопровождение тренировок"},
         {value:"PRO - тренировки + питание + расширенное сопровождение", tag:"PRO", label:"Тренировки, питание и расширенное сопровождение"},
@@ -271,7 +275,8 @@ var STEPS = [
         {key:"weight", label:"Вес, кг"},
         {key:"targetWeight", label:"Желаемый вес, кг"}
       ]},
-      {key:"repost", type:"text", label:"Ссылка на репост", when:isFree, hint:"Если поделились постом Lite Fit у себя – вставьте ссылку на него", ph:"https://…"},
+      {key:"subTg", type:"sub", when:function(){ return isFree() && !state.noTg; }},   // 4.2: условие FREE – подписка на канал
+      {key:"repost", type:"text", label:"Ссылка на репост", when:isFree, hint:"Поделились постом Lite Fit у себя? Вставьте ссылку на него", ph:"https://…"},
       {key:"offer", type:"consent", req:true, value:"Ознакомлен"}
     ]}
 ];
@@ -305,6 +310,7 @@ function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&
 var ICON = {
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="#3ED6CE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  tgDark:'<svg viewBox="0 0 24 24" fill="none" stroke="#04211F" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 4.5L2.8 11.3c-.8.3-.8 1.4 0 1.7l4.6 1.5 1.8 5.4c.2.7 1.1.9 1.6.4l2.6-2.5 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3z"/><path d="M7.4 14.5l10-6.5-7.6 7.6"/></svg>',
   tg:'<svg viewBox="0 0 24 24" fill="none" stroke="#3ED6CE" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 4.5L2.8 11.3c-.8.3-.8 1.4 0 1.7l4.6 1.5 1.8 5.4c.2.7 1.1.9 1.6.4l2.6-2.5 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3z"/><path d="M7.4 14.5l10-6.5-7.6 7.6"/></svg>',
   max:'<svg viewBox="0 0 24 24" fill="none" stroke="#3ED6CE" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5c4.7 0 8.5 3.4 8.5 7.7s-3.8 7.7-8.5 7.7c-1 0-2-.2-2.9-.4L4.5 20.5l1.2-3.7c-1.4-1.4-2.2-3.3-2.2-5.4 0-4.4 3.8-7.9 8.5-7.9z"/></svg>'
 };
@@ -359,6 +365,11 @@ function qWrap(f){
 function renderField(f){
   if (f.when && !f.when()) return document.createDocumentFragment();
   if (f.type==="note"){ return el("p",{class:"lf-note"}, f.html); }
+  if (f.type==="sub"){                                                     // 4.2: FREE – подписка на канал
+    var sb = el("div",{class:"lf-note lf-sub"}, "<p class=\"lf-sub-t\"><b>Условие одно – подписка на наш Telegram-канал</b></p><p>Там советы по тренировкам и питанию. Подпишитесь сейчас – бот проверит подписку и сразу откроет Ваши 3 тренировки.</p>");
+    if (CONFIG.tgUrl) sb.appendChild(el("a",{class:"lf-btn lf-primary lf-sub-b",href:CONFIG.tgUrl,target:"_blank",rel:"noopener"}, ICON.tgDark+"Подписаться на канал"));
+    return sb;
+  }
   var q = qWrap(f);
   var err = el("p",{class:"lf-err"});
 
@@ -458,7 +469,7 @@ function renderField(f){
 function validate(){
   var ok = true, first = null;
   STEPS[step].fields.forEach(function(f){
-    if (f.type==="note" || (f.when && !f.when())) return;
+    if (f.type==="note" || f.type==="sub" || (f.when && !f.when())) return;
     var q = root.querySelector('.lf-q[data-key="'+f.key+'"]'); var msg = "";
     var v = state[f.key];
     if (f.req){
@@ -483,7 +494,7 @@ function validate(){
 function buildPayload(){
   var p = new URLSearchParams(), ids = CONFIG.ids;
   STEPS.forEach(function(s){ s.fields.forEach(function(f){
-    if (f.type==="note" || f.type==="toggle" || (f.when && !f.when())) return;
+    if (f.type==="note" || f.type==="sub" || f.type==="toggle" || (f.when && !f.when())) return;
     if (f.type==="params"){ f.items.forEach(function(it){ var v=(state[it.key]||"").trim(); if (v && ids[it.key]) p.append(ids[it.key], v); }); return; }
     var id = ids[f.key], v = state[f.key]; if (!id || v==null || v==="") return;
     if (f.type==="consent"){ if (v) p.append(id, f.value); return; }
@@ -518,10 +529,12 @@ function done(){
   w.appendChild(el("div",{class:"lf-done-ico"}, ICON.check));
   w.appendChild(el("h2",{class:"lf-title"}, "Анкета отправлена"));
   var hi = name ? esc(name)+", спасибо! " : "Спасибо! ";
-  w.appendChild(el("p",{class:"lf-lead"}, isFree()
-    ? hi + "Тренер проверит анкету и пришлёт Вам в Telegram ссылку на бота Lite Fit – через него откроются Ваши 3 тренировки. А пока подпишитесь на наш канал – там полезное о тренировках."
+  var freeTg = isFree() && !state.noTg;                                     // 4.2
+  w.appendChild(el("p",{class:"lf-lead"}, freeTg
+    ? hi + "Тренер проверит анкету и пришлёт Вам в Telegram ссылку на бота Lite Fit – через него откроются Ваши 3 тренировки. Условие одно – подписка на наш Telegram-канал: подпишитесь сейчас, и бот сразу откроет тренировки."
+    : isFree() ? hi + "Тренер проверит анкету и свяжется с Вами удобным для Вас способом – пришлёт ссылку, по которой откроются Ваши 3 тренировки."
     : hi + "Тренер изучит Ваши ответы и напишет Вам в Telegram, чтобы обсудить цель и формат. А пока загляните в наши каналы – там полезное о тренировках."));
-  if (CONFIG.tgUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.tgUrl,target:"_blank",rel:"noopener"}, ICON.tg+"Канал в Telegram"));
+  if (CONFIG.tgUrl) w.appendChild(el("a",{class:"lf-btn " + (freeTg ? "lf-primary" : "lf-secondary"),href:CONFIG.tgUrl,target:"_blank",rel:"noopener"}, (freeTg ? ICON.tgDark + "Подписаться на канал" : ICON.tg + "Канал в Telegram")));
   if (CONFIG.maxUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.maxUrl,target:"_blank",rel:"noopener"}, ICON.max+"Канал в MAX"));
   if (CONFIG.siteUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.siteUrl}, "Вернуться на сайт"));
   root.appendChild(w); scrollTop();
