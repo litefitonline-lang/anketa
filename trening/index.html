@@ -225,6 +225,8 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .row.lkb{cursor:pointer;width:100%;text-align:left}
 .blurl{display:block;margin-top:4px;font-size:12px;color:var(--muted);filter:blur(4px);user-select:none;-webkit-user-select:none;white-space:nowrap;overflow:hidden}
 .lkprev{filter:blur(6px);user-select:none;-webkit-user-select:none;pointer-events:none;margin:6px 0 14px;opacity:.8}
+.card.subc{border-color:var(--accent);box-shadow:0 0 22px -10px var(--glow)}
+.card.subc .sub{margin:4px 0 14px}
 .card.install.pulse{border-color:var(--accent);animation:instPulse 1.8s ease-in-out infinite}
 @keyframes instPulse{0%,100%{box-shadow:0 0 0 0 rgba(62,214,206,0)}50%{box-shadow:0 0 0 6px rgba(62,214,206,.28)}}
 @media (prefers-reduced-motion:reduce){.card.install.pulse{animation:none}}
@@ -445,6 +447,11 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .tmr small{font-size:11px;color:var(--muted)}
 .rst{display:inline-flex;align-items:center;gap:6px;min-height:40px;margin:-4px 0 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 .rst svg{width:16px;height:16px}
+/* 4.5: перенос у клиента FREE – заметная кнопка */
+.rst.mv{display:flex;justify-content:center;width:100%;min-height:48px;margin:0 0 14px;padding:0 14px;border:1.5px solid var(--accent);border-radius:14px;background:rgba(62,214,206,.1);color:var(--accent);font-size:14.5px;font-weight:800;text-align:center;box-shadow:0 0 18px -8px var(--glow)}
+.rst.mv svg{width:18px;height:18px;flex:none}
+.rst.mv:active{filter:brightness(.9)}
+.btn.mv{border:1.5px solid var(--accent);color:var(--accent);background:rgba(62,214,206,.1);box-shadow:0 0 18px -8px var(--glow)}
 .topr{display:flex;align-items:center;gap:4px}
 .nv{border-color:var(--accent)!important}
 .nv-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -771,6 +778,14 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.6 (26.10.2026). Сервер 4.20.0. FREE: условие – подписка на канал. Отписался – следующая тренировка закрыта (st 'sub'):
+ *   в списке «откроется после подписки на канал», вверху карточка «Подпишитесь снова» с кнопками «Подписаться» (M.fch – канал
+ *   Telegram или сообщество ВКонтакте) и «Я подписался(лась)» – { op:'fsub' }, проверка сразу. В инструкции – про условие.
+ * 4.5 (26.10.2026). Сервер 4.19.3. Клиент FREE: «Перенести на другой день» – яркая бирюзовая кнопка (в тренировке и в окне
+ *   закрытой). «Перенести» срабатывает сразу: окно закрывается, даты меняются в списке, запрос уходит в фоне; не получилось –
+ *   даты возвращаются и показывается ошибка. Тренировку нельзя поставить раньше дня по расписанию (календарь – с fmin от
+ *   сервера). Видео упражнения само встаёт на паузу, когда его пролистали (видно меньше трети), и продолжается, когда к нему
+ *   вернулись; видео Rutube / VK / YouTube – выгружается и загружается снова. Запустили одно видео – другие на паузе.
  * 4.4 (25.10.2026). Сервер 4.19.2. Единый кабинет, шаг 3: открыта внутри кабинета (?in=1) – вверху «‹ Кабинет» закрывает
  *   тренировки и возвращает в кабинет (сообщение кабинету), карточки «Есть новая версия» и «Добавьте на экран» не показываются.
  * 4.3 (25.10.2026). Сервер 4.19.1. Единый кабинет, шаг 2: приложение открыто со старого значка (как приложение, в адресе нет
@@ -906,7 +921,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.4';
+var VERSION = '4.6';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -2637,7 +2652,7 @@ function setMy(r) {
   var keep = {};
   if (M) M.list.forEach(function (w) { if (PEND[w.id] && w.items) keep[w.id] = w; });           // несохранённое не затираем ответом сервера
   var rdWas = {}; if (M && M.msgs) M.msgs.forEach(function (m) { if (m.rd) rdWas[m.id] = m.rd; });
-  M = { fmt: r.fmt || '', cabk: r.cabk || '', free: !!r.free, fend: r.fend || '', fwant: r.fwant || null, fowner: r.fowner || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
+  M = { fmt: r.fmt || '', cabk: r.cabk || '', fch: r.fch || null, free: !!r.free, fend: r.fend || '', fwant: r.fwant || null, fowner: r.fowner || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
     pay: r.pay || '', aw: r.aw || null, tg: r.tg || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
@@ -2736,7 +2751,8 @@ function loadMy(first, quiet) {
   return (pendCount() && M ? pushNow() : Promise.resolve()).then(function () { return ccall('my', {}, !!quiet); }).then(function (r) {
     if (r.auth) return;
     if (!r.ok) { S.offline = !!r.net; if (M) paintSync(); else screen('Не получилось загрузить', errText(r), true); return; }
-    S.offline = false; setMy(r); updCheck(r);
+    S.offline = false; if (FMV) { cvArm(); return; }              // 4.5: ответ на перенос ещё в пути – его данные новее
+    setMy(r); updCheck(r);
     if (M.cabk && qs.get('from') === 'cab') {                               // 4.2: открыл кабинет, а кабинет у клиента уже есть – назад в кабинет
       LS.del('lf_wko_' + CKEY.slice(0, 12)); location.replace('../cabinet/?k=' + encodeURIComponent(M.cabk)); return;
     }
@@ -2772,6 +2788,17 @@ function cvRefresh() {
   loadMy(false, true);                                                    // cvArm – внутри loadMy
 }
 /** 2.5: уведомления в Telegram – бот «Lite Fit» ещё не подключён. Скрыть можно крестиком. */
+/** 4.6: FREE – тренировка закрыта, пока клиент не подпишется на канал снова. */
+function subWhere() { return M.fch && M.fch.kind === 'vk' ? 'сообщество ВКонтакте' : 'Telegram-канал'; }
+function subBtns() {
+  return (M.fch && M.fch.u ? '<a class="btn pri" href="' + esc(M.fch.u) + '" target="_blank" rel="noopener noreferrer">Подписаться на ' + (M.fch.kind === 'vk' ? 'сообщество' : 'канал') + '</a>' : '') +
+    '<button class="btn sec mv mt" data-act="fsubGo">' + IC.sync + 'Я подписался(лась)</button>';
+}
+function subCard() {
+  var w = M && M.free ? M.list.filter(function (x) { return x.st === 'sub'; })[0] : null;
+  if (!w) return '';
+  return '<div class="card subc"><h3>' + titleOf(w) + ' ждёт Вас</h3><p class="sub">Условие FREE – подписка на наш ' + subWhere() + '. Подпишитесь снова – и тренировка сразу откроется.</p>' + subBtns() + '</div>';
+}
 function tgCard() {
   if (!M.tg || M.tg.on || M.closed || LS.get('lf_wk_tg_hide') === '1') return '';
   return '<div class="card"><div class="tgc"><span class="mn"><b>Уведомления в Telegram</b><small>Напоминание в день тренировки и ответы тренера на Ваши комментарии.</small></span>' +
@@ -2795,7 +2822,7 @@ function viewMy() {
       (M.pay && M.pay >= pk.s && M.pay >= TODAY ? '<p class="pk-pay">Оплата следующего пакета – <b>' + dMon(M.pay) + '</b></p>' : '') + awStrip() + '</div>';
     h += '<div class="meta"><span class="pill">Всего выполнено тренировок: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
   } else if (!M.free) h += '<div class="meta"><span class="pill">Всего: <b class="num">' + M.total + '</b></span><span class="pill">Выполнено: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
-  if (M.free) h += freeTop(true);                                           // 3.8: FREE – N из 3, дни, медаль
+  if (M.free) h += freeTop(true) + subCard();                               // 3.8: FREE – N из 3, дни, медаль; 4.6: подписка
   h += coachBanner() + installCard() + tgCard();
   if (M.closed) h += '<div class="banner warn">Ведение завершено: тренировки открыты для просмотра, новые отметки не принимаются.</div>';
   h += '<h2 class="sec-title" style="margin-top:0">Сегодня, ' + dMon(TODAY) + '</h2>';
@@ -3094,19 +3121,47 @@ try { INST_N = Number(LS.get('lf_wk_inst_n') || 0) || 0; } catch (e) {}
 function lockRow(w) {
   var d = pd(w.date);
   return '<button class="row lk lkb" data-act="lockedW" data-id="' + esc(w.id) + '"><span class="dt"><b class="num">' + d.getDate() + '</b><small>' + MONS[d.getMonth()] + '</small></span><span class="mn"><b>' + titleOf(w) + '</b>' +
-    '<small>' + (w.st === 'gone' ? 'выполнена ✓ · закрыта' : 'откроется после тренировки ' + (w.after || 1)) + '</small><span class="blurl" aria-hidden="true">Упражнение · 3 × 15 · Упражнение · 3 × 12</span></span>' + IC.lock + '</button>';
+    '<small>' + (w.st === 'gone' ? 'выполнена ✓ · закрыта' : w.st === 'sub' ? 'откроется после подписки на канал' : 'откроется после тренировки ' + (w.after || 1)) + '</small><span class="blurl" aria-hidden="true">Упражнение · 3 × 15 · Упражнение · 3 × 12</span></span>' + IC.lock + '</button>';
 }
 function freeRow(w) {
   if (w.st === 'open') return wRow(w, 'runW');
-  if (w.st === 'lock' || w.st === 'gone') return lockRow(w);
+  if (w.st === 'lock' || w.st === 'gone' || w.st === 'sub') return lockRow(w);
   var d = pd(w.date);
   return '<button class="row lk lkb" data-act="lockedW" data-id="' + esc(w.id) + '"><span class="dt"><b class="num">' + d.getDate() + '</b><small>' + MONS[d.getMonth()] + '</small></span><span class="mn"><b>' + titleOf(w) + '</b><small>откроется ' + dm(w.from) + '</small><span class="blurl" aria-hidden="true">Упражнение · 3 × 15 · Упражнение · 3 × 12</span></span>' + IC.lock + '</button>';
 }
+/** 4.5: самый ранний день переноса: от сервера (fmin – не раньше расписания), не раньше сегодня и дня после предыдущей. */
+function fmMin(w) {
+  var m = isYmd(w.fmin) && w.fmin > TODAY ? w.fmin : TODAY, i = M.list.indexOf(w);
+  if (i > 0 && isYmd(M.list[i - 1].date)) { var d = pd(M.list[i - 1].date); d.setDate(d.getDate() + 1); if (ymd(d) > m) m = ymd(d); }
+  return m;
+}
+function addDay(s, n) { var d = pd(s); d.setDate(d.getDate() + n); return ymd(d); }
+/**
+ * 4.5: перенос сразу на экране – те же правила, что на сервере: следующие, если встали на тот же день или раньше, сдвигаются
+ * на день после. Состояние (открыта / откроется) прикидывается по датам, точное приходит с ответом сервера. Возвращает
+ * снимок для отката или null, если поставить так нельзя.
+ */
+function fmApply(id, d) {
+  var i = -1; M.list.forEach(function (w, k) { if (w.id === id) i = k; }); if (i < 0) return null;
+  var snap = M.list.map(function (w) { return { w: w, date: w.date, st: w.st, from: w.from, to: w.to }; });
+  var dates = M.list.map(function (w) { return w.date; }); dates[i] = d;
+  for (var j = i + 1; j < dates.length; j++) if (dates[j] <= dates[j - 1]) dates[j] = addDay(dates[j - 1], 1);
+  if (M.fend && dates[dates.length - 1] > M.fend) return null;
+  M.list.forEach(function (w, k) {
+    if (w.done || w.date === dates[k]) return;
+    w.date = dates[k]; w.from = addDay(w.date, -1); w.to = addDay(w.date, 1);
+    if (w.st === 'open' && w.from > TODAY) w.st = 'soon';
+    else if (w.st === 'soon' && w.from <= TODAY && w.items) w.st = 'open';
+  });
+  return snap;
+}
+function fmUndo(snap) { snap.forEach(function (o) { o.w.date = o.date; o.w.st = o.st; o.w.from = o.from; o.w.to = o.to; }); }
+var FMV = 0;                                                               // 4.5: идёт перенос – обычное обновление списка его не перебивает
 /** 3.5: клиент FREE переносит тренировку сам. */
 function fmoveForm(w) {
-  var min = TODAY, max = M.fend || '';
+  var min = fmMin(w), max = M.fend || '';
   sheet('Перенести тренировку', '<h2>Перенести ' + titleOf(w).replace('Тренировка', 'тренировку') + '</h2><p class="lead">Сейчас – ' + esc(longDate(w.date)) + '. Выберите новый день' +
-    (max ? ': с сегодня до ' + esc(dMon(max)) + ' – все 3 тренировки проходят за 7 дней' : '') + '.</p>' +
+    (max ? ': ' + (min === TODAY ? 'с сегодня' : 'с ' + esc(dMon(min))) + ' до ' + esc(dMon(max)) + ' – все 3 тренировки проходят за 7 дней' : '') + '.</p>' +
     fi('fmDate', 'Новая дата', w.date, 'date', 'min="' + min + '"' + (max ? ' max="' + max + '"' : '')) +
     '<p class="note" style="margin:6px 0 12px">Если следующая тренировка окажется в тот же день или раньше, она сама сдвинется на день позже. Тренер получит уведомление.</p>' +
     '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="fmoveGo" data-id="' + esc(w.id) + '">' + IC.cal + 'Перенести</button><button class="btn sec mt" data-act="close">Отмена</button>');
@@ -3114,10 +3169,11 @@ function fmoveForm(w) {
 function lockSheet(w) {
   var fake = ['Упражнение для ног', 'Упражнение для спины', 'Упражнение для груди', 'Упражнение для плеч', 'Упражнение для пресса'];
   sheet(titleOf(w), '<h2>' + titleOf(w) + '</h2><div class="lkprev" aria-hidden="true">' + fake.map(function (t, i) { return '<div class="row" style="min-height:0;padding:9px 0"><span class="mn"><b>' + t + '</b><small>3 подхода по ' + (i % 2 ? 12 : 15) + '</small></span></div>'; }).join('') + '</div>' +
-    (w.st === 'gone' ? '<p class="lead">Тренировка выполнена и закрыта – Вы начали следующую. Результат сохранён, тренер его видит.</p>'
+    (w.st === 'sub' ? '<p class="lead">Условие FREE – подписка на наш ' + subWhere() + '. Подпишитесь снова – и тренировка сразу откроется.</p>' + subBtns() + '<div style="height:10px"></div>'
+      : w.st === 'gone' ? '<p class="lead">Тренировка выполнена и закрыта – Вы начали следующую. Результат сохранён, тренер его видит.</p>'
       : w.st === 'soon' ? '<p class="lead">Откроется ' + esc(longDate(w.from)) + ' – за день до своей даты (' + longDate(w.date) + ').</p>'
       : '<p class="lead">Откроется, когда Вы выполните тренировку ' + (w.after || 1) + ', – не раньше чем за день до своей даты (' + longDate(w.date) + ').</p>') +
-    (w.st !== 'gone' && !w.done ? '<button class="btn sec" data-act="fmoveForm" data-id="' + esc(w.id) + '" style="margin-bottom:10px">' + IC.cal + 'Перенести на другой день</button>' : '') +
+    (w.st !== 'gone' && !w.done ? '<button class="btn sec mv" data-act="fmoveForm" data-id="' + esc(w.id) + '" style="margin-bottom:10px">' + IC.cal + 'Перенести на другой день</button>' : '') +
     '<p class="note">Тренировки идут по очереди: так нагрузка растёт постепенно, а тренер видит результат каждой и подстраивает следующую.</p><button class="btn pri mt" data-act="close">Понятно</button>');
 }
 /** 3.3: клиенту FREE при первом открытии – с чего начать и как выполнять. */
@@ -3125,7 +3181,7 @@ function introHtml() {
   return '<div class="help"><h2>Добро пожаловать в Lite Fit!</h2><p class="lead">Здесь Ваши 3 бесплатные тренировки. Пара минут – и Вы готовы к первой.</p>' +
     (standalone() ? '' : '<div class="card install pulse" style="margin:12px 0"><div class="ic">' + IC.home + '</div><div style="flex:1"><p><b>1. Добавьте приложение на экран телефона</b></p><p>' + installHow() + '</p>' +
       (deferredInstall ? '<button class="btn sec sm mt" data-act="install">Добавить</button>' : '') + '</div></div>') +
-    '<h3>' + (standalone() ? '1' : '2') + '. Тренировки открываются по очереди</h3><p>Каждая открывается за день до своей даты и после того, как выполнена предыдущая. Выполненная тренировка видна, пока Вы не начнёте следующую. Даты – в списке и в боте, в день тренировки бот пришлёт напоминание. Не получается в свой день – перенесите тренировку сами: «Перенести на другой день» (все 3 – за 7 дней).</p>' +
+    '<h3>' + (standalone() ? '1' : '2') + '. Тренировки открываются по очереди</h3><p>Каждая открывается за день до своей даты и после того, как выполнена предыдущая. Выполненная тренировка видна, пока Вы не начнёте следующую. Даты – в списке и в боте, в день тренировки бот пришлёт напоминание. Не получается в свой день – перенесите тренировку сами: «Перенести на другой день» (раньше расписания – нельзя, все 3 – за 7 дней). Условие FREE – подписка на наш Telegram-канал.</p>' +
     '<h3>' + (standalone() ? '2' : '3') + '. Перед тренировкой – суставная разминка</h3><p>5–7 минут: плавные вращения головой, плечами, локтями, кистями, тазом, коленями и стопами – по 8–10 раз в каждую сторону.</p>' +
     '<h3>' + (standalone() ? '3' : '4') + '. Как выполнять</h3><ol class="hl">' +
     '<li>Откройте тренировку и нажмите <b>«Начать тренировку»</b> внизу – пойдёт время.</li>' +
@@ -3261,9 +3317,11 @@ function helpSections() {
     '<li>Следующие видны в списке размытыми, с замком. Нажмите на них – увидите, когда откроются.</li>' +
     '<li>Выполненная тренировка остаётся открытой, пока Вы не начнёте следующую. Начали следующую – прошлая закрывается. Результат сохранён, тренер его видит.</li>' +
     '<li>Пропущенная тренировка закрывается через день после своей даты.</li>' +
+    '<li>Условие FREE – подписка на наш Telegram-канал. Отписались – следующая тренировка закроется и откроется сразу, как только Вы подпишетесь снова (кнопка «Я подписался(лась)»).</li>' +
     '<li>Все 3 тренировки – за 7 дней' + (M.fend ? ', до ' + dMon(M.fend) : '') + '. В день тренировки бот пришлёт напоминание.</li></ul>']);
   L.push(['Перенос тренировки', '<p>Не получается в свой день – перенесите тренировку сами: откройте её и нажмите <b>«Не получается сегодня? Перенести на другой день»</b> или нажмите на закрытую тренировку в списке → <b>«Перенести на другой день»</b>.</p><ul>' +
     '<li>Новый день – не раньше сегодняшнего и не раньше следующего дня после предыдущей тренировки. Можно и подряд, день за днём.</li>' +
+    '<li>Раньше своего дня по расписанию тренировку поставить нельзя – она откроется в свой срок. Перенесли на более поздний день – вернуть обратно можно.</li>' +
     '<li>Все 3 тренировки нужно пройти за 7 дней от первой' + (M.fend ? ' – до ' + dMon(M.fend) : '') + '. Позже выбрать нельзя, приложение подскажет крайний день.</li>' +
     '<li>Если следующая тренировка окажется в тот же день или раньше, она сама сдвинется на день позже. Например: первую перенесли с 25.10 на 27.10 – вторая сама встанет на 28.10.</li>' +
     '<li>Начатую или выполненную тренировку перенести нельзя.</li>' +
@@ -3336,7 +3394,7 @@ function viewRun() {
   var h = '<button class="back" data-act="myHome">' + IC.back + 'Тренировки</button><h1 class="hello">' + titleOf(w) + '</h1>' +
     '<div class="meta"><span class="pill">' + cap(longDate(w.date)) + '</span><span class="pill" id="prog">Подходов: <b class="num">' + p.ok + '</b> из ' + p.tot + '</span>' +
     (w.ts && !w.done ? '<span class="pill ok">начата в ' + hm(w.ts) + '</span>' : '') + '</div>';
-  if (M.free && !w.done && !w.ts && !M.closed) h += '<button class="rst" data-act="fmoveForm" data-id="' + esc(w.id) + '">' + IC.cal + 'Не получается сегодня? Перенести на другой день</button>';   // 3.5
+  if (M.free && !w.done && !w.ts && !M.closed) h += '<button class="rst mv" data-act="fmoveForm" data-id="' + esc(w.id) + '">' + IC.cal + 'Не получается сегодня? Перенести на другой день</button>';   // 3.5, 4.5: ярче
   if (canReset(w)) h += '<button class="rst" data-act="restart">' + IC.restart + 'Начали случайно? Сбросить и начать заново</button>';
   if (w.done) h += '<div class="banner done"><b>Тренировка выполнена ' + dm(w.doneAt || w.date) + (w.ts && w.te ? ' за ' + fmtDur((w.te - w.ts) / 60000) : '') + '.</b> Результат можно поправить, тренер увидит изменения.</div>';
   else if (!w.ts && !M.closed) h += '<div class="banner">Когда будете готовы, нажмите <b>«Начать тренировку»</b> внизу – пойдёт время. У каждого упражнения есть кнопки <b>«Видео»</b> и <b>«Описание»</b> – посмотрите технику перед первым подходом.</div>';
@@ -4013,11 +4071,26 @@ var ACT = {
     S.run = w.id; S.view = 'run'; S.open = {}; S.vid = ''; preconnect(w); render(); window.scrollTo(0, 0);
     if (M.msgs) msgMark(M.msgs.filter(function (m) { return m.k === 'reply' && m.wid === w.id; }));   // ответы тренера в этой тренировке клиент увидел
   },
-  video: function (b) { var it = runItemOf(b); if (!it) return; S.vid = S.vid === it.id ? '' : it.id; rerenderKeep(); },
+  video: function (b) {
+    var it = runItemOf(b); if (!it) return; S.vid = S.vid === it.id ? '' : it.id; rerenderKeep();
+    if (S.vid) vwReveal(it.id);                                             // 4.5: открыли видео ниже края экрана – подкрутить к нему
+  },
   showDesc: function (b) { var it = runItemOf(b); if (!it) return; S.open['d' + it.id] = !S.open['d' + it.id]; rerenderKeep(); },
   help: function () { if (MODE === 'client' && M) { S.ctab = 'help'; S.view = 'home'; S.run = null; closeSheet(); render(); window.scrollTo(0, 0); return; } sheet('Как пользоваться', helpHtml()); },   // 3.6: вкладка «Инструкция»
   introOk: function () { closeSheet(); },
   lockedW: function (b) { var w = myOf(b.getAttribute('data-id')); if (w) lockSheet(w); },
+  fsubGo: function (b) {                                                    // 4.6: «Я подписался(лась)» – проверка сразу
+    b.disabled = true;
+    ccall('fsub', {}).then(function (r) {
+      b.disabled = false;
+      if (r.auth) return;
+      if (!r.ok) return toast(errText(r), 'bad');
+      setMy(r);
+      if (!r.subOk) return toast(r.msg || 'Пока не вижу подписки', 'bad');  // окно остаётся – можно нажать ещё раз
+      closeSheet(); if (S.view === 'run' && (myOf(S.run) || {}).st !== 'open') S.view = 'home';
+      render(); toast(r.msg || 'Готово');
+    });
+  },
   fwant: function (b) {
     var f = b.getAttribute('data-f');
     b.disabled = true; b.textContent = 'Отправляю заявку…';
@@ -4028,14 +4101,30 @@ var ACT = {
     });
   },
   fmoveForm: function (b) { var w = myOf(b.getAttribute('data-id')); if (w) fmoveForm(w); },
-  fmoveGo: function (b) {
-    var d = val('fmDate'), id = b.getAttribute('data-id');
+  fmoveGo: function (b) {                                                  // 4.5: сразу на экране, запрос – в фоне
+    var d = val('fmDate'), id = b.getAttribute('data-id'), w = myOf(id);
     if (!isYmd(d)) return ferr('Выберите дату.');
-    b.disabled = true;
-    ccall('fmove', { id: id, date: d }).then(function (r) {
+    if (!w) { closeSheet(); return; }
+    var min = fmMin(w);
+    if (d < min) return ferr(min === TODAY ? 'Выберите сегодня или день позже.' : 'Не раньше ' + dMon(min) + ' – ' + (w.fmin && w.fmin >= min ? 'тренировка откроется по расписанию.' : 'на следующий день после предыдущей тренировки.'));
+    if (M.fend && d > M.fend) return ferr('Все 3 тренировки нужно пройти до ' + dMon(M.fend) + ' – выберите день не позже.');
+    if (d === w.date) { closeSheet(); return toast('Дата не изменилась'); }
+    var snap = fmApply(id, d);
+    if (!snap) return ferr('Так следующие тренировки не поместятся до ' + dMon(M.fend) + ' – выберите день раньше.');
+    closeSheet(); if (S.view === 'run' && (myOf(S.run) || {}).st !== 'open') S.view = 'home';
+    render(); toast('Перенесено на ' + dMon(d) + ' – тренер получит уведомление');
+    FMV++;
+    ccall('fmove', { id: id, date: d }, true).then(function (r) {
+      FMV--;
       if (r.auth) return;
-      if (!r.ok) { b.disabled = false; return ferr(errText(r)); }
-      setMy(r); closeSheet(); if (S.view === 'run' && !myOf(S.run)) S.view = 'home'; render(); toast(r.msg || 'Перенесено');
+      if (!r.ok) {                                                          // не получилось – вернуть как было
+        if (!r.list) fmUndo(snap); else setMy(r);
+        if (r.net) loadMy(false, true);                                     // связь оборвалась – могло и сохраниться, уточняем
+        if (S.view === 'run' && (myOf(S.run) || {}).st !== 'open') S.view = 'home';
+        render(); return toast('Не получилось перенести: ' + errText(r).replace(/^./, function (c) { return c.toLowerCase(); }), 'bad');
+      }
+      setMy(r); if (S.view === 'run' && !myOf(S.run)) S.view = 'home';
+      if (S.view === 'home') rerenderKeep(); else if (S.view === 'run') render();
     });
   },
   mOpen: function (b) { var it = runItemOf(b); if (!it) return; S.open['m' + it.id] = !S.open['m' + it.id]; medPaint(it.id); },
@@ -4296,6 +4385,58 @@ function updCheck(r) {
   d.innerHTML = '<span>Вышла новая версия приложения – ' + esc(r.page) + '</span><button class="btn pri sm" data-act="updGo">Обновить</button>';
   document.body.appendChild(d);
 }
+/*
+ * 4.5: видео упражнения само встаёт на паузу, когда его пролистали (видно меньше трети), и продолжается, когда к нему вернулись.
+ * Видео Rutube / VK / YouTube (iframe) паузу извне не принимают – такое видео выгружается и загружается снова. Запустили одно
+ * видео – остальные на паузе. Свернули приложение – пауза, вернулись – продолжается, если видео на экране.
+ */
+var VW = { io: null, raf: 0, CUT: 0.34 };
+function vwFull(el) { return !!(document.fullscreenElement || document.webkitFullscreenElement || el.webkitDisplayingFullscreen); }
+function vwPlay(v) { try { var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+function vwSee(el, on) {
+  if (el.tagName === 'VIDEO') {
+    if (!on) { if (!el.paused && !vwFull(el)) { el.pause(); el._ap = 1; } }
+    else if (el._ap) { el._ap = 0; vwPlay(el); }
+    return;
+  }
+  var f = el.querySelector('iframe'); if (!f) return;
+  if (!on) { if (!el._src && !vwFull(f)) { el._src = f.getAttribute('src'); f.setAttribute('src', 'about:blank'); } }
+  else if (el._src) { f.setAttribute('src', el._src); el._src = ''; }
+}
+function vwReveal(id, again) {
+  var card = document.getElementById('it-' + id), v = card && card.querySelector('video.vplay, .vframe'); if (!v) return;
+  if (v.tagName === 'VIDEO' && !v.videoHeight && !again) { v.addEventListener('loadedmetadata', function () { if (S.vid === id) vwReveal(id, true); }, { once: true }); return; }   // высота видна после загрузки
+  var r = v.getBoundingClientRect(), h = window.innerHeight || document.documentElement.clientHeight, bar = document.getElementById('bar');
+  var bh = bar && !bar.hidden ? bar.getBoundingClientRect().height : 0;
+  if (r.bottom <= h - bh) return;
+  var y = Math.min(r.top - 64, r.bottom - (h - bh) + 12);                    // кнопка «Скрыть видео» остаётся видна
+  if (y <= 0) return;
+  try { window.scrollTo({ top: window.scrollY + y, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, window.scrollY + y); }
+}
+function vwInView(el) { var r = el.getBoundingClientRect(), h = window.innerHeight || document.documentElement.clientHeight; if (!r.height) return false; return (Math.min(r.bottom, h) - Math.max(r.top, 0)) / r.height >= VW.CUT; }
+function vwScan() {
+  VW.raf = 0;
+  if (!('IntersectionObserver' in window)) return;
+  if (!VW.io) VW.io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!document.body.contains(e.target)) { VW.io.unobserve(e.target); return; }
+      vwSee(e.target, e.isIntersecting && e.intersectionRatio >= VW.CUT);
+    });
+  }, { threshold: [0, VW.CUT, 0.6, 1] });
+  [].forEach.call(document.querySelectorAll('video.vplay, .vframe'), function (el) { if (!el._vw) { el._vw = 1; VW.io.observe(el); } });
+}
+new MutationObserver(function () { if (!VW.raf) VW.raf = requestAnimationFrame(vwScan); }).observe(document.body, { childList: true, subtree: true });
+document.addEventListener('play', function (e) {                             // одно видео за раз
+  var t = e.target; if (!t || t.tagName !== 'VIDEO' || !t.classList.contains('vplay')) return;
+  [].forEach.call(document.querySelectorAll('video.vplay'), function (v) { if (v !== t && !v.paused) { v.pause(); v._ap = 0; } });
+}, true);
+document.addEventListener('visibilitychange', function () {
+  [].forEach.call(document.querySelectorAll('video.vplay'), function (v) {
+    if (document.visibilityState === 'hidden') { if (!v.paused) { v.pause(); v._ap = 1; } }
+    else if (v._ap && vwInView(v)) { v._ap = 0; vwPlay(v); }
+  });
+});
+
 /* вкладку закрывают или сворачивают — несохранённые отметки клиента уходят сразу; вернулись — данные обновляются */
 document.addEventListener('visibilitychange', function () {
   if (document.visibilityState === 'hidden') { if (MODE === 'client') { cnFire(true); if (pendCount() && !pushing) pushNow(true); } return; }
