@@ -744,6 +744,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.9.9 (27.10.2026). Обратная связь – один раз на клиента (lite-fit-trainer 3.11.8, lite-fit-anketa 4.3.0): в карточке – «Отзыв
+ *   уже есть – не напоминать» (два нажатия, { op:'fb', mode:'skip' }); у заполнивших – «Повторно анкета не приходит».
  * 1.9.8 (26.10.2026). FREE: в карточке клиента – «Подписка на канал»: есть / нет / отписался (lite-fit-trainer 3.11.7, бот
  *   проверяет подписку сам – lite-fit-trenirovki 4.20.0).
  * 1.9.3 (25.10.2026). Перевод в START: окно называется «START – кабинет на 14 дней», без слова «пробный».
@@ -2113,10 +2115,11 @@ function subCare(c) {
 
   var fb = c.fb || {};
   h += '<div class="card"><h3>Обратная связь</h3><p class="sub">' + (fb.state === 'wait' ? 'Анкета отправлена' + (fb.sent ? ' ' + esc(String(fb.sent).slice(0, 10).split('-').reverse().slice(0, 2).join('.')) : '') + ' – ждём ответа. Напоминания клиенту уходят сами.'
-    : fb.state === 'done' ? 'Клиент заполнил анкету' + (fb.score != null ? ', оценка ' + esc(fb.score) + ' из 10' : '') + '.' : c.format === 'FREE' ? 'Анкета FREE приходит клиенту сама на 7-й день – кнопкой в сообщении о последнем дне. Можно отправить раньше.'
+    : fb.state === 'done' ? (fb.skip ? 'Отзыв уже есть – отметил(а) ' + esc(fb.skip) : 'Клиент заполнил анкету' + (fb.score != null ? ', оценка ' + esc(fb.score) + ' из 10' : '')) + '. Повторно анкета не приходит.' : c.format === 'FREE' ? 'Анкета FREE приходит клиенту сама на 7-й день – кнопкой в сообщении о последнем дне. Можно отправить раньше.'
     : c.format === 'START' ? 'Анкета START приходит клиенту сама на 12-й день, напоминания – на 13-й и 14-й. Можно отправить раньше.'
     : 'Анкета уходит клиенту сама за 3 дня до конца пакета. Можно отправить раньше.') + '</p>' +
-    '<button class="btn sec sm" data-act="fbForm">' + (fb.state === 'none' ? 'Отправить анкету сейчас' : 'Ссылка на анкету') + '</button></div>';
+    '<button class="btn sec sm" data-act="fbForm">' + (fb.state === 'none' ? 'Отправить анкету сейчас' : 'Ссылка на анкету') + '</button>' +
+    (fb.state !== 'done' ? '<button class="btn sec sm" data-act="fbSkip" style="margin-top:8px">Отзыв уже есть – не напоминать</button>' : '') + '</div>';   // 1.9.9
 
   if (c.loaded) h += '<div class="card"><h3>Напоминания клиента</h3><p class="sub">Время клиент может менять сам в кабинете. Часовой пояс меняете только вы.</p><div class="frm"><div class="grid2">' +
     fs('rMor', 'Утро', [['off', 'не присылать']].concat(L0.morning || []), c.remind.morning, 'data-ch="remMor"') +
@@ -2796,6 +2799,10 @@ var ACT = {
     });
   },
   fbGo: function (t) { var c = cur(); send('fb', { id: c.id, mode: t.getAttribute('data-mode') }, { btn: t }).then(finish); },
+  fbSkip: function (t) {                                                    // 1.9.9: второе нажатие – отметка
+    if (!t.getAttribute('data-sure')) { t.setAttribute('data-sure', '1'); t.textContent = 'Точно? Анкета больше не придёт – нажмите ещё раз'; return; }
+    var c = cur(); send('fb', { id: c.id, mode: 'skip' }, { btn: t }).then(finish);
+  },
 
   /* --- итоги месяца --- */
   mrForm: function (t) { mrForm(t.getAttribute('data-n')); },
