@@ -744,6 +744,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 1.9.10 (27.10.2026). «Написать клиенту» – у всех клиентов с подключённым ботом, не только с таблицей PRO (BASIC, START, FREE);
+ *   у клиента без кабинета кнопка под сообщением – «Открыть тренировки» (lite-fit-script 4.3.7).
  * 1.9.9 (27.10.2026). Обратная связь – один раз на клиента (lite-fit-trainer 3.11.8, lite-fit-anketa 4.3.0): в карточке – «Отзыв
  *   уже есть – не напоминать» (два нажатия, { op:'fb', mode:'skip' }); у заполнивших – «Повторно анкета не приходит».
  * 1.9.8 (26.10.2026). FREE: в карточке клиента – «Подписка на канал»: есть / нет / отписался (lite-fit-trainer 3.11.7, бот
@@ -1773,8 +1775,8 @@ function viewClient(c) {
   if (needTable && !c.loaded) body = loadingCard(c);
   else body = S.sub === 'food' ? subFood(c) : S.sub === 'train' ? subTrain(c) : S.sub === 'meas' ? subMeas(c) : S.sub === 'care' ? subCare(c) : subOver(c);
   return topBar(true) + '<h1 class="hello">' + esc(c.name) + '</h1><div class="meta">' + pills.join('') + '</div>' + ban +
-    (c.table || EMBED ? '<div class="btns" style="margin:0 0 14px">' + (EMBED ? '<button class="btn sec" data-act="goTrain">Тренировки</button>' : '') +
-      (c.table ? '<button class="btn sec" data-act="msgForm">Написать клиенту</button><button class="btn sec" data-act="cabLink">Ссылка на кабинет</button>' : '') + '</div>' : '') +
+    (c.table || c.bot || EMBED ? '<div class="btns" style="margin:0 0 14px">' + (EMBED ? '<button class="btn sec" data-act="goTrain">Тренировки</button>' : '') +
+      (c.table || c.bot ? '<button class="btn sec" data-act="msgForm">Написать клиенту</button>' : '') + (c.table ? '<button class="btn sec" data-act="cabLink">Ссылка на кабинет</button>' : '') + '</div>' : '') +   // 1.9.10
     '<div class="chips" role="tablist">' + subs.map(function (x) { return '<button data-sub="' + x[0] + '" class="' + (S.sub === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>' + body;
 }
 function alertsCard(c) {
@@ -2739,7 +2741,7 @@ var ACT = {
   msgForm: function () {
     var c = cur();
     if (!c.bot) return sheet('Сообщение клиенту', '<h2>Бот не подключён</h2><p class="lead">Написать от имени бота можно, когда клиент откроет ссылку и нажмёт «Старт». Отправьте ему сообщение со ссылкой на кабинет.</p><button class="btn pri" data-act="cabLink">Ссылка на кабинет</button>' + (D.vk ? '<button class="btn sec" data-act="vkLink">Ссылка на ВКонтакте – нет Telegram</button>' : ''));
-    sheet('Сообщение клиенту', '<h2>Сообщение клиенту</h2><p class="lead">' + esc(c.name) + '. Сообщение придёт от бота Lite Fit с кнопками «Открыть кабинет» и «Написать тренеру». Копия уйдёт в рабочий чат.</p>' +
+    sheet('Сообщение клиенту', '<h2>Сообщение клиенту</h2><p class="lead">' + esc(c.name) + '. Сообщение придёт от бота Lite Fit с кнопками «' + (c.table ? 'Открыть кабинет' : 'Открыть тренировки') + '» и «Написать тренеру». Копия уйдёт в рабочий чат.</p>' +
       ft('msgTxt', 'Текст сообщения', '', 6, 'maxlength="3500"') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="msgSend">Отправить</button>');
   },
   msgSend: function (t) {
