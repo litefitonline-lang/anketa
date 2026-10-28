@@ -161,6 +161,37 @@ a.btn{text-decoration:none}
 .fld input[disabled]{opacity:.5}
 .fld span{position:absolute;left:15px;top:8px;font-size:12px;color:var(--muted);pointer-events:none}
 .fld.bad input{border-color:rgba(255,139,123,.7)}
+[hidden]{display:none!important}
+.fld.need input{border-color:var(--warm);background:var(--warm-bg)}
+.fld.need span{color:var(--warm)}
+.ank .aq,.aq{padding:10px 0;border-top:1px solid var(--line)}
+.aq span{display:block;font-size:12px;color:var(--muted)}
+.aq b{display:block;font-size:15px;font-weight:600;white-space:pre-wrap;margin-top:2px}
+.aq.lim{background:var(--warm-bg);border:0;border-radius:12px;padding:10px 12px;margin:6px 0}
+.aq.lim span,.aq.lim b{color:var(--warm)}
+a.row{text-decoration:none;color:inherit}
+.tl .tli{border-top:1px solid var(--line);padding:12px 0}
+.tl .tli:first-child{border-top:0;padding-top:4px}
+.tl .tli.now{border-left:3px solid var(--accent);padding-left:10px;margin-left:-2px}
+.tl .tli.frz{border-left:3px solid #3B2E63;padding-left:10px;margin-left:-2px}
+.tl-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tl-h b{font-size:17px}
+.tl-m{font-size:13.5px;color:var(--muted);margin-top:4px}
+.tl-m b{color:var(--text)}
+.tl-m.dim{color:var(--dim)}
+.tl-b{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.tl-b .btn{height:40px;font-size:13.5px}
+.pill.on{border-color:var(--accent);color:var(--accent)}
+.chart .tl{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:2 4;fill:none}
+.chart .gl2{stroke:var(--warm);stroke-width:1.5;stroke-dasharray:4 4}
+.chart-leg i.tr{background:repeating-linear-gradient(90deg,var(--muted) 0 2px,transparent 2px 5px)}
+.msg{border-top:1px solid var(--line);padding:10px 0}
+.msg-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.msg-h small{color:var(--muted);font-size:12px}
+.msg-h .rd{margin-left:auto;font-size:12px;color:var(--accent);font-weight:700}
+.msg-h .rd.no{color:var(--dim);font-weight:500}
+.msg-t{white-space:pre-wrap;font-size:14.5px;margin-top:4px}
+.msg-q{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:4px}
 .fld.dirty input{border-color:var(--line2);background:#081315}
 .ferr{font-size:13px;color:var(--err);margin:8px 0 0;min-height:0}
 .gap{height:10px}
@@ -668,16 +699,26 @@ function greet() {
   return h >= 5 && h < 12 ? 'Доброе утро' : h >= 12 && h < 17 ? 'Добрый день' : h >= 17 && h < 23 ? 'Добрый вечер' : 'Доброй ночи';
 }
 function dash(p, r) { var C = 2 * Math.PI * r; return (Math.min(Math.max(p, 0), 1) * C).toFixed(1) + ' ' + C.toFixed(1); }
-function lineChart(pts, unit, label, dec) {
+function lineChart(pts, unit, label, dec, o) {
+  o = o || {};
   var W = 340, H = 180, L = 36, R = 14, T = 16, B = 24;
   var n0 = pts[0].n, n1 = Math.max(pts[pts.length - 1].n, n0 + 6);
   var vals = pts.map(function (p) { return p.v; });
+  if (o.goal != null) vals = vals.concat([o.goal]);
   var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
   var pad0 = Math.max((mx - mn) * 0.18, unit === 'кг' ? 0.4 : 0.8); mn -= pad0; mx += pad0;
   var X = function (n) { return L + (n - n0) / (n1 - n0) * (W - L - R); };
   var Y = function (v) { return T + (mx - v) / (mx - mn) * (H - T - B); };
   var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(label) + '">';
   for (var g = 0; g <= 3; g++) { var v = mn + (mx - mn) * g / 3, y = Y(v); s += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"/><text x="' + (L - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end">' + fmt(v, 1, true) + '</text>'; }
+  if (o.goal != null) s += '<line class="gl2" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(o.goal).toFixed(1) + '" y2="' + Y(o.goal).toFixed(1) + '"/><text x="' + (W - R) + '" y="' + (Y(o.goal) - 5).toFixed(1) + '" text-anchor="end" style="fill:var(--warm)">цель ' + fmt(o.goal, 1) + '</text>';
+  if (o.trend && pts.length >= 3) {                                        // 2.0: линия тренда (наименьшие квадраты)
+    var sx = 0, sy = 0, sxx = 0, sxy = 0, k = pts.length;
+    pts.forEach(function (p) { sx += p.n; sy += p.v; sxx += p.n * p.n; sxy += p.n * p.v; });
+    var den = k * sxx - sx * sx;
+    if (den) { var a1 = (k * sxy - sx * sy) / den, b1 = (sy - a1 * sx) / k, xa = pts[0].n, xb = pts[k - 1].n;
+      s += '<line class="tl" x1="' + X(xa).toFixed(1) + '" y1="' + Y(a1 * xa + b1).toFixed(1) + '" x2="' + X(xb).toFixed(1) + '" y2="' + Y(a1 * xb + b1).toFixed(1) + '"/>'; }
+  }
   s += '<polyline class="wl" points="' + pts.map(function (p) { return X(p.n).toFixed(1) + ',' + Y(p.v).toFixed(1); }).join(' ') + '"/>';
   var few = pts.length <= 8;
   pts.forEach(function (p, i) {
@@ -796,7 +837,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '1.9';
+var VERSION = '2.0';
 var PATCH = '.7';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -928,7 +969,7 @@ function stShort(s) { return String(s || '').replace(/^\S+\s+/, ''); }
 /* ================= СВЯЗЬ С СЕРВЕРОМ ================= */
 var WRITE = { norm: 1, normf: 1, calc: 1, steps: 1, plan: 1, plandel: 1, plancopy: 1, meas: 1, guide: 1, remind: 1, pay: 1, freeze: 1, freezedel: 1, status: 1, extend: 1,
   topro: 1, trial: 1, create: 1, take: 1, cablink: 1, cabreset: 1, msg: 1, fb: 1, mrsave: 1, mrsend: 1, taskadd: 1, taskdel: 1, ctask: 1,
-  freetake: 1, freegive: 1, fmt: 1 };
+  freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 function post(body) {
@@ -1149,9 +1190,9 @@ function summ(c) {
     return o;
   }
   var act = c.status === ST_ACTIVE;
-  if (act && !tr && endIn !== null && endIn <= 3) o.alerts.push({ text: endIn < 0 ? 'Оплаченный период закончился ' + dm(c.payEnd) : 'Пакет заканчивается ' + (endIn === 0 ? 'сегодня' : dm(c.payEnd) + ' – через ' + days(endIn)), sub: 'care' });
-  if (act && !tr && endIn === null && !/аванс/i.test(c.payStatus || '')) o.alerts.push({ text: 'Нет оплаты – внесите её в разделе «Ведение»', sub: 'care' });
-  if (/аванс/i.test(c.payStatus || '') && /назначьте/i.test(c.payStatus || '')) o.alerts.push({ text: 'Есть оплата без даты начала (аванс)', sub: 'care' });
+  if (act && !tr && endIn !== null && endIn <= 3) o.alerts.push({ text: endIn < 0 ? 'Оплаченный период закончился ' + dm(c.payEnd) : 'Пакет заканчивается ' + (endIn === 0 ? 'сегодня' : dm(c.payEnd) + ' – через ' + days(endIn)), sub: 'pay' });
+  if (act && !tr && endIn === null && !/аванс/i.test(c.payStatus || '')) o.alerts.push({ text: 'Нет оплаты – внесите её во вкладке «Оплаты»', sub: 'pay' });
+  if (/аванс/i.test(c.payStatus || '') && /назначьте/i.test(c.payStatus || '')) o.alerts.push({ text: 'Есть оплата без даты начала (аванс) – назначьте её', sub: 'pay' });
   (c.reports || []).forEach(function (r) {
     if (r.test && !D.admin) return;
     if (r.state !== 'sent') o.alerts.push({ text: 'Итоги месяца ' + r.n + (r.state === 'wait' ? ' ждут вашей проверки' : ' сохранены, но не отправлены клиенту'), sub: 'care' });
@@ -1171,7 +1212,7 @@ function summ(c) {
   if (!c.loaded || (c.stale && !(S.unsure && S.memFresh))) { o.state = 'load'; o.text = c.err ? (c.loaded ? 'не обновилось' : 'не загрузилось') : c.loaded ? (S.offline ? 'нет связи' : 'обновляю…') : 'загружается…'; o.cls = 'dim'; return o; }
   if (!c.start) { o.state = 'off'; o.text = 'в дневнике нет дат'; o.cls = 'warm'; return o; }
   if (T < dn(c.start)) { o.state = 'off'; o.text = 'старт ' + dm(c.start); o.cls = 'dim'; return o; }
-  if (T > dn(c.end)) { o.alerts.unshift({ text: 'Дневник закончился ' + dm(c.end) + ' – внесите оплату или продлите', sub: 'care' }); o.state = 'off'; o.text = 'дневник закончился'; o.cls = 'warm'; return o; }
+  if (T > dn(c.end)) { o.alerts.unshift({ text: 'Дневник закончился ' + dm(c.end) + ' – внесите оплату или продлите', sub: 'pay' }); o.state = 'off'; o.text = 'дневник закончился'; o.cls = 'warm'; return o; }
   var td = hrow(c, TODAY) || {}, md = c.meas ? measDue(c) : null, gap = 0, n, h;
   if (td.k == null) o.miss.push('питание');
   if (!noSteps(c) && td.s == null) o.miss.push('шаги');
@@ -1512,7 +1553,7 @@ function render(nav) {
   if (wd && (S.tab === 'clients' || c)) {                                   // 1.8: компьютер – список слева, карточка справа
     if (c) S.tab = 'clients';
     body = '<div class="md"><div class="md-l">' + viewClients() + '</div><div class="md-r">' + (c ? viewClient(c) :
-      '<div class="md-0"><h3>Выберите клиента</h3><p>Слева – список. Справа откроется карточка клиента: обзор, питание, тренировки, замеры, ведение.</p></div>') + '</div></div>';
+      '<div class="md-0"><h3>Выберите клиента</h3><p>Слева – список. Справа откроется карточка клиента: данные, обзор, питание, тренировки, замеры, прогресс, оплаты, документы, ведение.</p></div>') + '</div></div>';
     app.innerHTML = header() + staleBanner() + '<div class="' + (nav && !c ? 'view' : '') + '">' + body + '</div>';
   } else {
     body = c ? viewClient(c) : S.tab === 'free' ? viewFree() : S.tab === 'fresh' ? viewFresh() : S.tab === 'tasks' ? viewTasks() : S.tab === 'clients' ? viewClients() : viewHome();
@@ -1748,7 +1789,13 @@ function viewTasks() {
 }
 
 /* ================= КАРТОЧКА КЛИЕНТА ================= */
-var SUBS = [['over', 'Обзор'], ['food', 'Питание'], ['train', 'Тренировки'], ['meas', 'Замеры'], ['care', 'Ведение']];
+var SUBS = [['client', 'Клиент'], ['over', 'Обзор'], ['food', 'Питание'], ['train', 'Тренировки'], ['meas', 'Замеры'], ['prog', 'Прогресс'], ['pay', 'Оплаты'], ['docs', 'Документы'], ['care', 'Ведение']];
+/** 2.0: вкладки по клиенту – без кабинета нет питания, тренировок, замеров и прогресса; у FREE нет оплат. */
+function subsFor(c) {
+  var k = c.table ? ['client', 'over', 'food', 'train', 'meas', 'prog', 'pay', 'docs', 'care'] : isFree(c) ? ['client', 'over', 'docs', 'care'] : ['client', 'over', 'pay', 'docs', 'care'];
+  return SUBS.filter(function (x) { return k.indexOf(x[0]) >= 0; });
+}
+var NEED_TABLE = { over: 1, food: 1, train: 1, meas: 1, prog: 1 };
 var CONSENT = { 'private': 'только для тренера, не публиковать', anon: 'можно публиковать анонимно – без лица и имени', 'public': 'можно публиковать' };
 function loadingCard(c) {
   if (c.err) return '<div class="card"><h3>Данные клиента не загрузились</h3><p class="sub">' + esc(cap(c.err)) + '</p><button class="btn sec sm" data-act="reload">Повторить</button></div>';
@@ -1769,14 +1816,16 @@ function viewClient(c) {
   else if (tr) ban = '<div class="banner warn"><b>Пробный кабинет закончился ' + longDate(c.trial.to) + '.</b> Кабинет открыт клиенту только для просмотра. Перевод на PRO – в разделе «Ведение».</div>';
   if (c.table && c.loaded && (c.stale || S.unsure)) ban += '<div class="banner' + (c.err ? ' warn' : '') + '">' + (c.err ? 'Не получилось обновить: ' + esc(c.err) + '. ' : '') +
     'Показаны данные на <b class="num">' + whenTxt(c.at) + '</b>' + (c.err ? '. <button class="btn sec sm" data-act="reload">Повторить</button>' : ' – обновляю.') + '</div>';
-  var subs = c.table ? SUBS : [SUBS[0], SUBS[4]];
+  if (!nameParts(c).last && S.sub !== 'client') ban += '<div class="banner warn"><b>Нет фамилии клиента.</b> <button class="lnk" data-sub="client">Впишите фамилию</button> – во вкладке «Клиент».</div>';   // 2.0
+  var subs = subsFor(c);
   if (!subs.some(function (x) { return x[0] === S.sub; })) S.sub = 'over';
-  var needTable = c.table && S.sub !== 'care', body;
+  var needTable = c.table && NEED_TABLE[S.sub], body;
   if (needTable && !c.loaded) body = loadingCard(c);
-  else body = S.sub === 'food' ? subFood(c) : S.sub === 'train' ? subTrain(c) : S.sub === 'meas' ? subMeas(c) : S.sub === 'care' ? subCare(c) : subOver(c);
+  else body = S.sub === 'client' ? subClient(c) : S.sub === 'food' ? subFood(c) : S.sub === 'train' ? subTrain(c) : S.sub === 'meas' ? subMeas(c) : S.sub === 'prog' ? subProg(c) :
+    S.sub === 'pay' ? subPay(c) : S.sub === 'docs' ? subDocs(c) : S.sub === 'care' ? subCare(c) : subOver(c);
   return topBar(true) + '<h1 class="hello">' + esc(c.name) + '</h1><div class="meta">' + pills.join('') + '</div>' + ban +
-    (c.table || c.bot || EMBED ? '<div class="btns" style="margin:0 0 14px">' + (EMBED ? '<button class="btn sec" data-act="goTrain">Тренировки</button>' : '') +
-      (c.table || c.bot ? '<button class="btn sec" data-act="msgForm">Написать клиенту</button>' : '') + (c.table ? '<button class="btn sec" data-act="cabLink">Ссылка на кабинет</button>' : '') + '</div>' : '') +   // 1.9.10
+    (c.arch && !EMBED ? '' : '<div class="btns" style="margin:0 0 14px">' + (EMBED ? '<button class="btn sec" data-act="goTrain">Тренировки клиента</button>' : '') +
+      (c.arch ? '' : '<button class="btn sec" data-act="msgForm">Написать клиенту</button>') + (c.table && !c.arch ? '<button class="btn sec" data-act="cabLink">Выдать ссылку на кабинет</button>' : '') + '</div>') +   // 2.0
     '<div class="chips" role="tablist">' + subs.map(function (x) { return '<button data-sub="' + x[0] + '" class="' + (S.sub === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>' + body;
 }
 function alertsCard(c) {
@@ -1796,6 +1845,7 @@ function aboutCard(c) {
   if (k.lim || a.lim) rows += kv('Ограничения', esc(k.lim || a.lim));
   if (k.exp || a.exp) rows += kv('Опыт', esc(k.exp || a.exp));
   if (k.inv) rows += kv('Инвентарь', esc(k.inv));
+  if (c.health) rows += kv('Здоровье', '<span style="color:var(--warm)">' + esc(c.health) + '</span>');   // 2.0
   if (!c.table && (a.weight || a.height || a.age)) rows += kv('По анкете', [a.sex ? (a.sex === 'Ж' ? 'жен.' : 'муж.') : '', a.age ? a.age + ' ' + plural(a.age, 'год', 'года', 'лет') : '', a.height ? a.height + ' см' : '', a.weight ? numTxt(a.weight) + ' кг' : ''].filter(String).join(' · '));
   if (c.sessTotal) rows += kv('Тренировок в пакете', c.sessTotal);
   rows += kv('Телефон', c.phone ? '<a href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '" style="color:var(--accent);text-decoration:none">' + esc(c.phone) + '</a>' : '—');
@@ -2073,32 +2123,19 @@ function thumbPump() {
 var MR_STATE = { wait: 'ждут вашей проверки', saved: 'сохранены, команда смотрит', sent: 'отправлены клиенту' };
 function subCare(c) {
   var tr = trialSt(c), h = '', L0 = L();
-  h += '<div class="card"><h3>Пакет и оплата</h3><div class="kvs">' + kv('Статус', esc(c.status || '—')) + kv('Формат', esc(c.format || 'не выбран')) +
+  h += '<div class="card"><h3>Статус и формат</h3><div class="kvs">' + kv('Статус', esc(c.status || '—')) + kv('Формат', esc(c.format || 'не выбран')) +
     (c.loaded && c.start ? kv('Дневник', dm(c.start) + ' – ' + dm(c.end)) : '') + (tr ? kv('Пробный кабинет', dm(c.trial.from) + ' – ' + dm(c.trial.to)) : '') +
     (c.payEnd ? kv('Оплачено до', dm(c.payEnd) + '.' + c.payEnd.slice(0, 4)) : '') + (c.payStatus ? kv('Статус оплаты', esc(c.payStatus)) : '') +
     (c.sessTotal ? kv('Тренировок в пакете', c.sessTotal) : '') + (c.proFrom ? kv('Старт PRO', dm(c.proFrom)) : '') + '</div>' +
     (c.arch ? '<div class="btns one"><button class="btn sec" data-act="statusForm">Сменить статус</button></div>'
-      : '<div class="btns">' + (isFree(c) ? '' : '<button class="btn pri" data-act="payForm">Внести оплату</button><button class="btn sec" data-act="frzForm">Заморозка</button>') +
-        '<button class="btn sec" data-act="statusForm">Сменить статус</button>' + (c.fmtTo && c.fmtTo.length ? '<button class="btn sec" data-act="fmtForm">Сменить формат</button>' : '') +
-        (c.table && !tr ? '<button class="btn sec" data-act="extend">Продлить дневник</button>' : '') + '</div>') + fmtNote(c) + '</div>';
+      : '<div class="btns">' + '<button class="btn sec" data-act="statusForm">Сменить статус</button>' + (c.fmtTo && c.fmtTo.length ? '<button class="btn sec" data-act="fmtForm">Сменить формат</button>' : '') +
+        (c.table && !tr ? '<button class="btn sec" data-act="extend">Продлить дневник</button>' : '') + '</div>') + fmtNote(c) +
+    (isFree(c) ? '' : '<p class="note">Оплаты, заморозки и досрочное закрытие пакета – во вкладке <button class="lnk" data-sub="pay">«Оплаты»</button>.</p>') + '</div>';
 
   if (tr) h += '<div class="card"><h3>Пробный кабинет</h3><p class="sub">' + (tr.before ? 'Начнётся ' + longDate(c.trial.from) + '.' : tr.ended ? 'Закончился ' + longDate(c.trial.to) + '. Кабинет открыт клиенту только для просмотра.' : 'День ' + tr.day + ' из ' + tr.total + ', до ' + longDate(c.trial.to) + ' включительно.') +
     (c.trial.want ? ' Клиент нажимал «Перейти на PRO» ' + dm(c.trial.want) + '.' : '') + '</p><button class="btn pri" data-act="proForm" style="height:48px">Перевести на PRO</button></div>';
   else if (!c.table && !c.arch) h += noCabCard(c);
 
-  if (!c.pays) h += (c.err ? loadingCard(c) : '<div class="card"><p class="muted" style="margin:0">Оплаты и заморозки загружаются…</p></div>');
-  else {
-    h += '<div class="card"><h3>Оплаты</h3>' + (c.pays.length ? '<div class="rows">' + c.pays.map(function (p) {
-      return '<div class="row"><span class="mn"><b class="num">' + fmt(p.sum) + ' ₽ · ' + (p.days ? p.days + ' дн.' : 'без пакета') + '</b><small>' + (p.date ? 'оплата ' + dm(p.date) : '') + (p.how ? ' · ' + esc(p.how) : '') +
-        (p.sess ? ' · тренировок: ' + esc(p.sess) : '') + '<br>' + (p.start ? 'период ' + dm(p.start) + (p.next ? ' – ' + dm(ymd(dn(p.next) - 1)) : '') : 'без даты начала (аванс)') + (p.note ? ' · ' + esc(p.note) : '') + '</small></span></div>';
-    }).join('') + '</div>' : '<p class="sub" style="margin:0">Оплат пока нет.</p>') + '</div>';
-    h += '<div class="card"><h3>Заморозки</h3>' + ((c.frzRows || []).length ? '<div class="rows">' + c.frzRows.map(function (z) {
-      var now = dn(z.from) <= T && dn(z.to) >= T, bad = z.check && z.check.indexOf('⚠') === 0;
-      return '<div class="row"><span class="dot ' + (now ? 'frz' : 'dim') + '"></span><span class="mn"><b class="num">' + dm(z.from) + ' – ' + dm(z.to) + ' · ' + days(z.days) + '</b><small>' + (now ? 'идёт сейчас' : dn(z.from) > T ? 'впереди' : 'прошла') +
-        (z.note ? ' · ' + esc(z.note) : '') + (bad ? '<br><span style="color:var(--warm)">' + esc(z.check) + '</span>' : '') + '</small></span>' +
-        '<button class="ib del" data-act="frzDel" data-from="' + z.from + '" aria-label="Убрать заморозку">' + IC.trash + '</button></div>';
-    }).join('') + '</div>' : '<p class="sub" style="margin:0">Заморозок не было.</p>') + '</div>';
-  }
   if (!c.table) return h;
 
   if (c.loaded) h += '<div class="card"><h3>Гайды</h3><p class="sub">Клиент видит в кабинете только выданные.</p>' + (c.guides.length ? '<div class="rows">' + c.guides.map(function (g) {
@@ -2128,14 +2165,346 @@ function subCare(c) {
     fs('rEve', 'Вечер', [['off', 'не присылать']].concat(L0.evening || []), c.remind.evening, 'data-ch="remEve"') + '</div>' +
     fs('rTz', 'Часовой пояс', L0.tz || [['', 'Москва']], c.remind.tz || '', 'data-ch="remTz"') + '</div></div>';
 
-  h += '<div class="card"><h3>Кабинет и бот</h3><p class="sub">' + (!c.key ? 'Кабинет ещё не выдан: нажмите «Ссылка на кабинет» – получите готовое сообщение клиенту.' : c.blocked ? 'Клиент заблокировал бота ' + dm(c.blocked) + ' – напоминания не приходят. Попросите разблокировать или отправьте ссылку заново.'
+  h += '<div class="card"><h3>Кабинет и бот</h3><p class="sub">' + (!c.key ? 'Кабинет ещё не выдан: нажмите «Выдать ссылку на кабинет» – получите готовое сообщение клиенту.' : c.blocked ? 'Клиент заблокировал бота ' + dm(c.blocked) + ' – напоминания не приходят. Попросите разблокировать или отправьте ссылку заново.'
     : c.bot ? (c.vk ? 'Клиент подключил ВКонтакте – напоминания и итоги приходят туда.' : 'Клиент подключил бота – напоминания и итоги приходят.') : 'Клиент ещё не подключил бота: напоминания не приходят. Отправьте ему ссылку.') + '</p>' +
-    '<div class="btns" style="margin-top:0"><button class="btn sec" data-act="cabLink">Ссылка на кабинет</button>' + (D.vk ? '<button class="btn sec" data-act="vkLink">Ссылка на ВКонтакте</button>' : '') + '<button class="btn danger" data-act="cabReset">Сбросить и выдать заново</button></div></div>';
+    '<div class="btns" style="margin-top:0"><button class="btn sec" data-act="cabLink">Выдать ссылку на кабинет</button>' + (D.vk ? '<button class="btn sec" data-act="vkLink">Ссылка на ВКонтакте</button>' : '') + '<button class="btn danger" data-act="cabReset">Сбросить и выдать заново</button></div></div>';
   return h;
 }
 function msgBox(id, text, hgt, label) {
   return '<label class="fld"><textarea id="' + id + '" readonly style="min-height:' + (hgt || 220) + 'px">' + esc(text) + '</textarea><span>' + (label || 'Готовое сообщение клиенту') + '</span></label>' +
     '<button class="btn pri" data-copy="' + id + '">Скопировать</button>';
+}
+
+
+/* ================= 2.0: клиент, оплаты, прогресс, документы, переписка ================= */
+function nameParts(c) { var w = String(c.name || '').trim().split(/\s+/); return { first: w[0] || '', last: w.slice(1).join(' ') }; }
+function fiNeed(id, label, v, need, attrs) { var s = fi(id, label, v, 'text', attrs); return need ? s.replace('class="fld"', 'class="fld need"') : s; }
+function botTxt(c) { return c.blocked ? '<span style="color:var(--warm)">заблокировал ' + dm(c.blocked) + '</span>' : c.bot ? (c.vk ? 'ВКонтакте подключён' : 'Telegram подключён') : '<span style="color:var(--warm)">не подключён</span>'; }
+function ymdTxt(s) { s = String(s || ''); return /^\d{4}-\d{2}-\d{2}/.test(s) ? dm(s.slice(0, 10)) + '.' + s.slice(0, 4) : esc(s); }
+function whenIso(s) {
+  var d = new Date(s); if (isNaN(d.getTime())) return esc(String(s || '').slice(0, 16));
+  var p = function (n) { return (n < 10 ? '0' : '') + n; };
+  return p(d.getDate()) + '.' + p(d.getMonth() + 1) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+/* ---------- документы и анкета: подгружаются, когда нужны ---------- */
+var DOCS = {};
+function docsOf(c) {
+  var d = DOCS[c.id];
+  if (d) return d;
+  DOCS[c.id] = d = { busy: true };
+  call('docs', { id: c.id }, true).then(function (r) {
+    DOCS[c.id] = r && r.ok ? r : { err: errText(r) };
+    if (String(S.cid) === String(c.id) && !document.getElementById('viewer')) render();
+  });
+  return d;
+}
+var LIM_RE = /огранич|травм|заболев|болезн|здоров|противопоказ|операц|беремен|давлен|сердц|сустав|спин|грыж|диабет|боли|лекарств/i;
+function ankCard(c) {
+  var d = docsOf(c), h = '<div class="card"><h3>Анкета клиента</h3>';
+  if (d.busy) return h + '<p class="sub" style="margin:0">Загружаю ответы анкеты…</p></div>';
+  if (d.err) return h + '<p class="sub">Не загрузилось: ' + esc(d.err) + '</p><button class="btn sec sm" data-act="docsRe">Повторить</button></div>';
+  if (!d.ank || !d.ank.length) return h + '<p class="sub" style="margin:0">Ответов анкеты не нашлось – анкета ищется по почте и телефону клиента.</p></div>';
+  var lim = d.ank.filter(function (x) { return LIM_RE.test(x[0]); }), rest = d.ank.filter(function (x) { return !LIM_RE.test(x[0]); });
+  var list = lim.concat(S.ankAll ? rest : rest.slice(0, 6));
+  h += '<p class="sub">Только просмотр – как клиент ответил в анкете. Здоровье и ограничения – первыми, подсвечены.</p><div class="ank">' + list.map(function (x) {
+    return '<div class="aq' + (LIM_RE.test(x[0]) ? ' lim' : '') + '"><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b></div>';
+  }).join('') + '</div>';
+  if (rest.length > 6) h += '<button class="btn sec sm mt" data-act="ankAll">' + (S.ankAll ? 'Свернуть' : 'Все ответы: ' + d.ank.length) + '</button>';
+  return h + (d.anketa ? '<a class="btn sec sm mt" href="' + esc(d.anketa) + '" target="_blank" rel="noopener">Анкета в PDF</a>' : '') + '</div>';
+}
+
+/* ---------- вкладка «Клиент» ---------- */
+function startOf(c) {
+  var xs = (c.pays || []).filter(function (p) { return p.start; }).map(function (p) { return p.start; });
+  if (c.trial && c.trial.from) xs.push(c.trial.from);
+  if (c.start) xs.push(c.start);
+  if (c.fmtUsed) Object.keys(c.fmtUsed).forEach(function (k) { var v = String(c.fmtUsed[k] || ''); if (/^\d{4}-\d{2}-\d{2}$/.test(v)) xs.push(v); });
+  xs.sort();
+  return xs[0] || '';
+}
+function subClient(c) {
+  var np = nameParts(c), a = c.an || {}, k = c.card || {}, h = '', lim = k.lim || a.lim || '';
+  var goals = (L().clGoals || []).slice();
+  if (c.goal && goals.indexOf(c.goal) < 0) goals.unshift(c.goal);
+  if (!c.goal) goals.unshift(['', '– не выбрана –']);
+  h += '<div class="card"><h3>Данные клиента</h3><div class="frm">' +
+    '<div class="grid2">' + fiNeed('ciFirst', 'Имя', np.first, false, 'maxlength="40" autocapitalize="words"') + fiNeed('ciLast', np.last ? 'Фамилия' : 'Фамилия – впишите', np.last, !np.last, 'maxlength="60" autocapitalize="words"') + '</div>' +
+    (np.last ? '' : '<p class="note" style="margin:0;color:var(--warm)">Фамилии нет. Впишите – имя обновится везде: в списке клиентов, «Платежах», «Заморозках» и сообщениях.</p>') +
+    fi('ciPhone', 'Телефон', c.phone || '', 'tel', 'maxlength="40"') + fi('ciEmail', 'Почта', c.email || '', 'email', 'maxlength="120" autocapitalize="off"') + fs('ciGoal', 'Цель', goals, c.goal || '') +
+    '</div><div class="kvs" style="margin-top:12px">' + kv('Бот', botTxt(c)) + (c.phone ? kv('Позвонить', '<a href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '" style="color:var(--accent);text-decoration:none">' + esc(c.phone) + '</a>') : '') + '</div>' +
+    '<button class="btn pri sm mt" data-act="ciSave">Сохранить данные</button></div>';
+  h += '<div class="card"><h3>Здоровье и ограничения – заметки тренера</h3>' +
+    (lim ? '<div class="aq lim" style="margin:0 0 12px"><span>Из анкеты</span><b>' + esc(lim) + '</b></div>' : '') +
+    '<div class="frm">' + ft('ciHealth', 'Заболевания, травмы, ограничения – со слов клиента', c.health || '', 4, 'maxlength="1000"') + '</div>' +
+    '<button class="btn sec sm mt" data-act="ciSave">Сохранить</button></div>';
+  h += '<div class="card"><h3>Заметки тренера</h3><p class="sub">Видите только Вы и команда. Клиенту не показываются.</p><div class="frm">' + ft('ciNote', 'Заметки', c.note || '', 4, 'maxlength="1000"') + '</div>' +
+    '<button class="btn sec sm mt" data-act="ciSave">Сохранить</button></div>';
+  h += ankCard(c);
+  var used = c.fmtUsed ? Object.keys(c.fmtUsed).map(function (f) { var v = String(c.fmtUsed[f] || ''); return f + (/^\d{4}-\d{2}-\d{2}$/.test(v) ? ' с ' + dm(v) + '.' + v.slice(2, 4) : ''); }) : [];
+  var st = startOf(c);
+  h += '<div class="card"><h3>История</h3><div class="kvs">' + kv('Формат', esc(c.format || 'не выбран')) + (used.length > 1 ? kv('Был(а) на', esc(used.join(', '))) : '') +
+    kv('Начало ведения', st ? ymdTxt(st) : '—') + kv('Тренер', esc(c.owner || '—')) + kv('Статус', esc(c.status || '—')) + (c.proFrom ? kv('Старт PRO', ymdTxt(c.proFrom)) : '') + '</div></div>';
+  return h;
+}
+
+/* ---------- вкладка «Оплаты» ---------- */
+function payTo(p) { return p.end || (p.next ? ymd(dn(p.next) - 1) : ''); }
+function payNow(p) { return !!(p.start && p.next && dn(p.start) <= T && T < dn(p.next)); }
+function payOf(c, row) { return (c.pays || []).filter(function (p) { return String(p.row) === String(row); })[0] || null; }
+function payHit(c, y, skipRow) { var n = dn(y); return (c.pays || []).filter(function (p) { return String(p.row) !== String(skipRow) && p.start && p.next && dn(p.start) <= n && n < dn(p.next); })[0] || null; }
+function payLine(p) { return fmt(p.sum) + ' ₽ от ' + dm(p.date) + (p.days ? ', пакет ' + p.days + ' дн.' : ''); }
+function subPay(c) {
+  if (!c.pays) return c.err ? loadingCard(c) : '<div class="card"><p class="muted" style="margin:0">Оплаты и заморозки загружаются…</p></div>';
+  var curP = c.pays.filter(payNow)[0], nx = c.payEnd ? ymd(dn(c.payEnd) + 1) : '', h = '';
+  h += '<div class="card"><h3>Оплата</h3><div class="kvs">' + kv('Оплачено до', c.payEnd ? dm(c.payEnd) + '.' + c.payEnd.slice(0, 4) : '—') +
+    kv('Пакет', curP ? curP.days + ' дн.' + (curP.sess ? ' · тренировок: ' + esc(curP.sess) : '') : c.period ? c.period + ' дн.' : '—') +
+    kv('Следующая оплата', nx ? dm(nx) + (dn(nx) - T >= 0 && dn(nx) - T <= 5 ? ' <span style="color:var(--warm)">– через ' + days(dn(nx) - T) + '</span>' : dn(nx) < T ? ' <span style="color:var(--warm)">– просрочена</span>' : '') : '—') +
+    kv('Статус оплаты', esc(c.payStatus || '—')) + kv('Скидка Lite Fit', c.disc ? c.disc.pct + ' % с ' + dm(c.disc.from) : 'нет') + '</div>' +
+    (c.arch ? '' : '<div class="btns"><button class="btn pri" data-act="payForm">Внести оплату</button><button class="btn sec" data-act="frzForm">Заморозка</button></div>') + '</div>';
+  var items = c.pays.map(function (p) { return { k: p.start || p.date, p: p }; }).concat((c.frzRows || []).map(function (z) { return { k: z.from, z: z }; }));
+  items.sort(function (a, b) { return a.k < b.k ? 1 : a.k > b.k ? -1 : 0; });
+  h += '<div class="card"><h3>История оплат</h3>';
+  if (!items.length) return h + '<p class="sub" style="margin:0">Оплат пока нет.</p></div>';
+  h += '<div class="tl">' + items.map(function (it) {
+    if (it.z) {
+      var z = it.z, now = dn(z.from) <= T && dn(z.to) >= T, bad = z.check && z.check.indexOf('⚠') === 0;
+      return '<div class="tli frz"><div class="tl-h"><b>Заморозка ' + dm(z.from) + ' – ' + dm(z.to) + '</b><span class="pill">' + days(z.days) + '</span></div>' +
+        '<div class="tl-m">' + (now ? 'идёт сейчас' : dn(z.from) > T ? 'впереди' : 'прошла') + (z.note ? ' · ' + esc(z.note) : '') + '</div>' + (bad ? '<div class="tl-m" style="color:var(--warm)">' + esc(z.check) + '</div>' : '') +
+        '<div class="tl-b"><button class="btn sec sm" data-act="frzDel" data-from="' + z.from + '">Убрать</button></div></div>';
+    }
+    var p = it.p, to = payTo(p), now2 = payNow(p), fut = p.start && dn(p.start) > T, adv = !p.start;
+    var tag = adv ? '<span class="pill warm">аванс</span>' : now2 ? '<span class="pill on">идёт сейчас</span>' : fut ? '<span class="pill">впереди</span>' : '';
+    var disc = p.price ? 'по прайсу ' + fmt(p.price) + ' ₽' + (p.disc ? ', скидка ' + p.disc + ' %' : '') + (p.dwhy ? ' · ' + esc(p.dwhy) : '') : '';
+    var btns = '';
+    if (!c.arch) {
+      if (adv) btns += '<button class="btn pri sm" data-act="payEditForm" data-row="' + p.row + '" data-f="start">Назначить дату начала</button>';
+      else if (now2 && !p.end && p.days) btns += '<button class="btn sec sm" data-act="endForm" data-row="' + p.row + '">Закрыть досрочно</button>';
+      btns += '<button class="btn sec sm" data-act="payEditForm" data-row="' + p.row + '">Изменить</button><button class="btn sec sm" data-act="payDelForm" data-row="' + p.row + '">Удалить</button>';
+    }
+    return '<div class="tli' + (now2 ? ' now' : '') + '"><div class="tl-h"><b class="num">' + fmt(p.sum) + ' ₽</b><span class="tag">' + (p.days ? p.days + ' дн.' : 'без пакета') + '</span>' + tag + '</div>' +
+      '<div class="tl-m">Оплата ' + (p.date ? dm(p.date) + '.' + p.date.slice(2, 4) : '—') + (p.how ? ' · ' + esc(p.how) : '') + (p.sess ? ' · тренировок: ' + esc(p.sess) : '') + '</div>' +
+      '<div class="tl-m">' + (adv ? '<span style="color:var(--warm)">Без даты начала – назначьте её, когда клиент начнёт</span>' : 'Период <b class="num">' + dm(p.start) + ' – ' + (to ? dm(to) : '…') + '</b>' + (p.end ? ' <span style="color:var(--warm)">· закрыт досрочно</span>' : '') + (p.frzd ? ' · заморозка +' + days(p.frzd) : '')) + '</div>' +
+      (disc ? '<div class="tl-m">Скидка: ' + disc + '</div>' : '') + (p.note ? '<div class="tl-m dim">' + esc(p.note) + '</div>' : '') +
+      (btns ? '<div class="tl-b">' + btns + '</div>' : '') + '</div>';
+  }).join('') + '</div>';
+  return h + '<p class="note">Клиент выполнил все тренировки раньше срока и платит за новый пакет? Нажмите «Закрыть досрочно» у текущего пакета – новый продолжит со следующего дня, без разрыва.</p></div>';
+}
+/** Поля скидки: в процентах или ценой по прайсу, и причина. x – оплата, которую меняют. */
+function discFields(p, x) {
+  var why = '', wt = '', list = L().dwhy || [], mode = x && x.price ? 'price' : '';
+  if (x && x.dwhy) { var i = x.dwhy.indexOf(': '), w0 = i > 0 ? x.dwhy.slice(0, i) : x.dwhy; if (list.indexOf(w0) >= 0) { why = w0; wt = i > 0 ? x.dwhy.slice(i + 2) : ''; } else { why = 'Индивидуально'; wt = x.dwhy; } }
+  return fs(p + 'DMode', 'Скидка', [['', 'без скидки'], ['pct', 'в процентах'], ['price', 'цена по прайсу']], mode, 'data-ch="dMode" data-p="' + p + '"') +
+    '<div id="' + p + 'DBox" class="frm"' + (mode ? '' : ' hidden') + '>' +
+    '<div id="' + p + 'PctW"' + (mode === 'pct' ? '' : ' hidden') + '>' + fi(p + 'Pct', 'Скидка, %', '', 'text', 'inputmode="numeric" placeholder="например, 10"') + '</div>' +
+    '<div id="' + p + 'PriceW"' + (mode === 'price' ? '' : ' hidden') + '>' + fi(p + 'Price', 'Цена по прайсу, ₽', x && x.price ? x.price : '', 'text', 'inputmode="numeric"') + '</div>' +
+    fs(p + 'Why', 'Причина скидки', [['', '– выберите –']].concat(list), why) + fi(p + 'WhyT', 'Пояснение – для «Индивидуально» обязательно', wt, 'text', 'maxlength="100"') + '</div>';
+}
+function discRead(p, sum) {
+  var mode = val(p + 'DMode'), out = { price: '', dwhy: '' };
+  if (!mode) return out;
+  if (mode === 'pct') {
+    var pct = num(p + 'Pct');
+    if (badNum(pct, 1, 99)) return { err: 'Скидка в процентах: от 1 до 99. Для бесплатного периода выберите «цена по прайсу».' };
+    out.price = Math.round(sum / (1 - pct / 100));
+  } else {
+    out.price = num(p + 'Price');
+    if (out.price === '' || isNaN(out.price) || out.price < sum) return { err: 'Цена по прайсу – не меньше суммы оплаты.' };
+  }
+  var why = val(p + 'Why'), wt = val(p + 'WhyT');
+  if (!why) return { err: 'Выберите причину скидки.' };
+  if (why === 'Индивидуально' && wt.length < 3) return { err: 'Напишите, в чём индивидуальная скидка.' };
+  out.dwhy = why + (wt ? ': ' + wt : '');
+  return out;
+}
+function payEditForm(row, f) {
+  var c = cur(), p = payOf(c, row);
+  if (!p) return toast('Оплата не найдена – обновите страницу', 'bad');
+  if (f === 'start') return sheet('Дата начала', '<h2>Дата начала пакета</h2><p class="lead">' + esc(c.name) + ': ' + payLine(p) + '. С этой даты считается оплаченный период; дневник PRO продлится.</p>' +
+    fi('eStart', 'Начало пакета', c.payEnd && dn(c.payEnd) + 1 >= T ? ymd(dn(c.payEnd) + 1) : TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + ymd(T + 120) + '"') +
+    '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="payEditSave" data-row="' + p.row + '" data-f="start">Сохранить</button>');
+  var meth = (L().methods || []).slice(); if (p.how && meth.indexOf(p.how) < 0) meth.unshift(p.how);
+  var pk = pkgOpts(); if (p.days && !pk.some(function (x) { return x[0] === String(p.days); })) pk.unshift([String(p.days), p.days + ' дн.']);
+  var ses = [['-', 'не указывать']].concat(L().sessions || []); if (p.sess && !ses.some(function (x) { return String(x instanceof Array ? x[0] : x) === String(p.sess); })) ses.push(String(p.sess));
+  sheet('Изменить оплату', '<h2>Изменить оплату</h2><p class="lead">' + esc(c.name) + ': ' + payLine(p) + '. Изменения попадут на лист «Платежи», сообщение – в рабочий чат.</p>' +
+    '<div class="grid2">' + fi('eDate', 'Дата оплаты', p.date, 'date', 'max="' + TODAY + '"') + fi('eSum', 'Сумма, ₽', p.sum != null ? p.sum : '', 'text', 'inputmode="numeric"') + '</div>' +
+    '<div class="grid2">' + fs('ePkg', 'Пакет', pk, String(p.days || '')) + fs('eSess', 'Тренировок', ses, p.sess || '-') + '</div>' + fs('eHow', 'Способ оплаты', meth, p.how) +
+    discFields('e', p) + '<div class="grid2">' + fi('eStart', 'Начало пакета', p.start, 'date') + fi('eEnd', 'Закрыт досрочно', p.end, 'date') + '</div>' +
+    '<p class="note" style="margin:0">Пустое «Начало» – аванс. «Закрыт досрочно» – последний день пакета, если клиент закончил его раньше; очистите поле, чтобы вернуть полный срок.</p>' +
+    ft('eNote', 'Комментарий', p.note, 2, 'maxlength="600"') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="payEditSave" data-row="' + p.row + '">Сохранить</button>' +
+    '<button class="btn danger" data-act="payDelForm" data-row="' + p.row + '">Удалить оплату</button>');
+}
+
+/* ---------- вкладка «Прогресс» ---------- */
+var PROG_P = [[30, '30 дней'], [90, '3 месяца'], [0, 'Весь период']];
+function barChart(rows, o) {
+  o = o || {};
+  var W = 340, H = 160, L0 = 38, R = 8, Tp = 14, B = 24, n = rows.length;
+  if (!n) return '';
+  var mx = o.max || 0; if (!o.max) rows.forEach(function (r) { mx = Math.max(mx, r.v || 0, r.nm || 0); });
+  if (!o.max) { var st = mx > 5000 ? 1000 : mx > 1000 ? 500 : mx > 100 ? 50 : mx > 20 ? 10 : 2; mx = Math.ceil(mx * 1.1 / st) * st || st; }
+  var bw = (W - L0 - R) / n, Y = function (v) { return Tp + (mx - v) / mx * (H - Tp - B); };
+  var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label || '') + '">';
+  [0, mx / 2, mx].forEach(function (v) { var y = Y(v); s += '<line class="gl" x1="' + L0 + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '"/><text x="' + (L0 - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + fmt(v) + (o.unit || '') + '</text>'; });
+  var np = [], few = n <= 16;
+  rows.forEach(function (r, i) {
+    var x = L0 + i * bw;
+    if (r.v != null && r.v > 0) {
+      var cls = o.over ? (r.nm && r.v > r.nm * 1.03 ? 'over' : 'ok') : o.under ? (r.nm && r.v < r.nm ? 'over' : 'ok') : 'ok';
+      s += '<rect class="bar ' + cls + '" x="' + (x + bw * 0.18).toFixed(1) + '" y="' + Y(r.v).toFixed(1) + '" width="' + (bw * 0.64).toFixed(1) + '" height="' + (Y(0) - Y(r.v)).toFixed(1) + '" rx="3"/>';
+      if (few && o.vals) s += '<text class="vl" x="' + (x + bw / 2).toFixed(1) + '" y="' + (Y(r.v) - 4).toFixed(1) + '" text-anchor="middle">' + (o.vals === true ? fmt(r.v) : o.vals(r)) + '</text>';
+    }
+    if (r.nm) np.push((x + bw * 0.1).toFixed(1) + ',' + Y(r.nm).toFixed(1), (x + bw * 0.9).toFixed(1) + ',' + Y(r.nm).toFixed(1));
+    if (i === 0 || i === n - 1 || (n > 4 && i === Math.floor(n / 2)) || n <= 6) s += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(r.lab) + '</text>';
+  });
+  if (np.length) s += '<polyline class="nl" points="' + np.join(' ') + '"/>';
+  return s + '</svg>';
+}
+/** Отрезки по 7 дней от from до to (последний может быть короче). */
+function weeks(from, to) { var out = []; for (var a = from; a <= to; a += 7) out.push({ a: a, b: Math.min(a + 6, to), lab: dm(ymd(a)) }); return out; }
+function goalW(c) {
+  var d = DOCS[c.id];
+  if (!d || !d.ank) return null;
+  var hit = d.ank.filter(function (x) { return /вес/i.test(x[0]) && /желаем|целев|хотите|цель/i.test(x[0]); })[0];
+  var v = hit ? parseNum(String(hit[1]).replace(/[^\d.,]/g, ' ').trim().split(/\s+/)[0]) : null;
+  return v && v > 30 && v < 250 ? v : null;
+}
+function progStat(k, v, cls) { return '<div class="stat' + (cls ? ' ' + cls : '') + '"><div class="k">' + k + '</div><div class="v num">' + v + '</div></div>'; }
+function subProg(c) {
+  docsOf(c);
+  var p = S.prog == null ? 30 : S.prog, n0 = c.start ? dn(c.start) : T - 29, end = Math.min(T, c.end ? dn(c.end) : T);
+  var from = p ? Math.max(T - p + 1, n0) : n0, wk = end - from > 45, h = '';
+  h += '<div class="chips">' + PROG_P.map(function (x) { return '<button data-act="progP" data-p="' + x[0] + '" class="' + (p === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  if (end < from) return h + '<div class="card"><p class="muted" style="margin:0">Ведение ещё не началось' + (c.start ? ' – старт ' + longDate(c.start) : '') + '.</p></div>';
+  var pd = days(end - from + 1), inR = function (y) { var n = dn(y); return n >= from && n <= end; };
+  var B = wk ? weeks(from, end) : null;
+  var series = function (get, nmOf) {                       // по дням или средние по неделям
+    if (!wk) { var out = []; for (var n = from; n <= end; n++) { var y = ymd(n); out.push({ lab: dm(y), v: get(y), nm: nmOf ? nmOf(y) : null }); } return out; }
+    return B.map(function (w) {
+      var vs = [], ns = [];
+      for (var n = w.a; n <= w.b; n++) { var y = ymd(n), v = get(y); if (v != null) vs.push(v); if (nmOf) { var m = nmOf(y); if (m) ns.push(m); } }
+      return { lab: w.lab, v: avg(vs), nm: avg(ns) };
+    });
+  };
+
+  // вес
+  var wr = c.hist.filter(function (r) { return r.w != null && inR(r.d); }).map(function (r) { return { n: dn(r.d), v: r.w, d: r.d }; }), gw = goalW(c);
+  h += '<div class="card"><h3>Вес</h3>';
+  if (wr.length) {
+    var w0 = wr[0].v, w1 = wr[wr.length - 1].v;
+    h += '<div class="stats">' + progStat('В начале', fx(w0) + ' <small>кг</small>') + progStat('Сейчас', fx(w1) + ' <small>кг</small>') + progStat('За ' + pd, signed(w1 - w0, 1) + ' <small>кг</small>', 'hl') + '</div>';
+    if (gw) h += '<p class="sub">Цель по анкете: <b class="num" style="color:var(--text)">' + fx(gw) + ' кг</b> – осталось ' + fx(Math.abs(w1 - gw)) + ' кг.</p>';
+  }
+  h += (wr.length >= 2 ? lineChart(wr, 'кг', 'Вес', 1, { trend: true, goal: gw }) + '<div class="chart-leg"><span><i></i>Вес</span><span><i class="tr"></i>Тренд</span>' + (gw ? '<span><i class="dash"></i>Цель</span>' : '') + '</div>'
+    : '<p class="sub" style="margin:0">За этот период вес внесён меньше двух раз.</p>') + '</div>';
+
+  // калории и Б/Ж/У
+  var kc = series(function (y) { var r = hrow(c, y); return r && r.k != null ? r.k : null; }, function (y) { return normAt(c, y).kcal; });
+  var kd = c.hist.filter(function (r) { return r.k != null && inR(r.d); }), inN = kd.filter(function (r) { var nm = normAt(c, r.d).kcal; return nm && r.k <= nm * 1.03; }).length;
+  h += '<div class="card"><h3>Калории' + (wk ? ' – средние по неделям' : '') + '</h3>';
+  if (kd.length) {
+    var ka = avg(kd.map(function (r) { return r.k; })), na = avg(kd.map(function (r) { return normAt(c, r.d).kcal; }));
+    h += '<div class="stats">' + progStat('В среднем', fmt(ka) + ' <small>ккал</small>') + progStat('Норма', fmt(na) + ' <small>ккал</small>') + progStat('В норме', inN + ' <small>из ' + kd.length + ' дн.</small>', 'hl') + '</div>' +
+      barChart(kc, { over: true, label: 'Калории' }) + '<div class="chart-leg"><span><i style="background:var(--accent)"></i>В пределах нормы</span><span><i style="background:var(--warm)"></i>Выше нормы</span><span><i class="dash"></i>Норма</span></div>';
+    var nmT = normAt(c, ymd(end));
+    h += '<div class="macros" style="margin-top:14px">' + [['p', 'Белки'], ['f', 'Жиры'], ['c', 'Углеводы']].map(function (m) {
+      var x = avg(kd.map(function (r) { return r[m[0]]; })), n = nmT[m[0]], pc = n && x != null ? Math.min(x / n, 1) * 100 : 0, ov = n && x != null && x > n * 1.1;
+      return '<div class="mac"><div class="k"><span>' + m[1] + ', в среднем</span></div><div class="bar"><i class="' + (ov ? 'over' : '') + '" style="width:' + pc.toFixed(1) + '%"></i></div><div class="v num"' + (ov ? ' style="color:var(--warm)"' : '') + '>' + fmt(x, 1) + ' <small>/ ' + fmt(n) + ' г</small></div></div>';
+    }).join('') + '</div>';
+  } else h += '<p class="sub" style="margin:0">За этот период питание не вносилось.</p>';
+  h += '</div>';
+
+  // шаги
+  if (!noSteps(c)) {
+    var sd = c.hist.filter(function (r) { return r.s != null && inR(r.d); }), sOk = sd.filter(function (r) { return r.s >= c.steps; }).length;
+    h += '<div class="card"><h3>Шаги' + (wk ? ' – средние по неделям' : '') + '</h3>';
+    if (sd.length) h += '<div class="stats">' + progStat('В среднем', fmt(avg(sd.map(function (r) { return r.s; })))) + progStat('Норма', fmt(c.steps)) + progStat('Норма выполнена', sOk + ' <small>из ' + sd.length + ' дн.</small>', 'hl') + '</div>' +
+      barChart(series(function (y) { var r = hrow(c, y); return r && r.s != null ? r.s : null; }, function () { return c.steps; }), { under: true, label: 'Шаги' }) +
+      '<div class="chart-leg"><span><i style="background:var(--accent)"></i>Норма выполнена</span><span><i style="background:var(--warm)"></i>Ниже нормы</span><span><i class="dash"></i>Норма</span></div>';
+    else h += '<p class="sub" style="margin:0">За этот период шаги не вносились.</p>';
+    h += '</div>';
+  }
+
+  // дисциплина: доля дней, когда внесено всё
+  var ns = noSteps(c), dRows = (B || weeks(from, end)).map(function (w) {
+    var inD = 0, full = 0;
+    for (var n = w.a; n <= w.b; n++) { if (frzOn(c, n)) continue; inD++; var r = hrow(c, ymd(n)); if (r && r.k != null && (ns || r.s != null)) full++; }
+    return { lab: w.lab, v: inD ? Math.round(full / inD * 100) : null, nm: null };
+  });
+  var dAll = avg(dRows.map(function (r) { return r.v; }));
+  h += '<div class="card"><h3>Дисциплина</h3><p class="sub">Доля дней по неделям, когда клиент внёс ' + (ns ? 'питание' : 'и питание, и шаги') + '. Дни заморозки не считаются. В среднем: <b class="num" style="color:var(--text)">' + (dAll != null ? Math.round(dAll) + ' %' : '—') + '</b>.</p>' +
+    barChart(dRows, { max: 100, unit: '%', label: 'Дисциплина', vals: function (r) { return r.v + '%'; } }) + '</div>';
+
+  // баллы и медали по месяцам
+  var P = ptsOfC(c);
+  if (P && P.R.months.length) {
+    var ms = P.R.months.filter(function (m) { return !p || dn(m.to) >= from; });
+    h += '<div class="card"><h3>Баллы и медали по месяцам</h3>' + barChart(ms.map(function (m) { return { lab: 'м.' + m.n, v: m.pts, nm: null, md: m.medals.length }; }), { label: 'Баллы по месяцам', vals: function (r) { return r.v + (r.md ? ' · ' + r.md + '🏅' : ''); } }) +
+      '<div class="rows">' + ms.slice().reverse().map(function (m) {
+        return '<div class="row"><span class="mn"><b>Месяц ' + m.n + ' · <span class="num">' + m.pts + '</span> ' + plural(m.pts, 'балл', 'балла', 'баллов') + '</b><small>' + dm(m.from) + ' – ' + dm(m.to) + ' · медалей: ' + m.medals.length + (m.open ? ' · идёт' : '') + '</small></span></div>';
+      }).join('') + '</div></div>';
+  }
+
+  // замеры
+  var m = c.meas, got = m ? measCols(c).filter(filled) : [];
+  if (got.length >= 2) {
+    var wd0 = m.names.map(function (nm, i) { return { i: i, pts: got.filter(function (x) { return x.values[i] != null && (!p || dn(x.date) >= from); }).map(function (x) { return { n: dn(x.date), v: x.values[i], d: x.date }; }) }; }).filter(function (x) { return x.pts.length >= 2; });
+    if (wd0.length) {
+      if (S.mSel == null || !wd0.some(function (x) { return x.i === S.mSel; })) S.mSel = (wd0.filter(function (x) { return mKind(m.names[x.i]) === 'waist'; })[0] || wd0[0]).i;
+      var cm = wd0.filter(function (x) { return x.i === S.mSel; })[0], a0 = cm.pts[0].v, a1 = cm.pts[cm.pts.length - 1].v;
+      h += '<div class="card"><h3>Замеры</h3><div class="chips">' + wd0.map(function (x) { return '<button data-msel="' + x.i + '" class="' + (x.i === S.mSel ? 'on' : '') + '">' + esc(mShort(m.names[x.i]).label) + '</button>'; }).join('') + '</div>' +
+        '<p class="sub">' + esc(mShort(m.names[cm.i]).label) + ': ' + fmt(a0, 1) + ' → ' + fmt(a1, 1) + ' ' + esc(m.units[cm.i] || '') + ' (' + signed(a1 - a0, 1) + ').</p>' + lineChart(cm.pts, m.units[cm.i], mShort(m.names[cm.i]).label, 1) + '</div>';
+    }
+  }
+
+  // тренировки по неделям
+  var pt = (PTSA && PTSA.list && PTSA.list[c.id]) || null, cnt = {};
+  ((pt && pt.done) || []).forEach(function (y) { cnt[y] = (cnt[y] || 0) + 1; });
+  (c.plan || []).forEach(function (x) { if (x.done && x.type !== 'Созвон') cnt[x.date] = (cnt[x.date] || 0) + 1; });
+  var tRows = weeks(from, end).map(function (w) { var s = 0; for (var n = w.a; n <= w.b; n++) s += cnt[ymd(n)] || 0; return { lab: w.lab, v: s, nm: null }; }), tAll = tRows.reduce(function (s, r) { return s + r.v; }, 0);
+  h += '<div class="card"><h3>Выполненные тренировки</h3><p class="sub">По неделям: тренировки в приложении и отметки «выполнено» в плане. За ' + pd + ': <b class="num" style="color:var(--text)">' + tAll + '</b>.</p>' +
+    (tAll ? barChart(tRows, { label: 'Тренировки по неделям', vals: true }) : '<p class="muted" style="margin:0">За этот период выполненных тренировок нет.</p>') + '</div>';
+  return h;
+}
+
+/* ---------- вкладка «Документы» ---------- */
+function docRow(url, title, sub) {
+  return url ? '<a class="row" href="' + esc(url) + '" target="_blank" rel="noopener"><span class="dot"></span><span class="mn"><b>' + title + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span><span class="chev">↗</span></a>'
+    : '<div class="row"><span class="dot dim"></span><span class="mn"><b>' + title + '</b><small>' + (sub || 'пока нет') + '</small></span></div>';
+}
+function subDocs(c) {
+  var d = docsOf(c), free = isFree(c), h = '';
+  if (d.busy) return '<div class="card"><p class="muted" style="margin:0">Загружаю документы клиента…</p></div>';
+  if (d.err) return '<div class="card"><h3>Документы не загрузились</h3><p class="sub">' + esc(d.err) + '</p><button class="btn sec sm" data-act="docsRe">Повторить</button></div>';
+  if (!free) h += '<div class="card"><h3>Папка клиента</h3><p class="sub">Google Диск: анкета, отзывы, итоги месяца, фото. Откроется в новой вкладке.</p>' +
+    (d.folder ? '<a class="btn pri" href="' + esc(d.folder) + '" target="_blank" rel="noopener">Открыть папку клиента</a>' : '<p class="note" style="margin:0">Папки пока нет – она появится вместе с анкетой в PDF или таблицей клиента.</p>') + '</div>';
+  var revs = (d.reviews || []).filter(function (r) { return !free || /FREE/.test(r.t); });
+  h += '<div class="card"><h3>Документы</h3><div class="rows">' + docRow(d.anketa, 'Анкета клиента (PDF)', d.anketa ? '' : 'PDF анкеты нет') +
+    (revs.length ? revs.map(function (r) { return docRow(r.url, esc(r.t), r.skip ? 'отмечено «отзыв уже есть» · ' + esc(r.skip) : r.at ? 'заполнен ' + ymdTxt(String(r.at).slice(0, 10)) : ''); }).join('') : docRow('', free ? 'Отзыв FREE' : 'Отзыв (анкета обратной связи)', 'клиент ещё не заполнял')) +
+    (free ? '' : (d.reports || []).map(function (r) { return docRow(r.url, 'Итоги месяца ' + r.n, dm(r.from) + ' – ' + dm(r.to) + (r.sent ? ' · отправлены клиенту' : ' · черновик')); }).join('') +
+      docRow(d.photos, 'Фото клиента', d.photos ? 'папка «Фото»' : 'фото ещё не загружались') +
+      (c.table ? docRow(d.table, 'Таблица PRO', d.table ? 'только просмотр' : '') : '')) + '</div>' +
+    '<p class="note">Всё – только для просмотра. Норму, план, замеры, оплаты и данные клиента меняйте здесь, в кабинете.</p></div>';
+  return h;
+}
+
+/* ---------- «Написать клиенту»: переписка ---------- */
+var MSG_K = [['msg', 'Сообщение'], ['tip', 'Рекомендация'], ['go', 'Напутствие'], ['fire', 'Мотивация']];
+var MSG_L = { msg: 'Сообщение', tip: 'Рекомендация', go: 'Напутствие', fire: 'Мотивация', reply: 'Ответ на комментарий' };
+function msgSheet(c) {
+  var el = document.getElementById('msgTxt'), txt = el ? el.value : '', kind = document.getElementById('msgK') ? val('msgK') : 'msg', M = S.msgs, list = '';
+  if (!M) list = '<p class="muted">Загружаю переписку…</p>';
+  else if (M.err) list = '<p class="muted">Переписка не загрузилась: ' + esc(M.err) + '</p>';
+  else if (!M.list.length) list = '<p class="muted">Сообщений клиенту ещё не было.</p>';
+  else list = M.list.slice(0, 40).map(function (m) {
+    return '<div class="msg"><div class="msg-h"><b>' + esc(MSG_L[m.k] || 'Сообщение') + '</b><small>' + whenIso(m.at) + (m.by ? ' · ' + esc(m.by) : '') + '</small>' +
+      '<span class="rd' + (m.rd ? '' : ' no') + '">' + (m.rd ? '✓ прочитано' : 'не прочитано') + '</span></div>' +
+      (m.com ? '<div class="msg-q">Клиент: «' + esc(m.com) + '»</div>' : '') + '<div class="msg-t">' + esc(m.t || (m.img ? '📷 фото' : '')) + '</div></div>';
+  }).join('');
+  var bot = M && M.bot != null ? M.bot : c.bot;
+  sheet('Написать клиенту', '<h2>' + esc(c.name) + '</h2><p class="lead">Сообщение придёт клиенту в приложение (вкладка «Тренер»)' + (bot ? ' и в бот Lite Fit' : ' – бот не подключён, в бот не придёт') + '. Копия – в рабочий чат.</p>' +
+    fs('msgK', 'Вид сообщения', MSG_K, kind) + ft('msgTxt', 'Текст сообщения', txt, 5, 'maxlength="1000"') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="msgSend">Отправить</button>' +
+    '<div class="grp" style="margin-top:20px">Переписка</div>' + list);
 }
 
 /* ================= ЗАПИСЬ НА СЕРВЕР ================= */
@@ -2228,17 +2597,18 @@ function pkgDef(want) { var o = pkgOpts(), w = String(want || ''); return o.some
 function payFields(p, pkg) {
   return '<div class="grid2">' + fi(p + 'Date', 'Дата оплаты', TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + TODAY + '"') + fi(p + 'Sum', 'Сумма, ₽', '', 'text', 'inputmode="numeric"') + '</div>' +
     '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg)) + fs(p + 'Sess', 'Тренировок', [['-', 'не указывать']].concat(L().sessions || []), '-') + '</div>' +
-    fs(p + 'How', 'Способ оплаты', L().methods || [], L().method || '') + fi(p + 'Price', 'Цена по прайсу – если была скидка', '', 'text', 'inputmode="numeric" placeholder="не обязательно"') +
+    fs(p + 'How', 'Способ оплаты', L().methods || [], L().method || '') + discFields(p) +   // 2.0: скидка в % или ценой по прайсу, с причиной
     ft(p + 'Note', 'Комментарий, если нужен', '', 2, 'maxlength="300"');
 }
 function payRead(p) {
-  var sum = num(p + 'Sum'), price = num(p + 'Price'), ss = val(p + 'Sess');
+  var sum = num(p + 'Sum'), ss = val(p + 'Sess');
   if (!val(p + 'Date')) return { err: 'Укажите дату оплаты.' };
   if (sum === '' || isNaN(sum) || sum < 0) return { err: 'Укажите сумму.' };
-  if (price !== '' && (isNaN(price) || price < sum)) return { err: 'Цена по прайсу – не меньше суммы оплаты.' };
-  if (sum === 0 && price === '') return { err: 'Сумма 0 – только для бесплатного периода: укажите цену по прайсу.' };
+  var dq = discRead(p, sum);
+  if (dq.err) return dq;
+  if (sum === 0 && dq.price === '') return { err: 'Сумма 0 – только для бесплатного периода: выберите «Скидка – цена по прайсу» и причину.' };
   if (!val(p + 'How')) return { err: 'Выберите способ оплаты.' };
-  return { date: val(p + 'Date'), sum: sum, method: val(p + 'How'), pkg: val(p + 'Pkg'), sess: ss === '-' ? '' : ss, note: val(p + 'Note'), price: price };
+  return { date: val(p + 'Date'), sum: sum, method: val(p + 'How'), pkg: val(p + 'Pkg'), sess: ss === '-' ? '' : ss, note: val(p + 'Note'), price: dq.price, dwhy: dq.dwhy };
 }
 function activeSw(c, id) { return c.status === ST_ACTIVE ? '' : fsw(id, 'Поставить статус «Тренируется»', true); }
 function actOpts() { return [['', '– выберите –']].concat((L().activity || []).map(function (a) { return [String(a[0]), numTxt(a[0]) + ' – ' + a[1]]; })); }
@@ -2573,27 +2943,98 @@ var ACT = {
   /* --- ведение --- */
   guide: function (t) { var c = cur(), on = t.getAttribute('aria-pressed') !== 'true'; inline('guide', { id: c.id, name: t.getAttribute('data-name'), on: on }); },
   payForm: function () {
-    var c = cur(), cont = !!c.payEnd && dn(c.payEnd) + 1 >= T, nx = cont ? ymd(dn(c.payEnd) + 1) : '';
+    var c = cur(), cont = !!c.payEnd && dn(c.payEnd) + 1 >= T, nx = cont ? ymd(dn(c.payEnd) + 1) : '', curP = (c.pays || []).filter(payNow)[0];
+    if (S.sub !== 'pay' && subsFor(c).some(function (x) { return x[0] === 'pay'; })) { S.sub = 'pay'; render(); }
     sheet('Оплата', '<h2>Внести оплату</h2><p class="lead">' + esc(c.name) + '. Запись попадёт на лист «Платежи», сообщение – в рабочий чат. Дневник PRO продлится сразу.</p>' +
-      (c.disc ? '<div class="banner trial" style="margin-bottom:12px"><b>Скидка Lite Fit ' + c.disc.pct + ' %</b> – с ' + dm(c.disc.from) + ' (3 медали подряд и продление в срок). В «Сумме» – сколько клиент заплатил со скидкой; «Цену по прайсу» можно не заполнять – поставится сама.</div>' : '') +
+      (curP && !curP.end && dn(payTo(curP)) > T ? '<div class="banner" style="margin-bottom:12px">Сейчас идёт пакет до <b>' + dm(payTo(curP)) + '</b>. Клиент уже выполнил все тренировки? Сначала закройте этот пакет досрочно – новый продолжит со следующего дня, без разрыва.' +
+        '<button class="btn sec" data-act="endForm" data-row="' + curP.row + '">Закрыть досрочно</button></div>' : '') +
+      (c.disc ? '<div class="banner trial" style="margin-bottom:12px"><b>Скидка Lite Fit ' + c.disc.pct + ' %</b> – с ' + dm(c.disc.from) + ' (3 медали подряд и продление в срок). В «Сумме» – сколько клиент заплатил со скидкой; скидку можно не выбирать – цена по прайсу поставится сама.</div>' : '') +
       payFields('y', c.period) +
-      fi('yStart', 'Начало периода', cont ? '' : TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + ymd(T + 120) + '"') +
-      '<p class="note" style="margin:0">' + (cont ? 'Сейчас оплачено до ' + dm(c.payEnd) + '. Оставьте поле пустым – новый период продолжит текущий с ' + dm(nx) + ', без разрыва. Дату ставьте, только если пакет начинается иначе.'
-        : 'С этой даты считается оплаченный период.') + '</p>' + activeSw(c, 'yActive') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="paySave" data-cont="' + (cont ? 1 : '') + '">Записать оплату</button>');
+      (cont ? fs('yMode', 'Начало пакета', [['cont', 'Продолжить без разрыва – с ' + dm(nx)], ['own', 'Своя дата']], 'cont', 'data-ch="payMode"') : '') +
+      '<div id="yStartBox"' + (cont ? ' hidden' : '') + '>' + fi('yStart', 'Начало пакета', cont ? nx : TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + ymd(T + 120) + '"') + '</div>' +
+      '<p class="note" style="margin:0">' + (cont ? 'Сейчас оплачено до ' + dm(c.payEnd) + '. «Продолжить без разрыва» – новый пакет начнётся ' + dm(nx) + '. Свою дату ставьте, только если пакет начинается иначе.'
+        : 'С этой даты считается оплаченный период.') + '</p>' + activeSw(c, 'yActive') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="paySave">Записать оплату</button>');
   },
   paySave: function (t) {
     var c = cur(), q = payRead('y');
     if (q.err) return ferr(q.err);
-    q.start = val('yStart');
-    if (!q.start && !t.getAttribute('data-cont')) return ferr('Укажите начало периода.');
+    var own = !document.getElementById('yMode') || val('yMode') === 'own';
+    q.start = own ? val('yStart') : '';
+    if (own && !q.start) return ferr('Укажите начало пакета.');
+    var hit = own ? payHit(c, q.start) : null;
+    if (hit) return ferr('У клиента идёт пакет до ' + dm(payTo(hit)) + '. Клиент уже выполнил все тренировки? Сначала закройте этот пакет досрочно, потом внесите оплату – новый пакет продолжит без разрыва.');
     q.id = c.id; q.active = document.getElementById('yActive') ? swOn('yActive') : false;
     send('pay', q, { btn: t }).then(function (r) {
       if (!r) return;
-      if (r.noStart) r.warn = 'оплата записана без даты начала – это аванс. Напишите Артёму: дату начала он поставит в таблице.';
+      if (r.noStart) r.warn = 'оплата записана без даты начала – это аванс. Когда клиент начнёт, нажмите «Назначить дату начала» у этой оплаты во вкладке «Оплаты».';
       if (r.ext) r.msg = (r.msg || '') + '. ' + cap(r.ext);
       finish(r);
     });
   },
+  endForm: function (t) {
+    var c = cur(), p = payOf(c, t.getAttribute('data-row'));
+    if (!p || !p.start) return toast('Оплата не найдена – обновите страницу', 'bad');
+    var to = payTo(p), mx = ymd(dn(to) - 1), def = T < dn(p.start) ? p.start : T > dn(mx) ? mx : TODAY;
+    sheet('Закрыть досрочно', '<h2>Закрыть пакет досрочно</h2><p class="lead">' + esc(c.name) + ': ' + payLine(p) + ', период ' + dm(p.start) + ' – ' + dm(to) + '. Пакет закончится в выбранный день, а новая оплата продолжит со следующего дня, без разрыва.</p>' +
+      fi('eEndD', 'Последний день пакета', def, 'date', 'min="' + p.start + '" max="' + mx + '"') + fs('eWhy', 'Причина', L().endWhy || ['Все тренировки пакета выполнены'], (L().endWhy || [''])[0], 'data-ch="endWhy"') +
+      '<div id="eTxtBox" hidden>' + ft('eTxt', 'Что случилось', '', 2, 'maxlength="120"') + '</div>' +
+      '<p class="note" style="margin:0">Например: пакет 23.09 – 23.10, клиент выполнил все тренировки и 20.10 оплатил новый. Закройте этот пакет 20.10 – новый пойдёт с 21.10. Если новая оплата уже записана, её начало сдвинется само.</p>' +
+      '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="endSave" data-row="' + p.row + '">Закрыть пакет</button><button class="btn sec" data-act="close">Отмена</button>');
+  },
+  endSave: function (t) {
+    var c = cur(), p = payOf(c, t.getAttribute('data-row')), end = val('eEndD'), why = val('eWhy'), tx = val('eTxt');
+    if (!p) return ferr('Оплата не найдена – обновите страницу.');
+    if (!end) return ferr('Укажите последний день пакета.');
+    if (dn(end) < dn(p.start) || dn(end) >= dn(payTo(p))) return ferr('Последний день – с ' + dm(p.start) + ' по ' + dm(ymd(dn(payTo(p)) - 1)) + '.');
+    if (why === 'Другое' && tx.length < 3) return ferr('Напишите, что случилось.');
+    send('payend', { id: c.id, row: p.row, pdate: p.date, psum: p.sum, end: end, why: why + (tx ? ': ' + tx : '') }, { btn: t }).then(function (r) { if (r && r.ext) r.msg = (r.msg || '') + '. ' + cap(r.ext); finish(r); });
+  },
+  payEditForm: function (t) { payEditForm(t.getAttribute('data-row'), t.getAttribute('data-f')); },
+  payEditSave: function (t) {
+    var c = cur(), p = payOf(c, t.getAttribute('data-row')), b;
+    if (!p) return ferr('Оплата не найдена – обновите страницу.');
+    if (t.getAttribute('data-f') === 'start') {
+      if (!val('eStart')) return ferr('Укажите дату начала.');
+      var hit0 = payHit(c, val('eStart'), p.row);
+      if (hit0) return ferr('На эту дату идёт пакет до ' + dm(payTo(hit0)) + '. Сначала закройте его досрочно или выберите ' + dm(ymd(dn(payTo(hit0)) + 1)) + '.');
+      b = { date: p.date, sum: p.sum, method: p.how, pkg: p.days, sess: p.sess, start: val('eStart'), note: p.note, price: p.price || '', dwhy: p.dwhy || '', end: p.end || '' };
+    } else {
+      var sum = num('eSum');
+      if (!val('eDate')) return ferr('Укажите дату оплаты.');
+      if (sum === '' || isNaN(sum) || sum < 0) return ferr('Укажите сумму.');
+      var dq = discRead('e', sum);
+      if (dq.err) return ferr(dq.err);
+      if (val('eEnd') && val('eStart') && dn(val('eEnd')) < dn(val('eStart'))) return ferr('«Закрыт досрочно» – не раньше начала пакета.');
+      var ss = val('eSess');
+      b = { date: val('eDate'), sum: sum, method: val('eHow'), pkg: val('ePkg'), sess: ss === '-' ? '' : ss, start: val('eStart'), note: val('eNote'), price: dq.price, dwhy: dq.dwhy, end: val('eEnd') };
+    }
+    b.id = c.id; b.row = p.row; b.pdate = p.date; b.psum = p.sum;
+    send('payedit', b, { btn: t }).then(finish);
+  },
+  payDelForm: function (t) {
+    var c = cur(), p = payOf(c, t.getAttribute('data-row'));
+    if (!p) return toast('Оплата не найдена – обновите страницу', 'bad');
+    sheet('Удалить оплату', '<h2>Удалить оплату?</h2><p class="lead">' + esc(c.name) + ': ' + payLine(p) + (p.how ? ', ' + esc(p.how) : '') + (p.start ? ', период ' + dm(p.start) + ' – ' + dm(payTo(p)) : ', аванс') +
+      '. Строка уйдёт с листа «Платежи», оплаченный период пересчитается. Удаляйте только ошибочную запись.</p>' +
+      '<p class="ferr" id="ferr"></p><button class="btn danger" data-act="payDelOk" data-row="' + p.row + '">Да, удалить</button><button class="btn sec" data-act="close">Отмена</button>');
+  },
+  payDelOk: function (t) {
+    var c = cur(), p = payOf(c, t.getAttribute('data-row'));
+    if (!p) return ferr('Оплата не найдена – обновите страницу.');
+    send('paydel', { id: c.id, row: p.row, pdate: p.date, psum: p.sum }, { btn: t }).then(finish);
+  },
+  /* --- 2.0: данные клиента, документы, прогресс --- */
+  ciSave: function (t) {
+    var c = cur(), np = nameParts(c), g = function (id, d) { return document.getElementById(id) ? val(id) : d; };
+    var b = { id: c.id, first: g('ciFirst', np.first), last: g('ciLast', np.last), phone: g('ciPhone', c.phone || ''), email: g('ciEmail', c.email || ''), goal: g('ciGoal', c.goal || ''), note: g('ciNote', c.note || ''), health: g('ciHealth', c.health || '') };
+    if (b.first.length < 2) return toast('Впишите имя', 'bad');
+    if (/[(),]/.test(b.first + b.last)) return toast('Имя и фамилия – без скобок и запятых', 'bad');
+    if (b.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(b.email)) return toast('Проверьте почту', 'bad');
+    send('cinfo', b, { btn: t }).then(finish);
+  },
+  docsRe: function () { var c = cur(); if (c) { delete DOCS[c.id]; render(); } },
+  ankAll: function () { S.ankAll = !S.ankAll; render(); },
+  progP: function (t) { S.prog = +t.getAttribute('data-p'); render(); },
   frzForm: function () {
     var c = cur();
     sheet('Заморозка', '<h2>Заморозка</h2><p class="lead">' + esc(c.name) + '. Клиент, рабочий чат и Артём получат сообщение. Срок пакета и дневник сдвинутся на эти дни.</p>' +
@@ -2649,7 +3090,7 @@ var ACT = {
     q.id = c.id;
     send('create', q, { wait: 'Создаю таблицу и кабинет…<br>Это около минуты, окно можно не закрывать.' }).then(function (r) {
       if (!r) return;
-      render(); resultSheet('Таблица и кабинет созданы', botLead(r) + ' Дальше: оплата – в разделе «Ведение», норма шагов – в «Питании», план – в «Тренировках».', r);
+      render(); resultSheet('Таблица и кабинет созданы', botLead(r) + ' Дальше: оплата – во вкладке «Оплаты», норма шагов – в «Питании», план – в «Тренировках».', r);
     });
   },
   proForm: function () {
@@ -2673,7 +3114,7 @@ var ACT = {
       if (!r) return;
       S.sub = 'care'; render();
       resultSheet('Клиент на PRO', esc(r.msg || '') + (r.ext ? '. ' + esc(cap(r.ext)) : '') + '. Кабинет у клиента открылся полностью, заново ему ничего делать не нужно.', r,
-        (r.paid ? '' : '<div class="banner warn">Оплата PRO не внесена – дневник продлится после записи оплаты («Ведение», «Внести оплату»).</div>') +
+        (r.paid ? '' : '<div class="banner warn">Оплата PRO не внесена – дневник продлится после записи оплаты («Оплаты», «Внести оплату»).</div>') +
         '<p class="lead" style="margin-bottom:8px">Что настроить дальше: норму шагов и расчёт нормы – «Питание»; интервал замеров – «Замеры»; план – «Тренировки»; гайды – «Ведение».</p>');
     });
   },
@@ -2738,16 +3179,25 @@ var ACT = {
   },
 
   /* --- сообщение клиенту, кабинет, обратная связь --- */
-  msgForm: function () {
-    var c = cur();
-    if (!c.bot) return sheet('Сообщение клиенту', '<h2>Бот не подключён</h2><p class="lead">Написать от имени бота можно, когда клиент откроет ссылку и нажмёт «Старт». Отправьте ему сообщение со ссылкой на кабинет.</p><button class="btn pri" data-act="cabLink">Ссылка на кабинет</button>' + (D.vk ? '<button class="btn sec" data-act="vkLink">Ссылка на ВКонтакте – нет Telegram</button>' : ''));
-    sheet('Сообщение клиенту', '<h2>Сообщение клиенту</h2><p class="lead">' + esc(c.name) + '. Сообщение придёт от бота Lite Fit с кнопками «' + (c.table ? 'Открыть кабинет' : 'Открыть тренировки') + '» и «Написать тренеру». Копия уйдёт в рабочий чат.</p>' +
-      ft('msgTxt', 'Текст сообщения', '', 6, 'maxlength="3500"') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="msgSend">Отправить</button>');
+  msgForm: function () {                                                    // 2.0: одна переписка – в приложение и в бот
+    var c = cur(); if (!c) return;
+    S.msgs = null; msgSheet(c);
+    call('cmsgs', { id: c.id }, true).then(function (r) {
+      if (!document.getElementById('msgTxt') || String(S.cid) !== String(c.id)) return;
+      S.msgs = r && r.ok ? { list: r.list || [], bot: r.bot } : { err: errText(r), list: [] };
+      msgSheet(c);
+    });
   },
   msgSend: function (t) {
     var c = cur(), text = val('msgTxt');
     if (text.length < 2) return ferr('Напишите сообщение.');
-    send('msg', { id: c.id, text: text }, { btn: t }).then(finish);
+    send('cmsg', { id: c.id, kind: val('msgK'), text: text }, { btn: t }).then(function (r) {
+      if (!r) return;
+      var el = document.getElementById('msgTxt'); if (el) el.value = '';
+      S.msgs = { list: r.list || [], bot: S.msgs ? S.msgs.bot : c.bot };
+      if (document.getElementById('msgTxt')) msgSheet(c);
+      toast(r.msg || 'Сообщение отправлено', 'ok');
+    });
   },
   nlSend: function (t) {                                                    // 1.9.6
     var c = cur(); if (!c) return;
@@ -2911,6 +3361,9 @@ document.addEventListener('change', function (e) {
     return;
   }
   if (!c) return;
+  if (k === 'payMode') { var bx = document.getElementById('yStartBox'); if (bx) bx.hidden = v !== 'own'; return; }   // 2.0
+  if (k === 'dMode') { var px = e.target.getAttribute('data-p'), db = document.getElementById(px + 'DBox'); if (db) db.hidden = !v; var pw = document.getElementById(px + 'PctW'), rw = document.getElementById(px + 'PriceW'); if (pw) pw.hidden = v !== 'pct'; if (rw) rw.hidden = v !== 'price'; return; }
+  if (k === 'endWhy') { var eb = document.getElementById('eTxtBox'); if (eb) eb.hidden = v !== 'Другое'; return; }
   if (k === 'measEvery') inline('meas', { id: c.id, every: +v });
   else if (k === 'measMode') inline('meas', { id: c.id, mode: v });
   else if (k === 'measNext') {
