@@ -921,7 +921,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.6';
+var VERSION = '4.7';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1407,7 +1407,7 @@ function mkItem(e, sets) {
   for (var i = 0; i < (sets || 3); i++) it.sets.push({ w: '', r: '', fw: '', fr: '', ok: false });
   return it;
 }
-function cloneItems(src) { return clone(src.items).map(function (it) { it.id = uid('i'); it.diff = 0; it.comment = ''; delete it.media; it.sets.forEach(function (s) { s.fw = ''; s.fr = ''; s.ok = false; }); return it; }); }
+function cloneItems(src) { return clone(src.items).map(function (it) { it.id = uid('i'); it.diff = 0; it.comment = ''; delete it.media; delete it.mr; it.sets.forEach(function (s) { s.fw = ''; s.fr = ''; s.ok = false; }); return it; }); }
 function memSave() { if (!D) return; try { LS.set(MEM_T, JSON.stringify({ at: S.loadedAt, d: D })); } catch (e) {} }
 function loadList(first) {
   return call('list', {}).then(function (r) {
@@ -1743,15 +1743,16 @@ function comList(w) {
 /** «2026-10-18 12:30» → «18.10 в 12:30». */
 function stampTxt(at) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)/.exec(at || ''); return m ? m[3] + '.' + m[2] + ' в ' + m[4] : ''; }
 /** Ответ тренера под комментарием клиента и кнопка «Ответить» / «Изменить ответ». */
-function rpLine(wid, iid, rp, c) {
-  var b = '<button class="rpt" data-act="rpOpen" data-id="' + esc(wid) + '" data-it="' + esc(iid) + '" data-c="' + esc(c || '') + '">';
-  if (!rp) return S.isNew && S.view === 'edit' ? '' : b + IC.reply + 'Ответить клиенту</button>';
+function rpLine(wid, iid, rp, c, mw) {
+  var b = '<button class="rpt" data-act="rpOpen" data-id="' + esc(wid) + '" data-it="' + esc(iid) + '" data-c="' + esc(c || '') + '"' + (mw ? ' data-m="1"' : '') + '>';
+  if (!rp) return S.isNew && S.view === 'edit' ? '' : b + IC.reply + (mw ? 'Ответить на ' + mw : 'Ответить клиенту') + '</button>';
   return '<div class="rpb"><small>Ответ тренера' + (rp.by && D && rp.by !== D.trainer ? ' · ' + esc(rp.by) : '') + '</small>' + (rp.t ? '<p>' + esc(rp.t) + '</p>' : '') + (rp.img && rp.mid ? imgHtml(rp.mid, rp.img) : '') +
     (rp.rd !== undefined ? '<div class="wh">' + (rp.rd ? 'Клиент прочитал ' + stampTxt(rp.rd) : 'Клиент ещё не открыл') + '</div>' : '') + '</div>' + b + IC.edit + 'Изменить ответ</button>';
 }
 /** Окно ответа на комментарий. */
-function rpForm(wid, iid, cm) {
+function rpForm(wid, iid, cm, md) {
   cm = cm || '';
+  if (md) return rpFormM(wid, iid);                                        // 4.7: ответ на фото/видео клиента
   var e = (S.coms ? S.coms.list : []).filter(function (x) { return x.id === wid && x.it === iid && (x.c || '') === cm; })[0], w = S.draft && S.draft.id === wid ? S.draft : FULL[wid], it = w ? w.items.filter(function (x) { return x.id === iid; })[0] : null;
   var me = it && cm ? (it.more || []).filter(function (x) { return x.c === cm; })[0] : null;   // 2.5: следующий комментарий
   var text = e ? e.text : me ? me.t : it ? it.comment : '', name = e ? e.no + '. ' + e.name : it ? it.name : '', rp = (e && e.rp) || (cm ? me && me.rp : it && it.rp) || null, s0 = sumOf(wid), c = s0 ? clientOf(s0.cid) : null;
@@ -1765,9 +1766,34 @@ function rpForm(wid, iid, cm) {
     '<button class="btn pri" data-act="rpGo">' + IC.reply + (rp ? 'Сохранить ответ' : 'Отправить ответ') + '</button>' + (rp ? '<button class="btn danger" data-act="rpDel" style="margin-top:0">Убрать ответ</button>' : ''));
   var t = document.getElementById('rpT'); if (t) { try { t.focus(); } catch (x) {} }
 }
+/** 4.7: «видео» / «фото» / «фото и видео» – что клиент прислал к упражнению. */
+function medWord(it) {
+  var m = it.media || [], v = m.filter(function (x) { return x.k !== 'p'; }).length, p = m.length - v;
+  return v && p ? 'фото и видео' : p ? 'фото' : 'видео';
+}
+/** 4.7: окно ответа на фото или видео клиента к упражнению. */
+function rpFormM(wid, iid) {
+  var w = S.draft && S.draft.id === wid ? S.draft : FULL[wid], it = w ? w.items.filter(function (x) { return x.id === iid; })[0] : null, s0 = sumOf(wid), c = s0 ? clientOf(s0.cid) : null;
+  if (!it) return toast('Упражнение не найдено – обновите страницу', 'bad');
+  var rp = it.mr || null, mw = medWord(it);
+  S.rp = { id: wid, it: iid, c: '', m: 1 };
+  S.img = { had: rp && rp.img ? rp.mid : '', tok: rp && rp.img ? rp.img : '' };
+  if (S.img.had) imgLoad(S.img.had, S.img.tok);
+  sheet('Ответ на ' + mw, '<h2>' + (rp ? 'Изменить ответ' : 'Ответ на ' + mw) + '</h2><p class="lead">' + esc(c ? c.name : 'Клиент') + ' · ' + esc(it.name) + '</p>' +
+    '<div class="coms" style="margin:0"><small>Клиент прислал ' + mw + '</small><p style="margin:0">Файл – у Вас в Telegram, в боте «Lite Fit Помощник».</p></div>' +
+    ft('rpT', 'Ваш ответ: что получилось, что поправить', rp ? rp.t : '', 5, 'maxlength="1000"') + imgPick() +
+    '<p class="note" style="margin:0">Клиент увидит ответ под этим упражнением и во вкладке «Тренер», а если подключил бота – и в боте.</p><p class="ferr" id="ferr" hidden></p>' +
+    '<button class="btn pri" data-act="rpGo">' + IC.reply + (rp ? 'Сохранить ответ' : 'Отправить ответ') + '</button>' + (rp ? '<button class="btn danger" data-act="rpDel" style="margin-top:0">Убрать ответ</button>' : ''));
+  var t = document.getElementById('rpT'); if (t) { try { t.focus(); } catch (x) {} }
+}
 /** Ответ сохранён: обновить вкладку «Комментарии», тренировку и счётчики. */
 function rpApply(r) {
   var id = r.id, iid = r.item, rp = r.rp, cm = r.c || '';
+  if (r.m) {                                                                // 4.7: ответ на фото/видео
+    [FULL[id], S.draft && S.draft.id === id ? S.draft : null].forEach(function (w) { if (w) w.items.forEach(function (x) { if (x.id === iid) { if (rp) x.mr = rp; else delete x.mr; } }); });
+    if (r.sum) { var n0 = sumObj(r.sum), o0 = sumOf(id); if (o0) D.w[D.w.indexOf(o0)] = n0; }
+    memSave(); rerenderKeep(); return;
+  }
   comLocal[id + '|' + iid] = { u: 0, until: Infinity };
   if (S.coms) S.coms.list.forEach(function (e) {
     if (e.id !== id || e.it !== iid) return;
@@ -2140,7 +2166,7 @@ function editItem(w, it, i, n, no) {
   h += setsHtml(it, i);
   if (it.desc || S.open['d' + it.id]) h += '<div class="mt">' + ft('d-' + it.id, 'Описание и рекомендации (клиент откроет по кнопке)', it.desc, 3, 'maxlength="800" data-f="desc" data-i="' + i + '"') + '</div>';
   else h += '<button class="txtb" data-act="openDesc" data-i="' + i + '">' + IC.note + 'Добавить описание или рекомендации</button>';
-  h += resHtml(w, it) + medNote(it);
+  h += resHtml(w, it) + medNote(it, w);
   if (i > 0) h += '<div class="mt">' + sw('join', it.join, 'Вместе с предыдущим (суперсет)', 'Упражнения выполняются подряд', 'data-i="' + i + '"') + '</div>';
   h += '<div class="ex-f"><button class="ib" data-act="up" data-i="' + i + '" aria-label="Выше"' + (canMv(w.items, i, -1) ? '' : ' disabled') + '>' + IC.up + '</button><button class="ib" data-act="down" data-i="' + i + '" aria-label="Ниже"' + (canMv(w.items, i, 1) ? '' : ' disabled') + '>' + IC.down + '</button>' +
     '<button class="ib del" data-act="delItem" data-i="' + i + '">' + IC.trash + 'Убрать</button></div></div>';
@@ -3109,10 +3135,11 @@ function mqBoot() {
 window.addEventListener('online', function () { if (MODE === 'trainer') { setTimeout(draftPush, 1500); return; } S.mqOff = false; mqPause = 5000; medPaint(); mqKick(); });
 window.addEventListener('offline', function () { S.mqOff = true; medPaint(); });
 /** Тренеру у упражнения: сколько фото и видео прислал клиент. */
-function medNote(it) {
+function medNote(it, w) {
   var m = it.media || []; if (!m.length) return '';
   var v = m.filter(function (x) { return x.k !== 'p'; }).length, p = m.length - v;
-  return '<div class="mdl">' + IC.clip + '<span>Клиент прислал ' + [v ? v + ' видео' : '', p ? p + ' фото' : ''].filter(String).join(' и ') + ' – смотрите в Telegram</span></div>';
+  return '<div class="mdl">' + IC.clip + '<span>Клиент прислал ' + [v ? v + ' видео' : '', p ? p + ' фото' : ''].filter(String).join(' и ') + ' – смотрите в Telegram</span></div>' +
+    (w && w.id && !S.isNew ? '<div class="mt">' + rpLine(w.id, it.id, it.mr || null, '', medWord(it)) + '</div>' : '');   // 4.7: ответ на фото/видео
 }
 /* ---------- на экран телефона и справка ---------- */
 var deferredInstall = null, INST_N = 0;
@@ -3509,11 +3536,18 @@ function comStatus(w, it, e) {
  * 2.4: комментарий тренеру у клиента. Нет комментария – кнопка «Написать тренеру» (окно, «Отправить тренеру»). Есть – текст без
  * правки, статус и ответ. Комментарий, написанный до 2.4 и ещё не ушедший тренеру, – с кнопкой «Отправить тренеру».
  */
+/** 4.7: ответ тренера на фото или видео клиента к упражнению. */
+function mrBox(it) {
+  var r = it.mr; if (!r || !(r.t || r.img)) return '';
+  var m = it.media || [], v = m.filter(function (x) { return x.k !== 'p'; }).length, p = m.length - v, mw = v && p ? 'Ваши фото и видео' : p ? 'Ваше фото' : 'Ваше видео';
+  return '<div class="cms" style="margin-bottom:10px"><div class="rpb"><small>Тренер посмотрел ' + mw.toLowerCase() + (r.by ? ' · ' + esc(r.by) : '') + '</small>' + (r.t ? '<p>' + esc(r.t) + '</p>' : '') +
+    (r.img && r.mid ? imgHtml(r.mid, r.img) : '') + (r.at ? '<div class="wh">' + stampTxt(r.at) + '</div>' : '') + '</div></div>';
+}
 function comBox(w, it, i) {
   var t = String(it.comment || '').trim(), closed = M && M.closed;
-  if (!t) return closed ? '' : '<button class="btn sec sm cmw" data-act="cmOpen" data-i="' + i + '">' + IC.chat + 'Написать тренеру</button>';
+  if (!t) return mrBox(it) + (closed ? '' : '<button class="btn sec sm cmw" data-act="cmOpen" data-i="' + i + '">' + IC.chat + 'Написать тренеру</button>');
   var sent = it.cs || it.cr || it.rp || (PEND[w.id] && (PEND[w.id].cn || []).indexOf(it.id) >= 0);
-  var more = it.more || [], h = '<div class="cmq"><small>' + (more.length ? 'Ваш комментарий тренеру · 1' : 'Ваш комментарий тренеру') + '</small><p>' + esc(t) + '</p></div>' +
+  var more = it.more || [], h = mrBox(it) + '<div class="cmq"><small>' + (more.length ? 'Ваш комментарий тренеру · 1' : 'Ваш комментарий тренеру') + '</small><p>' + esc(t) + '</p></div>' +
     (sent ? '<div class="cms">' + comStatus(w, it) + '</div>'
       : '<p class="cst">' + IC.clock + 'Ещё не отправлен тренеру</p><button class="btn pri sm cmw" data-act="cmSend" data-i="' + i + '">' + IC.reply + 'Отправить тренеру</button>');
   more.forEach(function (e, k) {                                          // 2.5: следующие комментарии – каждый со своим статусом и ответом
@@ -3897,13 +3931,13 @@ var ACT = {
     });
   },
   tmDel: function (b) { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно убрать? Нажмите ещё раз'; return; } ACT.tmGo(b, null, true); },
-  rpOpen: function (b) { rpForm(b.getAttribute('data-id'), b.getAttribute('data-it'), b.getAttribute('data-c') || ''); },
+  rpOpen: function (b) { rpForm(b.getAttribute('data-id'), b.getAttribute('data-it'), b.getAttribute('data-c') || '', b.getAttribute('data-m') === '1'); },
   rpGo: function (b, e, del) {
     var R = S.rp, text = del ? '' : val('rpT'), I = S.img || {};
     if (!R) return;
     if (!del && !text && !I.d && !(I.had && !I.del)) return ferr('Напишите ответ или приложите фото.');
     b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
-    call('reply', del ? { id: R.id, item: R.it, c: R.c || '', text: '', imgDel: true } : imgBody({ id: R.id, item: R.it, c: R.c || '', text: text })).then(function (r) {
+    call('reply', del ? { id: R.id, item: R.it, c: R.c || '', m: R.m ? 1 : '', text: '', imgDel: true } : imgBody({ id: R.id, item: R.it, c: R.c || '', m: R.m ? 1 : '', text: text })).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = del ? 'Убрать ответ' : 'Отправить ответ'; return ferr(errText(r)); }
       if (r.rp && r.rp.img && I.d) IMGC[imgKey(r.rp.mid, r.rp.img)] = { u: I.d };   // своё новое фото – сразу, без загрузки
