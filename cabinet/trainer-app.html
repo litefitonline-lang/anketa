@@ -785,6 +785,10 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.0 (правка 30.10.2026). FREE (lite-fit-trenirovki 4.23.1): на вкладке «Free» и в карточке клиента – где и с чем тренируется
+ *   клиент: «в зале · женщины», «дома · гантели», а дома ещё строка «Инвентарь» – из какого набора каждая из 3 тренировок
+ *   (тренер меняет их между гантелями и эспандером на странице тренировок). Данные – из { op:'ptsall' } (fw). Строка «набор
+ *   не выбран» больше не появляется у тех, кто выбрал набор, но не подписан на канал.
  * 1.9.10 (27.10.2026). «Написать клиенту» – у всех клиентов с подключённым ботом, не только с таблицей PRO (BASIC, START, FREE);
  *   у клиента без кабинета кнопка под сообщением – «Открыть тренировки» (lite-fit-script 4.3.7).
  * 1.9.9 (27.10.2026). Обратная связь – один раз на клиента (lite-fit-trainer 3.11.8, lite-fit-anketa 4.3.0): в карточке – «Отзыв
@@ -1418,7 +1422,7 @@ function ptsLoadAll(force) {
     if (!r || !r.ok) return;
     PTSA = { list: r.list || {}, at: Date.now() };
     LS.set(PTS_LS, JSON.stringify(PTSA));
-    if (D && !document.getElementById('viewer') && (S.cid || S.tab === 'home')) render();
+    if (D && !document.getElementById('viewer') && (S.cid || S.tab === 'home' || S.tab === 'free')) render();
   }, function () { S.ptsBusy = false; });
 }
 /** Баллы клиента – так же, как их видит клиент в кабинете (дневник в кабинете тренера – за последние 200 дней). */
@@ -2681,6 +2685,26 @@ function trialForm() {
 /* ---------- 1.7: FREE ---------- */
 var FREE_SOON = true;              // кабинет FREE с тренировками ещё в работе (шаги 3–5) – подсказка тренеру
 /** Карточка заявки или клиента FREE. fresh – заявка без тренера (вкладка «Free»); иначе – свой клиент. */
+/* ---------- 2.0 (правка 30.10): FREE – где и с чем ---------- */
+/** Набор клиента: из кабинета тренера (place, sex) и из приложения тренировок (eq, ks – ptsall). Старые данные – больше часа – освежаются. */
+function frWk(id, wk) {
+  var f = PTSA && PTSA.fw && PTSA.fw[id];
+  if (PTSA && Date.now() - (PTSA.at || 0) > 3600000) setTimeout(function () { ptsLoadAll(true); }, 0);
+  return { place: (f && f.place) || wk.place, sex: (f && f.sex) || wk.sex, eq: f ? f.eq : '', ks: f && f.ks ? f.ks : [] };
+}
+/** Из какого набора каждая из 3 тренировок: 'ган' | 'эсп' (до 4.23 дома был только эспандер). */
+function frKinds(wk) { var ks = wk.ks && wk.ks.length ? wk.ks : [0, 1, 2].map(function () { return wk.eq === 'ган' ? 'fhd' : 'fhm'; }); return ks.map(function (k) { return k === 'fhd' ? 'ган' : 'эсп'; }); }
+/** «в зале · женщины», «дома · гантели», «дома · гантели и эспандер». */
+function frWhere(wk) {
+  if (wk.place !== 'дом') return 'в зале' + (wk.sex === 'Ж' ? ' · женщины' : wk.sex === 'М' ? ' · мужчины' : '');
+  var k = frKinds(wk), g = k.indexOf('ган') >= 0, e = k.indexOf('эсп') >= 0;
+  return 'дома · ' + (g && e ? 'гантели и эспандер' : g ? 'гантели' : 'эспандер');
+}
+/** «гантели – все 3 тренировки» или «1 – эспандер, 2 – гантели, 3 – гантели». */
+function frInv(wk) {
+  var k = frKinds(wk), w = function (x) { return x === 'ган' ? 'гантели' : 'эспандер'; };
+  return k[0] === k[1] && k[1] === k[2] ? w(k[0]) + ' – все 3 тренировки' : k.map(function (x, i) { return (i + 1) + ' – ' + w(x); }).join(', ');
+}
 function freeCard(x, fresh, inList) {
   var a = x.an || {}, fr = x.free || {}, rows = '';
   var lim = a.lim && !/^(нет|не|отсутств)/i.test(a.lim) ? a.lim : '';
@@ -2695,10 +2719,13 @@ function freeCard(x, fresh, inList) {
   var st = '', cls = '';
   if (!fresh) {
     if (fr.want) rows += kv('Заявка', '<span style="color:var(--accent);font-weight:800">🔥 хочет ' + esc(fr.want.fmt) + ' · ' + dm(fr.want.at) + '</span>');   // 1.9.2
-    if (fr.wk) rows += kv('Тренировки', esc((fr.wk.place === 'дом' ? 'дома' : 'в зале') + ' · с ' + dm(fr.wk.start) + (fr.wk.by === 'клиент' ? ' · выбрал клиент' : '')));
+    if (fr.wk) {                                                            // 2.0 (правка 30.10): где и с чем
+      var wx = frWk(x.id, fr.wk);
+      rows += kv('Тренировки', esc(frWhere(wx) + ' · с ' + dm(fr.wk.start) + (fr.wk.by === 'клиент' ? ' · выбрал клиент' : '')));
+      if (wx.place === 'дом') rows += kv('Инвентарь', esc(frInv(wx)));
+    } else rows += kv('Тренировки', '<span style="color:var(--warm)">набор не выбран</span>');
     if (fr.sub) rows += kv('Подписка на канал', fr.sub.s === 'yes' ? '<span style="color:var(--accent)">есть</span>'   // 1.9.8
       : '<span style="color:var(--warm)">' + (fr.sub.s === 'left' ? 'отписался(лась)' : 'нет') + (fr.sub.at ? ' · ' + esc(fr.sub.at.slice(0, 5)) : '') + ' – бот ждёт подписку</span>');
-    else rows += kv('Тренировки', '<span style="color:var(--warm)">набор не выбран</span>');
     if (!fr.given) { st = 'Доступ ещё не выдан'; cls = 'warm'; }
     else if (fr.mode === 'cab' && !x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' – ссылка на кабинет'; cls = 'ok'; }
     else if (x.bot) { st = 'Доступ выдан ' + dm(fr.given) + ' · ' + (x.vk ? 'ВКонтакте подключён' : 'бот подключён'); cls = 'ok'; }
