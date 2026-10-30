@@ -742,6 +742,15 @@ details.bi>summary::-webkit-details-marker{display:none}
 .fs-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .fs-h h3{margin:0}
 .fwc .rows{margin-top:6px}
+/* 4.8: переключатель домашнего набора под тренировкой */
+.fsw-w{border-top:1px solid var(--line)}
+.fsw-w:first-child{border-top:0}
+.fsw-w .row{border-top:0}
+.fsw{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-2px 0 10px 58px;font-size:12.5px;color:var(--muted)}
+.fsw .seg{flex:none;width:210px;padding:3px}
+.fsw .seg button{padding:7px 0;font-size:13px}
+.fsw .seg button[disabled]{opacity:.5}
+@media (max-width:420px){.fsw{margin-left:0}.fsw .seg{width:190px}}
 /* 2.9: общий кабинет тренера и тренировка без перехода */
 body.emb .tabs{display:none!important}
 body.emb .top img{display:none}
@@ -778,6 +787,12 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.8 (30.10.2026). Сервер 4.23.0. FREE дома – по инвентарю, для мужчин и женщин: наборы «Дом · эспандер» и «Дом · гантели»
+ *   вместо «Дом · мужчины / женщины» (зал – как был). Карточка FREE у тренера: клиенту без Telegram – «Где», для зала «Пол»,
+ *   для дома «Инвентарь». У клиента дома под каждой тренировкой – переключатель «Эспандер | Гантели»: тренировка № n меняется
+ *   на тренировку № n другого домашнего набора ({ op:'fswap' }); выполненную и начатую заменить нельзя.
+ * 4.7 (29.10.2026). Сервер 4.22.0. Ответ тренера на фото и видео клиента: у упражнения – «Ответить на видео», у клиента –
+ *   «Тренер посмотрел Ваше видео».
  * 4.6 (26.10.2026). Сервер 4.20.0. FREE: условие – подписка на канал. Отписался – следующая тренировка закрыта (st 'sub'):
  *   в списке «откроется после подписки на канал», вверху карточка «Подпишитесь снова» с кнопками «Подписаться» (M.fch – канал
  *   Telegram или сообщество ВКонтакте) и «Я подписался(лась)» – { op:'fsub' }, проверка сразу. В инструкции – про условие.
@@ -921,7 +936,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.7';
+var VERSION = '4.8';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1183,7 +1198,7 @@ function post(body) {
   });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1 };
+var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -1638,12 +1653,15 @@ function tplPutForm(id) {
     '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="tplPutGo" data-id="' + esc(id) + '">Поставить в наборы</button>' +
     '<p class="note" style="margin:6px 0 0">Тренировка с этим номером в отмеченных наборах заменится. У клиентов, которым набор уже выдан, ничего не меняется.</p>');
 }
-var FSETS = [['fgm', 'Зал · мужчины'], ['fgw', 'Зал · женщины'], ['fhm', 'Дом · мужчины'], ['fhw', 'Дом · женщины']], FDAY0 = '2099-01-0';
-function fsetOf(place, sex) { return 'f' + (place === 'дом' ? 'h' : 'g') + (sex === 'Ж' ? 'w' : 'm'); }
+var FSETS = [['fgm', 'Зал · мужчины'], ['fgw', 'Зал · женщины'], ['fhm', 'Дом · эспандер'], ['fhd', 'Дом · гантели']], FDAY0 = '2099-01-0', FHOME = [['fhm', 'Эспандер'], ['fhd', 'Гантели']];   // 4.8
+/** 4.8: зал – по полу, дома – по инвентарю (eq 'ган' | 'эсп'; до 4.8 дома был один набор – эспандер). */
+function fsetOf(place, sex, eq) { return place === 'дом' ? (eq === 'ган' ? 'fhd' : 'fhm') : 'fg' + (sex === 'Ж' ? 'w' : 'm'); }
+/** Из какого набора каждая из 3 тренировок клиента FREE. */
+function fwKinds(fw) { var k0 = fsetOf(fw.place, fw.sex, fw.eq), ks = fw.ks instanceof Array ? fw.ks : []; return [0, 1, 2].map(function (i) { return FSETS.some(function (s) { return s[0] === ks[i]; }) ? ks[i] : k0; }); }
 function isTpl(c) { return !!c && !!c.tpl; }
 function myTpl(kind) { var c = D && D.clients.filter(function (x) { return x.tpl && !x.base && x.kind === kind; })[0]; return c ? c.id : ''; }
 function baseTpl(kind) { var c = D && D.clients.filter(function (x) { return x.tpl && x.base && x.kind === kind; })[0]; return c ? c.id : ''; }
-function altKind(k) { return k === 'fhw' ? 'fhm' : k === 'fhm' ? 'fhw' : ''; }
+function altKind(k) { return ''; }   // 4.8: домашние наборы разные – запасного нет
 function slotW(cid, n) { return cid ? D.w.filter(function (w) { return w.cid === cid && w.date === FDAY0 + n; }).sort(wSort)[0] || null : null; }
 function isBaseW(w) { var c = w && clientOf(w.cid); return !!(c && c.tpl && c.base); }
 function tplOf(set) { return D.w.filter(function (w) { return w.cid === set; }).sort(wSort).slice(0, 3); }
@@ -1702,20 +1720,31 @@ function tplForm(set, slot, from) {
     fs('tpFrom', 'С чего начать', base.concat([['', 'Пустая тренировка']]).concat(src.map(function (w) { var c = clientOf(w.cid); return [w.id, (c ? c.name + ' · ' : '') + numFor(w) + ' от ' + dm(w.date) + ' · ' + exWord(w.n)]; })), from || (base[0] ? base[0][0] : '')) +
     '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="tplGo">Дальше</button>');
 }
-/** Карточка FREE в карточке клиента тренировок: набор и даты или «Поставить 3 тренировки». */
+/** Карточка FREE в карточке клиента тренировок: набор и даты или «Поставить 3 тренировки». 4.8: дома – переключатель набора у каждой. */
 function freeCardW(c) {
   if (!c || isTpl(c) || !(c.format === 'FREE' || c.fw)) return '';
   var fw = c.fw, h = '<div class="card fwc"><div class="fs-h"><h3>FREE · 3 тренировки</h3><span class="pill warn">FREE</span></div>';
   if (fw) {
-    var l = (fw.ids || []).map(function (id) { return sumOf(id); });
-    h += '<p class="sub">Набор: <b>' + esc(setName(fsetOf(fw.place, fw.sex))) + '</b>' + (fw.by === 'клиент' ? ' – выбрал(а) клиент' : '') + '.</p><div class="rows">' +
-      l.map(function (w, i) { return w ? wRow(w, 'editW') : '<div class="row"><span class="mn"><b>Тренировка ' + (i + 1) + '</b><small>не найдена</small></span></div>'; }).join('') + '</div>';
-    h += '<p class="note" style="margin:6px 0 0">Набор выбирается один раз. Подходы, повторы и дату правьте в самой тренировке – откройте её.</p>';
+    var l = (fw.ids || []).map(function (id) { return sumOf(id); }), ks = fwKinds(fw), home = fw.place === 'дом', names = [];
+    ks.forEach(function (k) { var n = setName(k); if (names.indexOf(n) < 0) names.push(n); });
+    h += '<p class="sub">Набор: <b>' + esc(names.join(' и ')) + '</b>' + (fw.by === 'клиент' ? ' – выбрал(а) клиент' : '') + '.</p><div class="rows">' +
+      l.map(function (w, i) {
+        if (!w) return '<div class="row"><span class="mn"><b>Тренировка ' + (i + 1) + '</b><small>не найдена</small></span></div>';
+        if (!home) return wRow(w, 'editW');
+        var lockd = w.done || w.dur < 0;
+        return '<div class="fsw-w">' + wRow(w, 'editW') + '<div class="fsw"><span>' + (lockd ? 'Набор: ' + esc(setName(ks[i])) + (w.done ? ' · выполнена' : ' · клиент начал') : 'Набор') + '</span>' +
+          (lockd ? '' : '<div class="seg" role="group" aria-label="Набор тренировки ' + (i + 1) + '">' + FHOME.map(function (x) {
+            return '<button data-act="fswap" data-n="' + (i + 1) + '" data-k="' + x[0] + '" class="' + (ks[i] === x[0] ? 'on' : '') + '" aria-pressed="' + (ks[i] === x[0]) + '">' + x[1] + '</button>';
+          }).join('') + '</div>') + '</div></div>';
+      }).join('') + '</div>';
+    h += '<p class="note" style="margin:6px 0 0">' + (home ? 'Есть и гантели, и эспандер – меняйте любую из трёх тренировок переключателем: она встанет из другого домашнего набора под тем же номером и на ту же дату. Выполненную и начатую заменить нельзя. ' : 'Набор выбирается один раз. ') + 'Подходы, повторы и дату правьте в самой тренировке – откройте её.</p>';
   } else {
-    h += '<p class="sub">Клиент выберет сам: после «Старт» бот спросит, где ему удобнее заниматься, и поставит 3 тренировки. Клиенту без Telegram поставьте сейчас:</p><div class="grid2">' +
-      fs('fwPlace', 'Где', [['', '– выберите –'], ['зал', 'в зале'], ['дом', 'дома']], '') + fs('fwSex', 'Пол', [['', '– выберите –'], ['Ж', 'женщина'], ['М', 'мужчина']], '') + '</div>' +
+    h += '<p class="sub">Клиент выберет сам: после «Старт» бот спросит, где ему удобнее заниматься (дома – с гантелями или с эспандером), и поставит 3 тренировки. Клиенту без Telegram поставьте сейчас:</p><div class="grid2">' +
+      fs('fwPlace', 'Где', [['', '– выберите –'], ['зал', 'в зале'], ['дом', 'дома']], '', 'data-f="fwPlace"') +
+      '<div><div id="fwSexBox" hidden>' + fs('fwSex', 'Пол', [['', '– выберите –'], ['Ж', 'женщина'], ['М', 'мужчина']], '') + '</div>' +
+      '<div id="fwEqBox" hidden>' + fs('fwEq', 'Инвентарь', [['', '– выберите –'], ['ган', 'гантели'], ['эсп', 'эспандер']], '') + '</div></div></div>' +
       fi('fwStart', 'Первая тренировка', TODAY, 'date', 'min="' + TODAY + '"') + '<p class="ferr" id="ferr" hidden></p>' +
-      '<button class="btn pri sm mt" data-act="freeSet">Поставить 3 тренировки</button><p class="note" style="margin:6px 0 0">Даты: первая, через 2 и через 4 дня. Каждая видна клиенту за 2 дня до своей даты и ещё день после. Набор выбирается один раз.</p>';
+      '<button class="btn pri sm mt" data-act="freeSet">Поставить 3 тренировки</button><p class="note" style="margin:6px 0 0">Даты: первая, через 2 и через 4 дня. Каждая видна клиенту за 2 дня до своей даты и ещё день после. Зал или дом выбирается один раз; дома потом можно менять тренировки между гантелями и эспандером.</p>';
   }
   return h + '</div>';
 }
@@ -1968,7 +1997,7 @@ function botHelpHtml() {
   var sec = function (t, l, open) { return '<details' + (open ? ' open' : '') + '><summary><span>' + t + '</span><i class="chv" aria-hidden="true">›</i></summary><div class="bd2"><ul>' + l.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div></details>'; };
   return '<div class="help hsec"><h2>Уведомления клиентам</h2><p class="lead">Все сообщения клиенту приходят от бота «Lite Fit». Что именно отправлено конкретному клиенту и что придёт дальше – в его карточке, блок «Бот клиента».</p>' +
     sec('FREE – 3 тренировки бесплатно', [
-      '<b>«Старт» в боте</b> – вопрос «В зале или дома?», затем пол. Сразу после ответа – 3 тренировки с датами и кнопка «Открыть тренировки». Вам – какой набор выбран.',
+      '<b>«Старт» в боте</b> – вопрос «В зале или дома?», затем для зала – пол, для дома – «С гантелями или с эспандером?». Сразу после ответа – 3 тренировки с датами и кнопка «Открыть тренировки». Вам – какой набор выбран.',
       '<b>Не выбрал</b> – в 12:00 следующего дня бот спрашивает ещё раз (до 2 раз).',
       '<b>9:00 в день тренировки</b> – «Сегодня по плану тренировка» с кнопкой.',
       '<b>12:00, день 5</b> – сколько выполнено и сколько дней осталось; все 3 – поздравление и «Что дальше».',
@@ -1977,6 +2006,7 @@ function botHelpHtml() {
       '<b>Клиент ответил на анкету</b> – Вам лично и в рабочий чат: оценки, ответы, сколько тренировок выполнено и как хочет продолжить.',
       '<b>«Хочу START / BASIC / PRO»</b> в приложении – Вам в рабочий чат и лично.',
       '<b>Перевели в BASIC</b> – клиенту: тренировки продолжаются в том же приложении.',
+      '<b>Дома</b> есть и гантели, и эспандер – в карточке клиента под каждой тренировкой переключатель «Эспандер | Гантели»: тренировка заменится тренировкой того же номера из другого набора.',
       'День 1 – дата первой тренировки. Каждое сообщение – один раз.'], true) +
     sec('BASIC – приложение тренировок', [
       '<b>9:00 в день тренировки</b> – «Сегодня по плану тренировка» с кнопкой «Открыть тренировку».',
@@ -3765,14 +3795,27 @@ var ACT = {
   freeSet: function (b) {
     var c = clientOf(S.cid); if (!c) return;
     var ferr = function (t) { var e = document.getElementById('ferr'); if (e) { e.textContent = t; e.hidden = false; } else toast(t, 'bad'); };
-    var sex = b.getAttribute('data-sex') || val('fwSex'), place = b.getAttribute('data-place') || val('fwPlace'), start = val('fwStart') || TODAY;
+    var sex = b.getAttribute('data-sex') || val('fwSex'), place = b.getAttribute('data-place') || val('fwPlace'), eq = val('fwEq'), start = val('fwStart') || TODAY;
     if (!place) return ferr('Выберите, где тренируется клиент.');
-    if (!sex) return ferr('Выберите пол.');
+    if (place === 'зал' && !sex) return ferr('Выберите пол.');
+    if (place === 'дом' && !eq) return ferr('Выберите, с чем клиент занимается дома: гантели или эспандер.');
     b.disabled = true; b.textContent = 'Ставлю тренировки…';
-    call('freeset', { cid: c.id, sex: sex, place: place, start: start }).then(function (r) {
+    call('freeset', { cid: c.id, sex: place === 'зал' ? sex : '', eq: place === 'дом' ? eq : '', place: place, start: start }).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = 'Повторить'; toast(errText(r), 'bad'); return; }
       c.fw = r.fw; toast(r.msg || 'Готово'); loadList();
+    });
+  },
+  fswap: function (b) {                                                     // 4.8: тренировка № n – из другого домашнего набора
+    var c = clientOf(S.cid), n = +b.getAttribute('data-n'), k = b.getAttribute('data-k'); if (!c || !c.fw) return;
+    if (fwKinds(c.fw)[n - 1] === k) return;
+    var box = b.parentNode, bs = box ? [].slice.call(box.querySelectorAll('button')) : [b];
+    bs.forEach(function (x) { x.disabled = true; }); b.textContent = 'Меняю…';
+    call('fswap', { cid: c.id, n: n, kind: k }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { toast(errText(r), 'bad'); rerenderKeep(); return; }
+      c.fw = r.fw; if (r.id) { delete FULL[r.id]; delete NM[r.id]; }
+      toast(r.msg || 'Готово'); rerenderKeep(); loadList();
     });
   },
   goCab: function () { if (S.cid) toShell({ type: 'go', s: 'clients', cid: S.cid }); },   // 2.9: та же карточка в кабинете тренера
@@ -4295,6 +4338,7 @@ document.addEventListener('change', function (e) {
   }
   if (f === 'comCid' && S.comCid !== el.value) { S.comCid = el.value; var cb = document.getElementById('comBox'); if (cb) cb.innerHTML = comsHtml(); return; }   // на случай браузера без события input у списка
   if (f === 'refId' && S.ref && S.ref.id !== el.value) { S.ref.id = el.value; S.ref.open = true; loadRef(); rerenderKeep(); return; }
+  if (f === 'fwPlace') { var sb = document.getElementById('fwSexBox'), eb = document.getElementById('fwEqBox'); if (sb) sb.hidden = el.value !== 'зал'; if (eb) eb.hidden = el.value !== 'дом'; return; }   // 4.8
   if (MODE !== 'trainer' || S.view !== 'client' || !D) return;
   var c = clientOf(S.cid); if (!c) return;
   if (f === 'start') { var n = +numR(el.value); if (n > 0 && n !== +c.start) cset('start', n); else el.value = c.start || 1; }
