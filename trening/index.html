@@ -787,6 +787,10 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.9 (31.10.2026). Сервер 4.24.0. Пакет – только из оплаты: внесли оплату с началом пакета и числом тренировок (кабинет тренера,
+ *   «Оплаты») – пакет здесь встаёт сам. «Новый пакет», «Изменить пакет» и «Выполнено тренировок до приложения» убраны: пакет
+ *   меняется в «Оплатах», «Всего выполнено» и номера – только по тренировкам в приложении. Остались: выполнено / осталось,
+ *   до какой даты, следующая оплата, всего выполнено, медали, история пакетов.
  * 4.8 (30.10.2026). Сервер 4.23.0. FREE дома – по инвентарю, для мужчин и женщин: наборы «Дом · эспандер» и «Дом · гантели»
  *   вместо «Дом · мужчины / женщины» (зал – как был). Карточка FREE у тренера: клиенту без Telegram – «Где», для зала «Пол»,
  *   для дома «Инвентарь». У клиента дома под каждой тренировкой – переключатель «Эспандер | Гантели»: тренировка № n меняется
@@ -936,7 +940,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.8';
+var VERSION = '4.9';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAABICAMAAABFncKdAAAAwFBMVEVd8eou4bMNq6tO5bIxzeBC3dUFfX1F2dFQrq40u+L///9IttkA/39/f39//38Af/8VuHEAAP8Afz8/f79S4tkAAAA91c041tE91c02ycpH1dE91c091c0A//891c091c081c47vb045Mw417tA29NG189E19BIystI5c9V//9E19A04+M7//xC2dEA/wAz/9IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACc6ptdAAAAMHRSTlMHCAQHDecCkAQHAQgCAgICAwEEBHMA8A9KCw2RrQHOai4HCwn6L08PDANqCQSvAQVRYlRJAAAIhElEQVR42q1YCXuruA41S7a2d5n3hggLDDYOW0KS///vRl7YmrbpfHPdJWw5COlIOoIlyY1rHQBw+gHFNG1x2qKllNmgP7vP7QVmY/pX+Q36jDhvQSTzYslLwEGm31zNvNG8OyXjDsUSWKPMjn9iFSmqGZmFIPNNkWfLtd775sqPxxJhBq4gO+WSPMUAESqEaXHoIECE2bHYdS12SMfpwi5C+oY5bwJBn+nxKHk4Acd1cTS4wLoDcgPTxZcYtbpcEC5VVV3MqlDhhc5RaDvCoCMArwp0BxfAS8Urc7I8Zvx1AlbpMSdb2C25mX1xu9lP81/QTyLsuplfc9icEe6MW7cRCEAS0mUCBgu8Tf7zUtoAdxMwJ+CFzx/Wm+qV+A5wyA2wnoNngKvP7cBh/1N/B3mLa2BrMf/s6gh5U6bItt8F7tY+9sCKsjZcWiegvhL185q/PAeOCJhXHwBvTTVAGPr54kGdTyapMsVF4tnxGbBQBjiegHF0xU/RXHNaOz5TaeBXm605wxeDrALxxBV8ZXGHtNU7604FH6aLod1Z4OwSAEMpa8nx/pXF74CtxSFvXC2BmXzRvd6YY7VGqAuzNjtUDie4c35fMFEcbPDMAbFyRU/Ec8A4m1GBpJIkTT1wJbCQ1qaIR69Kt8PbfirCzhVmVyRbTzf7AD33wNUMLO61KbtN3TYeNyV/wMv9ztMyy/OslLg/LIErITjW8GvBYzECw2F6vkE4v+/q01x3r1Tb0uu4l8sAF66IQfPzRiJzmWctxhF4bjEDL13w6kVBp+c9L+5zbLRaBA8MTNndrY+tV3s2ArNHYLkCbk6rziH51iaTAZaQFuYS7oCNxap7tDgAB1wuXHHagCd3WebutgxGYCntTQvyxRy8yRV8qgwBjsDnsnDBS8+N80teUxwz/4wGODbA7vpjWs08VhPdIucLymDlb1ZSK8idG+LXuHnfRqXtCMbisS2XuAjeyIoaOgWx5v2vBMADU6PzwNTD3gOfamr2NnjFeKiMZh9PrjCZ61ZdK3cs67gDpqeGvvEBNWqiNDS3ekJUiwiXHWsnYA9yLNwyppzDcgyPj1gKXNXegIEeqMhTSCzxtX86T8HHzFuuVI3AFfqUyK+Nv0dhtQR97qhlCh7zYvHFamFx9wVwxA9jUmzOau1kqktBQOrvvKQ2WGBX3eAh2keJ7uqMV9zVOXM3jFaZt+PVvYt353x5CCzd2tbUuR/rhLLh3lqIzS5B9rtxyJsmwbiZUIqSByRzslO59oTzselUN0FZsF4NRvWZAn9uBuofYX02Be1cvzC2HatbCopEFxJ/y5UnAmsxB58QiBGpMc5V0Pc8MGDh/w8gMTQFPRKUiaC8iBB7RVKPU5NkwHcmlAuyQSAYlZ58LHwXq/9In1XaakANxCh5LYoMInO+5zriyqflwEHtQxVEVWWMLRxDnMHt3nUQrrwMEyKiNnzbCqPd/rJdD41nTznff9bqBi5PI3BugVMjAhzdKtuo2MrHdqcZqSKp3Yg+CIOAvQPm3NlajO4gz/7yPc/ymIkHVhAF0APHQuxFch/0W7JSRQyCmf5Z4WoNT5bA4p5+IP8Br3S7U0aiWDVW6e9w1rCJOtT1FLUsc1SzpWPOvBA/AkZVZyZ41V1D4fKsnZ0RdHKzK6YZxOLW9X0CdplXPQKfipbGASmJVbrOfaUFTzkSTwFVkMng1FyQlZRA/QjMl8DFcmI5U1Uzpe6KO29WTqKl9s64GLEx5mDpSLfJg/us3SwrYgecczb00aBU+Jt8ONTuSeV12ZcdMLeU8cDZWGlc7HzwLPDFW7ycFztwwAXky6KXvFngthhzgrqdd/UZ3RhpW1O7lFirVaMHbq+b2fOpaUXJcDgvks3fOMdAvdPH4oNCf5SVs6QI/t75Xk+EqxOjw9HRxFo9DrfU9/3cOwN/aLFED0yGpP4IWNiVIWPXp2xmD4pefAgMHpj0ZumPeJnLw/IB96zgx3JqgngpYxds2yEfLQbfpWiKjew3NY4MlulULiM15boe6db7LktKLqIZlpoL/k7iyWL0Fpcv25FsuXfr5AdElaxmkJWuIE1SMWSoIhgCMQaPRIy3KysbqwGVj92IW6QAwaI6mcyrrI9fPXDbvizmsdEVOh71yOb6P6OoelkscTPZ4rJmz7oinCxejAovI7AMJ2VxzEMqBm8WOPc8KxoSMm/rejoVIVePaWpaPpBrD6Ye4ygANtd9b3qTpGrq8oI6tYZ3062j28V2sdrMedczrmZT3FEVznetoL4ryzwv6Iof5OQ+aU6lT8tNA927xuKDZ+dJEaq2pZm3X3UeCFqimtbBjbv3WFEQGhAF52aiGceHwXJmhcklOJB6fdfTqLu3WutDXQ17zZXC2PI4rsaw5WnLHgdWy2PgzyZw8vCuvs0sDdTduzdPsas+GIRd5j0F7lGeyv0EjAc3w9CcR4rlwyF4oYS+WnfKuxz8CxFRVXZOTRGwg/vPD7/hBsjq2SsU3mamNzgRBNbcItWkhfrPvulfNu2fuPgiSZCU2jzZvrIzWpFGVCL/+vQrRE4jDuneqMyiiVUzrZUixnMFd6PkBuioH5YFGaB0xRuXyvj1qy+mIT9ltRmGGL7uW0RNgrNt271iXKMCmo6VaHl2pOSVZuK3OZ7LVrMvH5LdqUecik/eVzoVR7GXZC6Fr6RDVvzVLT55/8RIHFilcTzZSuHW8XS0//3fpkxPJZWjsZ9mVCB/JM+AGWVqWn61UtJYx7TDZtzniE/fxDFqB6YE8KpiEaknChxqTQ7vdNd1FVQDQxLWRRHHHe47DVQ1ON8/fw3HfJFQh4MiChAriBr0h8qGjg6QzqQoZBz6AdCcQ/6dN6Hs+SUCiBPpJfrWG85/A5yE9/oqYZ/8cWDRYw1h8ueBE3EQofiXwP8A66dNbm8IYpYAAAAASUVORK5CYII=';
@@ -2075,40 +2079,18 @@ function pkCard(c) {
     h += '<span class="pill' + (ended ? ' warn' : N.left ? ' ok' : ' warn') + '">' + (ended ? 'закончился ' + dm(N.end) : N.left ? 'до ' + dm(N.end) + payTxt(c, N) : 'все тренировки выполнены') + '</span></div>' +
       '<div class="pk-bar"><i style="width:' + Math.min(100, Math.round(N.done * 100 / N.p.n)) + '%"></i></div>' +
       '<div class="pk-n"><span>Выполнено <b class="num">' + N.done + '</b> из ' + N.p.n + '</span><span>Осталось <b class="num">' + N.left + '</b></span></div>' +
-      '<p class="pk-end">' + dm(N.p.s) + ' – ' + dm(N.end) + ' · ' + daysWord(+N.p.d) + (N.p.f ? ' + заморозка ' + daysWord(+N.p.f) : '') + (N.p.pre ? ' · до приложения выполнено ' + N.p.pre : '') + '</p>';
-  } else h += '</div><p class="sub" style="margin:0 0 4px">Пакет не задан – тренировки нумеруются по порядку: № 1, № 2…</p>';
+      '<p class="pk-end">' + dm(N.p.s) + ' – ' + dm(N.end) + ' · ' + daysWord(+N.p.d) + (N.p.f ? ' + заморозка ' + daysWord(+N.p.f) : '') + (N.p.pay ? '' : ' · задан вручную') + '</p>';
+  } else h += '</div><p class="sub" style="margin:0 0 4px">Пакета нет – тренировки нумеруются по порядку: № 1, № 2…</p>';
   if (N && c.pay && c.pay >= N.p.s) h += '<p class="pk-pay">Следующая оплата: <b>' + longDate(c.pay) + '</b>' + (c.pay < TODAY ? ' – <span class="st-warn">дата прошла</span>' : '') + '</p>';
   h += '<p class="pk-end">Всего выполнено тренировок: <b>' + L.total + '</b></p>';
   if (c.aw) h += '<div class="aw-row" style="margin:12px 0 2px">' + medalSvg('sm', !c.aw.m.length) + '<span class="mn"><b>' + (c.aw.d ? 'Скидка ' + c.aw.disc + ' % с ' + dm(c.aw.d) : 'Медалей: ' + c.aw.m.length + (c.aw.streak ? ' · подряд ' + c.aw.streak + ' из ' + c.aw.need : '')) + '</b><small>' +
     (c.aw.d ? 'На все следующие пакеты – ' + c.aw.need + ' медали подряд. Медалей всего: ' + c.aw.m.length : c.aw.cur ? (c.aw.cur.medal ? 'Медаль за этот пакет уже есть' : 'До медали за этот пакет: ' + c.aw.cur.left + ' ' + plural(c.aw.cur.left, 'тренировка', 'тренировки', 'тренировок') + ' до ' + dm(c.aw.cur.end)) + '. ' + c.aw.need + ' подряд – скидка ' + c.aw.disc + ' %' : '') + '</small></span></div>';
-  h += '<div class="acts" style="margin:12px 0 0">' + (N ? '<button class="btn sec sm" data-act="pkEdit" data-i="' + N.i + '">Изменить пакет</button><button class="btn pri sm" data-act="pkNew">' + IC.plus + 'Новый пакет</button>'
-    : '<button class="btn pri sm" data-act="pkNew">' + IC.plus + 'Задать пакет</button>') + '</div>';
-  h += '<div class="mt">' + fi('cBase', 'Выполнено тренировок до приложения', baseOf(c), 'text', 'inputmode="numeric" data-f="base"') + '<p class="note" style="margin-top:6px">Например, сколько клиент сделал в TRNR. Дальше «Всего выполнено» растёт само.</p></div>';
+  h += '<p class="note" style="margin:10px 0 0">Пакет встаёт сам из оплаты: кабинет тренера → вкладка «Оплаты» (начало пакета и число тренировок). Там же его можно изменить или закрыть досрочно.</p>';   // 4.9
   if (P.length > 1 || (P.length && !N)) h += '<details class="pk-hist"><summary>Все пакеты · ' + P.length + '</summary><div class="rows">' + P.map(function (p, i) {
-    return '<button class="row" data-act="pkEdit" data-i="' + i + '"><span class="mn"><b>' + dm(p.s) + ' – ' + dm(packEnd(p)) + ' · ' + p.n + ' тренировок</b><small>выполнено ' + Math.min(L.per[i].done, p.n) + (L.per[i].done > p.n ? ' (+' + (L.per[i].done - p.n) + ' сверх)' : '') + (p.f ? ' · заморозка ' + daysWord(+p.f) : '') + '</small></span><span class="chev">›</span></button>';
+    return '<div class="row"><span class="mn"><b>' + dm(p.s) + ' – ' + dm(packEnd(p)) + ' · ' + p.n + ' тренировок</b><small>выполнено ' + Math.min(L.per[i].done, p.n) + (L.per[i].done > p.n ? ' (+' + (L.per[i].done - p.n) + ' сверх)' : '') + (p.f ? ' · заморозка ' + daysWord(+p.f) : '') + (p.pay ? '' : ' · задан вручную') + '</small></span></div>';
   }).reverse().join('') + '</div></details>';
   return h + '</div>';
 }
-/** Окно пакета: i – номер существующего, иначе новый (начало – на следующий день после окончания прошлого). */
-function pkForm(i) {
-  var c = clientOf(S.cid), P = packsOf(c), p = i >= 0 ? P[i] : null, last = P[P.length - 1];
-  var x = p || { s: last ? shift(packEnd(last), 1) : TODAY, n: last ? last.n : 12, d: last ? last.d : 30, f: 0, pre: 0 };
-  S.pk = i;
-  sheet(p ? 'Пакет' : 'Новый пакет', '<h2>' + (p ? 'Пакет с ' + dm(p.s) : P.length ? 'Новый пакет' : 'Пакет') + '</h2><p class="lead">' + esc(c.name) + '. Тренировки в пакете нумеруются «1 из 12», «2 из 12»… Засчитываются только выполненные.</p>' +
-    '<div class="grid2">' + fi('pN', 'Тренировок в пакете', x.n, 'text', 'inputmode="numeric" data-f="pk"') + fi('pS', 'Начало пакета', x.s, 'date', 'data-f="pk"') + '</div>' +
-    '<div class="grid2">' + fi('pD', 'Срок пакета, дней', x.d, 'text', 'inputmode="numeric" data-f="pk"') + fi('pF', 'Заморозка, дней', x.f || 0, 'text', 'inputmode="numeric" data-f="pk"') + '</div>' +
-    '<p class="pk-end" id="pkEnd"></p>' +
-    fi('pPre', 'Уже выполнено в этом пакете до приложения', x.pre || 0, 'text', 'inputmode="numeric" data-f="pk"') +
-    '<p class="note" style="margin:0">Для клиентов из TRNR: сколько тренировок этого пакета клиент уже сделал там. Тогда первая тренировка здесь получит следующий номер.</p>' +
-    '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="pkSave">Сохранить пакет</button>' + (p ? '<button class="btn danger" data-act="pkDel" style="margin-top:0">Удалить пакет</button>' : ''));
-  pkEndPaint();
-}
-function pkEndPaint() {
-  var el = document.getElementById('pkEnd'); if (!el) return;
-  var s = val('pS'), d = +numR(val('pD')) || 0, f = +numR(val('pF')) || 0;
-  el.innerHTML = isYmd(s) && d ? 'Окончание пакета: <b>' + longDate(packEnd({ s: s, d: d, f: f })) + '</b>' + (f ? ' (с учётом заморозки ' + daysWord(f) + ')' : '') : '';
-}
-/** Сохранить настройки клиента: body – только то, что меняем (base, packs, start, before, after). */
 function csetBody(extra, okMsg) {
   var c = clientOf(S.cid), body = { id: c.id, start: c.start, before: accOf(c).b, after: accOf(c).a };
   Object.keys(extra).forEach(function (k) { body[k] = extra[k]; });
@@ -2236,7 +2218,7 @@ function viewEdit() {
     runPill(w) + (TP ? '<span class="pill warn">' + (isBaseW(w) ? 'набор Lite Fit – для всех тренеров' : 'своя тренировка набора') + '</span>' : '<span class="pill" id="accPill">' + accTxt(ac) + '</span>') + '</div>';
   if (!S.isNew) h += '<div class="ed-top">' + (TP ? '' : '<button class="btn sec sm" data-act="moveW">' + IC.cal + 'Перенести</button>') + '<button class="btn sec sm" data-act="copyW">' + IC.copy + 'Копировать</button></div>';
   var lb = numFor(w);
-  if (lb === 'сверх пакета') h += '<div class="banner warn">Эта тренировка сверх пакета: пакет закончился или все его тренировки уже выполнены. Оформите клиенту новый пакет в его карточке.</div>';
+  if (lb === 'сверх пакета') h += '<div class="banner warn">Эта тренировка сверх пакета: пакет закончился или все его тренировки уже выполнены. Новый пакет встанет сам, когда в кабинете тренера внесут оплату (вкладка «Оплаты»).</div>';
   h += comsTop(w);
   h += '<div class="stack" style="margin-bottom:14px">' + (TP ? '<p class="note" style="margin:0">Тренировка ' + (Number(String(w.date).slice(-1)) || 1) + ' набора «' + esc(setName(w.cid)) + '». Клиенту даты ставятся сами.</p>' : fi('wDate', 'Дата тренировки', w.date, 'date', 'data-f="date"'));
   if (w.note || S.open.note) h += ft('wNote', 'Заметка клиенту ко всей тренировке', w.note, 2, 'maxlength="600" data-f="note"');
@@ -3850,26 +3832,6 @@ var ACT = {
   copyMsg: function () { copyText(val('copyBox')); },
   copyLink: function (b) { copyText(b.getAttribute('data-v')); },
   newW: function () { newWForm(); },
-  pkNew: function () { pkForm(-1); },
-  pkEdit: function (b) { pkForm(+b.getAttribute('data-i')); },
-  pkSave: function (b) {
-    var c = clientOf(S.cid), P = packsOf(c).slice(), n = +numR(val('pN')), s0 = val('pS'), d = +numR(val('pD')), f = +numR(val('pF')) || 0, pre = +numR(val('pPre')) || 0;
-    if (!n) return ferr('Укажите, сколько тренировок в пакете.');
-    if (!isYmd(s0)) return ferr('Укажите дату начала пакета.');
-    if (!d) return ferr('Укажите срок пакета в днях, например 30.');
-    if (pre > n) return ferr('Выполнено до приложения не может быть больше, чем тренировок в пакете.');
-    var x = { s: s0, n: n, d: d, f: f, pre: pre }, i = S.pk;
-    if (P.some(function (p, j) { return j !== i && p.s === s0; })) return ferr('Пакет с такой датой начала уже есть.');
-    if (i >= 0) P[i] = x; else P.push(x);
-    P.sort(function (a, z) { return a.s < z.s ? -1 : a.s > z.s ? 1 : 0; });
-    b.disabled = true; b.textContent = 'Сохраняю…';
-    csetBody({ packs: P }, i >= 0 ? 'Пакет сохранён' : 'Новый пакет начат').then(function (r) { if (r && r.ok) closeSheet(); else { b.disabled = false; b.textContent = 'Сохранить пакет'; } });
-  },
-  pkDel: function (b) {
-    if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно удалить пакет? Нажмите ещё раз'; return; }
-    var P = packsOf(clientOf(S.cid)).slice(); P.splice(S.pk, 1);
-    b.disabled = true; csetBody({ packs: P }, 'Пакет удалён').then(function () { closeSheet(); });
-  },
   moveW: function () {
     var w = S.draft;
     sheet('Перенести тренировку', '<h2>Перенести тренировку</h2><p class="lead">Сейчас: ' + esc(cap(longDate(w.date))) + '. Тренировка сохранится на новую дату сразу' + (S.dirty ? ' вместе с Вашими правками' : '') + '; в кабинете клиента дата поменяется сама.</p>' +
@@ -4296,7 +4258,6 @@ document.addEventListener('input', function (e) {
   if (f === 'vex') { if (V && (e.inputType === 'insertReplacementText' || !e.inputType) && exByName(v)) { var vi = +el.getAttribute('data-i'); vidAssign(vi, v); vidPaint(vidNextFree(vi)); } return; }   // выбрали из подсказки
   if (f === 'comCid') { S.comCid = v; var cb = document.getElementById('comBox'); if (cb) cb.innerHTML = comsHtml(); return; }
   if (f === 'refId') { S.ref.id = v; S.ref.open = true; loadRef(); rerenderKeep(); return; }
-  if (f === 'pk') { pkEndPaint(); return; }
   if (f === 'bq') { S.bq = v; var bl = document.getElementById('baseList'); if (bl) bl.innerHTML = baseList(); return; }
   if (f === 'cq') {
     S.cq = v; var q = norm(v), cl = document.getElementById('cList');
@@ -4342,7 +4303,6 @@ document.addEventListener('change', function (e) {
   if (MODE !== 'trainer' || S.view !== 'client' || !D) return;
   var c = clientOf(S.cid); if (!c) return;
   if (f === 'start') { var n = +numR(el.value); if (n > 0 && n !== +c.start) cset('start', n); else el.value = c.start || 1; }
-  if (f === 'base') { var bs = numR(el.value); if (bs !== '' && +bs !== baseOf(c)) csetBody({ base: +bs }); else el.value = baseOf(c); }
   if (f === 'before' || f === 'after') { var x = numR(el.value), cur = accOf(c)[f === 'before' ? 'b' : 'a']; if (x !== '' && +x !== cur) cset(f, +x); else el.value = cur; }
 });
 document.addEventListener('error', function (e) {
