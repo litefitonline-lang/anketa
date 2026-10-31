@@ -790,7 +790,8 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * 4.9 (31.10.2026). Сервер 4.24.0. Пакет – только из оплаты: внесли оплату с началом пакета и числом тренировок (кабинет тренера,
  *   «Оплаты») – пакет здесь встаёт сам. «Новый пакет», «Изменить пакет» и «Выполнено тренировок до приложения» убраны: пакет
  *   меняется в «Оплатах», «Всего выполнено» и номера – только по тренировкам в приложении. Остались: выполнено / осталось,
- *   до какой даты, следующая оплата, всего выполнено, медали, история пакетов.
+ *   до какой даты, следующая оплата, всего выполнено, медали, история пакетов. Прошлый пакет закончился, а новый оплачен и
+ *   начнётся позже – показывается новый: «начнётся 02.11», строка «Прошлый пакет … закончился», тренировки на его даты – заранее.
  * 4.8 (30.10.2026). Сервер 4.23.0. FREE дома – по инвентарю, для мужчин и женщин: наборы «Дом · эспандер» и «Дом · гантели»
  *   вместо «Дом · мужчины / женщины» (зал – как был). Карточка FREE у тренера: клиенту без Telegram – «Где», для зала «Пол»,
  *   для дома «Инвентарь». У клиента дома под каждой тренировкой – переключатель «Эспандер | Гантели»: тренировка № n меняется
@@ -1404,6 +1405,7 @@ function labelsOf(cid, extra) {
     map[x.id] = r.k > p.n || x.date > packEnd(p) ? { t: 'сверх пакета', out: true } : { t: r.k + ' из ' + p.n, k: r.k, n: p.n };
   });
   var cur = -1; P.forEach(function (p, j) { if (p.s <= TODAY) cur = j; }); if (cur < 0 && P.length) cur = 0;
+  else if (cur >= 0 && cur + 1 < P.length && packEnd(P[cur]) < TODAY) cur++;   // 4.9: прошлый закончился, новый оплачен – текущий новый
   return { map: map, per: per, total: baseOf(c) + doneAll, cur: cur };
 }
 /** Номер тренировки текстом: «4 из 12», «№ 7» или «сверх пакета». */
@@ -1412,7 +1414,7 @@ function numFor(w) { var m = labelsOf(w.cid, sumOf(w.id) && sumOf(w.id).date ===
 function packNow(c) {
   var P = packsOf(c); if (!P.length) return null;
   var L = labelsOf(c.id), i = L.cur, p = P[i];
-  return { p: p, i: i, done: Math.min(L.per[i].done, p.n), left: Math.max(p.n - L.per[i].done, 0), end: packEnd(p), total: L.total, L: L };
+  return { p: p, i: i, done: Math.min(L.per[i].done, p.n), left: Math.max(p.n - L.per[i].done, 0), end: packEnd(p), total: L.total, L: L, soon: p.s > TODAY, prev: i > 0 ? P[i - 1] : null };
 }
 function accOf(c) { return { b: c && c.before >= 0 ? +c.before : D.def.before, a: c && c.after >= 0 ? +c.after : D.def.after }; }
 function access(w) {
@@ -1929,7 +1931,7 @@ function clientRows(list, arch) {
   var row = function (c) {
     var l = wList(c.id), next = l.filter(function (w) { return !w.done && w.date >= TODAY; })[0], miss = l.filter(function (w) { return !w.done && w.date < TODAY && access(w).s !== 'closed'; }).length;
     var chg = l.filter(function (w) { return w.done && (w.c || w.m) && w.date >= shift(TODAY, -3); }).length, nc = l.reduce(function (a, w) { return a + (w.u || 0); }, 0);
-    var N = packNow(c), pkTxt = N ? (N.end < TODAY ? '' : ' · пакет ' + N.done + '/' + N.p.n + ' до ' + dm(N.end) + payTxt(c, N)) : '';
+    var N = packNow(c), pkTxt = N ? (N.end < TODAY ? '' : N.soon ? ' · новый пакет ' + N.p.n + ' тр. с ' + dm(N.p.s) : ' · пакет ' + N.done + '/' + N.p.n + ' до ' + dm(N.end) + payTxt(c, N)) : '';
     var sub = (c.format ? c.format + ' · ' : '') + (D.admin && S.own === '*' ? c.owner + ' · ' : '') + (l.length ? 'тренировок: ' + l.length + (next ? ' · ближайшая ' + (next.date === TODAY ? 'сегодня' : dm(next.date)) : ' · новых нет') : 'тренировок пока нет') + pkTxt;
     return '<button class="row' + (S.view === 'client' && String(c.id) === String(S.cid) ? ' sel' : '') + '" data-act="openClient" data-id="' + esc(c.id) + '"><span class="mn"><b>' + esc(c.name) + '</b><small>' + esc(sub) +
       (N && N.end < TODAY ? ' · <span class="st-warn">пакет закончился ' + dm(N.end) + '</span>' : N && !N.left ? ' · <span class="st-warn">пакет выполнен</span>' : '') +
@@ -2076,10 +2078,15 @@ function pkCard(c) {
   var N = packNow(c), P = packsOf(c), L = labelsOf(c.id), h = '<div class="card"><div class="pk-h"><h3>Пакет</h3>';
   if (N) {
     var ended = N.end < TODAY;
-    h += '<span class="pill' + (ended ? ' warn' : N.left ? ' ok' : ' warn') + '">' + (ended ? 'закончился ' + dm(N.end) : N.left ? 'до ' + dm(N.end) + payTxt(c, N) : 'все тренировки выполнены') + '</span></div>' +
+    h += '<span class="pill' + (ended ? ' warn' : N.left ? ' ok' : ' warn') + '">' + (ended ? 'закончился ' + dm(N.end) : N.soon ? 'начнётся ' + dm(N.p.s) : N.left ? 'до ' + dm(N.end) + payTxt(c, N) : 'все тренировки выполнены') + '</span></div>' +
       '<div class="pk-bar"><i style="width:' + Math.min(100, Math.round(N.done * 100 / N.p.n)) + '%"></i></div>' +
       '<div class="pk-n"><span>Выполнено <b class="num">' + N.done + '</b> из ' + N.p.n + '</span><span>Осталось <b class="num">' + N.left + '</b></span></div>' +
       '<p class="pk-end">' + dm(N.p.s) + ' – ' + dm(N.end) + ' · ' + daysWord(+N.p.d) + (N.p.f ? ' + заморозка ' + daysWord(+N.p.f) : '') + (N.p.pay ? '' : ' · задан вручную') + '</p>';
+    if (N.soon) {                                                             // 4.9: новый пакет оплачен и ещё не начался
+      var pv = N.prev, pvDone = pv ? Math.min(N.L.per[N.i - 1].done, pv.n) : 0;
+      if (pv) h += '<p class="pk-end">Прошлый пакет: ' + dm(pv.s) + ' – ' + dm(packEnd(pv)) + ' · выполнено ' + pvDone + ' из ' + pv.n + ' · <span class="st-warn">' + (packEnd(pv) < TODAY ? 'закончился' : 'идёт') + '</span></p>';
+      h += '<p class="pk-pay">Тренировки на даты с ' + dm(N.p.s) + ' можно составлять уже сейчас – они войдут в новый пакет: «1 из ' + N.p.n + '», «2 из ' + N.p.n + '»…</p>';
+    }
   } else h += '</div><p class="sub" style="margin:0 0 4px">Пакета нет – тренировки нумеруются по порядку: № 1, № 2…</p>';
   if (N && c.pay && c.pay >= N.p.s) h += '<p class="pk-pay">Следующая оплата: <b>' + longDate(c.pay) + '</b>' + (c.pay < TODAY ? ' – <span class="st-warn">дата прошла</span>' : '') + '</p>';
   h += '<p class="pk-end">Всего выполнено тренировок: <b>' + L.total + '</b></p>';
@@ -2853,7 +2860,7 @@ function viewMy() {
   var h = nvCard(nvLink()) + '<h1 class="hello">' + esc(first) + ', Ваши тренировки</h1>';   // 4.3
   if (M.pk) {
     var pk = M.pk, ended = pk.end < TODAY;
-    h += '<div class="card pack"><div class="pk-h"><h3>Ваш пакет</h3><span class="pill' + (ended ? ' warn' : ' ok') + '">' + (ended ? 'закончился ' + dm(pk.end) : 'до ' + dMon(pk.end)) + '</span></div>' +
+    h += '<div class="card pack"><div class="pk-h"><h3>Ваш пакет</h3><span class="pill' + (ended ? ' warn' : ' ok') + '">' + (ended ? 'закончился ' + dm(pk.end) : pk.s > TODAY ? 'начнётся ' + dMon(pk.s) : 'до ' + dMon(pk.end)) + '</span></div>' +
       '<div class="pk-bar"><i style="width:' + Math.min(100, Math.round(pk.done * 100 / pk.n)) + '%"></i></div>' +
       '<div class="pk-n"><span>Выполнено <b class="num">' + pk.done + '</b> из ' + pk.n + '</span><span>Осталось <b class="num">' + pk.left + '</b></span></div>' +
       (pk.f ? '<p class="note" style="margin:6px 0 0">С учётом заморозки ' + daysWord(pk.f) + '.</p>' : '') +
