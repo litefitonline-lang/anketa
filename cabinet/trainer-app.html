@@ -785,6 +785,10 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.0 (правка 31.10.2026, вторая). Пробный → PRO: дни между концом пробного и стартом PRO – «не на ведении» (offOn): не пропуски
+ *   в «Нет данных N дней», дисциплине и баллах; до старта PRO вместо «нет данных» – «PRO с 03.11» и плашка. trialTo – из lite-fit-trainer 3.12.3.
+ * 2.0 (правка 31.10.2026). Пакет тренировок – из оплаты (lite-fit-trenirovki 4.24.0, lite-fit-trainer 3.12.2): в «Внести оплату» и
+ *   «Перевести на PRO» число тренировок обязательно – по нему и началу пакета в приложении тренировок сам встаёт пакет «1 из N».
  * 2.0 (правка 30.10.2026). FREE (lite-fit-trenirovki 4.23.1): на вкладке «Free» и в карточке клиента – где и с чем тренируется
  *   клиент: «в зале · женщины», «дома · гантели», а дома ещё строка «Инвентарь» – из какого набора каждая из 3 тренировок
  *   (тренер меняет их между гантелями и эспандером на странице тренировок). Данные – из { op:'ptsall' } (fw). Строка «набор
@@ -1163,6 +1167,10 @@ function normAt(c, y) {
   return { kcal: h && typeof h.n === 'number' ? h.n : (r.kcal != null ? r.kcal : a.kcal), p: r.p != null ? r.p : a.p, f: r.f != null ? r.f : a.f, c: r.c != null ? r.c : a.c, row: r };
 }
 function frzOn(c, n) { return (c.frz || []).filter(function (z) { return n >= dn(z.from) && n <= dn(z.to); })[0] || null; }
+/** 2.0 (правка 31.10): день «не на ведении» – после конца пробного кабинета и до старта PRO. */
+function offOn(c, n) { return !!(c && c.proFrom && c.trialTo && n > dn(c.trialTo) && n < dn(c.proFrom)); }
+/** Старт PRO ещё впереди – его дата, иначе ''. */
+function proWait(c) { return c && c.proFrom && T < dn(c.proFrom) ? c.proFrom : ''; }
 function filled(col) { return col.values.some(function (v) { return v != null; }); }
 /** Замеры в пробном: видны прежние и стартовые (как в кабинете клиента), остальные даты — уже контрольные. */
 function measCols(c) {
@@ -1213,6 +1221,7 @@ function summ(c) {
   if (tr && tr.ended) { o.alerts.push({ text: 'Пробный кабинет закончился ' + dm(c.trial.to) + ' – время предложить PRO', sub: 'care' }); o.state = 'off'; o.text = 'пробный закончился'; o.cls = 'dim'; return o; }
   var fz = frzOn(c, T);
   if (fz) { o.state = 'frz'; o.text = 'заморозка до ' + dm(fz.to); o.cls = 'frz'; return o; }
+  if (proWait(c)) { o.state = 'off'; o.text = 'PRO с ' + dm(c.proFrom); o.cls = 'dim'; return o; }   // 2.0 (правка 31.10): ещё не на ведении
   if (!c.loaded || (c.stale && !(S.unsure && S.memFresh))) { o.state = 'load'; o.text = c.err ? (c.loaded ? 'не обновилось' : 'не загрузилось') : c.loaded ? (S.offline ? 'нет связи' : 'обновляю…') : 'загружается…'; o.cls = 'dim'; return o; }
   if (!c.start) { o.state = 'off'; o.text = 'в дневнике нет дат'; o.cls = 'warm'; return o; }
   if (T < dn(c.start)) { o.state = 'off'; o.text = 'старт ' + dm(c.start); o.cls = 'dim'; return o; }
@@ -1221,9 +1230,10 @@ function summ(c) {
   if (td.k == null) o.miss.push('питание');
   if (!noSteps(c) && td.s == null) o.miss.push('шаги');
   if (md) o.miss.push(md.date === TODAY ? 'замеры' : 'замеры за ' + dm(md.date));
-  for (n = T - 1; n >= dn(c.start); n--) {                    // сколько дней подряд до сегодня нет ни питания, ни шагов
+  var lo = c.proFrom && dn(c.proFrom) > dn(c.start) ? dn(c.proFrom) : dn(c.start);   // 2.0 (правка 31.10): после пробного – считаем со старта PRO
+  for (n = T - 1; n >= lo; n--) {                             // сколько дней подряд до сегодня нет ни питания, ни шагов
     h = hrow(c, ymd(n));
-    if (frzOn(c, n) || (h && (h.k != null || h.s != null))) break;
+    if (frzOn(c, n) || offOn(c, n) || (h && (h.k != null || h.s != null))) break;
     gap++;
   }
   if (gap >= 2) o.alerts.unshift({ text: 'Нет данных ' + days(gap) + ' подряд', sub: 'over' });
@@ -1431,7 +1441,7 @@ function ptsOfC(c) {
   var p = (PTSA && PTSA.list && PTSA.list[c.id]) || null;
   var base = c.proFrom && dn(c.proFrom) > dn(c.start) ? c.proFrom : c.start;
   var R = ptsCalc({ today: TODAY, start: c.start, end: c.end, base: base, stepsNorm: c.steps, noSteps: noSteps(c),
-    day: function (y) { var r = hrow(c, y); return r ? { kcal: r.k, steps: r.s } : null; }, frz: function (y) { return !!frzOn(c, dn(y)); },
+    day: function (y) { var r = hrow(c, y); return r ? { kcal: r.k, steps: r.s } : null; }, frz: function (y) { return !!frzOn(c, dn(y)) || offOn(c, dn(y)); },
     meas: measCols(c).map(function (x) { return { date: x.date, filled: filled(x) }; }),
     photos: (c.photos || []).map(function (x) { return { date: x.date, code: x.code }; }), done: p ? p.done || [] : [] });
   return R ? { R: R, aw: p ? p.aw : null } : null;
@@ -1809,6 +1819,7 @@ function viewClient(c) {
   var s = summ(c), tr = trialSt(c), pills = [], ban = '';
   pills.push('<span class="tag ' + (c.format === 'PRO' ? 'pro' : isFree(c) ? 'free' : '') + '">' + esc(c.format || 'формат не выбран') + '</span>');
   if (tr && !tr.ended && !tr.before) pills.push('<span class="pill">Пробный · день <b class="num">' + tr.day + '</b> из ' + tr.total + '</span>');
+  else if (proWait(c)) pills.push('<span class="pill">PRO с <b>' + dm(c.proFrom) + '</b></span>');   // 2.0 (правка 31.10)
   else if (c.loaded && c.start && T >= dn(c.start) && T <= dn(c.end)) pills.push('<span class="pill">День <b class="num">' + (T - dn(c.start) + 1) + '</b> из ' + (dn(c.end) - dn(c.start) + 1) + '</span>');
   if (!tr && c.payEnd) pills.push('<span class="pill">Оплачено до <b>' + dm(c.payEnd) + '</b></span>');
   if (c.status !== ST_ACTIVE) pills.push('<span class="pill warm">' + esc(c.status || 'нет статуса') + '</span>');
@@ -1818,6 +1829,7 @@ function viewClient(c) {
   else if (tr && tr.before) ban = '<div class="banner trial"><b>Пробный кабинет</b> начнётся ' + longDate(c.trial.from) + ' и продлится до ' + longDate(c.trial.to) + '.</div>';
   else if (tr && !tr.ended) ban = '<div class="banner trial"><b>Пробный кабинет</b> – до ' + longDate(c.trial.to) + ' включительно. Клиент ведёт питание и вес; шаги, план тренировок и контрольные замеры откроются в PRO.</div>';
   else if (tr) ban = '<div class="banner warn"><b>Пробный кабинет закончился ' + longDate(c.trial.to) + '.</b> Кабинет открыт клиенту только для просмотра. Перевод на PRO – в разделе «Ведение».</div>';
+  else if (proWait(c)) ban = '<div class="banner trial"><b>Ведение PRO начнётся ' + longDate(c.proFrom) + '.</b>' + (c.trialTo ? ' С ' + dm(ymd(dn(c.trialTo) + 1)) + ' клиент не на ведении – эти дни не считаются пропусками.' : '') + '</div>';   // 2.0 (правка 31.10)
   if (c.table && c.loaded && (c.stale || S.unsure)) ban += '<div class="banner' + (c.err ? ' warn' : '') + '">' + (c.err ? 'Не получилось обновить: ' + esc(c.err) + '. ' : '') +
     'Показаны данные на <b class="num">' + whenTxt(c.at) + '</b>' + (c.err ? '. <button class="btn sec sm" data-act="reload">Повторить</button>' : ' – обновляю.') + '</div>';
   if (!nameParts(c).last && S.sub !== 'client') ban += '<div class="banner warn"><b>Нет фамилии клиента.</b> <button class="lnk" data-sub="client">Впишите фамилию</button> – во вкладке «Клиент».</div>';   // 2.0
@@ -1895,7 +1907,7 @@ function subOver(c) {
     (ns ? '' : '<circle class="trk" cx="118" cy="118" r="82" stroke-width="9"/><circle class="arc st ' + sState + '" cx="118" cy="118" r="82" stroke-width="9" stroke-dasharray="' + dash(sp, 82) + '"' + (sp > 0 ? '' : ' opacity="0"') + '/>') +
     '</svg><div class="ctr"><div class="big num">' + (kc != null ? fmt(kc) : '0') + '</div><div class="of">' + (kN != null ? 'при норме <span class="num">' + fmt(kN) + '</span> ккал' : 'норма не задана') + '</div>' +
     (left != null ? '<div class="left num' + (over ? ' over' : '') + '">' + (left >= 0 ? 'осталось ' + fmt(left) : 'сверх нормы ' + fmt(-left)) + '</div>'
-      : '<div class="left" style="color:var(--dim)">' + (fzD ? 'заморозка' : kc == null ? 'не внесено' : '') + '</div>') + '</div></div>' +
+      : '<div class="left" style="color:var(--dim)">' + (fzD ? 'заморозка' : offOn(c, dn(S.day)) ? 'не на ведении' : kc == null ? 'не внесено' : '') + '</div>') + '</div></div>' +
     '<div class="legend"><div class="lg' + (over ? ' over' : '') + '"><div class="k"><i></i>Калории</div><div class="v num">' + fmt(kc) + ' <small>/ ' + fmt(kN) + '</small></div>' + (over ? '<div class="note">выше нормы</div>' : '') + '</div>' +
     (ns ? '<div class="lg lkd"><div class="k">' + (lk ? IC.lock : '') + 'Шаги</div><div class="v">' + (lk ? 'в PRO' : 'нет нормы') + '</div><div class="note">' + (lk ? 'в пробном закрыты' : 'задайте в «Питании»') + '</div></div></div>'
       : '<div class="lg st-' + (sState || 'none') + '"><div class="k"><i class="s"></i>Шаги</div><div class="v num">' + fmt(st) + ' <small>/ ' + fmt(sN) + '</small></div>' + (sNote ? '<div class="note">' + sNote + '</div>' : '') + '</div></div>') +
@@ -1908,7 +1920,7 @@ function subOver(c) {
   // дисциплина за 10 дней
   var cells = [], miss = [], full = 0, inDays = 0, need = ns ? 1 : 2;
   for (var i = 9; i >= 0; i--) {
-    var n = T - i, y = ymd(n), r = hrow(c, y), fz = !!frzOn(c, n), inP = n >= dn(c.start) && n <= dn(c.end) && !fz;
+    var n = T - i, y = ymd(n), r = hrow(c, y), fz = !!frzOn(c, n), inP = n >= dn(c.start) && n <= dn(c.end) && !fz && !offOn(c, n) && !(proWait(c) && n >= T);
     var got = r ? (ns ? [r.k] : [r.k, r.s]).filter(function (x) { return x != null; }).length : 0;
     if (inP) { inDays++; if (got === need) full++; }
     if (inP && i > 0 && got < need) miss.push(dm(y) + ' – ' + [r && r.k != null ? '' : 'питание', ns || (r && r.s != null) ? '' : 'шаги'].filter(String).join(', '));
@@ -2030,6 +2042,7 @@ function measCal(c) {
     var y = ymd(n), col = by[y], cls = [];
     if (n < sN || n > eN) cls.push('out');
     else if (frzOn(c, n)) cls.push('fz');
+    else if (offOn(c, n)) cls.push('out');                                     // 2.0 (правка 31.10): не на ведении
     if (n === T) cls.push('today');
     var st = '';
     if (col) { st = filled(col) ? 'm-done' : n > T ? 'm-plan' : n >= T - late ? 'm-due' : 'm-miss'; cls.push(st); }
@@ -2432,11 +2445,11 @@ function subProg(c) {
   // дисциплина: доля дней, когда внесено всё
   var ns = noSteps(c), dRows = (B || weeks(from, end)).map(function (w) {
     var inD = 0, full = 0;
-    for (var n = w.a; n <= w.b; n++) { if (frzOn(c, n)) continue; inD++; var r = hrow(c, ymd(n)); if (r && r.k != null && (ns || r.s != null)) full++; }
+    for (var n = w.a; n <= w.b; n++) { if (frzOn(c, n) || offOn(c, n)) continue; inD++; var r = hrow(c, ymd(n)); if (r && r.k != null && (ns || r.s != null)) full++; }
     return { lab: w.lab, v: inD ? Math.round(full / inD * 100) : null, nm: null };
   });
   var dAll = avg(dRows.map(function (r) { return r.v; }));
-  h += '<div class="card"><h3>Дисциплина</h3><p class="sub">Доля дней по неделям, когда клиент внёс ' + (ns ? 'питание' : 'и питание, и шаги') + '. Дни заморозки не считаются. В среднем: <b class="num" style="color:var(--text)">' + (dAll != null ? Math.round(dAll) + ' %' : '—') + '</b>.</p>' +
+  h += '<div class="card"><h3>Дисциплина</h3><p class="sub">Доля дней по неделям, когда клиент внёс ' + (ns ? 'питание' : 'и питание, и шаги') + '. Дни заморозки и дни не на ведении не считаются. В среднем: <b class="num" style="color:var(--text)">' + (dAll != null ? Math.round(dAll) + ' %' : '—') + '</b>.</p>' +
     barChart(dRows, { max: 100, unit: '%', label: 'Дисциплина', vals: function (r) { return r.v + '%'; } }) + '</div>';
 
   // баллы и медали по месяцам
@@ -2600,7 +2613,8 @@ function pkgDef(want) { var o = pkgOpts(), w = String(want || ''); return o.some
 /** Поля оплаты (общие для «Внести оплату» и «Перевести на PRO»). p — приставка к id полей. */
 function payFields(p, pkg) {
   return '<div class="grid2">' + fi(p + 'Date', 'Дата оплаты', TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + TODAY + '"') + fi(p + 'Sum', 'Сумма, ₽', '', 'text', 'inputmode="numeric"') + '</div>' +
-    '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg)) + fs(p + 'Sess', 'Тренировок', [['-', 'не указывать']].concat(L().sessions || []), '-') + '</div>' +
+    '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg)) + fs(p + 'Sess', 'Тренировок', [['', '– выберите –']].concat(L().sessions || []), '') + '</div>' +
+    '<p class="note" style="margin:0 0 10px">По числу тренировок и началу пакета в приложении тренировок сам встанет пакет «1 из N». «иное» – пакета там не будет, тренировки пойдут по порядку: № 1, № 2…</p>' +   // 2.0 (правка 31.10)
     fs(p + 'How', 'Способ оплаты', L().methods || [], L().method || '') + discFields(p) +   // 2.0: скидка в % или ценой по прайсу, с причиной
     ft(p + 'Note', 'Комментарий, если нужен', '', 2, 'maxlength="300"');
 }
@@ -2612,6 +2626,7 @@ function payRead(p) {
   if (dq.err) return dq;
   if (sum === 0 && dq.price === '') return { err: 'Сумма 0 – только для бесплатного периода: выберите «Скидка – цена по прайсу» и причину.' };
   if (!val(p + 'How')) return { err: 'Выберите способ оплаты.' };
+  if (!ss || ss === '-') return { err: 'Выберите, сколько тренировок в пакете – по нему в приложении тренировок встанет пакет «1 из N».' };   // 2.0 (правка 31.10)
   return { date: val(p + 'Date'), sum: sum, method: val(p + 'How'), pkg: val(p + 'Pkg'), sess: ss === '-' ? '' : ss, note: val(p + 'Note'), price: dq.price, dwhy: dq.dwhy };
 }
 function activeSw(c, id) { return c.status === ST_ACTIVE ? '' : fsw(id, 'Поставить статус «Тренируется»', true); }
