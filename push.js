@@ -6,7 +6,7 @@
  *   test(api, k, from)    → Promise<{ ok, error }>
  *   sync(api, k)          – при открытии: подписка есть на телефоне, а сервер её забыл – прислать снова
  *   prefetch(urls)        – скачать ролики заранее (сервис-воркер)
- * 1.3: P.panel(opt) – окно «Уведомления на телефон» для клиента (кнопка с колокольчиком в приложении и кабинете): включить,
+ * 1.3 (правка 02.11: окно не уходит под строку состояния iPhone, внизу «Готово»): P.panel(opt) – окно «Уведомления на телефон» для клиента (кнопка с колокольчиком в приложении и кабинете): включить,
  *   проверить, выключить на этом телефоне и выбрать, что присылать (ответы тренера, напоминание о тренировке).
  * 1.2: кабинет тренера – вместо ключа клиента k передаётся { t, d } (ключ тренера и устройство); P.prefs – о чём сообщать;
  *   status(api, auth) сверяет с сервером, выключено ли здесь; disable(…, keep) – выключить на сервере, не трогая телефон
@@ -125,8 +125,8 @@
   function css() {
     if (document.getElementById('lfp-css')) return;
     var st = document.createElement('style'); st.id = 'lfp-css';
-    st.textContent = '.lfp-sh{position:fixed;inset:0;z-index:9000;background:rgba(3,6,7,.72);display:flex;align-items:flex-end;justify-content:center;font-family:inherit}' +
-      '.lfp-in{width:100%;max-width:560px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--card,#0C1618);color:var(--text,#F2F7F7);border:1px solid var(--line2,#2A4B4D);border-bottom:0;border-radius:22px 22px 0 0;padding:8px 18px calc(env(safe-area-inset-bottom,0px) + 18px)}' +
+    st.textContent = '.lfp-sh{position:fixed;inset:0;z-index:9000;background:rgba(3,6,7,.72);display:flex;align-items:flex-end;justify-content:center;font-family:inherit;padding-top:calc(env(safe-area-inset-top,0px) + 14px)}' +
+      '.lfp-in{width:100%;max-width:560px;max-height:100%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--card,#0C1618);color:var(--text,#F2F7F7);border:1px solid var(--line2,#2A4B4D);border-bottom:0;border-radius:22px 22px 0 0;padding:8px 18px calc(env(safe-area-inset-bottom,0px) + 18px)}' +
       '@media (min-width:800px){.lfp-sh{align-items:center}.lfp-in{border-radius:22px;border-bottom:1px solid var(--line2,#2A4B4D)}}' +
       '.lfp-h{position:sticky;top:0;background:var(--card,#0C1618);display:flex;justify-content:space-between;align-items:center;padding:10px 0 12px;font-weight:800;font-size:17px}' +
       '.lfp-x{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--dim,#5E7577);background:none;border:0;font:inherit;cursor:pointer}.lfp-x svg{width:22px;height:22px}' +
@@ -140,6 +140,7 @@
       '.lfp-sw i{flex:none;width:46px;height:28px;border-radius:99px;background:var(--line2,#2A4B4D);position:relative;transition:background .15s}' +
       '.lfp-sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}' +
       '.lfp-sw[aria-checked="true"] i{background:var(--accent,#3ED6CE)}.lfp-sw[aria-checked="true"] i::after{transform:translateX(18px)}' +
+      '.lfp-done{width:100%;min-height:50px;margin-top:14px;border-radius:14px;border:1px solid var(--line2,#2A4B4D);background:none;color:var(--text,#F2F7F7);font:inherit;font-weight:800;font-size:16px;cursor:pointer}' +
       '.lfp-note{color:var(--dim,#5E7577);font-size:12.5px;line-height:1.45;margin:12px 2px 0}.lfp-msg{min-height:20px;margin:10px 2px 0;font-size:13.5px;color:var(--muted,#8FA5A7)}.lfp-msg.bad{color:var(--warm,#FF9A52)}';
     document.head.appendChild(st);
   }
@@ -168,8 +169,10 @@
           return '<button class="lfp-sw" role="switch" aria-checked="' + !!S.prefs[x[0]] + '" data-k="' + x[0] + '"><span>' + esc(x[1]) + (x[2] ? '<small>' + esc(x[2]) + '</small>' : '') + '</span><i></i></button>';
         }).join('') + '<p class="lfp-note">Настройки общие для всех Ваших телефонов. Выключили всё – уведомлений не будет, бот в Telegram продолжит присылать сообщения.</p>';
       } else if (S.err) h += '<p class="lfp-msg bad">' + esc(S.err) + '</p>';
-      h += '<p class="lfp-msg' + (S.bad ? ' bad' : '') + '" role="status">' + esc(S.msg) + '</p></div>';
+      h += '<p class="lfp-msg' + (S.bad ? ' bad' : '') + '" role="status">' + esc(S.msg) + '</p><button class="lfp-done" data-p="close">Готово</button></div>';
+      var y = el.firstChild ? el.firstChild.scrollTop : 0;
       el.innerHTML = h;
+      if (y && el.firstChild) el.firstChild.scrollTop = y;
     }
     function load() {
       P.status(api, auth).then(function (st) { S.st = st; draw(); tell(); });
