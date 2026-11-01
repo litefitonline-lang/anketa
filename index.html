@@ -93,6 +93,7 @@
 
 /* согласие */
 #lf-anketa .lf-consent{font-size:15px!important}
+#lf-anketa .lf-q[data-key="pd"]{margin-bottom:10px!important}
 #lf-anketa .lf-consent a{color:#F2F7F7!important;text-decoration:underline!important;text-underline-offset:3px!important;text-decoration-color:#2A4B4D!important}
 
 /* кнопки */
@@ -129,6 +130,9 @@
 function lfInit(root){
 /* =================== НАСТРОЙКИ =================== */
 var CONFIG = {
+  // 4.5: анкета уходит через веб-приложение Lite Fit (тот же адрес, что в cabinet/config.js) – сервер передаёт её в Google Форму
+  // и отвечает, приняла ли форма. Сервер не ответил – анкета уходит в форму напрямую, как раньше.
+  api: "https://script.google.com/macros/s/AKfycbxWfakUcj7YiUCx9HQbzPPE04iPyjKteJXPPkX-pjhoZ50RihUsjrEsqJMohqMZwkGT/exec",
   // адрес отправки в существующую Google Форму (не менять)
   action: "https://docs.google.com/forms/d/e/1FAIpQLSfhvtSZhU6-XRil7FNdhCZH4iX0bYnLe7leWR7elrKH5EBuFA/formResponse",
   // запасная ссылка на обычную форму, если что-то пошло не так
@@ -137,11 +141,16 @@ var CONFIG = {
   pageHistory: "0,1,2,3,4,5",
   siteUrl: "https://taplink.cc/litefit",
   offerUrl: "https://docs.google.com/document/d/1ggdsTyFEWn8hu0T_QIp7G2aGGpUUXIeEM2ktiq1x2Dc/view",
+  // 4.4: согласие на обработку персональных данных и политика – отдельные страницы
+  consentUrl: "https://litefitonline-lang.github.io/anketa/soglasie.html",
+  policyUrl: "https://litefitonline-lang.github.io/anketa/politika.html",
   // каналы на экране «Анкета отправлена» (пусто – кнопка скрыта)
   tgUrl: "https://t.me/lite_fit_online",
   maxUrl: "https://max.ru/join/BkXc82YgFe0TWviNnV1Nksk87Oi8FGVYEr8cqrwchjc",
   // версия страницы анкеты
-  version: "4.2",
+  // 4.5 (01.11.2026): отправка через сервер с ответом «принята» (сервер – файл lite-fit-fix 1.0); ответы сохраняются в телефоне
+  //   и не пропадают, если закрыть страницу или пропадёт связь (до отправки, 7 дней); скрытое поле против ботов.
+  version: "4.5",
   // ID полей Google Формы (entry.…)
   ids: {
     email:        "emailAddress",
@@ -171,6 +180,7 @@ var CONFIG = {
 /* ================================================= */
 
 var DEMO = Object.keys(CONFIG.ids).some(function(k){ return CONFIG.ids[k].indexOf("XXXX") !== -1; });
+var T0 = Date.now();                                                       // 4.5: сколько заполняли (бот – за секунды)
 
 // value – точный текст варианта в Google Форме (не менять без правки формы)
 var NUTRITION = "Контроль и план питания: рекомендации, КБЖУ, чек-листы (входит в формат PRO).";
@@ -185,10 +195,24 @@ var SRC = (function(){
   try { if (v) sessionStorage.setItem("lfSrc", v); else v = sessionStorage.getItem("lfSrc") || ""; } catch(e){}
   return v;
 })();
+// 4.3: пришли из игры «Один день после 30» (…/anketa/?format=free&g=s&ob=vs&src=игра…) – тип игрока, «Что мешает» по результату
+var GAME = (function(){
+  var T = {v:"Вечно занятый", s:"Стартер с понедельника", o:"Осторожный", r:"Самоучка по роликам"};
+  var OB = {v:"Не хватает времени", s:"Начинаю и вскоре бросаю", o:"Есть страх сделать что-то неправильно", r:"Не знаю, что и как делать, с чего начать"};
+  var u; try { u = new URLSearchParams(location.search); } catch(e){ return null; }
+  var g = String(u.get("g") || "").toLowerCase(); if (!T[g]) return null;
+  if (u.get("gs") === "f") { T.v = "Вечно занятая"; T.o = "Осторожная"; }
+  var ob = []; String(u.get("ob") || g).toLowerCase().split("").forEach(function(k){ if (OB[k] && ob.indexOf(OB[k]) === -1) ob.push(OB[k]); });
+  return { name: T[g], ob: ob };
+})();
 var STEPS = [
   { title:"Давайте знакомиться",
     lead:"Артём и Андрей на связи. Ответьте на несколько вопросов – тренер изучит Вашу цель и подберёт формат. Это займёт 3–4 минуты.",
     fields:[
+      {key:"gameNote", type:"note", when:function(){ return !!GAME; },
+       html:"Вы прошли «Один день после 30»: Ваш тип – <b>«" + (GAME ? GAME.name : "") + "»</b>. Формат FREE уже выбран, а в вопросе «Что мешает» отмечено по результату игры – поправьте, если нужно."},
+      {key:"draftNote", type:"note", when:function(){ return !!RESTORED && step === 0; },
+       html:"Мы сохранили Ваши ответы с прошлого раза – можно продолжить с того же места."},
       {key:"name",  type:"text",  label:"Имя и фамилия", hint:"Фамилию – по желанию", req:true, ac:"name", ph:"Например: Анна Смирнова"},
       {key:"phone", type:"tel",   label:"Телефон для связи в Telegram", hint:"Сюда тренер напишет и пришлёт персональные рекомендации", req:true, ac:"tel", ph:"+7 900 000-00-00"},
       {key:"noTg",  type:"toggle", text:"У меня нет Telegram"},
@@ -277,12 +301,23 @@ var STEPS = [
       ]},
       {key:"subTg", type:"sub", when:function(){ return isFree() && !state.noTg; }},   // 4.2: условие FREE – подписка на канал
       {key:"repost", type:"text", label:"Ссылка на репост", when:isFree, hint:"Поделились постом Lite Fit у себя? Вставьте ссылку на него", ph:"https://…"},
-      {key:"offer", type:"consent", req:true, value:"Ознакомлен"}
+      {key:"pd", type:"consent", req:true, pd:true},                          // 4.4: согласие на обработку данных – отдельно от оферты
+      {key:"offer", type:"consent", req:true, value:"Ознакомлен"},
+      {key:"hp", type:"hp"}                                                     // 4.5: скрытое поле – человек его не видит и не заполняет
     ]}
 ];
 
 var LOGO = "data:image/png;base64,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";
 var state = {}; var step = 0;
+// 4.5: черновик – ответы сохраняются в телефоне (7 дней), пока анкета не отправлена
+var DRAFT = "lf_anketa_draft", RESTORED = false;
+function draftRead(){ try { var j = JSON.parse(localStorage.getItem(DRAFT) || "null"); if (j && j.s && Date.now() - j.at < 7 * 864e5) return j; } catch(e){} return null; }
+function draftSave(){ try { var s = {}; Object.keys(state).forEach(function(k){ if (k !== "hp") s[k] = state[k]; }); if (Object.keys(s).length) localStorage.setItem(DRAFT, JSON.stringify({ s: s, step: step, at: Date.now() })); } catch(e){} }
+function draftDrop(){ try { localStorage.removeItem(DRAFT); } catch(e){} }
+(function(){ var d = draftRead(); if (d){ state = d.s; step = Math.min(Math.max(d.step|0, 0), STEPS.length - 1); RESTORED = Object.keys(state).length > 0; } })();
+if (GAME){ state.format = FREE; if (!RESTORED) state.obstacles = GAME.ob.slice(); }   // 4.3
+var draftWas = "";
+setInterval(function(){ if (root.querySelector(".lf-done")) return; var s = JSON.stringify([state, step]); if (s !== draftWas){ draftWas = s; draftSave(); } }, 1500);
 
 // на отдельном просмотре (не в Taplink) – тёмный фон страницы
 if (/taplink/.test(location.hostname)) root.classList.add("in-taplink");
@@ -347,7 +382,7 @@ function render(){
   next.onclick = function(){ if (validate()) { if (last) submit(next); else { step++; render(); scrollTop(); } } };
   nav.appendChild(next);
   wrap.appendChild(nav);
-  if (last) wrap.appendChild(el("p",{class:"lf-senderr"},'Не получилось отправить. Проверьте интернет и попробуйте ещё раз или <a href="'+CONFIG.fallback+'" target="_blank" rel="noopener">заполните анкету здесь</a>.'));
+  if (last) wrap.appendChild(el("p",{class:"lf-senderr"},'Не получилось отправить. Ваши ответы сохранены – проверьте интернет и нажмите «Отправить анкету» ещё раз или <a href="'+CONFIG.fallback+'" target="_blank" rel="noopener">заполните анкету здесь</a>.'));
 
   root.appendChild(wrap);
 }
@@ -365,6 +400,12 @@ function qWrap(f){
 function renderField(f){
   if (f.when && !f.when()) return document.createDocumentFragment();
   if (f.type==="note"){ return el("p",{class:"lf-note"}, f.html); }
+  if (f.type==="hp"){                                                      // 4.5: ловушка для ботов – вне экрана, без фокуса
+    var hw = el("div",{"aria-hidden":"true",style:"position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important"});
+    var hi = el("input",{type:"text",name:"website",tabindex:"-1",autocomplete:"off"});
+    hi.value = state.hp || ""; hi.oninput = function(){ state.hp = hi.value; };
+    hw.appendChild(hi); return hw;
+  }
   if (f.type==="sub"){                                                     // 4.2: FREE – подписка на канал
     var sb = el("div",{class:"lf-note lf-sub"}, "<p class=\"lf-sub-t\"><b>Условие одно – подписка на наш Telegram-канал</b></p><p>Там советы по тренировкам и питанию. Подпишитесь сейчас – бот проверит подписку и сразу откроет Ваши 3 тренировки.</p>");
     if (CONFIG.tgUrl) sb.appendChild(el("a",{class:"lf-btn lf-primary lf-sub-b",href:CONFIG.tgUrl,target:"_blank",rel:"noopener"}, ICON.tgDark+"Подписаться на канал"));
@@ -454,11 +495,13 @@ function renderField(f){
 
   if (f.type==="consent"){
     var list2 = el("div",{class:"lf-choices"});
-    var c = el("button",{type:"button",class:"lf-choice lf-consent",role:"checkbox"},
-      '<span class="lf-ind"></span><span class="lf-ctext">С <a href="'+CONFIG.offerUrl+'" target="_blank" rel="noopener">офертой</a> ознакомлен(а), мне есть 18 лет, об ограничениях по здоровью написал(а) выше</span>');
-    function paintC(){ c.classList.toggle("sel", !!state.offer); c.setAttribute("aria-checked", state.offer ? "true":"false"); }
+    var ctext = f.pd
+      ? 'Даю <a href="'+CONFIG.consentUrl+'" target="_blank" rel="noopener">согласие на обработку персональных данных</a>, в том числе сведений о здоровье, на условиях <a href="'+CONFIG.policyUrl+'" target="_blank" rel="noopener">Политики</a>'
+      : 'С <a href="'+CONFIG.offerUrl+'" target="_blank" rel="noopener">офертой</a> ознакомлен(а), мне есть 18 лет, об ограничениях по здоровью написал(а) выше';
+    var c = el("button",{type:"button",class:"lf-choice lf-consent",role:"checkbox"}, '<span class="lf-ind"></span><span class="lf-ctext">'+ctext+'</span>');
+    function paintC(){ c.classList.toggle("sel", !!state[f.key]); c.setAttribute("aria-checked", state[f.key] ? "true":"false"); }
     paintC();
-    c.onclick = function(e){ if (e.target.tagName==="A") return; state.offer = !state.offer; paintC(); q.classList.remove("invalid"); };
+    c.onclick = function(e){ if (e.target.tagName==="A") return; state[f.key] = !state[f.key]; paintC(); q.classList.remove("invalid"); };
     list2.appendChild(c); q.appendChild(list2);
   }
 
@@ -469,13 +512,13 @@ function renderField(f){
 function validate(){
   var ok = true, first = null;
   STEPS[step].fields.forEach(function(f){
-    if (f.type==="note" || f.type==="sub" || (f.when && !f.when())) return;
+    if (f.type==="note" || f.type==="sub" || f.type==="hp" || (f.when && !f.when())) return;
     var q = root.querySelector('.lf-q[data-key="'+f.key+'"]'); var msg = "";
     var v = state[f.key];
     if (f.req){
       if (f.type==="checkbox" && !(v && v.length)) msg = "Выберите хотя бы один вариант";
       else if (f.type==="radio" && !v) msg = "Выберите вариант";
-      else if (f.type==="consent" && !v) msg = "Отметьте галочку – без неё анкету не отправить";
+      else if (f.type==="consent" && !v) msg = f.pd ? "Без согласия на обработку данных тренер не сможет подобрать программу – отметьте галочку" : "Отметьте галочку – без неё анкету не отправить";
       else if (/text|tel|email|textarea/.test(f.type) && !(v && v.trim())) msg = "Заполните это поле";
     }
     if (!msg && f.type==="email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())) msg = "Проверьте адрес почты – похоже, в нём опечатка";
@@ -494,7 +537,7 @@ function validate(){
 function buildPayload(){
   var p = new URLSearchParams(), ids = CONFIG.ids;
   STEPS.forEach(function(s){ s.fields.forEach(function(f){
-    if (f.type==="note" || f.type==="sub" || f.type==="toggle" || (f.when && !f.when())) return;
+    if (f.type==="note" || f.type==="sub" || f.type==="toggle" || f.type==="hp" || (f.when && !f.when())) return;
     if (f.type==="params"){ f.items.forEach(function(it){ var v=(state[it.key]||"").trim(); if (v && ids[it.key]) p.append(ids[it.key], v); }); return; }
     var id = ids[f.key], v = state[f.key]; if (!id || v==null || v==="") return;
     if (f.type==="consent"){ if (v) p.append(id, f.value); return; }
@@ -512,17 +555,42 @@ function buildPayload(){
   return p;
 }
 
+/** 4.5: запрос к серверу с ограничением по времени (25 с). Ответ – объект или { net:true }. */
+function apiPost(body){
+  var ctl = typeof AbortController === "function" ? new AbortController() : null, tm = ctl ? setTimeout(function(){ ctl.abort(); }, 25000) : 0;
+  return fetch(CONFIG.api, {method:"POST", body:JSON.stringify(body), redirect:"follow", signal: ctl ? ctl.signal : undefined})
+    .then(function(r){ return r.text(); }).then(function(t){ clearTimeout(tm); return JSON.parse(t); })
+    .catch(function(){ clearTimeout(tm); return { ok:false, net:true }; });
+}
+
+/**
+ * 4.5: отправка. Через сервер – он отвечает, приняла ли Google Форма анкету (повтор той же анкеты сервер не задваивает).
+ * Сервер не ответил дважды – анкета уходит в форму напрямую, как раньше. Форма отказала – ответы остаются, клиент видит ошибку.
+ */
 function submit(btn){
   btn.disabled = true; btn.textContent = "Отправляем…";
   var errBox = root.querySelector(".lf-senderr"); errBox.classList.remove("show");
   var payload = buildPayload();
   if (DEMO){ console.info("Lite Fit анкета (демо), данные к отправке:", payload.toString()); setTimeout(done, 600); return; }
-  fetch(CONFIG.action, {method:"POST", mode:"no-cors", body:payload})
-    .then(done)
-    .catch(function(){ btn.disabled = false; btn.textContent = "Отправить анкету"; errBox.classList.add("show"); });
+  var fail = function(text){ btn.disabled = false; btn.textContent = "Отправить анкету"; if (text) errBox.firstChild.textContent = text + " Ваши ответы сохранены – нажмите «Отправить анкету» ещё раз или "; errBox.classList.add("show"); };
+  var body = { a:"ank", f:Array.from(payload.entries()), hp:state.hp || "", ms:Date.now() - T0, v:CONFIG.version };
+  var direct = function(){
+    return fetch(CONFIG.action, {method:"POST", mode:"no-cors", body:payload}).then(done).catch(function(){ fail(""); });
+  };
+  if (!/^https:\/\/script\.google\.com\//.test(CONFIG.api || "")) { direct(); return; }
+  apiPost(body).then(function(r){
+    if (r && r.ok) return done();
+    if (r && r.net) return new Promise(function(ok){ setTimeout(ok, 2500); }).then(function(){ return apiPost(body); }).then(function(r2){
+      if (r2 && r2.ok) return done();
+      if (r2 && r2.net) return direct();                                    // сервер недоступен – напрямую в форму, как в 4.4
+      fail("Не получилось отправить: " + String((r2 && r2.error) || "сервер не принял анкету") + ".");
+    });
+    fail("Не получилось отправить: " + String((r && r.error) || "сервер не принял анкету") + ".");
+  });
 }
 
 function done(){
+  draftDrop();
   root.innerHTML = "";
   var name = (state.name||"").trim().split(/\s+/)[0];
   var w = el("div",{class:"lf-step lf-done"});
