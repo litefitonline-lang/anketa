@@ -646,6 +646,7 @@ body.wide .md .chips{flex-wrap:wrap;overflow:visible}
 <div class="tabs hidden" id="tabs"><nav></nav></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="config.js"></script>
+<script src="../voice.js"></script>
 <script>
 (function () {
 'use strict';
@@ -785,6 +786,17 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.2 (01.11.2026). Голосовые в «Написать клиенту» (общий файл voice.js): под текстом – «Записать голосовое» (до 3 минут,
+ *   прослушать, записать заново или удалить перед отправкой); голосовое уходит клиенту в бот и в приложение (вкладка «Тренер»),
+ *   можно без текста; запрос с голосовым ждёт ответа до 2 минут. В переписке у голосовых – «Голосовое – слушать» (op cfile).
+ *   Вкладка «Тренировки» в карточке клиента теперь называется «План PRO», кнопка «Тренировки клиента» – «Открыть тренировки».
+ * 2.1 (01.11.2026). Надёжность и безопасность: набранный текст в карточке клиента («Клиент» и другие поля прямо в карточке)
+ *   не стирается, когда в фоне приходят данные, – страница ждёт, пока Вы закончите ввод; ПИН-код скрыт точками; подтверждение
+ *   перед снятием задачи, статусом «Отказ» / «Закончил(а)», «Отправить клиенту», «Повторить прошлую неделю», «Продлить
+ *   дневник», отправкой ссылки на новый кабинет, «Взять себе» и «Назначить»; страница открывается только внутри кабинета
+ *   Lite Fit (не на чужом сайте); секундомер внизу «Сегодня» – только у владельца; «Выйти с устройства» внизу «Сегодня» –
+ *   стирает список, карточки и отметку ПИН-кода на этом устройстве; запрос без ответа 30 с (запись – 45 с) обрывается и
+ *   считается сбоем связи; на компьютере карточка справа от списка – с ширины кабинета 900 px.
  * 2.0 (правка 31.10.2026, вторая). Пробный → PRO: дни между концом пробного и стартом PRO – «не на ведении» (offOn): не пропуски
  *   в «Нет данных N дней», дисциплине и баллах; до старта PRO вместо «нет данных» – «PRO с 03.11» и плашка. trialTo – из lite-fit-trainer 3.12.3.
  * 2.0 (правка 31.10.2026). Пакет тренировок – из оплаты (lite-fit-trenirovki 4.24.0, lite-fit-trainer 3.12.2): в «Внести оплату» и
@@ -845,8 +857,8 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.0';
-var PATCH = '.7';                // правка страницы без смены версии сервера                // правка страницы без смены версии сервера
+var VERSION = '2.2';
+var PATCH = '';                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -856,8 +868,15 @@ if (window.top === window) {                                                // 1
   location.replace('trainer.html' + (t0 ? '?t=' + encodeURIComponent(t0) : ''));
   return;
 }
+var SAME = false;                                                           // 2.1: встроить можно только в свой кабинет (тот же адрес сайта)
+try { SAME = window.top.location.origin === location.origin && window.parent.location.origin === location.origin; } catch (e) { SAME = false; }
+if (!SAME) {
+  app.innerHTML = '<div class="center view"><img src="' + LOGO + '" alt="Lite Fit"><h2>Кабинет тренера</h2><p>Эта страница открывается только в кабинете Lite Fit.</p>' +
+    '<a class="btn pri" href="trainer.html" target="_top" rel="noopener noreferrer">Открыть кабинет</a></div>';
+  return;
+}
 function toShell(o) { if (!EMBED) return; o.lf = 1; o.app = 'A'; try { window.parent.postMessage(o, location.origin); } catch (e) {} }
-function WIDE() { return window.innerWidth >= 1100; }
+function WIDE() { return window.innerWidth >= (EMBED ? 900 : 1100); }   // 2.1: в кабинете слева меню 236 px – широкая раскладка с ширины рамки 900 px
 var wideWas = null, wideT = 0;
 window.addEventListener('resize', function () {
   clearTimeout(wideT);
@@ -929,6 +948,20 @@ function memAll() {
     return function () { var o = {}; keys.result.forEach(function (k, i) { o[String(k).slice(KP.length)] = vals.result[i]; }); return o; };
   }, {});
 }
+/** 2.1: «Выйти с устройства» – стереть всё, что кабинет хранит здесь: базу lf_trainer целиком (и прежние ключи) и записи lf_tr_* в localStorage. */
+function deviceWipe() {
+  var ks = [];
+  try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('lf_tr_') === 0) ks.push(k); } } catch (e) {}
+  ks.forEach(function (k) { LS.del(k); });
+  return memTx('readwrite', function (s) { s.clear(); }, null).then(function () { return memDb(); }).then(function (db) {
+    try { if (db) db.close(); } catch (e) {}
+    MEMP = Promise.resolve(null);                                           // больше ничего не записывать
+    return new Promise(function (res) {
+      try { var rq = window.indexedDB.deleteDatabase('lf_trainer'); rq.onsuccess = rq.onerror = rq.onblocked = function () { res(); }; } catch (e) { res(); }
+      setTimeout(res, 1500);
+    });
+  })['catch'](function () {});
+}
 function mskToday() {
   try { var p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); if (/^\d{4}-\d{2}-\d{2}$/.test(p)) return p; } catch (e) {}
   return '';
@@ -980,13 +1013,16 @@ var WRITE = { norm: 1, normf: 1, calc: 1, steps: 1, plan: 1, plandel: 1, plancop
   freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
-function post(body) {
-  var t0 = Date.now(), t1 = 0;
-  return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { t1 = Date.now(); return r.text(); }).then(function (t) {
+/** 2.1: ms – сколько ждать ответа (по умолчанию 30 с); не ответил – запрос обрывается и считается сбоем связи. */
+function post(body, ms) {
+  var t0 = Date.now(), t1 = 0, tm = 0, o = { method: 'POST', body: JSON.stringify(body), redirect: 'follow' };
+  try { if (window.AbortController) { var ctl = new AbortController(); o.signal = ctl.signal; tm = setTimeout(function () { try { ctl.abort(); } catch (e) {} }, ms || 30000); } } catch (e) { tm = 0; delete o.signal; }
+  return fetch(API, o).then(function (r) { t1 = Date.now(); return r.text(); }).then(function (t) {
+    clearTimeout(tm);
     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('bad'); }
     if (j && typeof j === 'object') { j._w = t1 - t0; j._d = Date.now() - t1; j._kb = Math.round(t.length / 1024); }   // ожидание ответа, его загрузка, размер
     return j;
-  });
+  }, function (e) { clearTimeout(tm); throw e; });
 }
 /**
  * Чтение с подстраховкой: если ответа нет after мс, тот же запрос уходит второй раз, берётся первый пришедший ответ.
@@ -1031,10 +1067,11 @@ function call(op, body, quiet) {
         return r;
       }).catch(function () { return asked < 30 ? ask() : net; });
     };
-    p = post(b).catch(ask);
+    p = post(b, b.pdf || b.aud ? 120000 : 45000).catch(ask);              // 2.1: нет ответа 45 с (PDF, 2.2: голосовое – 2 мин) – как сбой связи: спрашиваем по jid
   }
   return p.then(function (r) {
     if (!quiet) busy(-1);
+    if (S.out) return { ok: false, auth: 'out' };                         // 2.1: вышли с устройства – ответы больше не нужны
     r = r || net;
     if (r.auth === 'pin') { S.pinName = r.name || S.pinName; DEV = ''; LS.del(DEV_KEY); if (op !== 'pin') { memWipe(); D = null; closeSheetNow(); viewPin(''); } }
     else if (r.auth === 'key') { memWipe(); D = null; closeSheetNow(); toShell({ type: 'auth', state: 'key' }); screen('Ссылка не работает', cap(r.error || 'Попросите у Артёма новую ссылку.')); }
@@ -1429,10 +1466,10 @@ function ptsLoadAll(force) {
   S.ptsBusy = true;
   post({ a: 'wk', op: 'ptsall', t: KEY, d: DEV }).then(function (r) {
     S.ptsBusy = false;
-    if (!r || !r.ok) return;
+    if (!r || !r.ok || S.out) return;
     PTSA = { list: r.list || {}, at: Date.now() };
     LS.set(PTS_LS, JSON.stringify(PTSA));
-    if (D && !document.getElementById('viewer') && (S.cid || S.tab === 'home' || S.tab === 'free')) render();
+    if (D && !document.getElementById('viewer') && (S.cid || S.tab === 'home' || S.tab === 'free')) bgRender();
   }, function () { S.ptsBusy = false; });
 }
 /** Баллы клиента – так же, как их видит клиент в кабинете (дневник в кабинете тренера – за последние 200 дней). */
@@ -1557,8 +1594,61 @@ function header() {
     '<div class="meta"><span class="pill">Кабинет тренера</span><span class="pill">Клиентов <b class="num">' + D.clients.filter(function (c) { return !c.arch; }).length + '</b></span>' +
     (D.as ? '<span class="pill warm">Кабинет ' + esc(gen(D.as)) + '</span>' : '') + '</div>' + who;
 }
+/* ---------- 2.1: набранный текст не теряется при перерисовке ----------
+ * Поля прямо на странице (не в окне), которые тренер менял, запоминаются по id; перед перерисовкой их значения, фокус и курсор
+ * снимаются, после – возвращаются в поля с тем же id. Поля с data-ch сохраняются сразу – их не трогаем. Метка снимается после
+ * сохранения формы (clean), при переходе к другому клиенту и когда поля больше нет на странице. */
+var DIRTY = {}, DIRTY_CID = '';
+function dirtyEl(el) { return !!(el && el.id && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) && el.type !== 'password' && !el.readOnly && !el.hasAttribute('data-ch') && app.contains(el)); }
+function markDirty(e) {
+  if (!dirtyEl(e.target)) return;
+  if (DIRTY_CID !== String(S.cid || '')) { DIRTY = {}; DIRTY_CID = String(S.cid || ''); }
+  DIRTY[e.target.id] = 1;
+}
+document.addEventListener('input', markDirty, true);
+document.addEventListener('change', markDirty, true);
+function clean(re) { Object.keys(DIRTY).forEach(function (id) { if (re.test(id)) delete DIRTY[id]; }); }
+function keepForm() {
+  var o = { v: {}, f: '' }, a = document.activeElement;
+  if (DIRTY_CID !== String(S.cid || '')) DIRTY = {};
+  Object.keys(DIRTY).forEach(function (id) { var el = document.getElementById(id); if (el && app.contains(el)) o.v[id] = el.value; else delete DIRTY[id]; });
+  if (a && a.id && app.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) {
+    o.f = a.id;
+    try { o.s = a.selectionStart; o.e = a.selectionEnd; o.d = a.selectionDirection; } catch (e) { o.s = null; }
+  }
+  return o;
+}
+function restoreForm(o) {
+  Object.keys(o.v).forEach(function (id) {
+    var el = document.getElementById(id); if (!el || !app.contains(el) || el.value === o.v[id]) return;
+    if (el.tagName === 'SELECT' && !Array.prototype.some.call(el.options, function (x) { return x.value === o.v[id]; })) return;
+    el.value = o.v[id];
+  });
+  var f = o.f && document.getElementById(o.f);
+  if (f && app.contains(f) && document.activeElement !== f) {
+    try { f.focus({ preventScroll: true }); } catch (e) { try { f.focus(); } catch (e2) {} }
+    try { if (o.s != null) f.setSelectionRange(o.s, o.e, o.d || 'none'); } catch (e) {}
+  }
+}
+/** Тренер сейчас вводит текст на странице (не в окне). */
+function typing() { var a = document.activeElement; return !!(a && a !== document.body && app.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !a.readOnly); }
+/** Фоновая перерисовка (пришли данные): пока идёт ввод или нажатие – отложить до ухода из поля. */
+var BG = { wait: false, t: 0, down: 0 };
+document.addEventListener('pointerdown', function () { BG.down = Date.now(); }, true);
+document.addEventListener('pointerup', function () { setTimeout(function () { BG.down = 0; }, 0); }, true);
+document.addEventListener('pointercancel', function () { BG.down = 0; }, true);
+function bgLater() { clearTimeout(BG.t); BG.t = setTimeout(function () { if (BG.wait) bgRender(); }, 400); }
+function bgRender() {
+  if (!D || document.getElementById('viewer')) { BG.wait = false; return; }
+  if (typing()) { BG.wait = true; return; }
+  if (BG.down && Date.now() - BG.down < 3000) { BG.wait = true; bgLater(); return; }
+  render();
+}
+app.addEventListener('focusout', function () { if (BG.wait) bgLater(); });
 function render(nav) {
   if (!D) return;
+  BG.wait = false;
+  var keep = keepForm();
   paintTabs();
   var c = cur();
   if (S.cid && !c) { S.cid = null; }
@@ -1567,7 +1657,7 @@ function render(nav) {
   if (wd && (S.tab === 'clients' || c)) {                                   // 1.8: компьютер – список слева, карточка справа
     if (c) S.tab = 'clients';
     body = '<div class="md"><div class="md-l">' + viewClients() + '</div><div class="md-r">' + (c ? viewClient(c) :
-      '<div class="md-0"><h3>Выберите клиента</h3><p>Слева – список. Справа откроется карточка клиента: данные, обзор, питание, тренировки, замеры, прогресс, оплаты, документы, ведение.</p></div>') + '</div></div>';
+      '<div class="md-0"><h3>Выберите клиента</h3><p>Слева – список. Справа откроется карточка клиента: данные, обзор, питание, план PRO, замеры, прогресс, оплаты, документы, ведение.</p></div>') + '</div></div>';
     app.innerHTML = header() + staleBanner() + '<div class="' + (nav && !c ? 'view' : '') + '">' + body + '</div>';
   } else {
     body = c ? viewClient(c) : S.tab === 'free' ? viewFree() : S.tab === 'fresh' ? viewFresh() : S.tab === 'tasks' ? viewTasks() : S.tab === 'clients' ? viewClients() : viewHome();
@@ -1575,6 +1665,7 @@ function render(nav) {
     app.innerHTML = (c ? '' : header() + staleBanner()) + '<div class="' + (nav ? 'view' : '') + '">' + body + '</div>';
   }
   var chip = app.querySelector('.chips .on'); if (chip) chip.parentNode.scrollLeft = Math.max(chip.offsetLeft - chip.parentNode.offsetLeft - 24, 0);
+  restoreForm(keep);                                                       // 2.1
   if (nav && !(wd && c)) window.scrollTo(0, 0);
   paintSync();
   if (c) paintThumbs();
@@ -1584,8 +1675,8 @@ function softRender(id) {
   if (!D) return;
   paintSync();
   if (document.getElementById('viewer')) return;
-  if (S.cid) { if (String(S.cid) === String(id)) render(); return; }
-  if (S.tab === 'home') render();
+  if (S.cid) { if (String(S.cid) === String(id)) bgRender(); return; }
+  if (S.tab === 'home') bgRender();
   else if (S.tab === 'clients') { var box = document.getElementById('clist'); if (box) box.innerHTML = clientRows(); paintTabs(); }
   else paintTabs();
 }
@@ -1596,7 +1687,7 @@ function sheet(title, html) {
     '<div class="vb"><div class="how frm">' + html + '</div></div>';
   var vb = v.querySelector('.vb'); if (vb) vb.scrollTop = 0;
 }
-function closeSheetNow() { var v = document.getElementById('viewer'); if (v) v.remove(); document.body.style.overflow = ''; document.body.classList.remove('has-sheet'); mrCur = null; }
+function closeSheetNow() { var v = document.getElementById('viewer'); if (v) v.remove(); document.body.style.overflow = ''; document.body.classList.remove('has-sheet'); mrCur = null; msgVoiceReset(); }
 function closeSheet() { if (!document.getElementById('viewer')) return; if (NAV[NAV.length - 1] === 'sheet') { NAV.pop(); closeSheetNow(); try { history.back(); SKIP_POP++; } catch (e) {} } else closeSheetNow(); }
 var SKIP_POP = 0;
 function pushNav(kind) { NAV.push(kind); try { history.pushState({ lf: NAV.length }, ''); } catch (e) {} }
@@ -1640,7 +1731,7 @@ function viewPin(err) {
   tabsEl.classList.add('hidden');
   app.innerHTML = '<div class="center view pin"><img src="' + LOGO + '" alt="Lite Fit"><h2>Кабинет тренера</h2>' +
     '<p>' + (S.pinName ? esc(S.pinName) + ', введите' : 'Введите') + ' ПИН-код. На этом устройстве его спросят один раз.</p>' +
-    '<label class="fld plain pinbox"><input id="pin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" aria-label="ПИН-код" placeholder="••••"></label>' +
+    '<label class="fld plain pinbox"><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" aria-label="ПИН-код" placeholder="••••"></label>' +
     '<p class="ferr" id="ferr">' + esc(err || '') + '</p><button class="btn pri" data-act="pinGo">Войти</button>' +
     '<p style="font-size:13px">Нет ПИН-кода или забыли его – напишите Артёму.</p></div>';
   var el = document.getElementById('pin'); if (el) { try { el.focus(); } catch (e) {} }
@@ -1701,7 +1792,8 @@ function viewHome() {
   var mine = D.tasks.slice(0, 3);
   h += '<div class="card"><h3>Задачи</h3>' + (mine.length ? '<div class="rows">' + mine.map(taskRow).join('') + '</div>' : '<p class="sub" style="margin:0">Задач нет.</p>') +
     '<button class="btn sec sm mt" data-tab="tasks">Все задачи</button></div>';
-  h += '<p class="muted" style="font-size:12px;text-align:center;margin:18px 0 0">Кабинет тренера · версия ' + VERSION + PATCH + diagText() + '</p>';
+  h += '<p class="muted" style="font-size:12px;text-align:center;margin:18px 0 0">Кабинет тренера · версия ' + VERSION + PATCH + (D.admin ? diagText() : '') + '</p>';   // 2.1: секундомер – только владельцу
+  h += '<p style="text-align:center;margin:10px 0 0"><button class="lnk" data-act="logoutAsk" style="font-size:13px;font-weight:600;color:var(--muted)">Выйти с устройства</button></p>';   // 2.1
   return h;
 }
 
@@ -1803,7 +1895,7 @@ function viewTasks() {
 }
 
 /* ================= КАРТОЧКА КЛИЕНТА ================= */
-var SUBS = [['client', 'Клиент'], ['over', 'Обзор'], ['food', 'Питание'], ['train', 'Тренировки'], ['meas', 'Замеры'], ['prog', 'Прогресс'], ['pay', 'Оплаты'], ['docs', 'Документы'], ['care', 'Ведение']];
+var SUBS = [['client', 'Клиент'], ['over', 'Обзор'], ['food', 'Питание'], ['train', 'План PRO'], ['meas', 'Замеры'], ['prog', 'Прогресс'], ['pay', 'Оплаты'], ['docs', 'Документы'], ['care', 'Ведение']];
 /** 2.0: вкладки по клиенту – без кабинета нет питания, тренировок, замеров и прогресса; у FREE нет оплат. */
 function subsFor(c) {
   var k = c.table ? ['client', 'over', 'food', 'train', 'meas', 'prog', 'pay', 'docs', 'care'] : isFree(c) ? ['client', 'over', 'docs', 'care'] : ['client', 'over', 'pay', 'docs', 'care'];
@@ -1840,7 +1932,7 @@ function viewClient(c) {
   else body = S.sub === 'client' ? subClient(c) : S.sub === 'food' ? subFood(c) : S.sub === 'train' ? subTrain(c) : S.sub === 'meas' ? subMeas(c) : S.sub === 'prog' ? subProg(c) :
     S.sub === 'pay' ? subPay(c) : S.sub === 'docs' ? subDocs(c) : S.sub === 'care' ? subCare(c) : subOver(c);
   return topBar(true) + '<h1 class="hello">' + esc(c.name) + '</h1><div class="meta">' + pills.join('') + '</div>' + ban +
-    (c.arch && !EMBED ? '' : '<div class="btns" style="margin:0 0 14px">' + (EMBED ? '<button class="btn sec" data-act="goTrain">Тренировки клиента</button>' : '') +
+    (c.arch && !EMBED ? '' : '<div class="btns" style="margin:0 0 14px">' + (EMBED ? '<button class="btn sec" data-act="goTrain">Открыть тренировки</button>' : '') +
       (c.arch ? '' : '<button class="btn sec" data-act="msgForm">Написать клиенту</button>') + (c.table && !c.arch ? '<button class="btn sec" data-act="cabLink">Выдать ссылку на кабинет</button>' : '') + '</div>') +   // 2.0
     '<div class="chips" role="tablist">' + subs.map(function (x) { return '<button data-sub="' + x[0] + '" class="' + (S.sub === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>' + body;
 }
@@ -2212,7 +2304,7 @@ function docsOf(c) {
   DOCS[c.id] = d = { busy: true };
   call('docs', { id: c.id }, true).then(function (r) {
     DOCS[c.id] = r && r.ok ? r : { err: errText(r) };
-    if (String(S.cid) === String(c.id) && !document.getElementById('viewer')) render();
+    if (String(S.cid) === String(c.id) && !document.getElementById('viewer')) bgRender();
   });
   return d;
 }
@@ -2514,14 +2606,36 @@ function msgSheet(c) {
   else if (M.err) list = '<p class="muted">Переписка не загрузилась: ' + esc(M.err) + '</p>';
   else if (!M.list.length) list = '<p class="muted">Сообщений клиенту ещё не было.</p>';
   else list = M.list.slice(0, 40).map(function (m) {
+    var tx = m.t || (m.img ? '📷 фото' : ''), au = '';                    // 2.2: голосовое – кнопка «слушать» (без voice.js – просто подпись)
+    if (m.aud) au = window.LFVoice && m.id != null && m.id !== '' ? '<div class="vpl" data-mid="' + esc(m.id) + '" data-btn="btn sec sm"></div>' : '<div class="msg-t">🎤 Голосовое сообщение</div>';
     return '<div class="msg"><div class="msg-h"><b>' + esc(MSG_L[m.k] || 'Сообщение') + '</b><small>' + whenIso(m.at) + (m.by ? ' · ' + esc(m.by) : '') + '</small>' +
       '<span class="rd' + (m.rd ? '' : ' no') + '">' + (m.rd ? '✓ прочитано' : 'не прочитано') + '</span></div>' +
-      (m.com ? '<div class="msg-q">Клиент: «' + esc(m.com) + '»</div>' : '') + '<div class="msg-t">' + esc(m.t || (m.img ? '📷 фото' : '')) + '</div></div>';
+      (m.com ? '<div class="msg-q">Клиент: «' + esc(m.com) + '»</div>' : '') + (tx ? '<div class="msg-t">' + esc(tx) + '</div>' : '') + au + '</div>';
   }).join('');
   var bot = M && M.bot != null ? M.bot : c.bot;
   sheet('Написать клиенту', '<h2>' + esc(c.name) + '</h2><p class="lead">Сообщение придёт клиенту в приложение (вкладка «Тренер»)' + (bot ? ' и в бот Lite Fit' : ' – бот не подключён, в бот не придёт') + '. Копия – в рабочий чат.</p>' +
-    fs('msgK', 'Вид сообщения', MSG_K, kind) + ft('msgTxt', 'Текст сообщения', txt, 5, 'maxlength="1000"') + '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="msgSend">Отправить</button>' +
+    fs('msgK', 'Вид сообщения', MSG_K, kind) + ft('msgTxt', 'Текст сообщения', txt, 5, 'maxlength="1000"') + '<div id="msgVoiceSlot"></div><p class="ferr" id="ferr"></p><button class="btn pri" data-act="msgSend">Отправить</button>' +
     '<div class="grp" style="margin-top:20px">Переписка</div>' + list);
+  var slot = document.getElementById('msgVoiceSlot'), rec = msgVoice();   // 2.2: та же запись – после каждой перерисовки окна
+  if (slot && rec) slot.appendChild(rec);
+  paintVoice(document.getElementById('viewer'));
+}
+/** 2.2: запись голосового в «Написать клиенту» – одна на открытое окно (S.vrec), окно перерисовывается – переносится в него. */
+function msgVoice() {
+  if (!window.LFVoice) return null;
+  if (!S.vrec) {
+    try { if (!LFVoice.canRecord()) return null; var el = document.createElement('div'); LFVoice.mount(el, { max: 180, btn: 'btn sec sm', label: 'Записать голосовое' }); S.vrec = el; } catch (e) { S.vrec = null; }
+  }
+  return S.vrec;
+}
+function msgVoiceReset() { var el = S.vrec; S.vrec = null; if (el && el.lfv) try { el.lfv.clear(); } catch (e) {} }
+/** 2.2: голосовые в переписке – кнопка «Голосовое – слушать», файл с сервера по нажатию (op cfile, только чтение). */
+function paintVoice(root) {
+  if (!root || !window.LFVoice) return;
+  Array.prototype.forEach.call(root.querySelectorAll('.vpl[data-mid]'), function (el) {
+    var mid = el.getAttribute('data-mid');
+    try { LFVoice.player(el, function () { return call('cfile', { mid: mid }, true); }, 'Голосовое – слушать'); } catch (e) { el.innerHTML = '<div class="msg-t">🎤 Голосовое сообщение</div>'; }
+  });
 }
 
 /* ================= ЗАПИСЬ НА СЕРВЕР ================= */
@@ -2760,7 +2874,7 @@ function freeCard(x, fresh, inList) {
   } else if (!x.arch) {
     h += '<div class="btns">' + '<button class="btn ' + (fr.given ? 'sec' : 'pri') + '" data-act="freeGiveForm" data-id="' + x.id + '">' + (fr.given ? 'Сообщение со ссылкой' : 'Выдать доступ') + '</button>' +
       '<button class="btn sec" data-act="fmtFormId" data-id="' + x.id + '">В START / BASIC / PRO</button>' +
-      (EMBED ? '<button class="btn sec" data-act="goTrainId" data-id="' + x.id + '">' + (fr.wk ? 'Тренировки клиента' : 'Поставить тренировки') + '</button>' : '') + '</div>';
+      (EMBED ? '<button class="btn sec" data-act="goTrainId" data-id="' + x.id + '">' + (fr.wk ? 'Открыть тренировки' : 'Поставить тренировки') + '</button>' : '') + '</div>';
     if (D.admin && !D.as && D.trainers.length > 1) h += '<div class="asg">' + fs('asg' + x.id, 'Передать другому тренеру', D.trainers.map(function (n) { return [n, n]; }), x.owner || D.trainer) +
       '<button class="btn sec" data-act="freeAssign" data-id="' + x.id + '">Передать</button></div>';
   }
@@ -2980,7 +3094,12 @@ var ACT = {
     if (!t.getAttribute('data-sure')) { t.setAttribute('data-sure', '1'); t.textContent = 'Нажмите ещё раз – запись удалится'; return; }
     send('plandel', { id: c.id, row: x.row, date0: x.date }, { btn: t }).then(finish);
   },
-  planCopy: function (t) { var c = cur(); t.disabled = true; inline('plancopy', { id: c.id }); },
+  planCopy: function (t) {                                                  // 2.1: с подтверждением
+    var c = cur(); if (!c) return;
+    sure('Повторить прошлую неделю?', esc(c.name) + '. Записи плана за прошлую неделю скопируются – клиент увидит их в кабинете. После копирования проверьте план.', 'Да, повторить', function () {
+      closeSheet(); if (document.body.contains(t)) t.disabled = true; inline('plancopy', { id: c.id });
+    });
+  },
 
   /* --- ведение --- */
   guide: function (t) { var c = cur(), on = t.getAttribute('aria-pressed') !== 'true'; inline('guide', { id: c.id, name: t.getAttribute('data-name'), on: on }); },
@@ -3072,7 +3191,7 @@ var ACT = {
     if (b.first.length < 2) return toast('Впишите имя', 'bad');
     if (/[(),]/.test(b.first + b.last)) return toast('Имя и фамилия – без скобок и запятых', 'bad');
     if (b.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(b.email)) return toast('Проверьте почту', 'bad');
-    send('cinfo', b, { btn: t }).then(finish);
+    send('cinfo', b, { btn: t }).then(function (r) { if (r) clean(/^ci/); finish(r); });   // 2.1: сохранено – поля больше не «свои»
   },
   docsRe: function () { var c = cur(); if (c) { delete DOCS[c.id]; render(); } },
   ankAll: function () { S.ankAll = !S.ankAll; render(); },
@@ -3104,9 +3223,15 @@ var ACT = {
   statusSave: function (t) {
     var c = cur(), v = val('stV');
     if (v === c.status) return closeSheet();
+    if (/отказ|закончил/i.test(v) && t.getAttribute('data-sure') !== v) { t.setAttribute('data-sure', v); t.textContent = 'Нажмите ещё раз – статус «' + stShort(v) + '»'; return; }   // 2.1
     send('status', { id: c.id, status: v }, { btn: t }).then(finish);
   },
-  extend: function (t) { var c = cur(); t.disabled = true; inline('extend', { id: c.id }); },
+  extend: function (t) {                                                    // 2.1: с подтверждением
+    var c = cur(); if (!c) return;
+    sure('Продлить дневник?', esc(c.name) + '. Обычно дневник продлевается сам, когда Вы вносите оплату. Продлевайте вручную, только если это действительно нужно.', 'Да, продлить', function () {
+      closeSheet(); if (document.body.contains(t)) t.disabled = true; inline('extend', { id: c.id });
+    });
+  },
 
   /* --- пробный кабинет, таблица PRO, перевод на PRO --- */
   trialForm: function () { S.trialFmt = ''; trialForm(); },
@@ -3132,7 +3257,7 @@ var ACT = {
     q.id = c.id;
     send('create', q, { wait: 'Создаю таблицу и кабинет…<br>Это около минуты, окно можно не закрывать.' }).then(function (r) {
       if (!r) return;
-      render(); resultSheet('Таблица и кабинет созданы', botLead(r) + ' Дальше: оплата – во вкладке «Оплаты», норма шагов – в «Питании», план – в «Тренировках».', r);
+      render(); resultSheet('Таблица и кабинет созданы', botLead(r) + ' Дальше: оплата – во вкладке «Оплаты», норма шагов – в «Питании», план – в «Плане PRO».', r);
     });
   },
   proForm: function () {
@@ -3157,21 +3282,25 @@ var ACT = {
       S.sub = 'care'; render();
       resultSheet('Клиент на PRO', esc(r.msg || '') + (r.ext ? '. ' + esc(cap(r.ext)) : '') + '. Кабинет у клиента открылся полностью, заново ему ничего делать не нужно.', r,
         (r.paid ? '' : '<div class="banner warn">Оплата PRO не внесена – дневник продлится после записи оплаты («Оплаты», «Внести оплату»).</div>') +
-        '<p class="lead" style="margin-bottom:8px">Что настроить дальше: норму шагов и расчёт нормы – «Питание»; интервал замеров – «Замеры»; план – «Тренировки»; гайды – «Ведение».</p>');
+        '<p class="lead" style="margin-bottom:8px">Что настроить дальше: норму шагов и расчёт нормы – «Питание»; интервал замеров – «Замеры»; план – «План PRO»; гайды – «Ведение».</p>');
     });
   },
 
   goTrainId: function (t) { toShell({ type: 'go', s: 'train', cid: t.getAttribute('data-id') }); },
   goTrain: function () { var c = cur(); if (c) toShell({ type: 'go', s: 'train', cid: c.id }); },   // 1.8: тренировки клиента – в общем кабинете
   /* --- 1.7: FREE и формат --- */
-  freeTake: function (t) {
+  freeTake: function (t) {                                                  // 2.1: с подтверждением
     var id = t.getAttribute('data-id'), f = anyOf(id);
-    send('freetake', { id: id }, { btn: t }).then(function (r) { if (!r) return; render(); toast(r.msg || 'Готово', 'ok'); });
+    sure('Взять клиента себе?', (f ? esc(f.name) + ' – ' : '') + 'заявка FREE станет Вашей: Вы будете тренером этого клиента.', 'Да, взять', function (b) {
+      send('freetake', { id: id }, { btn: b }).then(function (r) { if (r) done(r.msg || 'Готово'); });
+    });
   },
   freeAssign: function (t) {
-    var id = t.getAttribute('data-id'), to = val('asg' + id);
+    var id = t.getAttribute('data-id'), to = val('asg' + id), f = anyOf(id);
     if (!to) return toast('Выберите тренера', 'bad');
-    send('freetake', { id: id, to: to }, { btn: t }).then(function (r) { if (!r) return; render(); toast(r.msg || 'Готово', 'ok'); });
+    sure('Передать клиента?', (f ? esc(f.name) : 'Клиент') + ' перейдёт к тренеру ' + esc(to) + '.', 'Да, передать', function (b) {
+      send('freetake', { id: id, to: to }, { btn: b }).then(function (r) { if (r) done(r.msg || 'Готово'); });
+    });
   },
   freeGiveForm: function (t) { freeGiveForm(t.getAttribute('data-id')); },
   freeGive: function (t) {
@@ -3223,7 +3352,7 @@ var ACT = {
   /* --- сообщение клиенту, кабинет, обратная связь --- */
   msgForm: function () {                                                    // 2.0: одна переписка – в приложение и в бот
     var c = cur(); if (!c) return;
-    S.msgs = null; msgSheet(c);
+    S.msgs = null; msgVoiceReset(); msgSheet(c);
     call('cmsgs', { id: c.id }, true).then(function (r) {
       if (!document.getElementById('msgTxt') || String(S.cid) !== String(c.id)) return;
       S.msgs = r && r.ok ? { list: r.list || [], bot: r.bot } : { err: errText(r), list: [] };
@@ -3231,19 +3360,25 @@ var ACT = {
     });
   },
   msgSend: function (t) {
-    var c = cur(), text = val('msgTxt');
-    if (text.length < 2) return ferr('Напишите сообщение.');
-    send('cmsg', { id: c.id, kind: val('msgK'), text: text }, { btn: t }).then(function (r) {
+    var c = cur(), text = val('msgTxt'), rec = S.vrec && S.vrec.lfv ? S.vrec.lfv : null;   // 2.2: голосовое
+    if (rec && rec.busy()) return ferr('Дождитесь, пока голосовое запишется.');
+    var v = rec ? rec.value() : null, body = { id: c.id, kind: val('msgK'), text: text };
+    if (text.length < 2 && !v) return ferr(rec ? 'Напишите сообщение или запишите голосовое.' : 'Напишите сообщение.');
+    if (v) { body.aud = v.b64; body.audMime = v.mime; }
+    send('cmsg', body, { btn: t }).then(function (r) {
       if (!r) return;
       var el = document.getElementById('msgTxt'); if (el) el.value = '';
+      if (v && rec && S.vrec && S.vrec.lfv === rec) rec.clear();
       S.msgs = { list: r.list || [], bot: S.msgs ? S.msgs.bot : c.bot };
       if (document.getElementById('msgTxt')) msgSheet(c);
       toast(r.msg || 'Сообщение отправлено', 'ok');
     });
   },
-  nlSend: function (t) {                                                    // 1.9.6
+  nlSend: function () {                                                     // 1.9.6; 2.1: с подтверждением
     var c = cur(); if (!c) return;
-    send('newlink', { id: c.id, send: true }, { btn: t }).then(function (r) { if (!r) return; c.nl = r.nl || c.nl; done('Ссылка отправлена клиенту ' + (c.vk ? 'во ВКонтакте' : 'в бот')); });
+    sure('Отправить ссылку клиенту?', esc(c.name) + ' получит ' + (c.vk ? 'во ВКонтакте' : 'в бот') + ' ссылку на новый кабинет и инструкцию.', 'Да, отправить', function (b) {
+      send('newlink', { id: c.id, send: true }, { btn: b }).then(function (r) { if (!r) return; c.nl = r.nl || c.nl; done('Ссылка отправлена клиенту ' + (c.vk ? 'во ВКонтакте' : 'в бот')); });
+    });
   },
   nlText: function () {
     var c = cur(); if (!c) return;
@@ -3329,10 +3464,11 @@ var ACT = {
       if (mrCur === my) mrForm(my.n);
     }).catch(function (e) { back(); ferr('PDF не собрался: ' + ((e && e.message) || e) + '. Попробуйте ещё раз или откройте кабинет в Chrome.'); });
   },
-  mrSend: function () {
+  mrSend: function (t) {
     var my = mrCur, txt = mrTxt();
     if (!my) return;
     if (!txt.comment) return ferr('Напишите рекомендации – без них итоги не отправляются.');
+    if (t && !t.getAttribute('data-sure')) { t.setAttribute('data-sure', '1'); t.textContent = 'Отправить клиенту? Нажмите ещё раз'; return; }   // 2.1
     send('mrsend', { id: my.id, n: my.n, comment: txt.comment, goal: txt.goal }, { wait: 'Отправляю клиенту сохранённый PDF…<br>Это до минуты.' }).then(function (r) {
       if (!r) return;
       render(); sheet('Итоги месяца', '<h2>Отправлено</h2><p class="lead">' + esc(r.note || r.msg || 'Итоги месяца отправлены клиенту') + '</p><button class="btn sec" data-act="close">Готово</button>');
@@ -3350,23 +3486,57 @@ var ACT = {
     if (!text) return ferr('Напишите задачу. Чтобы убрать её – кнопка «Снять задачу» в карточке.');
     send('ctask', { id: c.id, text: text }, { btn: t }).then(finish);
   },
-  ctaskDone: function (t) { var c = cur(); send('ctask', { id: c.id, text: '' }, { btn: t }).then(function (r) { if (r) { render(); toast(r.msg || 'Задача снята', 'ok'); } }); },
+  ctaskDone: function () {                                                  // 2.1: с подтверждением
+    var c = cur(); if (!c) return;
+    sure('Снять задачу?', esc(c.name) + (c.task ? ': «' + esc(c.task) + '»' : '') + '. Задача исчезнет из карточки и утреннего отчёта.', 'Да, снять', function (b) {
+      send('ctask', { id: c.id, text: '' }, { btn: b }).then(function (r) { if (r) done(r.msg || 'Задача снята'); });
+    });
+  },
   taskAdd: function (t) {
     var text = val('tText');
     if (text.length < 3) return toast('Напишите, что сделать', 'bad');
-    send('taskadd', { text: text, who: val('tWho'), due: val('tDue') }, { btn: t }).then(function (r) { if (r) { render(); toast(r.msg || 'Задача добавлена', 'ok'); } });
+    send('taskadd', { text: text, who: val('tWho'), due: val('tDue') }, { btn: t }).then(function (r) { if (r) { clean(/^t(Text|Who|Due)$/); render(); toast(r.msg || 'Задача добавлена', 'ok'); } });
   },
-  taskDel: function (t) {
-    var id = t.getAttribute('data-id'), tid = t.getAttribute('data-kind') === 'client' ? 'А' + id : id;
-    send('taskdel', { tid: tid }, { btn: t }).then(function (r) { if (r) { render(); toast(r.msg || 'Задача снята', 'ok'); } });
+  taskDel: function (t) {                                                   // 2.1: с подтверждением
+    var id = t.getAttribute('data-id'), kind = t.getAttribute('data-kind'), tid = kind === 'client' ? 'А' + id : id;
+    var x = D.tasks.filter(function (k) { return String(k.id) === String(id) && k.kind === kind; })[0];
+    sure('Снять задачу?', (x ? '«' + esc(x.text) + '». ' : '') + 'Задача исчезнет из списка и утреннего отчёта.', 'Да, снять', function (b) {
+      send('taskdel', { tid: tid }, { btn: b }).then(function (r) { if (r) done(r.msg || 'Задача снята'); });
+    });
+  },
+
+  /* --- 2.1: подтверждение и выход с устройства --- */
+  sureOk: function (t) { if (SURE) SURE(t); else closeSheet(); },
+  logoutAsk: function () {
+    sure('Выйти с устройства?', 'С этого устройства сотрутся список клиентов, карточки и отметка о ПИН-коде. На сервере ничего не изменится. Чтобы войти снова, понадобятся личная ссылка и ПИН-код.', 'Да, выйти', function (b) {
+      b.disabled = true; b.textContent = 'Стираю…'; logout();
+    }, true);
   }
 };
+/** 2.1: подтверждение действия – окно «Да, …» / «Отмена», как у удаления оплаты и снятия заморозки. fn получает кнопку «Да». */
+var SURE = null;
+function sure(title, lead, ok, fn, danger) {
+  SURE = fn;
+  sheet(title, '<h2>' + esc(title) + '</h2><p class="lead">' + lead + '</p><p class="ferr" id="ferr"></p>' +
+    '<button class="btn ' + (danger ? 'danger' : 'pri') + '" data-act="sureOk">' + esc(ok) + '</button><button class="btn sec" data-act="close">Отмена</button>');
+}
+/** 2.1: выйти с устройства – стереть память, отметку ПИН-кода и ключ, сообщить общему кабинету. */
+function logout() {
+  S.out = true;
+  deviceWipe().then(function () {
+    D = null; DEV = ''; KEY = ''; PTSA = null; DOCS = {}; thumbs = {}; mrCache = {}; DIRTY = {}; queue = [];
+    closeSheet();
+    toShell({ type: 'auth', state: 'out' });
+    screen('Вы вышли', 'Чтобы войти снова, откройте личную ссылку и введите ПИН-код.');
+  });
+}
 
 /* ================= ПЕРЕХОДЫ ================= */
 function pushNavClient() { pushNav('client'); }
 function openClient(id, sub) {
   var c = clientOf(id); if (!c) return;
   if (!S.cid) { S.listY = window.scrollY || 0; pushNavClient(); }
+  if (String(S.cid || '') !== String(id)) DIRTY = {};                       // 2.1: другой клиент – чужие несохранённые поля не переносим
   S.cid = String(id); S.sub = sub || 'over'; S.day = null; S.mSel = null; S.more = false; S.allPhotos = false;
   render(true);
   if (wantCard(c) && !loading[c.id] && !S.unsure) { c.err = ''; loadClient(c.id); }
@@ -3453,7 +3623,7 @@ function loadList(first, manual) {
       if (D && D.as !== AS) AS = D.as;                                     // «как видит» не переключилось — остаёмся в прежнем виде
       if (!D) return screen('Не получилось загрузить', errText(r), true);
       S.offline = !!r.net;
-      if (!document.getElementById('viewer')) render();
+      if (!document.getElementById('viewer')) bgRender();
       if (!S.unsure || manual) toast(errText(r), 'bad');
       return;
     }
@@ -3473,7 +3643,7 @@ function loadList(first, manual) {
     if (raw) memSet('list|', { at: Date.now(), raw: raw });
     toShell({ type: 'auth', state: 'ok', trainer: D.trainer, admin: D.admin });
     if (S.pendOpen) { var po = S.pendOpen; S.pendOpen = ''; setTimeout(function () { embOpen(po); }, 0); }
-    if (!document.getElementById('viewer')) { render(first && !was); if (draft && document.getElementById('tText')) document.getElementById('tText').value = draft; }
+    if (!document.getElementById('viewer')) { if (first && !was) render(true); else bgRender(); if (draft && document.getElementById('tText')) document.getElementById('tText').value = draft; }
     var c = cur();
     if (c && manual && c.table && !loading[c.id]) loadClient(c.id, true);
     loadAll();
@@ -3482,7 +3652,7 @@ function loadList(first, manual) {
     if (manual) toast('Обновлено', 'ok');
     if (S.diag.ping == null) {                                             // один раз за открытие: сколько длится запрос, в котором сервер ничего не делает
       var tp = Date.now(); S.diag.ping = 0;
-      sleep(1500).then(function () { tp = Date.now(); return call('ping', {}, true); }).then(function (p) { S.diag.ping = p && p.ok ? Date.now() - tp : 0; if (!S.cid && S.tab === 'home' && !document.getElementById('viewer')) render(); });
+      sleep(1500).then(function () { tp = Date.now(); return call('ping', {}, true); }).then(function (p) { S.diag.ping = p && p.ok ? Date.now() - tp : 0; if (!S.cid && S.tab === 'home' && !document.getElementById('viewer')) bgRender(); });
     }
   });
 }
