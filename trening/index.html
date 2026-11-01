@@ -413,6 +413,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
 .mnote.bad{color:var(--warm)}
 .mbtn{width:100%}
 .mmenu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.mmenu.m4{grid-template-columns:repeat(2,minmax(0,1fr))}
 .mmenu button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:68px;padding:8px 4px;border-radius:13px;border:1px solid var(--line2);background:var(--card2);color:var(--text);font-size:12.5px;font-weight:700;line-height:1.2;text-align:center}
 .mmenu button svg{width:22px;height:22px;color:var(--accent)}
 .mdl{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line2);font-size:13.5px}
@@ -782,11 +783,25 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 <div class="bar" id="bar" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../cabinet/config.js"></script>
+<script src="../push.js"></script>
+<script src="../voice.js"></script>
 <script>
 (function () {
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.11 (01.11.2026). Сервер – файл lite-fit-fix 1.1. Голосовые (../voice.js, ../lib): клиент к упражнению может записать
+ *   голосовое тренеру (меню «Фото, видео или голосовое» → «Голосовое», до 3 минут) – оно уходит тренеру в Telegram, как фото
+ *   и видео. Тренер отвечает голосовым в окне ответа и в «Сообщении клиенту» («Записать голосовое»): у клиента оно – под
+ *   упражнением и во вкладке «Тренер» (кнопка «Слушать»). Вложение одно – фото или голосовое. Видео больше 12 МБ сжимается
+ *   со звуком (раньше – без звука); где телефон так не умеет – уходит как снято, если не больше 28 МБ. Ответ тренера с файлом
+ *   ждёт сервер до 2 минут.
+ * 4.10 (01.11.2026). Сервер – файл lite-fit-fix 1.0. Уведомления на телефон: у клиента на главной – «Уведомления на телефон»
+ *   (iPhone – из значка на экране «Домой», iOS 16.4+; Android, компьютер): ответы и сообщения тренера, напоминание в день
+ *   тренировки. Работа без сети: страница и видео открытых тренировок хранятся в телефоне (../sw.js, ../push.js) – в зале
+ *   приложение открывается и видео играет без интернета, отметки уходят, когда появится связь. Запрос к серверу ждёт не
+ *   дольше 25 секунд (файл – 5 минут), дальше – как «нет связи». «Завершить тренировку» – всегда с подтверждением (сколько
+ *   подходов отмечено). Ссылка на видео – только http(s). Страницу нельзя встроить в чужой сайт.
  * 4.9 (31.10.2026). Сервер 4.24.0. Пакет – только из оплаты: внесли оплату с началом пакета и числом тренировок (кабинет тренера,
  *   «Оплаты») – пакет здесь встаёт сам. «Новый пакет», «Изменить пакет» и «Выполнено тренировок до приложения» убраны: пакет
  *   меняется в «Оплатах», «Всего выполнено» и номера – только по тренировкам в приложении. Остались: выполнено / осталось,
@@ -941,7 +956,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.9';
+var VERSION = '4.11';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -952,6 +967,11 @@ var LS = {
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
+var SAMETOP = (function () { if (window.top === window) return true; try { return window.top.location.origin === location.origin; } catch (e) { return false; } })();
+if (!SAMETOP) {                                                         // 4.10: встроили в чужой сайт – не запускаемся
+  app.innerHTML = '<div class="center"><h2>Lite Fit</h2><p><a class="btn pri" href="' + location.href.replace(/"/g, '%22') + '" target="_top" rel="noopener">Открыть приложение</a></p></div>';
+  return;
+}
 var OPENW = (qs.get('w') || '').trim();
 var INCAB = qs.get('in') === '1' && window.top !== window;          // 4.4: открыто внутри кабинета
 NV_NEW = qs.get('from') === 'cab' || qs.has('u') || INCAB;
@@ -1022,6 +1042,7 @@ var IC = {
   folder: ic('<path d="M3.5 7.5A2 2 0 015.5 5.5h4l2 2.2h7a2 2 0 012 2v7.8a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/>', 1.8),
   chat: ic('<path d="M4.5 6.5A2.5 2.5 0 017 4h10a2.5 2.5 0 012.5 2.5v7A2.5 2.5 0 0117 16h-4.5L8 20v-4H7a2.5 2.5 0 01-2.5-2.5z"/><path d="M8.5 8.5h7M8.5 11.5h4.5"/>', 1.8),
   home: ic('<path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/>', 1.8), restart: ic('<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/>', 1.8),
+  mic: ic('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/>', 1.8),
   clip: ic('<path d="M20 11.5l-7.8 7.8a5 5 0 01-7.1-7.1l8.5-8.5a3.3 3.3 0 014.7 4.7l-8.5 8.5a1.7 1.7 0 01-2.4-2.4l7.8-7.8"/>', 1.8),
   cam: ic('<rect x="3" y="6.5" width="13" height="11" rx="2.5"/><path d="M16 10.5l5-3v9l-5-3"/>', 1.8),
   photo: ic('<path d="M4 8.5A2 2 0 016 6.5h2.2L9.8 4.5h4.4l1.6 2H18a2 2 0 012 2V17a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><circle cx="12" cy="12.5" r="3.4"/>', 1.8),
@@ -1163,6 +1184,7 @@ function fixUrl(v) {
  * встраиваются своим плеером; любая другая ссылка открывается в новой вкладке. { t, src, name, tall }.
  */
 function videoKind(u) {
+  if (!/^https?:\/\//i.test(String(u || '').trim())) return { t: 'bad', src: '', name: '' };   // 4.10: только http(s)
   var url; try { url = new URL(u); } catch (e) { return { t: 'link', src: u, name: '' }; }
   var h = url.hostname.replace(/^www\./, ''), p = url.pathname, m;
   if (/\.(mp4|m4v|mov|webm)$/i.test(p)) return { t: 'file', src: u, name: 'видео' };
@@ -1196,11 +1218,14 @@ var NET = { ok: false, net: true, error: 'нет связи с сервером 
 var S = { pg: '', pb: false, bg: '', bb: false, bv: '', vnew: -1, vrep: null, vbEdit: false, vfull: false, ref: null, coms: null, comCid: '', comF: 'all', comBusy: false, tab: 'clients', view: 'home', cid: null, draft: null, dirty: false, isNew: false, run: null, q: '', bq: '', bf: 'all', cq: '', own: '', open: {}, del: false,
   calM: TODAY.slice(0, 7), calDay: TODAY, ret: 'client', ctab: 'w', busy: 0, saving: false, hints: null, vid: '', loadedAt: 0, offline: false, exEdit: null, pinName: '' };
 (function () { var v = qs.get('v'); if (['next', 'show', 'help', 'coach', 'aw'].indexOf(v) >= 0) S.ctab = v; })();   // 3.9: вкладка из ссылки бота
-function post(body) {
-  return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { return r.text(); }).then(function (t) {
+/** 4.10: запрос ждёт не дольше ms (по умолчанию 25 с) – в зале со слабой связью не висит минутами; дальше – как «нет связи». */
+function post(body, ms) {
+  var ctl = typeof AbortController === 'function' ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, ms || 25000) : 0;
+  return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', signal: ctl ? ctl.signal : undefined }).then(function (r) { return r.text(); }).then(function (t) {
+    clearTimeout(tm);
     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('bad'); }
     return j;
-  });
+  }, function (e) { clearTimeout(tm); throw e; });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
 var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1 };
@@ -1230,7 +1255,7 @@ function call(op, body, quiet) {
         return r;
       }).catch(function () { return asked < (navigator.onLine === false ? 3 : 30) ? ask() : NET; });   // телефон сам говорит «нет сети» – не ждём две минуты
     };
-    p = post(b).catch(ask);
+    p = post(b, b.aud || b.img ? 120000 : 0).catch(ask);                  // 4.11: с файлом – до 2 минут
   }
   return p.then(function (r) {
     if (!quiet) busy(-1);
@@ -1265,11 +1290,11 @@ function sw(act, on, title, sub, attrs) { return '<button class="swrow" data-act
 function val(id) { var el = document.getElementById(id); return el ? String(el.value).trim() : ''; }
 function ferr(t) { var e = document.getElementById('ferr'); if (e) { e.textContent = t; e.hidden = !t; } }
 function sheet(title, html) {
-  var v = document.getElementById('viewer');
+  var v = document.getElementById('viewer'), vr = vRec(); if (vr) vr.clear();   // 4.11: запись голосового в прежнем окне – остановить
   if (!v) { v = document.createElement('div'); v.className = 'viewer'; v.id = 'viewer'; document.body.appendChild(v); document.body.style.overflow = 'hidden'; document.body.classList.add('has-sheet'); }
   v.innerHTML = '<div class="vp"><div class="vh"><b>' + esc(title) + '</b><button class="x" data-act="close" aria-label="Закрыть">' + IC.x + '</button></div><div class="vb"><div class="frm">' + html + '</div></div></div>';
 }
-function closeSheet() { var v = document.getElementById('viewer'); if (v) v.remove(); document.body.style.overflow = ''; document.body.classList.remove('has-sheet'); }
+function closeSheet() { var vr = vRec(); if (vr) vr.clear(); var v = document.getElementById('viewer'); if (v) v.remove(); document.body.style.overflow = ''; document.body.classList.remove('has-sheet'); }
 function screen(title, text, retry) {
   shell(false); tabsEl.hidden = true; barEl.hidden = true;
   app.innerHTML = '<div class="center"><img src="' + LOGO + '" alt="Lite Fit"><h2>' + esc(title) + '</h2><p>' + esc(text) + '</p>' + (retry ? '<button class="btn sec" data-act="retry">Повторить</button>' : '') + '</div>';
@@ -1781,7 +1806,7 @@ function stampTxt(at) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)/.exec(at || 
 function rpLine(wid, iid, rp, c, mw) {
   var b = '<button class="rpt" data-act="rpOpen" data-id="' + esc(wid) + '" data-it="' + esc(iid) + '" data-c="' + esc(c || '') + '"' + (mw ? ' data-m="1"' : '') + '>';
   if (!rp) return S.isNew && S.view === 'edit' ? '' : b + IC.reply + (mw ? 'Ответить на ' + mw : 'Ответить клиенту') + '</button>';
-  return '<div class="rpb"><small>Ответ тренера' + (rp.by && D && rp.by !== D.trainer ? ' · ' + esc(rp.by) : '') + '</small>' + (rp.t ? '<p>' + esc(rp.t) + '</p>' : '') + (rp.img && rp.mid ? imgHtml(rp.mid, rp.img) : '') +
+  return '<div class="rpb"><small>Ответ тренера' + (rp.by && D && rp.by !== D.trainer ? ' · ' + esc(rp.by) : '') + '</small>' + (rp.t ? '<p>' + esc(rp.t) + '</p>' : '') + (rp.img && rp.mid ? imgHtml(rp.mid, rp.img) : '') + (rp.aud && rp.mid ? audHtml(rp.mid, rp.aud) : '') +
     (rp.rd !== undefined ? '<div class="wh">' + (rp.rd ? 'Клиент прочитал ' + stampTxt(rp.rd) : 'Клиент ещё не открыл') + '</div>' : '') + '</div>' + b + IC.edit + 'Изменить ответ</button>';
 }
 /** Окно ответа на комментарий. */
@@ -1796,15 +1821,25 @@ function rpForm(wid, iid, cm, md) {
   if (S.img.had) imgLoad(S.img.had, S.img.tok);
   sheet('Ответ клиенту', '<h2>' + (rp ? 'Изменить ответ' : 'Ответ клиенту') + '</h2><p class="lead">' + esc(c ? c.name : 'Клиент') + ' · ' + esc(name) + '</p>' +
     '<div class="coms" style="margin:0"><small>Комментарий клиента</small><p style="margin:0">«' + esc(text) + '»</p></div>' +
-    ft('rpT', 'Ваш ответ', rp ? rp.t : '', 5, 'maxlength="1000"') + imgPick() +
+    ft('rpT', 'Ваш ответ', rp ? rp.t : '', 5, 'maxlength="1000"') + imgPick() + vPick(rp, rp && rp.mid) +
     '<p class="note" style="margin:0">Клиент увидит ответ под своим комментарием и во вкладке «Тренер». Комментарий отметится прочитанным.</p><p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn pri" data-act="rpGo">' + IC.reply + (rp ? 'Сохранить ответ' : 'Отправить ответ') + '</button>' + (rp ? '<button class="btn danger" data-act="rpDel" style="margin-top:0">Убрать ответ</button>' : ''));
   var t = document.getElementById('rpT'); if (t) { try { t.focus(); } catch (x) {} }
 }
 /** 4.7: «видео» / «фото» / «фото и видео» – что клиент прислал к упражнению. */
-function medWord(it) {
-  var m = it.media || [], v = m.filter(function (x) { return x.k !== 'p'; }).length, p = m.length - v;
-  return v && p ? 'фото и видео' : p ? 'фото' : 'видео';
+function medWord(it) { return medWords(medKinds(it), false); }
+/** 4.11: сколько фото, видео и голосовых у упражнения: { v, p, a }. */
+function medKinds(it) {
+  var n = { v: 0, p: 0, a: 0 };
+  (it.media || []).forEach(function (x) { if (x.k === 'p') n.p++; else if (x.k === 'a') n.a++; else n.v++; });
+  return n;
+}
+/** «фото и видео», «голосовое», «видео и голосовое»; your – «Ваше видео», «Ваши фото и голосовое». */
+function medWords(n, your) {
+  var w = [n.p ? 'фото' : '', n.v ? 'видео' : '', n.a ? 'голосовое' : ''].filter(String), many = n.p + n.v + n.a > 1;
+  if (!w.length) w = ['видео'];
+  var t = w.length > 1 ? w.slice(0, -1).join(', ') + ' и ' + w[w.length - 1] : w[0];
+  return your ? (many ? 'Ваши ' : 'Ваше ') + t : t;
 }
 /** 4.7: окно ответа на фото или видео клиента к упражнению. */
 function rpFormM(wid, iid) {
@@ -1816,7 +1851,7 @@ function rpFormM(wid, iid) {
   if (S.img.had) imgLoad(S.img.had, S.img.tok);
   sheet('Ответ на ' + mw, '<h2>' + (rp ? 'Изменить ответ' : 'Ответ на ' + mw) + '</h2><p class="lead">' + esc(c ? c.name : 'Клиент') + ' · ' + esc(it.name) + '</p>' +
     '<div class="coms" style="margin:0"><small>Клиент прислал ' + mw + '</small><p style="margin:0">Файл – у Вас в Telegram, в боте «Lite Fit Помощник».</p></div>' +
-    ft('rpT', 'Ваш ответ: что получилось, что поправить', rp ? rp.t : '', 5, 'maxlength="1000"') + imgPick() +
+    ft('rpT', 'Ваш ответ: что получилось, что поправить', rp ? rp.t : '', 5, 'maxlength="1000"') + imgPick() + vPick(rp, rp && rp.mid) +
     '<p class="note" style="margin:0">Клиент увидит ответ под этим упражнением и во вкладке «Тренер», а если подключил бота – и в боте.</p><p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn pri" data-act="rpGo">' + IC.reply + (rp ? 'Сохранить ответ' : 'Отправить ответ') + '</button>' + (rp ? '<button class="btn danger" data-act="rpDel" style="margin-top:0">Убрать ответ</button>' : ''));
   var t = document.getElementById('rpT'); if (t) { try { t.focus(); } catch (x) {} }
@@ -1833,7 +1868,7 @@ function rpApply(r) {
   if (S.coms) S.coms.list.forEach(function (e) {
     if (e.id !== id || e.it !== iid) return;
     e.u = 0;
-    if ((e.c || '') === cm) e.rp = rp ? { t: rp.t, at: rp.at, by: rp.by, mid: rp.mid || '', img: rp.img || '', rd: '' } : null;
+    if ((e.c || '') === cm) e.rp = rp ? { t: rp.t, at: rp.at, by: rp.by, mid: rp.mid || '', img: rp.img || '', aud: rp.aud || '', rd: '' } : null;
   });
   [FULL[id], S.draft && S.draft.id === id ? S.draft : null].forEach(function (w) { if (w) w.items.forEach(function (x) {
     if (x.id !== iid) return;
@@ -2055,7 +2090,7 @@ function msgCard(c) {
   var l = S.msgAll ? M.list : M.list.slice(0, 4);
   h += '<div>' + l.map(function (m) {
     return '<div class="msg"><div class="msg-h"><b>' + esc(KINDS[m.k] || KINDS.msg) + '</b><span>' + stampTxt(m.at) + (m.by && m.by !== D.trainer ? ' · ' + esc(m.by) : '') + '</span></div>' +
-      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + (m.t ? '<p>' + esc(m.t) + '</p>' : '') + (m.img ? imgHtml(m.id, m.img) : '') +
+      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + (m.t ? '<p>' + esc(m.t) + '</p>' : '') + (m.img ? imgHtml(m.id, m.img) : '') + (m.aud ? audHtml(m.id, m.aud) : '') +
       '<div class="msub">' + (m.rd ? '<span class="st-ok">Клиент прочитал ' + stampTxt(m.rd) + '</span>' : 'Клиент ещё не открыл') + '</div>' +
       (m.k !== 'reply' ? '<div class="msg-act"><button class="rpt" data-act="tmEdit" data-id="' + esc(m.id) + '">' + IC.edit + 'Изменить</button></div>' : '') + '</div>';
   }).join('') + '</div>';
@@ -2068,7 +2103,7 @@ function tmForm(mid) {
   S.img = { had: m && m.img ? m.id : '', tok: m && m.img ? m.img : '' };
   if (S.img.had) imgLoad(S.img.had, S.img.tok);
   sheet(m ? 'Изменить сообщение' : 'Сообщение клиенту', '<h2>' + (m ? 'Изменить сообщение' : 'Сообщение клиенту') + '</h2><p class="lead">' + esc(c.name) + '. Клиент увидит его во вкладке «Тренер», новое – с пометкой.</p>' +
-    '<div class="kchips" id="tmK">' + tmChips() + '</div>' + ft('tmT', 'Текст', m ? m.t : '', 6, 'maxlength="1000"') + imgPick() + '<p class="ferr" id="ferr" hidden></p>' +
+    '<div class="kchips" id="tmK">' + tmChips() + '</div>' + ft('tmT', 'Текст', m ? m.t : '', 6, 'maxlength="1000"') + imgPick() + vPick(m, m && m.id) + '<p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn pri" data-act="tmGo">' + (m ? 'Сохранить' : 'Отправить клиенту') + '</button>' + (m ? '<button class="btn danger" data-act="tmDel" style="margin-top:0">Убрать сообщение</button>' : ''));
 }
 function tmChips() { return ['tip', 'go', 'fire', 'msg'].map(function (k) { return '<button data-act="tmK" data-v="' + k + '" class="' + (S.tm.kind === k ? 'on' : '') + '">' + KINDS[k] + '</button>'; }).join(''); }
@@ -2797,7 +2832,7 @@ function loadMy(first, quiet) {
     if (r.auth) return;
     if (!r.ok) { S.offline = !!r.net; if (M) paintSync(); else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false; if (FMV) { cvArm(); return; }              // 4.5: ответ на перенос ещё в пути – его данные новее
-    setMy(r); updCheck(r);
+    setMy(r); updCheck(r); try { prefetchVideos(); } catch (e) {}
     if (M.cabk && qs.get('from') === 'cab') {                               // 4.2: открыл кабинет, а кабинет у клиента уже есть – назад в кабинет
       LS.del('lf_wko_' + CKEY.slice(0, 12)); location.replace('../cabinet/?k=' + encodeURIComponent(M.cabk)); return;
     }
@@ -2850,6 +2885,36 @@ function tgCard() {
     '<a class="btn pri sm" href="' + esc(M.tg.link) + '" target="_blank" rel="noopener noreferrer">Подключить</a></div>' +
     '<button class="txtb" data-act="tgHide" style="margin-top:8px">Не сейчас</button></div>';
 }
+/**
+ * 4.10: уведомления на телефон (Web Push, ../push.js). Состояние телефона – S.push: 'on' | 'off' | 'install' | 'denied' |
+ * 'unsupported' | '' (ещё не узнали). Карточка: не включены – «Включить»; включены – коротко, с «Проверить» и «Выключить».
+ */
+function pushCard() {
+  if (INCAB || M.closed || !window.LFPush || !S.push || S.push === 'unsupported') return '';
+  if (S.push === 'on') return LS.get('lf_wk_push_ok') === '1' ? '' : '<div class="card"><div class="tgc"><span class="mn"><b>Уведомления включены</b><small>Ответы тренера и напоминание в день тренировки придут на этот телефон.</small></span>' +
+    '<button class="btn sec sm" data-act="pushTest">Проверить</button></div><div style="display:flex;gap:14px;margin-top:8px"><button class="txtb" data-act="pushOk">Понятно</button><button class="txtb" data-act="pushOff">Выключить</button></div></div>';
+  if (LS.get('lf_wk_push_hide') === '1') return '';
+  var how = S.push === 'install' ? 'На iPhone уведомления работают из значка Lite Fit на экране «Домой»: «Поделиться» → «На экран «Домой»», откройте приложение со значка и включите здесь.'
+    : S.push === 'denied' ? 'Уведомления для Lite Fit запрещены в настройках телефона. Разрешите их: Настройки → Уведомления → Lite Fit – и нажмите «Включить».'
+    : 'Ответы тренера на Ваши комментарии и напоминание в день тренировки – сразу на экран телефона.';
+  return '<div class="card"><div class="tgc"><span class="mn"><b>Уведомления на телефон</b><small>' + esc(how) + '</small></span>' +
+    (S.push === 'install' ? '' : '<button class="btn pri sm" data-act="pushOn"' + (S.pushBusy ? ' disabled' : '') + '>' + (S.pushBusy ? 'Включаю…' : 'Включить') + '</button>') + '</div>' +
+    '<button class="txtb" data-act="pushHide" style="margin-top:8px">Не сейчас</button></div>';
+}
+function pushInit() {
+  if (MODE !== 'client' || INCAB || !window.LFPush) return;
+  LFPush.status().then(function (st) { var was = S.push; S.push = st; if (st === 'on') LFPush.sync(API, CKEY); if (was !== st && M && S.view === 'home') rerenderKeep(); });
+}
+/** 4.10: видео открытых невыполненных тренировок – скачать в телефон заранее (играют в зале без интернета). */
+function prefetchVideos() {
+  if (!window.LFPush || !M || !M.list) return;
+  var urls = [];
+  M.list.forEach(function (w) {
+    if (w.st !== 'open' || w.done || !w.items || w.date < TODAY) return;
+    w.items.forEach(function (it) { var u = String(it.video || ''); if (/\/anketa\/Video\/[^/?#]+\.(mp4|m4v|mov|webm)$/i.test(u.split('?')[0]) && urls.indexOf(u) < 0) urls.push(u); });
+  });
+  if (urls.length) LFPush.prefetch(urls.slice(0, 40));
+}
 /** Номер тренировки у клиента: «4 из 12», «№ 7»; пусто – сверх пакета (номер не показываем). */
 function labOf(w) { return w.lab === undefined ? '№ ' + w.num : w.lab; }
 function titleOf(w) { var l = labOf(w); return 'Тренировка' + (l ? ' ' + l : ''); }
@@ -2868,7 +2933,7 @@ function viewMy() {
     h += '<div class="meta"><span class="pill">Всего выполнено тренировок: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
   } else if (!M.free) h += '<div class="meta"><span class="pill">Всего: <b class="num">' + M.total + '</b></span><span class="pill">Выполнено: <b class="num">' + (M.totalDone != null ? M.totalDone : M.doneN) + '</b></span></div>';
   if (M.free) h += freeTop(true) + subCard();                               // 3.8: FREE – N из 3, дни, медаль; 4.6: подписка
-  h += coachBanner() + installCard() + tgCard();
+  h += coachBanner() + installCard() + pushCard() + tgCard();
   if (M.closed) h += '<div class="banner warn">Ведение завершено: тренировки открыты для просмотра, новые отметки не принимаются.</div>';
   h += '<h2 class="sec-title" style="margin-top:0">Сегодня, ' + dMon(TODAY) + '</h2>';
   if (!td.length) h += '<div class="card"><h3>На сегодня тренировки нет</h3><p class="sub" style="margin:0">' + (next.length ? 'Ближайшая: ' + longDate(next[0].date) + '.' : 'Тренер добавит следующую, и она появится здесь.') + '</p></div>';
@@ -2936,6 +3001,8 @@ function blobGet(mid) {
 function blobDel(mid) { delete MBLOB[mid]; return idbDo('readwrite', function (st) { return st.delete(mid); }).catch(function () {}); }
 
 /** Файлы упражнения: свои (из очереди) и уже отправленные с другого устройства (отметки с сервера). */
+var MKW = { p: ['Фото', 'фото'], v: ['Видео', 'видео'], a: ['Голосовое', 'голосовое'] };   // 4.11
+var VREC = !!(window.LFVoice && LFVoice.canRecord());
 function medList(w, it) {
   var own = MQ.filter(function (j) { return j.wid === w.id && j.iid === it.id; }), ids = {};
   own.forEach(function (j) { ids[j.mid] = true; });
@@ -2945,8 +3012,8 @@ function medList(w, it) {
 function medTile(j) {
   var b = j.st === 'sent' ? '<i class="mb ok">' + IC.check + '</i>' : j.st === 'err' || j.st === 'lost' ? '<i class="mb bad">!</i>' : '<i class="mb">' + IC.clock + '</i>';
   var lab = j.st === 'sent' ? 'тренер получил' : j.st === 'err' || j.st === 'lost' ? 'не отправлен' : j.st === 'prep' ? 'готовится' : 'отправляется';
-  return '<button class="mtile" data-act="mTile" data-m="' + j.mid + '" aria-label="' + (j.k === 'p' ? 'Фото' : 'Видео') + ': ' + lab + '">' +
-    (j.th ? '<img src="' + j.th + '" alt="">' : (j.k === 'p' ? IC.photo : IC.cam)) + (j.k === 'v' && j.th ? '<span class="mk2">▶</span>' : '') + b + '</button>';
+  return '<button class="mtile" data-act="mTile" data-m="' + j.mid + '" aria-label="' + MKW[j.k === 'p' ? 'p' : j.k === 'a' ? 'a' : 'v'][0] + ': ' + lab + '">' +
+    (j.th ? '<img src="' + j.th + '" alt="">' : (j.k === 'p' ? IC.photo : j.k === 'a' ? IC.mic : IC.cam)) + (j.k === 'a' && j.dur ? '<span class="mk2">' + mmss(j.dur) + '</span>' : '') + (j.k === 'v' && j.th ? '<span class="mk2">▶</span>' : '') + b + '</button>';
 }
 function medInner(w, it, i) {
   var L = medList(w, it), h = '', busy = L.some(mqBusy), bad = L.filter(function (j) { return j.st === 'err' || j.st === 'lost'; })[0];
@@ -2954,8 +3021,9 @@ function medInner(w, it, i) {
   if (bad) h += '<p class="mnote bad">' + esc(bad.st === 'lost' ? 'Файл не успел подготовиться – нажмите на него и добавьте заново.' : 'Файл не отправлен – нажмите на него.') + '</p>';
   else if (busy) h += '<p class="mnote">' + (S.mqOff ? 'Нет интернета – файл отправится сам, когда связь появится.' : 'Отправляется тренеру – можно продолжать тренировку.') + '</p>';
   if (L.length < MED.max && !M.closed) {
-    h += '<button class="btn sec sm mbtn" data-act="mOpen" data-i="' + i + '" aria-expanded="' + (S.open['m' + it.id] ? 'true' : 'false') + '">' + IC.clip + (L.length ? 'Добавить ещё фото или видео' : 'Фото/видео тренеру') + '</button>';
-    if (S.open['m' + it.id]) h += '<div class="mmenu"><button data-act="mPick" data-m="v" data-i="' + i + '">' + IC.cam + 'Снять видео</button><button data-act="mPick" data-m="p" data-i="' + i + '">' + IC.photo + 'Сделать фото</button><button data-act="mPick" data-m="g" data-i="' + i + '">' + IC.gallery + 'Из галереи</button></div>';
+    h += '<button class="btn sec sm mbtn" data-act="mOpen" data-i="' + i + '" aria-expanded="' + (S.open['m' + it.id] ? 'true' : 'false') + '">' + IC.clip + (L.length ? (VREC ? 'Добавить ещё фото, видео или голосовое' : 'Добавить ещё фото или видео') : (VREC ? 'Фото, видео или голосовое тренеру' : 'Фото/видео тренеру')) + '</button>';
+    if (S.open['m' + it.id]) h += '<div class="mmenu' + (VREC ? ' m4' : '') + '"><button data-act="mPick" data-m="v" data-i="' + i + '">' + IC.cam + 'Снять видео</button><button data-act="mPick" data-m="p" data-i="' + i + '">' + IC.photo + 'Сделать фото</button><button data-act="mPick" data-m="g" data-i="' + i + '">' + IC.gallery + 'Из галереи</button>' +
+      (VREC ? '<button data-act="mVoice" data-i="' + i + '">' + IC.mic + 'Голосовое</button>' : '') + '</div>';
   }
   return h;
 }
@@ -3025,6 +3093,21 @@ function thumbOf(src, W, H) {
   } catch (e) { return ''; }
 }
 function mmss(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + pad(sec % 60); }
+/** 4.11: звук страницы (AudioContext) включается в нажатии – им сжатое видео сохраняет звук. */
+function acUnlock() {
+  try {
+    var C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+    if (!window.LFAC) window.LFAC = new C();
+    if (window.LFAC.state !== 'running' && window.LFAC.resume) window.LFAC.resume().catch(function () {});
+  } catch (e) {}
+}
+/** 4.11: формат записи видео со звуком. */
+function recMimeA() {
+  if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
+  var c = ['video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/webm'];
+  for (var i = 0; i < c.length; i++) { try { if (MediaRecorder.isTypeSupported(c[i])) return c[i]; } catch (e) {} }
+  return '';
+}
 function recMime() {
   if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
   var c = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
@@ -3054,7 +3137,11 @@ function prepVideo(f, j) {
     v.onloadedmetadata = function () {
       var dur = v.duration, W = v.videoWidth, H = v.videoHeight;
       if (isFinite(dur) && dur > MED.sec + 5) { done = true; cleanup(); return no({ drop: true, message: 'Видео ' + mmss(dur) + ' – тренеру можно отправить до 90 секунд. Обрежьте его в галерее («Изменить») и добавьте снова.' }); }
-      var mime = recMime(), canRec = !!(mime && HTMLCanvasElement.prototype.captureStream && W && H);
+      // 4.11: звук – через звук страницы (включён в нажатии): видео играет в запись, а не в динамик. Не выходит – маленькое и
+      // среднее (до 28 МБ) уходит как снято, со звуком; сжимается без звука только то, что иначе не отправить.
+      var ac = window.LFAC, aOk = !!(ac && ac.state === 'running' && ac.createMediaElementSource && ac.createMediaStreamDestination && window.MediaRecorder);
+      var mime = aOk ? recMimeA() : recMime(), canRec = !!(mime && HTMLCanvasElement.prototype.captureStream && W && H);
+      if (canRec && !aOk && f.size <= MED.mb * 1048576) canRec = false;
       if (f.size <= MED.small * 1048576 || !canRec) {                       // маленький – как есть; здесь только картинка для значка
         var grab = function () { if (!j.th) { j.th = thumbOf(v, W, H); medPaint(j.iid); } asIs(); };
         try { v.currentTime = Math.min(0.5, (dur || 1) / 2); v.onseeked = grab; setTimeout(grab, 2500); } catch (e) { grab(); }
@@ -3062,8 +3149,21 @@ function prepVideo(f, j) {
       }
       var sc = Math.min(1, 960 / Math.max(W, H)), cw = Math.max(2, Math.round(W * sc / 2) * 2), ch = Math.max(2, Math.round(H * sc / 2) * 2);
       var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
-      var g = cv.getContext('2d'), stream, rec, parts = [], last = -1, still = 0, timer = null, stopped = false;
-      try { stream = cv.captureStream(30); rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 1500000 }); } catch (e) { return asIs(); }
+      var g = cv.getContext('2d'), stream, rec, parts = [], last = -1, still = 0, timer = null, stopped = false, aSrc = null, aDst = null;
+      if (aOk) {
+        try { aSrc = ac.createMediaElementSource(v); aDst = ac.createMediaStreamDestination(); aSrc.connect(aDst); v.muted = false; v.defaultMuted = false; v.removeAttribute('muted'); v.volume = 1; }
+        catch (e) { aSrc = aDst = null; v.muted = true; mime = recMime(); }
+      }
+      var unA = function () { try { if (aSrc) aSrc.disconnect(); } catch (e) {} };
+      try {
+        stream = cv.captureStream(30);
+        if (aDst) aDst.stream.getAudioTracks().forEach(function (t) { stream.addTrack(t); });
+        rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 1500000, audioBitsPerSecond: 96000 });
+      } catch (e) {
+        unA();
+        if (!aDst) return asIs();
+        try { stream = cv.captureStream(30); mime = recMime(); rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 1500000 }); } catch (e2) { return asIs(); }
+      }
       var draw = function () {
         if (stopped) return;
         try { g.drawImage(v, 0, 0, cw, ch); } catch (e) {}
@@ -3082,6 +3182,7 @@ function prepVideo(f, j) {
       };
       rec.ondataavailable = function (e) { if (e.data && e.data.size) parts.push(e.data); };
       rec.onstop = function () {
+        unA();
         try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
         var b = new Blob(parts, { type: (rec.mimeType || mime).split(';')[0] });
         if (b.size < 2000 || (b.size >= f.size && f.size <= MED.mb * 1048576)) return asIs();
@@ -3099,7 +3200,12 @@ function prepVideo(f, j) {
       }, 40);
       try { rec.start(1000); } catch (e) { stopped = true; clearInterval(timer); return asIs(); }
       draw();
-      var pl = v.play(); if (pl && pl.catch) pl.catch(function () { if (document.visibilityState !== 'hidden') { stopped = true; clearInterval(timer); try { rec.ondataavailable = null; rec.onstop = null; rec.stop(); } catch (e) {} asIs(); } });
+      var pl = v.play(); if (pl && pl.catch) pl.catch(function () {
+        if (aSrc && f.size > MED.mb * 1048576 && document.visibilityState !== 'hidden') {   // со звуком играть не дали – сжать хотя бы без звука
+          v.muted = true; var p2 = v.play(); if (p2 && p2.catch) p2.catch(function () { stopped = true; clearInterval(timer); try { rec.ondataavailable = null; rec.onstop = null; rec.stop(); } catch (e) {} unA(); asIs(); });
+          return;
+        }
+        if (document.visibilityState !== 'hidden') { stopped = true; clearInterval(timer); try { rec.ondataavailable = null; rec.onstop = null; rec.stop(); } catch (e) {} asIs(); } });
     };
     v.src = u;
   });
@@ -3120,7 +3226,7 @@ function mqKick(delay) {
   blobGet(j.mid).then(function (b) {
     if (!b) return { lost: true };
     return toB64(b).then(function (d) {
-      return post({ a: 'wk', op: 'media', k: CKEY, id: j.wid, item: j.iid, mid: j.mid, kind: j.k, mime: j.mime || b.type || '', dur: j.dur || 0, wd: j.wd || 0, ht: j.ht || 0, data: d });
+      return post({ a: 'wk', op: 'media', k: CKEY, id: j.wid, item: j.iid, mid: j.mid, kind: j.k, mime: j.mime || b.type || '', dur: j.dur || 0, wd: j.wd || 0, ht: j.ht || 0, data: d }, 300000);
     });
   }).then(function (r) {
     r = r || NET;
@@ -3156,8 +3262,8 @@ window.addEventListener('offline', function () { S.mqOff = true; medPaint(); });
 /** Тренеру у упражнения: сколько фото и видео прислал клиент. */
 function medNote(it, w) {
   var m = it.media || []; if (!m.length) return '';
-  var v = m.filter(function (x) { return x.k !== 'p'; }).length, p = m.length - v;
-  return '<div class="mdl">' + IC.clip + '<span>Клиент прислал ' + [v ? v + ' видео' : '', p ? p + ' фото' : ''].filter(String).join(' и ') + ' – смотрите в Telegram</span></div>' +
+  var n = medKinds(it), L = [n.v ? n.v + ' видео' : '', n.p ? n.p + ' фото' : '', n.a ? (n.a === 1 ? 'голосовое' : n.a + ' голосовых') : ''].filter(String);
+  return '<div class="mdl">' + IC.clip + '<span>Клиент прислал ' + (L.length > 1 ? L.slice(0, -1).join(', ') + ' и ' + L[L.length - 1] : L[0]) + ' – ' + (n.a && !n.v && !n.p ? 'слушайте' : 'смотрите') + ' в Telegram</span></div>' +
     (w && w.id && !S.isNew ? '<div class="mt">' + rpLine(w.id, it.id, it.mr || null, '', medWord(it)) + '</div>' : '');   // 4.7: ответ на фото/видео
 }
 /* ---------- на экран телефона и справка ---------- */
@@ -3418,6 +3524,7 @@ function playerHtml(url) {
 }
 function runItem(w, it, i, no) {
   var url = it.video || '', k = url ? videoKind(url) : null;
+  if (k && k.t === 'bad') { k = null; url = ''; }
   var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn"><b>' + esc(it.name) + '</b><small>' + esc((it.grp ? it.grp + ' · ' : '') + 'план: ' + planTxt(it)) + '</small></div>' +
     (muOk(it.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Какие мышцы работают">' + bodySvg(it.mu) + '</button>' : '') + '</div>';
   var acts = '';
@@ -3492,7 +3599,7 @@ function viewCoach() {
   if (!l.length) h += '<div class="card"><h3>Сообщений пока нет</h3><p class="sub" style="margin:0">Когда тренер ответит на комментарий или напишет Вам, сообщение появится здесь.</p></div>';
   else h += '<div class="card">' + l.map(function (m) {
     return '<div class="msg' + (fresh[m.id] ? ' un' : '') + '"><div class="msg-h"><b>' + esc(KINDS_C[m.k] || KINDS_C.msg) + '</b><span>' + stampTxt(m.at) + (m.by ? ' · ' + esc(m.by) : '') + '</span>' + (fresh[m.id] ? '<span class="nw">новое</span>' : '') + '</div>' +
-      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + (m.t ? '<p>' + esc(m.t) + '</p>' : '') + (m.img ? imgHtml(m.id, m.img) : '') + '</div>';
+      (m.k === 'reply' ? '<p class="ctx">' + esc(m.ex) + ': «' + esc(m.com) + '»</p>' : '') + (m.t ? '<p>' + esc(m.t) + '</p>' : '') + (m.img ? imgHtml(m.id, m.img) : '') + (m.aud ? audHtml(m.id, m.aud) : '') + '</div>';
   }).join('') + '</div>';
   setTimeout(function () { msgMark(l); }, 600);
   return h;
@@ -3548,7 +3655,7 @@ function comStatus(w, it, e) {
   else if (it.cr || e.rp) h = '<p class="cst rd">' + IC.check2 + 'Тренер прочитал</p>';
   else h = '<p class="cst">' + IC.check + 'Отправлено тренеру</p>';
   if (e.rp) h += '<div class="rpb"><small>Ответ тренера' + (e.rp.by ? ' · ' + esc(e.rp.by) : '') + '</small>' + (e.rp.t ? '<p>' + esc(e.rp.t) + '</p>' : '') +
-    (e.rp.img && e.rp.mid ? imgHtml(e.rp.mid, e.rp.img) : '') + (e.rp.at ? '<div class="wh">' + stampTxt(e.rp.at) + '</div>' : '') + '</div>';
+    (e.rp.img && e.rp.mid ? imgHtml(e.rp.mid, e.rp.img) : '') + (e.rp.aud && e.rp.mid ? audHtml(e.rp.mid, e.rp.aud) : '') + (e.rp.at ? '<div class="wh">' + stampTxt(e.rp.at) + '</div>' : '') + '</div>';
   return h;
 }
 /**
@@ -3557,10 +3664,10 @@ function comStatus(w, it, e) {
  */
 /** 4.7: ответ тренера на фото или видео клиента к упражнению. */
 function mrBox(it) {
-  var r = it.mr; if (!r || !(r.t || r.img)) return '';
-  var m = it.media || [], v = m.filter(function (x) { return x.k !== 'p'; }).length, p = m.length - v, mw = v && p ? 'Ваши фото и видео' : p ? 'Ваше фото' : 'Ваше видео';
-  return '<div class="cms" style="margin-bottom:10px"><div class="rpb"><small>Тренер посмотрел ' + mw.toLowerCase() + (r.by ? ' · ' + esc(r.by) : '') + '</small>' + (r.t ? '<p>' + esc(r.t) + '</p>' : '') +
-    (r.img && r.mid ? imgHtml(r.mid, r.img) : '') + (r.at ? '<div class="wh">' + stampTxt(r.at) + '</div>' : '') + '</div></div>';
+  var r = it.mr; if (!r || !(r.t || r.img || r.aud)) return '';
+  var n = medKinds(it), mw = medWords(n, true);
+  return '<div class="cms" style="margin-bottom:10px"><div class="rpb"><small>Тренер ' + (n.a && !n.v && !n.p ? 'послушал ' : 'посмотрел ') + mw.toLowerCase() + (r.by ? ' · ' + esc(r.by) : '') + '</small>' + (r.t ? '<p>' + esc(r.t) + '</p>' : '') +
+    (r.img && r.mid ? imgHtml(r.mid, r.img) : '') + (r.aud && r.mid ? audHtml(r.mid, r.aud) : '') + (r.at ? '<div class="wh">' + stampTxt(r.at) + '</div>' : '') + '</div></div>';
 }
 function comBox(w, it, i) {
   var t = String(it.comment || '').trim(), closed = M && M.closed;
@@ -3648,6 +3755,56 @@ function imgPick() {
 }
 function imgPickPaint() { var el = document.getElementById('imgPick'); if (el) el.outerHTML = imgPick(); }
 function imgBody(b) { var I = S.img || {}; if (I.d) b.img = I.d.slice(I.d.indexOf(',') + 1); else if (I.del) b.imgDel = true; return b; }
+
+/* ---------- 4.11: голосовые (../voice.js) ---------- */
+var AUDC = {};                                                             // загруженные голосовые: «сообщение» → ответ сервера
+/** Кнопка «Слушать» голосового сообщения mid (плеер подключает audMount). */
+function audHtml(mid, tok) {
+  if (!mid) return '';
+  return '<div class="vpl" data-vmid="' + esc(mid) + '" data-vtok="' + esc(tok || '') + '" data-btn="btn sec sm">' + (window.LFVoice ? '' : '<p class="note" style="margin:6px 0 0">🎤 Голосовое – обновите страницу, чтобы послушать</p>') + '</div>';
+}
+function audLoad(mid, tok) {
+  var k = mid + '.' + (tok || '');
+  if (AUDC[k]) return Promise.resolve(AUDC[k]);
+  return (MODE === 'client' ? ccall('img', { mid: mid }, true) : call('img', { mid: mid }, true)).then(function (r) { if (r && r.ok && r.data) AUDC[k] = r; return r; });
+}
+/** Новые плееры и кнопки записи на странице – подключить (страница перерисовывается целиком, поэтому – по наблюдению). */
+function audMount() {
+  if (!window.LFVoice) return;
+  [].forEach.call(document.querySelectorAll('.vpl:not([data-on])'), function (el) {
+    el.setAttribute('data-on', '1');
+    var mid = el.getAttribute('data-vmid'), tok = el.getAttribute('data-vtok');
+    LFVoice.player(el, function () { return audLoad(mid, tok); }, 'Голосовое – слушать', mid + '.' + tok);
+  });
+  [].forEach.call(document.querySelectorAll('.vrec:not([data-on])'), function (el) {
+    el.setAttribute('data-on', '1');
+    LFVoice.mount(el, { max: 180, btn: 'btn sec sm', label: el.getAttribute('data-lab') || 'Записать голосовое' });
+  });
+}
+try { new MutationObserver(audMount).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+/** Блок «Голосовое» в окне ответа / сообщения тренера: прежнее голосовое (прослушать, убрать) и запись нового. */
+function vPick(x, mid) {
+  S.aud = { had: x && x.aud && mid ? mid : '', tok: x && x.aud ? x.aud : '', del: false };
+  if (!window.LFVoice || !LFVoice.canRecord()) return S.aud.had ? '<div id="vold">' + audHtml(S.aud.had, S.aud.tok) + '</div>' : '';
+  return (S.aud.had ? '<div id="vold"><p class="note" style="margin:8px 0 0">Голосовое прикреплено</p>' + audHtml(S.aud.had, S.aud.tok) +
+    '<button class="btn danger sm" data-act="audDel" style="width:auto;padding:0 12px;margin:6px 0 0">' + IC.trash + 'Убрать голосовое</button></div>' : '') +
+    '<div class="vrec" id="vrec" data-lab="' + (S.aud.had ? 'Записать новое голосовое' : 'Записать голосовое') + '"></div>';
+}
+function vRec() { var el = document.getElementById('vrec'); return el && el.lfv ? el.lfv : null; }
+/** Проверка перед отправкой: '' – можно; иначе текст ошибки. has – есть текст или фото. */
+function vCheck(has, need) {
+  var R = vRec(), v = R ? R.value() : null, I = S.img || {}, A = S.aud || {};
+  if (R && R.busy()) return 'Дождитесь, пока голосовое запишется: нажмите «Готово».';
+  if (v && I.d) return 'Приложите что-то одно: фото или голосовое.';
+  if (!has && !v && !(A.had && !A.del)) return need;
+  return '';
+}
+function vBody(b) {
+  var R = vRec(), v = R ? R.value() : null;
+  if (v) { b.aud = v.b64; b.audMime = v.mime; delete b.imgDel; }
+  else if (S.aud && S.aud.had && S.aud.del && !b.img) b.imgDel = true;
+  return b;
+}
 
 /* ================= СБОРКА СТРАНИЦЫ ================= */
 function paintBar() {
@@ -3931,9 +4088,9 @@ var ACT = {
   msgAll: function () { S.msgAll = !S.msgAll; msgPaint(S.cid); },
   tmGo: function (b, e, del) {
     var c = clientOf(S.cid), text = val('tmT'), cid = c.id, I = S.img || {};
-    if (!del && !text && !I.d && !(I.had && !I.del)) return ferr('Напишите текст сообщения или приложите фото.');
+    var vq = del ? '' : vCheck(text || I.d || (I.had && !I.del), 'Напишите текст сообщения, приложите фото или запишите голосовое.'); if (vq) return ferr(vq);
     b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
-    call('tmsg', imgBody({ cid: cid, kind: S.tm.kind, text: text, mid: S.tm.mid, del: !!del })).then(function (r) {
+    call('tmsg', vBody(imgBody({ cid: cid, kind: S.tm.kind, text: text, mid: S.tm.mid, del: !!del }))).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = 'Повторить'; return ferr(errText(r)); }
       S.msgs = S.msgs || {}; S.msgs[cid] = { list: r.list || [] };
@@ -3947,9 +4104,9 @@ var ACT = {
   rpGo: function (b, e, del) {
     var R = S.rp, text = del ? '' : val('rpT'), I = S.img || {};
     if (!R) return;
-    if (!del && !text && !I.d && !(I.had && !I.del)) return ferr('Напишите ответ или приложите фото.');
+    var vq = del ? '' : vCheck(text || I.d || (I.had && !I.del), 'Напишите ответ, приложите фото или запишите голосовое.'); if (vq) return ferr(vq);
     b.disabled = true; b.textContent = del ? 'Убираю…' : 'Отправляю…';
-    call('reply', del ? { id: R.id, item: R.it, c: R.c || '', m: R.m ? 1 : '', text: '', imgDel: true } : imgBody({ id: R.id, item: R.it, c: R.c || '', m: R.m ? 1 : '', text: text })).then(function (r) {
+    call('reply', del ? { id: R.id, item: R.it, c: R.c || '', m: R.m ? 1 : '', text: '', imgDel: true } : vBody(imgBody({ id: R.id, item: R.it, c: R.c || '', m: R.m ? 1 : '', text: text }))).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { b.disabled = false; b.textContent = del ? 'Убрать ответ' : 'Отправить ответ'; return ferr(errText(r)); }
       if (r.rp && r.rp.img && I.d) IMGC[imgKey(r.rp.mid, r.rp.img)] = { u: I.d };   // своё новое фото – сразу, без загрузки
@@ -3958,6 +4115,7 @@ var ACT = {
   },
   rpDel: function (b) { if (!b.getAttribute('data-sure')) { b.setAttribute('data-sure', '1'); b.textContent = 'Точно убрать? Нажмите ещё раз'; return; } ACT.rpGo(b, null, true); },
   imgDel: function () { S.img = S.img || {}; if (S.img.d) delete S.img.d; else S.img.del = true; imgPickPaint(); },
+  audDel: function () { if (S.aud) S.aud.del = true; var el = document.getElementById('vold'); if (el) el.innerHTML = '<p class="note" style="margin:8px 0 0">Голосовое уберётся, когда Вы сохраните.</p>'; },
   imgView: function (b) {
     var mid = b.getAttribute('data-mid'), c = IMGC[mid]; if (!c || !c.u) return;
     var v = document.getElementById('viewer');
@@ -3965,6 +4123,27 @@ var ACT = {
     sheet('Фото тренера', '<img class="imfull" src="' + c.u + '" alt="Фото тренера">');
   },
   tgHide: function () { LS.set('lf_wk_tg_hide', '1'); rerenderKeep(); },
+  pushHide: function () { LS.set('lf_wk_push_hide', '1'); rerenderKeep(); },
+  pushOk: function () { LS.set('lf_wk_push_ok', '1'); rerenderKeep(); },
+  pushOn: function () {
+    if (!window.LFPush || S.pushBusy) return;
+    S.pushBusy = true; rerenderKeep();
+    LFPush.enable(API, CKEY, 'wk').then(function (r) {
+      S.pushBusy = false;
+      if (r && r.ok) { S.push = 'on'; LS.del('lf_wk_push_ok'); toast('Уведомления включены'); }
+      else { if (r && r.denied) S.push = 'denied'; toast(cap((r && r.error) || 'не получилось включить'), 'bad'); }
+      rerenderKeep();
+    });
+  },
+  pushOff: function () {
+    if (!window.LFPush) return;
+    LFPush.disable(API, CKEY).then(function () { S.push = 'off'; LS.set('lf_wk_push_hide', '1'); toast('Уведомления выключены'); rerenderKeep(); });
+  },
+  pushTest: function (b) {
+    if (!window.LFPush) return;
+    b.disabled = true;
+    LFPush.test(API, CKEY, 'wk').then(function (r) { b.disabled = false; toast(r && r.ok ? 'Отправил – уведомление придёт через несколько секунд' : cap((r && r.error) || 'не получилось'), r && r.ok ? '' : 'bad'); });
+  },
   imgClose: function () { var v = document.getElementById('viewer2'); if (v) v.remove(); },
   cmOpen: function (b) { cmForm(+b.getAttribute('data-i')); },
   cmGo: function (b) {
@@ -4176,6 +4355,7 @@ var ACT = {
   mOpen: function (b) { var it = runItemOf(b); if (!it) return; S.open['m' + it.id] = !S.open['m' + it.id]; medPaint(it.id); },
   mPick: function (b) {
     var w = myOf(S.run), it = runItemOf(b), m = b.getAttribute('data-m'); if (!w || !it || M.closed) return;
+    if (m !== 'p') acUnlock();                                              // 4.11: звук для сжатия видео включается только в нажатии
     [].forEach.call(document.querySelectorAll('input.mfile'), function (x) { if (x.parentNode) x.parentNode.removeChild(x); });
     var inp = document.createElement('input'); inp.type = 'file'; inp.className = 'mfile'; inp.style.display = 'none';
     if (m === 'v') { inp.accept = 'video/*'; inp.setAttribute('capture', 'environment'); }
@@ -4188,14 +4368,34 @@ var ACT = {
     });
     document.body.appendChild(inp); inp.click();
   },
+  mVoice: function (b) {                                                    // 4.11: голосовое тренеру к упражнению
+    var it = runItemOf(b); if (!it || M.closed) return;
+    S.open['m' + it.id] = false; medPaint(it.id);
+    S.mv = { iid: it.id, i: b.getAttribute('data-i') };
+    sheet('Голосовое тренеру', '<h2>Голосовое тренеру</h2><p class="lead">' + esc(it.name) + '. Расскажите, как прошло упражнение или что спросить, – до 3 минут. Тренер получит голосовое в Telegram.</p>' +
+      '<div class="vrec" id="vrec" data-lab="Начать запись"></div><p class="ferr" id="ferr" hidden></p>' +
+      '<button class="btn pri" data-act="mVoiceGo">' + IC.reply + 'Отправить тренеру</button><button class="btn sec" data-act="close" style="margin-top:0">Отмена</button>');
+  },
+  mVoiceGo: function () {
+    var w = myOf(S.run), it = w && S.mv ? (w.items || []).filter(function (x) { return x.id === S.mv.iid; })[0] : null, R = vRec();
+    if (!w || !it || !R) return closeSheet();
+    if (R.busy()) return ferr('Нажмите «Готово», чтобы закончить запись.');
+    var v = R.value(), blob = R.blob();
+    if (!v || !blob) return ferr('Сначала запишите голосовое.');
+    if (medList(w, it).length >= MED.max) { closeSheet(); return toast('К упражнению можно приложить до ' + MED.max + ' файлов', 'bad'); }
+    var j = { mid: mqNewId(), wid: w.id, iid: it.id, k: 'a', st: 'wait', th: '', at: Date.now(), mime: v.mime, dur: v.dur, size: blob.size };
+    MQ.push(j); closeSheet();
+    blobPut(j.mid, blob).then(function () { mqSave(); medPaint(it.id); mqKick(); });
+    mqSave(); medPaint(it.id);
+  },
   mTile: function (b) {
     var mid = b.getAttribute('data-m'), j = MQ.filter(function (x) { return x.mid === mid; })[0];
     if (!j) return toast('Этот файл тренер уже получил');
-    var t = j.k === 'p' ? 'Фото' : 'Видео', h = '<h2>' + t + '</h2>';
+    var kw = MKW[j.k === 'p' ? 'p' : j.k === 'a' ? 'a' : 'v'], t = kw[0], h = '<h2>' + t + '</h2>';
     if (j.th) h += '<img src="' + j.th + '" alt="" style="width:120px;height:120px;border-radius:16px;object-fit:cover;display:block;margin:0 0 14px">';
-    if (j.st === 'sent') h += '<p class="lead">Тренер получил ' + (j.k === 'p' ? 'фото' : 'видео') + (j.sentAt ? ' ' + new Date(j.sentAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '') + '.</p><button class="btn pri" data-act="close">Понятно</button>';
+    if (j.st === 'sent') h += '<p class="lead">Тренер получил ' + kw[1] + (j.sentAt ? ' ' + new Date(j.sentAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '') + '.</p><button class="btn pri" data-act="close">Понятно</button>';
     else if (j.st === 'err') h += '<p class="lead">Не отправлено: ' + esc(j.err || '') + '</p><button class="btn pri" data-act="mRetry" data-m="' + mid + '">Отправить ещё раз</button><button class="btn sec" data-act="mDrop" data-m="' + mid + '">Убрать</button>';
-    else if (j.st === 'lost') h += '<p class="lead">Страницу закрыли, пока ' + (j.k === 'p' ? 'фото' : 'видео') + ' готовилось к отправке, – файл не сохранился. Уберите его и добавьте заново.</p><button class="btn pri" data-act="mDrop" data-m="' + mid + '">Убрать</button>';
+    else if (j.st === 'lost') h += '<p class="lead">Страницу закрыли, пока ' + kw[1] + ' готовилось к отправке, – файл не сохранился. Уберите его и добавьте заново.</p><button class="btn pri" data-act="mDrop" data-m="' + mid + '">Убрать</button>';
     else h += '<p class="lead">' + (j.st === 'prep' ? (j.k === 'v' ? 'Видео сжимается – это занимает примерно столько, сколько длится ролик. Потом оно отправится само.' : 'Фото готовится к отправке.') : S.mqOff ? 'Нет интернета – файл отправится сам, когда связь появится. Страницу можно закрыть.' : 'Отправляется тренеру. Можно продолжать тренировку.') + '</p>' +
       '<button class="btn pri" data-act="close">Хорошо</button>' + (j.st === 'wait' ? '<button class="btn sec" data-act="mDrop" data-m="' + mid + '">Не отправлять</button>' : '');
     sheet(t, h);
@@ -4244,7 +4444,9 @@ var ACT = {
   finish: function () {
     var w = myOf(S.run), p = runProgress(w);
     if (!p.ok) { sheet('Подходы не отмечены', '<h2>Ни один подход не отмечен</h2><p class="lead">Отметьте выполненные подходы кружком справа, чтобы тренер увидел результат. Можно завершить и так.</p><button class="btn pri" data-act="close">Вернуться и отметить</button><button class="btn sec" data-act="finishAny">Завершить без отметок</button>'); return; }
-    ACT.finishAny();
+    var all = p.ok >= p.tot;                                                // 4.10: всегда спрашиваем – случайное нажатие не завершает тренировку
+    sheet('Завершить тренировку?', '<h2>Завершить тренировку?</h2><p class="lead">' + (all ? 'Все подходы отмечены – ' + p.tot + ' из ' + p.tot + '.' : 'Отмечено подходов: ' + p.ok + ' из ' + p.tot + '. Неотмеченные тренер увидит как невыполненные.') +
+      (w.ts ? ' Время: ' + fmtDur((Date.now() - w.ts) / 60000) + '.' : '') + '</p><button class="btn pri" data-act="finishAny">' + IC.check + 'Завершить</button><button class="btn sec" data-act="close">' + (all ? 'Продолжить тренировку' : 'Вернуться и отметить') + '</button>');
   },
   finishAny: function () {
     var w = myOf(S.run); if (!w.done) { M.doneN++; if (M.totalDone != null) M.totalDone++; if (M.pk && w.lab) { M.pk.done++; M.pk.left = Math.max(M.pk.left - 1, 0); } }
@@ -4517,6 +4719,7 @@ function boot() {
     try { LS.set('lf_wk_inst_n', String(INST_N + 1)); } catch (e) {}       // 3.3: подсветка «на экран телефона» – первые 3 открытия
     loadMy(!M).then(function () { cnArm(); introCheck(); });
     mqBoot();
+    pushInit();                                                             // 4.10: уведомления на телефон
   }
 }
 boot();
