@@ -1,0 +1,14 @@
+{
+  "name": "Lite Fit тренер",
+  "short_name": "Lite Fit тренер",
+  "description": "Кабинет тренера Lite Fit: клиенты, тренировки, уведомления",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#05090B",
+  "theme_color": "#05090B",
+  "lang": "ru",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

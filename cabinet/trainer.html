@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Lite Fit тренер">
 <title>Кабинет тренера Lite Fit</title>
+<link rel="manifest" href="trainer.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,17 +78,56 @@ svg{width:22px;height:22px;flex:none}
 .more-in .it{width:100%;min-height:54px;padding:0 10px;border-top:1px solid var(--line);font-size:16px;color:var(--text)}
 .more-in .it .lb{flex:1;text-align:left}
 .more-in .it svg{color:var(--accent)}
+.more-in .it .st{font-size:12px;font-weight:700;color:var(--dim)}
+.more-in .it .st.on{color:var(--accent)}
+/* 2.1: уведомления на телефон */
+.nav .it .st{font-size:11px;font-weight:700;color:var(--dim)}
+.nav .it .st.on{color:var(--accent)}
+.psh{position:fixed;inset:0;z-index:40;background:rgba(3,6,7,.72);display:flex;align-items:flex-end;justify-content:center}
+.psh[hidden]{display:none}
+.pin{width:100%;max-width:560px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--card);border:1px solid var(--line2);border-bottom:0;border-radius:22px 22px 0 0;padding:8px 18px calc(var(--safe-b) + 18px)}
+@media (min-width:1024px){.psh{align-items:center}.pin{border-radius:22px;border-bottom:1px solid var(--line2);padding-bottom:18px}}
+.pin .h{position:sticky;top:0;background:var(--card);display:flex;justify-content:space-between;align-items:center;padding:10px 0 12px;font-weight:800;font-size:17px;z-index:1}
+.pin .h button{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--dim)}
+.pin .box{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}
+.pin .box b{display:block;font-size:15px;margin-bottom:4px}
+.pin .box p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+.pin .row2{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pb{flex:1 1 0;min-width:130px;min-height:46px;border-radius:13px;font-weight:800;font-size:15px;padding:0 14px}
+.pb.pri{background:var(--accent);color:var(--on-accent);box-shadow:0 6px 20px -8px var(--glow)}
+.pb.sec{background:transparent;color:var(--text);border:1px solid var(--line2)}
+.pb[disabled]{opacity:.5}
+.pin .grp2{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:6px 2px 6px}
+.sw{width:100%;display:flex;align-items:center;gap:12px;min-height:54px;padding:8px 2px;border-top:1px solid var(--line);text-align:left;font-size:15px;line-height:1.35}
+.sw .lb{flex:1}
+.sw i{flex:none;width:46px;height:28px;border-radius:99px;background:var(--line2);position:relative;transition:background .15s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}
+.sw[aria-checked="true"] i{background:var(--accent)}
+.sw[aria-checked="true"] i::after{transform:translateX(18px)}
+.sw[disabled]{opacity:.5}
+.pin .note{color:var(--dim);font-size:12.5px;line-height:1.45;margin:12px 2px 0}
+.pin .msg{min-height:20px;margin:10px 2px 0;font-size:13.5px;color:var(--muted)}
+.pin .msg.bad{color:var(--warm)}
 </style>
 </head>
 <body>
 <div class="main" id="main"><div class="wait" id="wait"><img src="data:image/png;base64,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" alt=""><span>Открываю кабинет…</span></div></div>
 <nav class="nav" id="nav" aria-label="Разделы кабинета"></nav>
 <div class="more-sh" id="more" hidden></div>
+<div class="psh" id="psh" hidden role="dialog" aria-modal="true" aria-label="Уведомления на телефон"></div>
+<script src="config.js"></script>
+<script src="../push.js"></script>
 <script>
 (function () {
 'use strict';
 /*
  * Кабинет тренера Lite Fit – общий: одна ссылка (…/cabinet/trainer.html?t=<ключ>) и один ПИН-код.
+ * 2.1 (02.11.2026). Сервер – lite-fit-fix 1.2. Кнопка «Уведомления» (на телефоне – в «Ещё», на компьютере – в меню слева):
+ *   включить уведомления на этом телефоне (iPhone – из значка «Lite Fit тренер» на экране «Домой», iOS 16.4+), проверить,
+ *   выключить и выбрать, о чём сообщать: комментарии, фото/видео/голосовые, выполненные и начатые тренировки, сообщения
+ *   боту, медали, новые заявки, прочее; Telegram без звука, если уведомление пришло. Настройки общие для всех устройств
+ *   тренера (хранятся на сервере). Нажатие на уведомление открывает кабинет сразу на тренировке. Свой значок для экрана
+ *   «Домой» (trainer.webmanifest) – уведомлениям на iPhone он нужен.
  * 1.9 (25.10.2026). Раздел «Наборы FREE» (приложение тренировок 3.0) – в блоке «Тренировки».
  * 1.8 (25.10.2026). Внутри – два приложения, каждое без своего меню: кабинет тренера (trainer-app.html: Сегодня, Клиенты,
  *   Free, Новые, Задачи) и приложение тренировок (../trening/: Тренировки, Календарь, Комментарии, База упражнений). Оба
@@ -96,7 +136,7 @@ svg{width:22px;height:22px;flex:none}
  *   «Тренировки» в карточке клиента открывает тренировки этого клиента. Старые ссылки на приложение тренировок
  *   (в том числе из Telegram с ?w=) ведут сюда же.
  */
-var VERSION = '2.0';
+var VERSION = '2.1';
 var LOGO = 'data:image/png;base64,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';
 var LS = {
   get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -118,6 +158,7 @@ var I = {
   coms: ic('<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12.5h5"/>'),
   base: ic('<path d="M4 6h16M4 12h16M4 18h10"/>'),
   fsets: ic('<rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8.5V20"/><path d="M12 8.5c-1.5-3.5-5.5-4-5.5-1.5S10 8.5 12 8.5zM12 8.5c1.5-3.5 5.5-4 5.5-1.5S14 8.5 12 8.5z"/>'),
+  bell: ic('<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>'),
   more: ic('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),
   x: ic('<path d="M6 6l12 12M18 6L6 18"/>')
 };
@@ -125,7 +166,7 @@ var I = {
 var SECS = [['home', 'Сегодня', 'A', 1], ['clients', 'Клиенты', 'A', 1], ['free', 'Free', 'A', 1], ['fresh', 'Новые', 'A', 0], ['tasks', 'Задачи', 'A', 0],
   ['train', 'Тренировки', 'B', 1], ['cal', 'Календарь', 'B', 0], ['coms', 'Комментарии', 'B', 0], ['base', 'База упражнений', 'B', 0], ['fsets', 'Наборы FREE', 'B', 0]];
 function secOf(s) { return SECS.filter(function (x) { return x[0] === s; })[0] || null; }
-var main = document.getElementById('main'), navEl = document.getElementById('nav'), moreEl = document.getElementById('more');
+var main = document.getElementById('main'), navEl = document.getElementById('nav'), moreEl = document.getElementById('more'), pshEl = document.getElementById('psh');
 var F = { A: null, B: null }, READY = { A: false, B: false }, AUTH = { A: '', B: '' }, PENDING = { A: [], B: [] };
 var BADGE = {}, CUR = '', TRAINER = '', ADMIN = false, WANT = '';
 
@@ -193,6 +234,7 @@ function paintNav() {
     h += it(x, x[3] ? '' : 'side');
   });
   h += '<button class="it more' + (moreOn ? ' on' : '') + '" data-more="1">' + I.more + '<span class="lb">Ещё</span><span class="cnt num"' + (moreN ? '' : ' hidden') + '>' + moreN + '</span></button>';
+  h += '<span class="grp">Настройки</span><button class="it side" data-push="1">' + I.bell + '<span class="lb">Уведомления</span>' + pushSt() + '</button>';
   h += '<div class="who">' + (TRAINER ? '<b>' + esc(TRAINER) + '</b>' : '') + 'Кабинет тренера · ' + VERSION + '</div>';
   // на телефоне внизу: 4 главных раздела + «Ещё»; на компьютере – все разделы
   navEl.innerHTML = h;
@@ -201,6 +243,7 @@ function paintNav() {
 function openMore() {
   moreEl.hidden = false;
   moreEl.innerHTML = '<div class="more-in"><div class="h"><span>Разделы</span><button data-close="1" aria-label="Закрыть">' + I.x + '</button></div>' +
+    '<button class="it" data-push="1">' + I.bell + '<span class="lb">Уведомления на телефон</span>' + pushSt() + '</button>' +
     SECS.filter(function (x) { return !x[3]; }).map(function (x) {
       var n = BADGE[x[0]] || 0;
       return '<button class="it' + (CUR === x[0] ? ' on' : '') + '" data-s="' + x[0] + '">' + I[x[0]] + '<span class="lb">' + x[1] + '</span><span class="cnt num"' + (n ? '' : ' hidden') + '>' + n + '</span></button>';
@@ -210,6 +253,9 @@ function closeMore() { moreEl.hidden = true; moreEl.innerHTML = ''; }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
 document.addEventListener('click', function (e) {
+  var p = e.target.closest ? e.target.closest('[data-push],[data-pa],[data-pk]') : null;
+  if (p) return pushClick(p);
+  if (e.target === pshEl) return closePush();
   var b = e.target.closest ? e.target.closest('[data-s],[data-more],[data-close]') : null;
   if (!b) { if (e.target === moreEl) closeMore(); return; }
   if (b.hasAttribute('data-more')) return moreEl.hidden ? openMore() : closeMore();
@@ -232,6 +278,7 @@ window.addEventListener('message', function (e) {
     AUTH[app] = m.state;
     if (m.trainer) { TRAINER = m.trainer; paintNav(); }
     if (app === 'A' && m.state === 'ok') {
+      pushBoot();                                                         // 2.1: уведомления – состояние этого телефона
       if (WANT) { var wnt = WANT; WANT = ''; go(wnt); }                    // шли в тренировки, а сначала нужен был ПИН-код
       if (!F.B) setTimeout(function () { load('B'); }, appOf(CUR) === 'B' ? 0 : 1200);
       else if (AUTH.B === 'pin') reload('B');                             // ПИН-код только что введён в кабинете – тренировки откроются без него
@@ -246,6 +293,91 @@ window.addEventListener('message', function (e) {
   }
 });
 
+/* ---------- 2.1: уведомления на телефон ---------- */
+var API = String(window.LF_API || '').trim();
+var PUSH = { st: '', prefs: null, list: null, n: 0, busy: '', msg: '', bad: false, err: '' };
+function pAuth() { return { t: KEY, d: LS.get(DEVK) || '' }; }
+function pushSt() {
+  if (PUSH.st === 'on') return '<span class="st on">вкл</span>';
+  return PUSH.st && PUSH.st !== 'unsupported' ? '<span class="st">выкл</span>' : '';
+}
+var booted = false;
+function pushBoot() {
+  if (booted || !window.LFPush || !hasDev() || !API) return;
+  booted = true;
+  LFPush.status(API, pAuth()).then(function (st) { PUSH.st = st; if (st === 'on') LFPush.sync(API, pAuth()); paintNav(); });
+}
+function openPush() { closeMore(); pshEl.hidden = false; PUSH.msg = ''; paintPush(); loadPush(); }
+function closePush() { pshEl.hidden = true; pshEl.innerHTML = ''; }
+function loadPush() {
+  if (!window.LFPush || !hasDev() || !API) return paintPush();
+  LFPush.status(API, pAuth()).then(function (st) { PUSH.st = st; paintPush(); paintNav(); });
+  LFPush.prefs(API, pAuth()).then(function (r) {
+    if (r && r.ok) { PUSH.prefs = r.prefs; PUSH.list = r.list; PUSH.n = r.n || 0; PUSH.err = ''; }
+    else PUSH.err = r && r.auth ? 'Войдите в кабинет заново – введите ПИН-код.' : r && r.error && !r.net ? cap(r.error) + (/неизвестное действие/.test(r.error) ? ' – на сервере старая версия, нужен lite-fit-fix 1.2' : '') : 'Нет связи с сервером – проверьте интернет.';
+    paintPush();
+  });
+}
+function cap(t) { t = String(t || ''); return t.charAt(0).toUpperCase() + t.slice(1); }
+function paintPush() {
+  if (pshEl.hidden) return;
+  var h = '<div class="pin"><div class="h"><span>Уведомления на телефон</span><button data-pa="close" aria-label="Закрыть">' + I.x + '</button></div>', st = PUSH.st, B = PUSH.busy;
+  var box = function (t, p, btns) { return '<div class="box"><b>' + t + '</b><p>' + p + '</p>' + (btns ? '<div class="row2">' + btns + '</div>' : '') + '</div>'; };
+  if (!window.LFPush || !API) h += box('Уведомления недоступны', 'Модуль уведомлений не загрузился. Закройте кабинет и откройте снова.');
+  else if (!hasDev()) h += box('Сначала войдите в кабинет', 'Введите ПИН-код в разделе «Сегодня» – потом здесь можно включить уведомления.');
+  else if (st === 'install') h += box('Нужен значок на экране «Домой»', 'На iPhone уведомления работают только из значка кабинета: откройте ссылку кабинета в Safari → «Поделиться» → «На экран «Домой»», затем откройте кабинет со значка (iOS 16.4 и новее).');
+  else if (st === 'denied') h += box('Уведомления запрещены в настройках', 'Разрешите их: Настройки телефона → Уведомления → Lite Fit тренер, затем вернитесь сюда.', '<button class="pb pri" data-pa="on"' + (B ? ' disabled' : '') + '>Включить</button>');
+  else if (st === 'unsupported') h += box('Этот браузер не умеет уведомления', esc(LFPush.why() || 'Откройте кабинет в Chrome или Safari.'));
+  else if (st === 'on') h += box('Включены на этом телефоне', 'Сообщения приходят на экран телефона. Telegram продолжает работать как раньше.',
+    '<button class="pb sec" data-pa="test"' + (B ? ' disabled' : '') + '>' + (B === 'test' ? 'Отправляю…' : 'Проверить') + '</button><button class="pb sec" data-pa="off"' + (B ? ' disabled' : '') + '>' + (B === 'off' ? 'Выключаю…' : 'Выключить здесь') + '</button>');
+  else h += box(st ? 'Выключены на этом телефоне' : 'Проверяю…', 'Комментарии, файлы и тренировки Ваших клиентов – сразу на экран телефона.', '<button class="pb pri" data-pa="on"' + (B || !st ? ' disabled' : '') + '>' + (B === 'on' ? 'Включаю…' : 'Включить') + '</button>');
+  if (PUSH.prefs && PUSH.list) {
+    var sw = function (k, label) { var on = !!PUSH.prefs[k]; return '<button class="sw" role="switch" aria-checked="' + on + '" data-pk="' + k + '"><span class="lb">' + esc(label) + '</span><i></i></button>'; };
+    h += '<div class="grp2">О чём сообщать</div>' + PUSH.list.map(function (x) { return sw(x[0], x[1]); }).join('');
+    h += '<div class="grp2" style="margin-top:16px">Telegram</div>' + sw('silent', 'Сообщения бота – без звука, когда пришло уведомление');
+    h += '<p class="note">Настройки общие для всех Ваших устройств. Устройств с уведомлениями: ' + PUSH.n + '. Отвечать клиенту по-прежнему удобно в Telegram свайпом – текстом, фото или голосом.</p>';
+  } else if (PUSH.err) h += '<p class="msg bad">' + esc(PUSH.err) + '</p>';
+  else if (hasDev() && API) h += '<p class="msg">Загружаю настройки…</p>';
+  h += '<p class="msg' + (PUSH.bad ? ' bad' : '') + '" role="status">' + esc(PUSH.msg) + '</p></div>';
+  pshEl.innerHTML = h;
+}
+function say(t, bad) { PUSH.msg = t; PUSH.bad = !!bad; paintPush(); }
+function pushClick(b) {
+  if (b.hasAttribute('data-push')) return openPush();
+  var a = b.getAttribute('data-pa'), k = b.getAttribute('data-pk');
+  if (a === 'close') return closePush();
+  if (PUSH.busy) return;
+  if (k) {
+    if (!PUSH.prefs) return;
+    var v = !PUSH.prefs[k], set = {}; set[k] = v;
+    PUSH.prefs[k] = v; paintPush();
+    LFPush.prefs(API, pAuth(), set).then(function (r) {
+      if (r && r.ok) { PUSH.prefs = r.prefs; say('Сохранено'); }
+      else { PUSH.prefs[k] = !v; say(cap((r && r.error) || 'не сохранилось') + ' – попробуйте ещё раз', true); }
+    });
+    return;
+  }
+  if (a === 'on') {
+    PUSH.busy = 'on'; say('');
+    LFPush.enable(API, pAuth(), 'tr').then(function (r) {                 // разрешение спрашивается сразу – пока идёт нажатие
+      PUSH.busy = '';
+      if (r && r.ok) { PUSH.st = 'on'; PUSH.n = Math.max(PUSH.n, 1); say('Включено. Нажмите «Проверить» – уведомление придёт за несколько секунд.'); }
+      else { if (r && r.denied) PUSH.st = 'denied'; say(cap((r && r.error) || 'не получилось'), true); }
+      paintNav(); loadPush();
+    });
+  } else if (a === 'off') {
+    PUSH.busy = 'off'; paintPush();
+    LFPush.disable(API, pAuth(), true).then(function () { PUSH.busy = ''; PUSH.st = 'off'; say('Выключено на этом телефоне.'); paintNav(); loadPush(); });
+  } else if (a === 'test') {
+    PUSH.busy = 'test'; paintPush();
+    LFPush.test(API, pAuth(), 'tr').then(function (r) {
+      PUSH.busy = '';
+      say(r && r.ok ? 'Отправил – уведомление придёт через несколько секунд. Не пришло – проверьте, что для «Lite Fit тренер» разрешены уведомления и выключен режим «Фокус».' : cap((r && r.error) || 'не получилось'), !(r && r.ok));
+    });
+  }
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pshEl.hidden) closePush(); });
+
 /* ---------- старт ---------- */
 (function start() {
   var s = (location.hash || '').replace(/^#/, '') || qs.get('s') || 'home';
@@ -258,6 +390,8 @@ window.addEventListener('message', function (e) {
   if (appOf(s) === 'B') load('B');
   send(appOf(s), { type: 'nav', s: s });
   if (hasDev() && !F.B) setTimeout(function () { load('B'); }, 2500);
+  if (hasDev()) setTimeout(pushBoot, 1500);
+  if (qs.get('push') === '1') setTimeout(openPush, 300);                   // ссылка сразу на настройки уведомлений
 })();
 })();
 </script>
