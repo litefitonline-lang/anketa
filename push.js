@@ -1,4 +1,4 @@
-/* LF-PUSH 1.0 – уведомления на телефон для страниц тренировок и кабинета клиента (общий файл, лежит рядом с sw.js).
+/* LF-PUSH 1.1 – уведомления на телефон для страниц тренировок и кабинета клиента (общий файл, лежит рядом с sw.js).
  * window.LFPush:
  *   status()              → Promise<'unsupported' | 'install' | 'denied' | 'on' | 'off'>  ('install' – iPhone: сначала значок на экран «Домой»)
  *   enable(api, k, from)  → Promise<{ ok, error }>   вызывать прямо из нажатия кнопки (iPhone спрашивает разрешение только так)
@@ -6,6 +6,8 @@
  *   test(api, k, from)    → Promise<{ ok, error }>
  *   sync(api, k)          – при открытии: подписка есть на телефоне, а сервер её забыл – прислать снова
  *   prefetch(urls)        – скачать ролики заранее (сервис-воркер)
+ * 1.1: на iPhone со значка карточка показывается всегда – если телефон не может включить уведомления, «Включить» объясняет
+ *   почему (старая iOS, служба приложения не запустилась). Проверка состояния не ждёт дольше 6 секунд.
  */
 (function () {
   var SW = '../sw.js', SCOPE = '../', P = {};
@@ -13,11 +15,26 @@
   P.ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   P.standalone = function () { return navigator.standalone === true || !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches); };
   P.supported = function () { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && window.isSecureContext === true; };
+  /** Почему нельзя: '' – можно. */
+  P.why = function () {
+    if (window.isSecureContext !== true) return 'уведомления работают только по защищённой ссылке https';
+    if (P.ios && !P.standalone()) return 'на iPhone уведомления работают из значка Lite Fit на экране «Домой» (iOS 16.4 и новее)';
+    if (!('serviceWorker' in navigator)) return P.ios ? 'на этом iPhone старая iOS – уведомления появятся после обновления до iOS 16.4 или новее (Настройки → Основные → Обновление ПО)' : 'этот браузер не умеет уведомления';
+    if (!('PushManager' in window) || !('Notification' in window)) {
+      var v = (navigator.userAgent.match(/OS (\d+)_(\d+)/) || []);
+      return P.ios ? 'на этом iPhone' + (v[1] ? ' iOS ' + v[1] + '.' + v[2] : '') + ' – уведомления работают с iOS 16.4: Настройки → Основные → Обновление ПО, потом удалите значок Lite Fit и добавьте его снова' : 'этот браузер не умеет уведомления';
+    }
+    return '';
+  };
+  function wait(p, ms, val) { return Promise.race([p, new Promise(function (ok) { setTimeout(function () { ok(val); }, ms); })]); }
 
   var regP = null;
   P.reg = function () {
     if (!('serviceWorker' in navigator) || !window.isSecureContext) return Promise.reject(new Error('sw'));
-    if (!regP) regP = navigator.serviceWorker.register(SW, { scope: SCOPE }).then(function () { return navigator.serviceWorker.ready; });
+    if (!regP) regP = navigator.serviceWorker.register(SW, { scope: SCOPE }).then(function (r) {
+      return wait(navigator.serviceWorker.ready, 8000, null).then(function (x) { return x || r; });   // 1.1: не ждём бесконечно
+    });
+    regP.catch(function () { regP = null; });                                 // не вышло – в следующий раз заново
     return regP;
   };
 
@@ -42,14 +59,15 @@
   function getSub() { return P.reg().then(function (reg) { return reg.pushManager.getSubscription().then(function (s) { return { reg: reg, sub: s }; }); }); }
 
   P.status = function () {
-    if (!P.supported()) return Promise.resolve(P.ios && !P.standalone() ? 'install' : 'unsupported');
     if (P.ios && !P.standalone()) return Promise.resolve('install');
+    if (!P.supported()) return Promise.resolve(P.ios ? 'off' : 'unsupported');   // 1.1: iPhone со значка – карточка есть, «Включить» скажет почему нет
     if (Notification.permission === 'denied') return Promise.resolve('denied');
-    return getSub().then(function (x) { return x.sub && Notification.permission === 'granted' ? 'on' : 'off'; }).catch(function () { return 'unsupported'; });
+    return wait(getSub().then(function (x) { return x.sub && Notification.permission === 'granted' ? 'on' : 'off'; }), 6000, 'off')
+      .catch(function () { return P.ios ? 'off' : 'unsupported'; });
   };
 
   P.enable = function (api, k, from) {
-    if (!P.supported()) return Promise.resolve({ ok: false, error: P.ios ? 'на iPhone уведомления работают из значка на экране «Домой» (iOS 16.4 и новее)' : 'этот браузер не умеет уведомления' });
+    if (!P.supported()) return Promise.resolve({ ok: false, error: P.why() || 'этот браузер не умеет уведомления' });
     var ask = Notification.permission === 'granted' ? Promise.resolve('granted') : new Promise(function (ok) {
       var r = Notification.requestPermission(ok); if (r && r.then) r.then(ok);                  // спрашиваем сразу – пока идёт нажатие
     });
@@ -68,7 +86,8 @@
     }).catch(function (e) {
       var n = e && e.name, m = String((e && e.message) || e || '');
       return { ok: false, denied: n === 'NotAllowedError', error: n === 'NotAllowedError' ? 'телефон не разрешил уведомления – проверьте настройки уведомлений для Lite Fit'
-        : /[а-яё]/i.test(m) ? m : 'служба уведомлений телефона не ответила – попробуйте ещё раз позже' };
+        : /[а-яё]/i.test(m) ? m : m === 'sw' || /service ?worker|registration/i.test(m) ? 'служба приложения не запустилась – закройте Lite Fit (смахните вверх) и откройте снова со значка'
+        : 'служба уведомлений телефона не ответила (' + (n || 'ошибка') + ') – попробуйте ещё раз позже' };
     });
   };
 
