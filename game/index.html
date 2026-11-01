@@ -179,7 +179,7 @@ h3{font-size:17px;font-weight:700;margin-bottom:8px}
 "use strict";
 /* =================== НАСТРОЙКИ =================== */
 var CFG = {
-  version: "1.5",
+  version: "1.6",
   anketa: "https://litefitonline-lang.github.io/anketa/",   // анкета: FREE выбран, результат игры – в «Метке источника»
   channel: "https://t.me/lite_fit_online",
   site: "https://taplink.cc/litefit",
@@ -363,7 +363,7 @@ function art(slot, ico, opt){
     fit(box); PX.add(stage);
   }
   function full(){ load(src + ".jpg", function(im){ show(im, null); }, function(){}); }
-  if (CFG.layered && !opt.single) load(src + "-hero.webp", function(h){ load(src + "-bg.jpg", function(b){ show(b, h); }, full); }, full);
+  if (CFG.layered && !opt.single) load(src + "-hero.webp?v=" + CFG.version, function(h){ load(src + "-bg.jpg", function(b){ show(b, h); }, full); }, full);
   else full();
   return box;
 }
@@ -744,7 +744,7 @@ tgInit(); setTimeout(tgInit, 800);
 })();
 
 // заранее подгрузить картинки сцен выбранного героя
-function preload(){ if (!S.g || !CFG.layered) return; for (var i = 1; i <= 7; i++) ["-bg.jpg", "-hero.webp"].forEach(function(x){ var im = new Image(); im.src = CFG.img + "s" + i + "-" + S.g + x; }); }
+function preload(){ if (!S.g || !CFG.layered) return; for (var i = 1; i <= 7; i++) ["-bg.jpg", "-hero.webp"].forEach(function(x){ var im = new Image(); im.src = CFG.img + "s" + i + "-" + S.g + x + (x == "-hero.webp" ? "?v=" + CFG.version : ""); }); }
 document.addEventListener("click", function once(e){ if (S.g) { preload(); document.removeEventListener("click", once); } });
 
 cover();
