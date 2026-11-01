@@ -37,8 +37,12 @@ p,h1,h2,h3{margin:0}
 
 /* картинка сцены */
 .art{position:relative;aspect-ratio:3/4;max-height:52vh;width:100%;border-radius:22px;overflow:hidden;background:radial-gradient(120% 80% at 50% 30%,#123335 0%,#0A1719 55%,#070E10 100%);border:1px solid var(--line);margin:0 auto 16px;flex:none}
-.art.short{max-height:34vh}
-.art.scene{max-height:44vh}
+.art.short{max-height:34vh;max-height:36svh}
+.art.scene{max-height:46vh;max-height:48svh}
+.art .back{position:absolute;inset:-12%;background:center/cover no-repeat;filter:blur(18px) brightness(.55) saturate(1.1);transform:scale(1.05)}
+.snd{width:34px;height:34px;flex:none;border:0;border-radius:50%;background:var(--card);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.snd svg{width:18px;height:18px}
+.snd.on{color:var(--acc)}
 .art .ph{position:absolute;inset:0;display:grid;place-items:center}
 .art .ph svg{width:38%;max-width:150px;height:auto;stroke:var(--acc);opacity:.85;filter:drop-shadow(0 0 18px rgba(62,214,206,.35))}
 .art img,.art video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
@@ -175,12 +179,13 @@ h3{font-size:17px;font-weight:700;margin-bottom:8px}
 "use strict";
 /* =================== НАСТРОЙКИ =================== */
 var CFG = {
-  version: "1.3",
+  version: "1.5",
   anketa: "https://litefitonline-lang.github.io/anketa/",   // анкета: FREE выбран, результат игры – в «Метке источника»
   channel: "https://t.me/lite_fit_online",
   site: "https://taplink.cc/litefit",
   self: "https://litefitonline-lang.github.io/anketa/game/",
   img: "img/",                         // папка с картинками рядом со страницей
+  music: "img/music.mp3",              // 1.4: фоновая музыка (нет файла – кнопки звука нет)
   // 1.2: картинка из двух слоёв – <слот>-bg.jpg (фон без героя) и <слот>-hero.webp (герой на прозрачном фоне);
   // слоёв нет – <слот>.jpg целиком; нет и его – значок-заглушка
   layered: true
@@ -353,6 +358,7 @@ function art(slot, ico, opt){
     stage.appendChild(fl);
     if (heroIm) { var h = el("div", "lay fig"); heroIm.className = "breath"; h.appendChild(heroIm); stage.appendChild(h); stage.appendChild(ft); }
     stage._ratio = bgIm.naturalWidth / bgIm.naturalHeight;
+    if (!opt.single) { box.classList.add("whole"); var bk = el("div", "back"); bk.style.backgroundImage = "url(" + bgIm.src + ")"; box.insertBefore(bk, box.firstChild); }
     box.insertBefore(stage, box.firstChild.nextSibling); box.classList.add("ok");
     fit(box); PX.add(stage);
   }
@@ -365,7 +371,9 @@ function art(slot, ico, opt){
 function fit(box){
   var st = box.querySelector(".stage"); if (!st || !st._ratio) return;
   var bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) { requestAnimationFrame(function(){ fit(box); }); return; }
-  var w = bw, h = bw / st._ratio; if (h < bh) { h = bh; w = bh * st._ratio; }
+  var w = bw, h = bw / st._ratio;
+  if (box.classList.contains("whole")) { if (h > bh) { h = bh; w = bh * st._ratio; } }   // 1.4: картинка целиком, по бокам – размытая копия
+  else if (h < bh) { h = bh; w = bh * st._ratio; }
   st.style.width = w + "px"; st.style.height = h + "px"; st.style.left = (bw - w) / 2 + "px"; st.style.top = (bh - h) / 2 + "px";
 }
 window.addEventListener("resize", function(){ [].forEach.call(document.querySelectorAll(".art"), fit); });
@@ -381,9 +389,9 @@ var PX = (function(){
     cx += (tx - cx) * .06; cy += (ty - cy) * .06;
     list.forEach(function(s){
       var b = s.querySelector(".bg"), f = s.querySelector(".fxl"), h = s.querySelector(".fig");
-      var tb = "translate3d(" + (-cx * 5).toFixed(2) + "px," + (-cy * 4).toFixed(2) + "px,0) scale(1.06)";
+      var tb = "translate3d(" + (-cx * 5).toFixed(2) + "px," + (-cy * 4).toFixed(2) + "px,0) scale(1.03)";
       if (b) b.style.transform = tb; if (f) f.style.transform = tb;
-      var th = "translate3d(" + (cx * 7).toFixed(2) + "px," + (cy * 4).toFixed(2) + "px,0) scale(1.06)";
+      var th = "translate3d(" + (cx * 7).toFixed(2) + "px," + (cy * 4).toFixed(2) + "px,0) scale(1.03)";
       if (h) h.style.transform = th; var t2 = s.querySelector(".fxt"); if (t2) t2.style.transform = th;
     });
     requestAnimationFrame(loop);
@@ -411,8 +419,28 @@ function top(progress, label){
   if (progress == null) t.appendChild(el("div", "brand", "LITE FIT"));
   else { var b = el("div", "bar", "<i></i>"); t.appendChild(b); setTimeout(function(){ b.firstChild.style.width = Math.round(progress * 100) + "%"; }, 30); }
   if (label) t.appendChild(el("div", "cnt", label));
+  if (MUS.ok) t.appendChild(MUS.btn());
   return t;
 }
+
+/* 1.4: фоновая музыка – включается кнопкой «Начать» (браузеры не дают играть звук без нажатия), выключается кнопкой вверху. */
+var MUS = (function(){
+  var a = null, want = true, M = { ok: false };
+  try { want = localStorage.getItem("lf_game_snd") !== "0"; } catch(e){}
+  var I_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>';
+  var I_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+  function paint(){ [].forEach.call(document.querySelectorAll(".snd"), function(b){ var on = want && a && !a.paused; b.classList.toggle("on", on); b.innerHTML = on ? I_ON : I_OFF; b.setAttribute("aria-label", on ? "Выключить музыку" : "Включить музыку"); }); }
+  if (CFG.music) {
+    a = new Audio(); a.loop = true; a.preload = "auto"; a.volume = .35;
+    a.oncanplaythrough = function(){ if (!M.ok) { M.ok = true; [].forEach.call(document.querySelectorAll(".top"), function(t){ if (!t.querySelector(".snd")) t.appendChild(M.btn()); }); } };
+    a.onplay = a.onpause = paint;
+    a.src = CFG.music;
+  }
+  M.start = function(){ if (a && want) { var p = a.play(); if (p && p.catch) p.catch(function(){}); } };
+  M.btn = function(){ var b = el("button", "snd"); b.type = "button"; b.onclick = function(){ want = !(want && !a.paused); try { localStorage.setItem("lf_game_snd", want ? "1" : "0"); } catch(e){} if (want) M.start(); else a.pause(); paint(); }; setTimeout(paint, 0); return b; };
+  document.addEventListener("visibilitychange", function(){ if (!a) return; if (document.hidden) a.pause(); else if (want && M.started) M.start(); });
+  return M;
+})();
 
 /* =================== экраны =================== */
 function cover(){
@@ -422,7 +450,7 @@ function cover(){
   s.appendChild(el("h1", "", "Один день после&nbsp;30"));
   s.appendChild(el("p", "lead", "Узнаёте себя? Проживите обычный день – 7 коротких сцен – и узнайте, что мешает начать и что поможет."));
   s.appendChild(el("div", "sp"));
-  s.appendChild(btn("pri", "Начать – 3 минуты", function(){ haptic(); PX.ask(); pickHero(); }));
+  s.appendChild(btn("pri", "Начать – 3 минуты", function(){ haptic(); PX.ask(); MUS.started = true; MUS.start(); pickHero(); }));
 }
 
 function pickHero(){
@@ -695,11 +723,25 @@ function tgInit(){
     var w = window.Telegram && window.Telegram.WebApp;
     if (w && w.initData !== undefined && (w.initData || w.platform !== "unknown")) {
       TG = w; w.ready(); w.expand();
+      if (!ORIGIN) {                                                      // 1.5: открыто в Telegram – метка «tg» или «tg_<startapp>»
+        var sp = ""; try { sp = String((w.initDataUnsafe && w.initDataUnsafe.start_param) || "").replace(/[^\w.\-]/g, "").slice(0, 16); } catch(e){}
+        ORIGIN = sp ? "tg_" + sp : "tg";
+      }
       try { w.setHeaderColor("#05090B"); w.setBackgroundColor("#05090B"); } catch(e){}
     }
   } catch(e){}
 }
 tgInit(); setTimeout(tgInit, 800);
+/* 1.4: открыто как мини-приложение ВКонтакте (в адресе vk_app_id) – сообщить ВКонтакте, что игра загрузилась (VKWebAppInit). */
+(function(){
+  if (!/[?&]vk_app_id=/.test(location.search)) return;
+  if (!ORIGIN) ORIGIN = "vkapp";
+  try {
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.VKWebAppInit) window.webkit.messageHandlers.VKWebAppInit.postMessage({});
+    else if (window.AndroidBridge && window.AndroidBridge.VKWebAppInit) window.AndroidBridge.VKWebAppInit("{}");
+    else if (window.parent !== window) window.parent.postMessage({ handler: "VKWebAppInit", params: {}, type: "vk-connect" }, "*");
+  } catch(e){}
+})();
 
 // заранее подгрузить картинки сцен выбранного героя
 function preload(){ if (!S.g || !CFG.layered) return; for (var i = 1; i <= 7; i++) ["-bg.jpg", "-hero.webp"].forEach(function(x){ var im = new Image(); im.src = CFG.img + "s" + i + "-" + S.g + x; }); }
