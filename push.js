@@ -1,4 +1,4 @@
-/* LF-PUSH 1.1 – уведомления на телефон для страниц тренировок и кабинета клиента (общий файл, лежит рядом с sw.js).
+/* LF-PUSH 1.2 – уведомления на телефон для страниц тренировок и кабинета клиента (общий файл, лежит рядом с sw.js).
  * window.LFPush:
  *   status()              → Promise<'unsupported' | 'install' | 'denied' | 'on' | 'off'>  ('install' – iPhone: сначала значок на экран «Домой»)
  *   enable(api, k, from)  → Promise<{ ok, error }>   вызывать прямо из нажатия кнопки (iPhone спрашивает разрешение только так)
@@ -6,6 +6,9 @@
  *   test(api, k, from)    → Promise<{ ok, error }>
  *   sync(api, k)          – при открытии: подписка есть на телефоне, а сервер её забыл – прислать снова
  *   prefetch(urls)        – скачать ролики заранее (сервис-воркер)
+ * 1.2: кабинет тренера – вместо ключа клиента k передаётся { t, d } (ключ тренера и устройство); P.prefs – о чём сообщать;
+ *   status(api, auth) сверяет с сервером, выключено ли здесь; disable(…, keep) – выключить на сервере, не трогая телефон
+ *   (у клиента и тренера на одном телефоне подписка общая).
  * 1.1: на iPhone со значка карточка показывается всегда – если телефон не может включить уведомления, «Включить» объясняет
  *   почему (старая iOS, служба приложения не запустилась). Проверка состояния не ждёт дольше 6 секунд.
  */
@@ -44,6 +47,11 @@
       .then(function (r) { return r.text(); }).then(function (x) { clearTimeout(t); return JSON.parse(x); })
       .catch(function () { clearTimeout(t); return { ok: false, net: true, error: 'нет связи с сервером – проверьте интернет и повторите' }; });
   }
+  /** Кто: ключ клиента (строка) или тренер { t, d } – поля запроса. */
+  function who(auth, body) {
+    if (auth && typeof auth === 'object') { body.t = auth.t; body.d = auth.d; } else body.k = auth;
+    return body;
+  }
   function u8(b64) {
     var s = String(b64).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '=';
     var raw = atob(s), out = new Uint8Array(raw.length);
@@ -58,12 +66,15 @@
   }
   function getSub() { return P.reg().then(function (reg) { return reg.pushManager.getSubscription().then(function (s) { return { reg: reg, sub: s }; }); }); }
 
-  P.status = function () {
+  P.status = function (api, auth) {
     if (P.ios && !P.standalone()) return Promise.resolve('install');
     if (!P.supported()) return Promise.resolve(P.ios ? 'off' : 'unsupported');   // 1.1: iPhone со значка – карточка есть, «Включить» скажет почему нет
     if (Notification.permission === 'denied') return Promise.resolve('denied');
-    return wait(getSub().then(function (x) { return x.sub && Notification.permission === 'granted' ? 'on' : 'off'; }), 6000, 'off')
-      .catch(function () { return P.ios ? 'off' : 'unsupported'; });
+    return wait(getSub().then(function (x) {
+      if (!(x.sub && Notification.permission === 'granted')) return 'off';
+      if (!api || !auth) return 'on';
+      return post(api, who(auth, { a: 'push', op: 'state', endpoint: x.sub.endpoint })).then(function (r) { return r && r.ok && !r.on ? 'off' : 'on'; });   // 1.2: выключено на сервере
+    }), 6000, 'off').catch(function () { return P.ios ? 'off' : 'unsupported'; });
   };
 
   P.enable = function (api, k, from) {
@@ -79,8 +90,8 @@
         var go = cur && ls('lf_push_srv') === key ? Promise.resolve(cur) : (cur ? cur.unsubscribe().then(make, make) : make());
         return go.then(function (sub) {
           ls('lf_push_srv', key);
-          return post(api, { a: 'push', op: 'sub', k: k, from: from || '', sub: sub.toJSON(), ua: (P.ios ? 'iPhone' : /Android/.test(navigator.userAgent) ? 'Android' : 'компьютер') + ' · ' + String(navigator.userAgent).slice(0, 60) })
-            .then(function (r) { if (r && r.ok) ls('lf_push_on', '1'); return r; });
+          return post(api, who(k, { a: 'push', op: 'sub', from: from || '', sub: sub.toJSON(), ua: (P.ios ? 'iPhone' : /Android/.test(navigator.userAgent) ? 'Android' : 'компьютер') + ' · ' + String(navigator.userAgent).slice(0, 60) }))
+            .then(function (r) { if (r && r.ok) ls(typeof k === 'object' ? 'lf_push_tr' : 'lf_push_on', '1'); return r; });
         });
       });
     }).catch(function (e) {
@@ -91,27 +102,30 @@
     });
   };
 
-  P.disable = function (api, k) {
+  P.disable = function (api, k, keep) {
     return getSub().then(function (x) {
-      ls('lf_push_on', null);
+      ls(typeof k === 'object' ? 'lf_push_tr' : 'lf_push_on', null);
       if (!x.sub) return { ok: true };
-      var e = x.sub.endpoint;
-      return x.sub.unsubscribe().catch(function () {}).then(function () { return post(api, { a: 'push', op: 'unsub', k: k, endpoint: e }); });
+      var e = x.sub.endpoint, srv = function () { return post(api, who(k, { a: 'push', op: 'unsub', endpoint: e })); };
+      return keep ? srv() : x.sub.unsubscribe().catch(function () {}).then(srv);
     }).catch(function () { return { ok: true }; });
   };
 
-  P.test = function (api, k, from) { return post(api, { a: 'push', op: 'test', k: k, from: from || '' }); };
+  P.test = function (api, k, from) { return post(api, who(k, { a: 'push', op: 'test', from: from || '' })); };
+  /** 1.2: тренер – о чём сообщать: прочитать (set не задан) или сохранить { com: true, … }. */
+  P.prefs = function (api, auth, set) { return post(api, who(auth, set ? { a: 'push', op: 'tprefs', set: set } : { a: 'push', op: 'tprefs' })); };
 
   P.sync = function (api, k) {
-    if (!P.supported() || Notification.permission !== 'granted' || !ls('lf_push_on')) return;
+    var tr = typeof k === 'object', flag = tr ? 'lf_push_tr' : 'lf_push_on', sk = tr ? 'lf_push_sync_tr' : 'lf_push_sync';
+    if (!P.supported() || Notification.permission !== 'granted' || !ls(flag)) return;
     var day = new Date().toISOString().slice(0, 10);
-    if (ls('lf_push_sync') === day) return;                                  // раз в день достаточно
+    if (ls(sk) === day) return;                                              // раз в день достаточно
     getSub().then(function (x) {
       if (!x.sub) return;
-      return post(api, { a: 'push', op: 'state', k: k, endpoint: x.sub.endpoint }).then(function (r) {
+      return post(api, who(k, { a: 'push', op: 'state', endpoint: x.sub.endpoint })).then(function (r) {
         if (!r || !r.ok) return;
-        ls('lf_push_sync', day);
-        if (!r.on) return post(api, { a: 'push', op: 'sub', k: k, sub: x.sub.toJSON(), ua: 'повторно · ' + String(navigator.userAgent).slice(0, 60) });
+        ls(sk, day);
+        if (!r.on) return post(api, who(k, { a: 'push', op: 'sub', sub: x.sub.toJSON(), ua: 'повторно · ' + String(navigator.userAgent).slice(0, 60) }));
       });
     }).catch(function () {});
   };
