@@ -786,6 +786,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.2, правка 02.11: следующий пакет уже оплачен, но ещё не начался – «Тренировок в пакете: 4 (с 03.11 – 8)», в «Оплатах»
+ *   у «Пакета» – «(с 03.11 – 30 дн., тренировок: 8)». Версия для сервера прежняя – 2.2.
  * 2.2 (01.11.2026). Голосовые в «Написать клиенту» (общий файл voice.js): под текстом – «Записать голосовое» (до 3 минут,
  *   прослушать, записать заново или удалить перед отправкой); голосовое уходит клиенту в бот и в приложение (вкладка «Тренер»),
  *   можно без текста; запрос с голосовым ждёт ответа до 2 минут. В переписке у голосовых – «Голосовое – слушать» (op cfile).
@@ -858,7 +860,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '2.2';
-var PATCH = '';                  // правка страницы без смены версии сервера
+var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -1955,7 +1957,7 @@ function aboutCard(c) {
   if (k.inv) rows += kv('Инвентарь', esc(k.inv));
   if (c.health) rows += kv('Здоровье', '<span style="color:var(--warm)">' + esc(c.health) + '</span>');   // 2.0
   if (!c.table && (a.weight || a.height || a.age)) rows += kv('По анкете', [a.sex ? (a.sex === 'Ж' ? 'жен.' : 'муж.') : '', a.age ? a.age + ' ' + plural(a.age, 'год', 'года', 'лет') : '', a.height ? a.height + ' см' : '', a.weight ? numTxt(a.weight) + ' кг' : ''].filter(String).join(' · '));
-  if (c.sessTotal) rows += kv('Тренировок в пакете', c.sessTotal);
+  if (c.sessTotal || payNext(c)) rows += kv('Тренировок в пакете', sessTxt(c));
   rows += kv('Телефон', c.phone ? '<a href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '" style="color:var(--accent);text-decoration:none">' + esc(c.phone) + '</a>' : '—');
   return '<div class="card"><h3>О клиенте</h3><div class="kvs">' + rows + '</div>' + (c.note ? '<p class="note">Заметки: ' + esc(c.note) + '</p>' : '') + '</div>';
 }
@@ -2235,7 +2237,7 @@ function subCare(c) {
   h += '<div class="card"><h3>Статус и формат</h3><div class="kvs">' + kv('Статус', esc(c.status || '—')) + kv('Формат', esc(c.format || 'не выбран')) +
     (c.loaded && c.start ? kv('Дневник', dm(c.start) + ' – ' + dm(c.end)) : '') + (tr ? kv('Пробный кабинет', dm(c.trial.from) + ' – ' + dm(c.trial.to)) : '') +
     (c.payEnd ? kv('Оплачено до', dm(c.payEnd) + '.' + c.payEnd.slice(0, 4)) : '') + (c.payStatus ? kv('Статус оплаты', esc(c.payStatus)) : '') +
-    (c.sessTotal ? kv('Тренировок в пакете', c.sessTotal) : '') + (c.proFrom ? kv('Старт PRO', dm(c.proFrom)) : '') + '</div>' +
+    (c.sessTotal || payNext(c) ? kv('Тренировок в пакете', sessTxt(c)) : '') + (c.proFrom ? kv('Старт PRO', dm(c.proFrom)) : '') + '</div>' +
     (c.arch ? '<div class="btns one"><button class="btn sec" data-act="statusForm">Сменить статус</button></div>'
       : '<div class="btns">' + '<button class="btn sec" data-act="statusForm">Сменить статус</button>' + (c.fmtTo && c.fmtTo.length ? '<button class="btn sec" data-act="fmtForm">Сменить формат</button>' : '') +
         (c.table && !tr ? '<button class="btn sec" data-act="extend">Продлить дневник</button>' : '') + '</div>') + fmtNote(c) +
@@ -2359,6 +2361,20 @@ function subClient(c) {
 
 /* ---------- вкладка «Оплаты» ---------- */
 function payTo(p) { return p.end || (p.next ? ymd(dn(p.next) - 1) : ''); }
+/** Правка 02.11: ближайшая оплата, период которой ещё не начался (новый пакет «впереди»). */
+function payNext(c) {
+  return (c.pays || []).filter(function (p) { return p.start && dn(p.start) > T; }).sort(function (a, b) { return dn(a.start) - dn(b.start); })[0] || null;
+}
+/** «4 (с 03.11 – 8)»: тренировок в текущем пакете и в следующем, если он уже оплачен и число другое. */
+function sessTxt(c) {
+  var cur = c.sessTotal ? String(c.sessTotal) : '', n = payNext(c), nx = n && n.sess ? String(n.sess) : '';
+  if (!nx || nx === cur) return esc(cur || '—');
+  return cur ? esc(cur) + ' <span class="muted">(с ' + dm(n.start) + ' – ' + esc(nx) + ')</span>' : '<span class="muted">с ' + dm(n.start) + ' – </span>' + esc(nx);
+}
+function nextPkgTxt(c, curP) {
+  var n = payNext(c); if (!n) return '';
+  return ' <span class="muted">(с ' + dm(n.start) + ' – ' + (n.days ? n.days + ' дн.' : 'новый пакет') + (n.sess ? ', тренировок: ' + esc(n.sess) : '') + ')</span>';
+}
 function payNow(p) { return !!(p.start && p.next && dn(p.start) <= T && T < dn(p.next)); }
 function payOf(c, row) { return (c.pays || []).filter(function (p) { return String(p.row) === String(row); })[0] || null; }
 function payHit(c, y, skipRow) { var n = dn(y); return (c.pays || []).filter(function (p) { return String(p.row) !== String(skipRow) && p.start && p.next && dn(p.start) <= n && n < dn(p.next); })[0] || null; }
@@ -2367,7 +2383,7 @@ function subPay(c) {
   if (!c.pays) return c.err ? loadingCard(c) : '<div class="card"><p class="muted" style="margin:0">Оплаты и заморозки загружаются…</p></div>';
   var curP = c.pays.filter(payNow)[0], nx = c.payEnd ? ymd(dn(c.payEnd) + 1) : '', h = '';
   h += '<div class="card"><h3>Оплата</h3><div class="kvs">' + kv('Оплачено до', c.payEnd ? dm(c.payEnd) + '.' + c.payEnd.slice(0, 4) : '—') +
-    kv('Пакет', curP ? curP.days + ' дн.' + (curP.sess ? ' · тренировок: ' + esc(curP.sess) : '') : c.period ? c.period + ' дн.' : '—') +
+    kv('Пакет', (curP ? curP.days + ' дн.' + (curP.sess ? ' · тренировок: ' + esc(curP.sess) : '') : c.period ? c.period + ' дн.' : '—') + nextPkgTxt(c, curP)) +
     kv('Следующая оплата', nx ? dm(nx) + (dn(nx) - T >= 0 && dn(nx) - T <= 5 ? ' <span style="color:var(--warm)">– через ' + days(dn(nx) - T) + '</span>' : dn(nx) < T ? ' <span style="color:var(--warm)">– просрочена</span>' : '') : '—') +
     kv('Статус оплаты', esc(c.payStatus || '—')) + kv('Скидка Lite Fit', c.disc ? c.disc.pct + ' % с ' + dm(c.disc.from) : 'нет') + '</div>' +
     (c.arch ? '' : '<div class="btns"><button class="btn pri" data-act="payForm">Внести оплату</button><button class="btn sec" data-act="frzForm">Заморозка</button></div>') + '</div>';
