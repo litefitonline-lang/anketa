@@ -786,6 +786,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.3, правка 02.11: «Новый кабинет» → «Да, отправить» и «ВКонтакте» отказывали «Запрос без номера – обновите страницу»: эти
+ *   действия сервер принимает только с номером запроса (jid), а страница его не ставила. Добавлены в WRITE.
  * 2.3 (02.11.2026). Скидка в оплате: «без скидки» / «есть скидка» – цена по прайсу и скидка в %, «Сумма» считается сама
  *   (990 ₽, 100 % → 0 ₽; поменяли сумму – пересчитается процент). В рабочий чат – «Цена по прайсу: 990 ₽ · скидка 100 % · оплата 0 ₽»
  *   и причина отдельной строкой (lite-fit-fix 1.5).
@@ -863,7 +865,7 @@ function planBody(x) {
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
 var VERSION = '2.3';
-var PATCH = '';                  // правка страницы без смены версии сервера
+var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -1015,7 +1017,7 @@ function stShort(s) { return String(s || '').replace(/^\S+\s+/, ''); }
 /* ================= СВЯЗЬ С СЕРВЕРОМ ================= */
 var WRITE = { norm: 1, normf: 1, calc: 1, steps: 1, plan: 1, plandel: 1, plancopy: 1, meas: 1, guide: 1, remind: 1, pay: 1, freeze: 1, freezedel: 1, status: 1, extend: 1,
   topro: 1, trial: 1, create: 1, take: 1, cablink: 1, cabreset: 1, msg: 1, fb: 1, mrsave: 1, mrsend: 1, taskadd: 1, taskdel: 1, ctask: 1,
-  freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1 };
+  freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1, newlink: 1, vklink: 1 };   // 2.3, правка 02.11: newlink, vklink
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /** 2.1: ms – сколько ждать ответа (по умолчанию 30 с); не ответил – запрос обрывается и считается сбоем связи. */
