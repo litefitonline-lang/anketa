@@ -786,6 +786,9 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.3 (02.11.2026). Скидка в оплате: «без скидки» / «есть скидка» – цена по прайсу и скидка в %, «Сумма» считается сама
+ *   (990 ₽, 100 % → 0 ₽; поменяли сумму – пересчитается процент). В рабочий чат – «Цена по прайсу: 990 ₽ · скидка 100 % · оплата 0 ₽»
+ *   и причина отдельной строкой (lite-fit-fix 1.5).
  * 2.2, правка 02.11: следующий пакет уже оплачен, но ещё не начался – «Тренировок в пакете: 4 (с 03.11 – 8)», в «Оплатах»
  *   у «Пакета» – «(с 03.11 – 30 дн., тренировок: 8)». Версия для сервера прежняя – 2.2.
  * 2.2 (01.11.2026). Голосовые в «Написать клиенту» (общий файл voice.js): под текстом – «Записать голосовое» (до 3 минут,
@@ -859,8 +862,8 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.2';
-var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера
+var VERSION = '2.3';
+var PATCH = '';                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
 /* 1.8: внутри общего кабинета (cabinet/trainer.html) – без своего меню; на компьютере – широкая раскладка */
@@ -2415,27 +2418,40 @@ function subPay(c) {
   }).join('') + '</div>';
   return h + '<p class="note">Клиент выполнил все тренировки раньше срока и платит за новый пакет? Нажмите «Закрыть досрочно» у текущего пакета – новый продолжит со следующего дня, без разрыва.</p></div>';
 }
-/** Поля скидки: в процентах или ценой по прайсу, и причина. x – оплата, которую меняют. */
+/** 2.3: поля скидки – цена по прайсу и скидка в %, «Сумма» считается сама; причина. x – оплата, которую меняют. */
 function discFields(p, x) {
-  var why = '', wt = '', list = L().dwhy || [], mode = x && x.price ? 'price' : '';
+  var why = '', wt = '', list = L().dwhy || [], on = !!(x && x.price);
   if (x && x.dwhy) { var i = x.dwhy.indexOf(': '), w0 = i > 0 ? x.dwhy.slice(0, i) : x.dwhy; if (list.indexOf(w0) >= 0) { why = w0; wt = i > 0 ? x.dwhy.slice(i + 2) : ''; } else { why = 'Индивидуально'; wt = x.dwhy; } }
-  return fs(p + 'DMode', 'Скидка', [['', 'без скидки'], ['pct', 'в процентах'], ['price', 'цена по прайсу']], mode, 'data-ch="dMode" data-p="' + p + '"') +
-    '<div id="' + p + 'DBox" class="frm"' + (mode ? '' : ' hidden') + '>' +
-    '<div id="' + p + 'PctW"' + (mode === 'pct' ? '' : ' hidden') + '>' + fi(p + 'Pct', 'Скидка, %', '', 'text', 'inputmode="numeric" placeholder="например, 10"') + '</div>' +
-    '<div id="' + p + 'PriceW"' + (mode === 'price' ? '' : ' hidden') + '>' + fi(p + 'Price', 'Цена по прайсу, ₽', x && x.price ? x.price : '', 'text', 'inputmode="numeric"') + '</div>' +
+  var pct = on ? (x.disc != null ? x.disc : Math.round((1 - (Number(x.sum) || 0) / x.price) * 100)) : '';
+  return fs(p + 'DMode', 'Скидка', [['', 'без скидки'], ['on', 'есть скидка']], on ? 'on' : '', 'data-ch="dMode" data-p="' + p + '"') +
+    '<div id="' + p + 'DBox" class="frm"' + (on ? '' : ' hidden') + '>' +
+    '<div class="grid2">' + fi(p + 'Price', 'Цена по прайсу, ₽', on ? x.price : '', 'text', 'inputmode="numeric" data-dc="' + p + '"') +
+    fi(p + 'Pct', 'Скидка, %', pct, 'text', 'inputmode="numeric" placeholder="10 или 100" data-dc="' + p + '"') + '</div>' +
+    '<p class="note" style="margin:0 0 10px">«Сумма» считается сама: цена по прайсу минус скидка. Бесплатный период – скидка 100 %, сумма 0.</p>' +
     fs(p + 'Why', 'Причина скидки', [['', '– выберите –']].concat(list), why) + fi(p + 'WhyT', 'Пояснение – для «Индивидуально» обязательно', wt, 'text', 'maxlength="100"') + '</div>';
 }
+/** 2.3: цена или скидка изменились – посчитать «Сумму». */
+function discCalc(p) {
+  if (val(p + 'DMode') !== 'on') return;
+  var price = num(p + 'Price'), pct = num(p + 'Pct'), el = document.getElementById(p + 'Sum');
+  if (!el || price === '' || isNaN(price) || price <= 0 || pct === '' || isNaN(pct) || pct < 0 || pct > 100) return;
+  el.value = String(Math.round(price * (100 - pct) / 100));
+}
+/** 2.3: «Сумму» поправили руками – пересчитать процент скидки. */
+function discBack(p) {
+  if (val(p + 'DMode') !== 'on') return;
+  var price = num(p + 'Price'), sum = num(p + 'Sum'), el = document.getElementById(p + 'Pct');
+  if (!el || price === '' || isNaN(price) || price <= 0 || sum === '' || isNaN(sum) || sum < 0 || sum > price) return;
+  el.value = String(Math.round((1 - sum / price) * 100));
+}
 function discRead(p, sum) {
-  var mode = val(p + 'DMode'), out = { price: '', dwhy: '' };
-  if (!mode) return out;
-  if (mode === 'pct') {
-    var pct = num(p + 'Pct');
-    if (badNum(pct, 1, 99)) return { err: 'Скидка в процентах: от 1 до 99. Для бесплатного периода выберите «цена по прайсу».' };
-    out.price = Math.round(sum / (1 - pct / 100));
-  } else {
-    out.price = num(p + 'Price');
-    if (out.price === '' || isNaN(out.price) || out.price < sum) return { err: 'Цена по прайсу – не меньше суммы оплаты.' };
-  }
+  var out = { price: '', dwhy: '' };
+  if (val(p + 'DMode') !== 'on') return out;
+  var price = num(p + 'Price'), pct = num(p + 'Pct');
+  if (price === '' || isNaN(price) || price <= 0) return { err: 'Укажите цену по прайсу.' };
+  if (pct === '' || isNaN(pct) || pct < 1 || pct > 100) return { err: 'Скидка – от 1 до 100 %. Бесплатный период – 100 %.' };
+  if (price < sum) return { err: 'Цена по прайсу – не меньше суммы оплаты.' };
+  out.price = price;
   var why = val(p + 'Why'), wt = val(p + 'WhyT');
   if (!why) return { err: 'Выберите причину скидки.' };
   if (why === 'Индивидуально' && wt.length < 3) return { err: 'Напишите, в чём индивидуальная скидка.' };
@@ -2754,7 +2770,7 @@ function payRead(p) {
   if (sum === '' || isNaN(sum) || sum < 0) return { err: 'Укажите сумму.' };
   var dq = discRead(p, sum);
   if (dq.err) return dq;
-  if (sum === 0 && dq.price === '') return { err: 'Сумма 0 – только для бесплатного периода: выберите «Скидка – цена по прайсу» и причину.' };
+  if (sum === 0 && dq.price === '') return { err: 'Сумма 0 – только для бесплатного периода: «Скидка» – «есть скидка», цена по прайсу и скидка 100 %.' };
   if (!val(p + 'How')) return { err: 'Выберите способ оплаты.' };
   if (!ss || ss === '-') return { err: 'Выберите, сколько тренировок в пакете – по нему в приложении тренировок встанет пакет «1 из N».' };   // 2.0 (правка 31.10)
   return { date: val(p + 'Date'), sum: sum, method: val(p + 'How'), pkg: val(p + 'Pkg'), sess: ss === '-' ? '' : ss, note: val(p + 'Note'), price: dq.price, dwhy: dq.dwhy };
@@ -3590,7 +3606,7 @@ document.addEventListener('change', function (e) {
   }
   if (!c) return;
   if (k === 'payMode') { var bx = document.getElementById('yStartBox'); if (bx) bx.hidden = v !== 'own'; return; }   // 2.0
-  if (k === 'dMode') { var px = e.target.getAttribute('data-p'), db = document.getElementById(px + 'DBox'); if (db) db.hidden = !v; var pw = document.getElementById(px + 'PctW'), rw = document.getElementById(px + 'PriceW'); if (pw) pw.hidden = v !== 'pct'; if (rw) rw.hidden = v !== 'price'; return; }
+  if (k === 'dMode') { var px = e.target.getAttribute('data-p'), db = document.getElementById(px + 'DBox'); if (db) db.hidden = !v; if (v) discCalc(px); return; }   // 2.3
   if (k === 'endWhy') { var eb = document.getElementById('eTxtBox'); if (eb) eb.hidden = v !== 'Другое'; return; }
   if (k === 'measEvery') inline('meas', { id: c.id, every: +v });
   else if (k === 'measMode') inline('meas', { id: c.id, mode: v });
@@ -3604,7 +3620,9 @@ document.addEventListener('change', function (e) {
   else if (k === 'remTz') inline('remind', { id: c.id, tz: v });
 });
 document.addEventListener('input', function (e) {
-  var id = e.target.id;
+  var id = e.target.id, dcp = e.target.getAttribute && e.target.getAttribute('data-dc');
+  if (dcp) return discCalc(dcp);                                         // 2.3: цена или скидка → сумма
+  if (/Sum$/.test(id || '') && document.getElementById(id.slice(0, -3) + 'DMode')) return discBack(id.slice(0, -3));   // сумма → скидка
   if (id === 'q') { S.q = e.target.value; var box = document.getElementById('clist'); if (box) box.innerHTML = clientRows(); }
   else if (id === 'mrCom' || id === 'mrGoal') mrBtns();
   else if (id === 'pin') { var g = document.getElementById('ferr'); if (g) g.textContent = ''; }
