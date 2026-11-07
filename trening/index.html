@@ -154,6 +154,9 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .ex-h .mn b{display:block;font-size:17px;font-weight:800;line-height:1.25;letter-spacing:-.01em;overflow-wrap:anywhere}
 .ex-h .mn small{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
 .last{font-size:13px;color:var(--muted);margin:0 0 12px;padding-left:10px;border-left:2px solid var(--line2)}
+.lastb{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0;padding:6px 12px;min-height:34px;border:1px solid var(--accent);border-radius:99px;background:transparent;color:var(--accent);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.lastb svg{width:15px;height:15px}
+.lastb:hover{background:rgba(62,214,206,.08)}
 .last b{color:var(--text);font-weight:700}
 .vid{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);margin-bottom:10px}
 .vid svg{width:18px;height:18px;color:var(--accent);flex:none}
@@ -185,6 +188,12 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .ib svg{width:18px;height:18px}
 .ib[disabled]{opacity:.3}
 .ib.del{color:var(--err);border-color:rgba(255,139,123,.3);margin-left:auto;width:auto;padding:0 14px;font-size:13.5px;font-weight:700;display:flex;gap:8px;align-items:center}
+.ib.swp{width:auto;padding:0 14px;font-size:13.5px;font-weight:700;display:flex;gap:8px;align-items:center;color:var(--accent);border-color:rgba(62,214,206,.35)}
+.ib.swp.on{background:rgba(62,214,206,.1)}
+@media (max-width:420px){.ex-f{flex-wrap:wrap}.ex-f .ib.swp{order:5;flex:1 1 100%;justify-content:center}}   /* 4.14: на телефоне «Заменить» – строкой ниже */
+.swbox{margin-top:12px;padding:12px;border:1px solid rgba(62,214,206,.35);border-radius:14px;background:rgba(62,214,206,.04)}
+.swbox h4{margin:0 0 4px;font-size:14.5px}
+.swbox .sugg{margin-top:8px}
 .txtb{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;font-weight:700;color:var(--accent)}
 .txtb svg{width:18px;height:18px}
 .res{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line2);font-size:14px}
@@ -556,7 +565,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
   /* тренировка: упражнения в колонках, «Следующее упражнение» – следующей клеткой; «Сохранить» – полосой внизу */
   body.tr .ed-head{max-width:560px}
   body.tr .ed.has-ref{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
-  body.tr .ed-ref{position:sticky;top:14px;max-height:calc(100vh - 110px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+  body.tr .ed-ref{position:sticky;top:14px;max-height:calc(100vh - 110px);overflow-y:auto;overflow-anchor:none;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
   body.tr .ed-ref .card{margin:0}
   body.tr .ed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;align-items:start}
   body.tr .ed-grid>.card,body.tr .ed-grid>.sup{margin:0}
@@ -792,6 +801,14 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.14 (07.11.2026). Сервер – без изменений (сохранение – прежним { op:'save' }). Тренер, редактор тренировки: внизу
+ *   упражнения кнопка «Заменить» – поиск по базе (сразу – упражнения той же группы мышц) или своё упражнение; подходы, вес,
+ *   повторы, суперсет и место в тренировке остаются. Календарь: в окне тренировки под «Скопировать» – «Перенести на другую
+ *   дату»: тренировка сохраняется на новую дату сразу, не открывая её (у наборов FREE – нет, там даты ставятся сами).
+ * 4.13 (03.11.2026). Сервер – файл lite-fit-fix 1.6. Тренер, редактор тренировки: под упражнением «В прошлый раз …» – кнопка
+ *   «Как в прошлый раз»: подходы, вес и повторы (секунды, «без веса») ставятся как в прошлый раз, результат клиента не трогается.
+ *   Панель «Прошлая тренировка» сбоку не сдвигается: своя прокрутка не передаётся странице и не подстраивается браузером
+ *   (overflow-anchor, overscroll-behavior), положение сохраняется при любой перерисовке.
  * 4.12 (02.11.2026). Сервер – файл lite-fit-fix 1.3. Кнопка с колокольчиком вверху (у клиента, вне кабинета): «Уведомления
  *   на телефон» – включить, проверить, выключить на этом телефоне и выбрать, что присылать (ответы тренера, напоминание
  *   о тренировке); окно – из ../push.js 1.3 (LFPush.panel). Карточка на главной – только подсказка при первом входе.
@@ -961,7 +978,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.12';
+var VERSION = '4.14';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1321,7 +1338,8 @@ var KEEP_SCROLL = ['.ed-ref', '.md-l', '.vd-r', '#sugg'];     // 2.6: панел
 function rerenderKeep(focusId) {
   var y = window.scrollY, ps = KEEP_SCROLL.map(function (q) { var el = document.querySelector(q); return el ? el.scrollTop : 0; });
   render(); window.scrollTo(0, y);
-  KEEP_SCROLL.forEach(function (q, k) { var el = document.querySelector(q); if (el && ps[k]) el.scrollTop = ps[k]; }); if (focusId) { var el = document.getElementById(focusId); if (el) { try { el.focus({ preventScroll: true }); var n = el.value.length; el.setSelectionRange(n, n); } catch (e) {} } } }
+  KEEP_SCROLL.forEach(function (q, k) { var el = document.querySelector(q); if (el && ps[k]) el.scrollTop = ps[k]; });
+  try { requestAnimationFrame(function () { KEEP_SCROLL.forEach(function (q, k) { var el = document.querySelector(q); if (el && ps[k] && Math.abs(el.scrollTop - ps[k]) > 1) el.scrollTop = ps[k]; }); }); } catch (e) {} if (focusId) { var el = document.getElementById(focusId); if (el) { try { el.focus({ preventScroll: true }); var n = el.value.length; el.setSelectionRange(n, n); } catch (e) {} } } }
 function scrollToEl(id) { var el = document.getElementById(id); if (el) { var top = el.getBoundingClientRect().top + window.scrollY - 12; try { window.scrollTo({ top: top, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, top); } } }
 function wSort(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.row || 1e9) - (b.row || 1e9); }
 /** Номера упражнений: одиночное – «3», в сете – «3.1», «3.2». Сет занимает одно место в тренировке. */
@@ -1675,7 +1693,10 @@ function peekSheet(id, from) {
     fi('pkDate', 'Дата', def, 'date') + '</div><p class="ferr" id="ferr" hidden></p>' +
     '<button class="btn sec" data-act="peekCopy" data-id="' + esc(id) + '" data-from="' + from + '">' + IC.copy + 'Скопировать</button>' +
     '<button class="btn sec mt" data-act="tplPutForm" data-id="' + esc(id) + '">В мои наборы FREE…</button>' +
-    '<p class="note" style="margin:6px 0 0">Копия откроется для проверки: упражнения, подходы и веса переносятся, результат клиента нет. Сохраните её – и клиент увидит.</p></div>';
+    '<p class="note" style="margin:6px 0 0">Копия откроется для проверки: упражнения, подходы и веса переносятся, результат клиента нет. Сохраните её – и клиент увидит.</p></div>' +
+    (isTpl(clientOf(w.cid)) ? '' : '<div class="pk-c"><h3>Перенести на другую дату</h3>' + fi('pkMv', 'Новая дата', w.date, 'date') +   // 4.14: без открытия тренировки
+      '<p class="ferr" id="ferrMv" hidden></p><button class="btn sec" data-act="peekMove" data-id="' + esc(id) + '">' + IC.cal + 'Перенести</button>' +
+      '<p class="note" style="margin:6px 0 0">Сохранится сразу, в кабинете клиента дата поменяется сама.</p></div>');
   sheet('Тренировка', '<div id="pkBox">' + peekBody(w, f) + '</div>' + acts);
   if (!f) peekLoad(id).then(function (full) { var b = document.getElementById('pkBox'); if (b && full) b.innerHTML = peekBody(w, full); });
 }
@@ -2171,7 +2192,8 @@ function hintHtml(it) {
   var hn = S.hints && (S.hints[it.exId] || S.hints['n:' + norm(it.name)]);
   if (!hn) return '';
   var x = { noW: hn.noW, sec: hn.sec };
-  return '<p class="last">В прошлый раз, ' + dm(hn.d) + ': <b>' + esc(hn.s.map(function (s) { return one(x, s[0], s[1]); }).join(' · ')) + '</b>' + (hn.diff ? ' · сложность ' + hn.diff + ' из 5' : '') + '</p>';
+  return '<p class="last">В прошлый раз, ' + dm(hn.d) + ': <b>' + esc(hn.s.map(function (s) { return one(x, s[0], s[1]); }).join(' · ')) + '</b>' + (hn.diff ? ' · сложность ' + hn.diff + ' из 5' : '') +
+    (hn.s.length ? '<br><button class="lastb" data-act="hintUse" data-id="' + esc(it.id) + '" title="Подходы, вес и повторы – как в прошлый раз">' + IC.copy + 'Как в прошлый раз</button>' : '') + '</p>';   // 4.13
 }
 function paintHints() { if (S.view !== 'edit' || !S.draft) return; S.draft.items.forEach(function (it) { var el = document.getElementById('lh-' + it.id); if (el) el.innerHTML = hintHtml(it); }); }
 function loadHints() {
@@ -2230,8 +2252,30 @@ function editItem(w, it, i, n, no) {
   h += resHtml(w, it) + medNote(it, w);
   if (i > 0) h += '<div class="mt">' + sw('join', it.join, 'Вместе с предыдущим (суперсет)', 'Упражнения выполняются подряд', 'data-i="' + i + '"') + '</div>';
   h += '<div class="ex-f"><button class="ib" data-act="up" data-i="' + i + '" aria-label="Выше"' + (canMv(w.items, i, -1) ? '' : ' disabled') + '>' + IC.up + '</button><button class="ib" data-act="down" data-i="' + i + '" aria-label="Ниже"' + (canMv(w.items, i, 1) ? '' : ' disabled') + '>' + IC.down + '</button>' +
-    '<button class="ib del" data-act="delItem" data-i="' + i + '">' + IC.trash + 'Убрать</button></div></div>';
+    '<button class="ib swp' + (S.swap === it.id ? ' on' : '') + '" data-act="swapOpen" data-i="' + i + '" title="Другое упражнение вместо этого – подходы и вес останутся">' + IC.edit + 'Заменить</button>' +   // 4.14
+    '<button class="ib del" data-act="delItem" data-i="' + i + '">' + IC.trash + 'Убрать</button></div>' + (S.swap === it.id ? swapBox(it, i) : '') + '</div>';
   return h;
+}
+/** 4.14: замена упражнения – поиск по базе; пока ничего не введено – упражнения той же группы мышц. */
+function swapBox(it, i) {
+  return '<div class="swbox" id="swBox"><h4>Чем заменить «' + esc(it.name || 'упражнение') + '»</h4><p class="hint" style="margin:0 0 8px">Подходы, вес, повторы и место в тренировке останутся.</p>' +
+    fi('swQ', 'Новое упражнение', S.sq || '', 'text', 'autocomplete="off" autocorrect="off" data-f="sq" data-i="' + i + '"') +
+    '<div class="sugg" id="swS">' + swapSugg(it, i) + '</div><button class="btn sec sm mt" data-act="swapClose">Отмена</button></div>';
+}
+function swapSugg(it, i) {
+  var q = String(S.sq || '').trim(), row = function (e) {
+    return '<button class="row" data-act="swapPick" data-i="' + i + '" data-id="' + e.id + '"><span class="dot' + (e.video ? ' on' : '') + '"></span><span class="mn"><b>' + esc(e.name) + '</b><small>' + esc(e.grp || '') + (e.cat ? ' · ' + esc(e.cat) : '') + '</small></span></button>';
+  };
+  if (!q) {
+    var g = it.grp || ((exOf(it.exId) || {}).grp) || '', same = g ? D.ex.filter(function (e) { return e.grp === g && e.id !== it.exId; }).sort(function (a, b) { return catRank(a.cat) - catRank(b.cat); }) : [];
+    if (!same.length) return '<p class="hint">Начните вводить название нового упражнения.</p>';
+    return '<p class="hint" style="margin:0 0 4px">Та же группа – ' + esc(g) + '. Или начните вводить название.</p><div class="rows">' + same.slice(0, 30).map(row).join('') + '</div>';
+  }
+  var list = findEx(q, wide() ? 12 : 8).filter(function (e) { return e.id !== it.exId; }), exact = list.some(function (e) { return norm(e.name) === norm(q); });
+  var h = '<div class="rows">' + list.map(row).join('');
+  if (!list.length) h += '<p class="hint" style="margin:6px 0 10px">В базе не нашлось.</p>';
+  if (!exact && q.length >= 2) h += '<button class="row own" data-act="swapOwn" data-i="' + i + '"><span class="mn"><b>Своё упражнение: «' + esc(cap(q)) + '»</b><small>Название и ссылку на видео впишете сами</small></span></button>';
+  return h + '</div>';
 }
 /** Вкладки над выбором упражнения: группы мышц и отдельно «Резинки и эспандер». */
 function pickChips() {
@@ -2334,7 +2378,7 @@ function refParts(w) {
     fs('refId', 'Какую тренировку показать', opts, R.id, 'data-f="refId"') + (f ? refBody(f) : '<p class="sub" style="margin:12px 0 0">Открываю тренировку…</p>') + '</div>' };
 }
 function openEditor(w, isNew, dirty, refId) {
-  S.draft = w; S.isNew = !!isNew; S.dirty = !!dirty; S.view = 'edit'; S.q = ''; S.open = {}; S.del = false; S.saving = false; S.cid = w.cid;
+  S.draft = w; S.isNew = !!isNew; S.dirty = !!dirty; S.view = 'edit'; S.q = ''; S.swap = null; S.sq = ''; S.open = {}; S.del = false; S.saving = false; S.cid = w.cid;
   var rid = refId && sumOf(refId) && sumOf(refId).cid === String(w.cid) ? refId : refDefault(w);
   S.ref = { id: rid, open: !!isNew && !!rid && wide() };            // новая тренировка на компьютере — прошлая сразу рядом; на телефоне — по кнопке
   closeSheet(); render(); window.scrollTo(0, 0); loadHints(); loadRef();
@@ -3859,6 +3903,16 @@ function render() {
   shell(MODE === 'trainer'); app.innerHTML = h; paintBar();
   if (EMBED && MODE === 'trainer') toShell({ type: 'sec', s: SEC_OF[S.view === 'client' ? 'clients' : S.tab] || 'train' });
 }
+/** 4.14: упражнение it заменить на e из базы (или своё с названием own). Подходы, суперсет, место – как были. */
+function swapTo(it, e, own) {
+  var was = it.name, oldB = exOf(it.exId), ownDesc = it.desc && !(oldB && oldB.desc === it.desc);   // описание, которое тренер писал сам, остаётся
+  it.exId = e ? e.id : ''; it.name = e ? e.name : own; it.grp = e ? e.grp || '' : ''; it.video = ''; it.keep = true;
+  if (!ownDesc) it.desc = e ? e.desc || '' : '';
+  if (e) { it.noW = !!e.noW; it.sec = !!e.sec; delete it.isOwn; delete it.addBase; } else { it.isOwn = true; it.addBase = true; }
+  S.swap = null; S.sq = ''; S.open['v' + it.id] = false; markDirty(); rerenderKeep(); scrollToEl('it-' + it.id);
+  toast('Заменено: «' + was + '» → «' + it.name + '»');
+  if (!e && wide()) { var f = document.getElementById('n-' + it.id); if (f) try { f.focus({ preventScroll: true }); } catch (x) {} }
+}
 function addItem(it) {
   var w = S.draft; w.items.push(it); S.q = ''; S.del = false; markDirty();
   var y = window.scrollY; render(); window.scrollTo(0, y); scrollToEl('it-' + it.id);
@@ -3973,6 +4027,34 @@ var ACT = {
   },
   goCab: function () { if (S.cid) toShell({ type: 'go', s: 'clients', cid: S.cid }); },   // 2.9: та же карточка в кабинете тренера
   wPeek: function (b) { var id = b.getAttribute('data-id'), w = sumOf(id); if (!w) return; if (w.date.slice(0, 7) === S.calM) S.calDay = w.date; peekSheet(id, S.view === 'client' ? 'client' : 'cal'); },
+  peekMove: function (b) {                                                 // 4.14: перенести из окна календаря, не открывая тренировку
+    var id = b.getAttribute('data-id'), s = sumOf(id), d = val('pkMv'), er = document.getElementById('ferrMv');
+    var bad = function (t) { if (er) { er.textContent = t; er.hidden = false; } else toast(t, 'bad'); };
+    if (!s) return;
+    if (!isYmd(d)) return bad('Выберите новую дату.');
+    if (d === s.date) return bad('Это та же дата – выберите другую.');
+    if (draftsAll()[id]) return bad('У этой тренировки есть несохранённые правки – откройте её и перенесите там («Перенести» вверху).');
+    if (S.saving) return;
+    b.disabled = true; b.textContent = 'Переношу…'; if (er) er.hidden = true;
+    var back = function (t) { b.disabled = false; b.innerHTML = IC.cal + 'Перенести'; bad(t); };
+    peekLoad(id).then(function (full) {
+      if (!full) return back('Тренировка не загрузилась – проверьте интернет и попробуйте ещё раз.');
+      var w = clone(full); w.row = s.row; w.date = d;
+      var out = draftOut(w, false);
+      if (typeof out === 'string') return back(out);
+      S.saving = true;
+      call('save', { w: out }).then(function (r) {
+        S.saving = false;
+        if (r.auth) return;
+        if (!r.ok) return back(r.net ? 'Нет связи – попробуйте ещё раз, когда появится интернет.' : errText(r));
+        var x = savedIn(r); closeSheet();
+        if (S.calDay === s.date) S.calDay = x.date.slice(0, 7) === S.calM ? x.date : S.calDay;
+        rerenderKeep();
+        var c = clientOf(x.cid);
+        if (r.warn) toast('Перенесено на ' + dm(x.date) + '. Но ' + r.warn, 'bad'); else toast((c ? c.name + ': т' : 'Т') + 'ренировка перенесена на ' + dm(x.date));
+      });
+    });
+  },
   peekCopy: function (b) {
     var id = b.getAttribute('data-id'), from = b.getAttribute('data-from'), d = val('pkDate'), cid = val('pkCid') || (sumOf(id) || {}).cid;
     if (!isYmd(d)) return ferr('Укажите дату новой тренировки.');
@@ -4172,7 +4254,29 @@ var ACT = {
   openNote: function () { S.open.note = true; rerenderKeep('wNote'); },
   openDesc: function (b) { var it = draftItem(b); S.open['d' + it.id] = true; rerenderKeep('d-' + it.id); },
   pick: function (b) { var e = exOf(b.getAttribute('data-id')); if (e) addItem(mkItem(e, 3)); },
+  swapOpen: function (b) {                                                 // 4.14: заменить упражнение, подходы остаются
+    var it = draftItem(b); if (!it) return;
+    S.swap = S.swap === it.id ? null : it.id; S.sq = ''; rerenderKeep();
+    if (S.swap) { var bx = document.getElementById('swBox'); if (bx && bx.scrollIntoView) try { bx.scrollIntoView({ block: 'nearest' }); } catch (e) {} var q = document.getElementById('swQ'); if (q) try { q.focus({ preventScroll: true }); } catch (e) {} }
+  },
+  swapClose: function () { S.swap = null; S.sq = ''; rerenderKeep(); },
+  swapPick: function (b) { var it = draftItem(b), e = exOf(b.getAttribute('data-id')); if (it && e) swapTo(it, e, ''); },
+  swapOwn: function (b) { var it = draftItem(b), q = cap(String(S.sq || '').trim()); if (it && q) swapTo(it, null, q); },
   pickOwn: function () { var it = mkItem(null, 3); it.name = cap(S.q.trim()); it.isOwn = true; addItem(it); },
+  hintUse: function (b) {                                                  // 4.13: подходы, вес и повторы – как в прошлый раз
+    var w = S.draft, id = b.getAttribute('data-id'), it = w && w.items.filter(function (x) { return x.id === id; })[0];
+    var hn = it && S.hints && (S.hints[it.exId] || S.hints['n:' + norm(it.name)]);
+    if (!hn || !hn.s || !hn.s.length) return;
+    var old = it.sets || [];
+    it.sets = hn.s.slice(0, 10).map(function (x, k) {
+      var o = old[k] || {};                                                 // результат клиента (если тренировку уже делали) не трогаем
+      return { w: hn.noW ? '' : String(x[0] == null ? '' : x[0]), r: String(x[1] == null ? '' : x[1]), fw: o.fw || '', fr: o.fr || '', ok: !!o.ok };
+    });
+    if (hn.noW !== undefined) it.noW = !!hn.noW;
+    if (hn.sec !== undefined) it.sec = !!hn.sec;
+    markDirty(); rerenderKeep();
+    toast('Как ' + dm(hn.d) + ': ' + it.sets.length + ' ' + plural(it.sets.length, 'подход', 'подхода', 'подходов'));
+  },
   setsInc: function (b) { var it = draftItem(b); if (it.sets.length >= 10) return; var l = it.sets[it.sets.length - 1]; it.sets.push({ w: l.w, r: l.r, fw: '', fr: '', ok: false }); markDirty(); rerenderKeep(); },
   setsDec: function (b) { var it = draftItem(b); if (it.sets.length <= 1) return; it.sets.pop(); markDirty(); rerenderKeep(); },
   fill: function (b) {
@@ -4472,6 +4576,7 @@ document.addEventListener('input', function (e) {
   var el = e.target, f = el.getAttribute && el.getAttribute('data-f'); if (!f) return;
   var i = +el.getAttribute('data-i'), k = +el.getAttribute('data-k'), v = el.value;
   if (f === 'q') { S.q = v; var s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(); return; }
+  if (f === 'sq') { S.sq = v; var sw = document.getElementById('swS'), sit = S.draft && S.draft.items[i]; if (sw && sit) sw.innerHTML = swapSugg(sit, i); return; }   // 4.14
   if (f === 'vex') { if (V && (e.inputType === 'insertReplacementText' || !e.inputType) && exByName(v)) { var vi = +el.getAttribute('data-i'); vidAssign(vi, v); vidPaint(vidNextFree(vi)); } return; }   // выбрали из подсказки
   if (f === 'comCid') { S.comCid = v; var cb = document.getElementById('comBox'); if (cb) cb.innerHTML = comsHtml(); return; }
   if (f === 'refId') { S.ref.id = v; S.ref.open = true; loadRef(); rerenderKeep(); return; }
@@ -4531,6 +4636,7 @@ document.addEventListener('keydown', function (e) {
   if (e.target && /^Arrow/.test(e.key) && setKey(e)) return;                // 2.6: стрелки между полями подходов
   if (e.key !== 'Enter' || !e.target) return;
   if (e.target.id === 'exQ') { var first = document.querySelector('#sugg [data-act]'); if (first) { e.preventDefault(); first.click(); } }
+  if (e.target.id === 'swQ') { var f1 = document.querySelector('#swS [data-act]'); if (f1) { e.preventDefault(); f1.click(); } }
   if (e.target.id === 'pin') { var pb = document.querySelector('[data-act="pinGo"]'); if (pb && !pb.disabled) ACT.pinGo(pb); }
 });
 /**
