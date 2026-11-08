@@ -183,14 +183,17 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .okb.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 14px -4px var(--glow)}
 .okb.on svg{opacity:1}
 .set.ok input{border-color:var(--accent-d)}
-.ex-f{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.ex-f{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);container-type:inline-size}   /* 4.16: узкая карточка – кнопки переносятся, а не вылезают */
 .ib{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--muted)}
 .ib svg{width:18px;height:18px}
 .ib[disabled]{opacity:.3}
 .ib.del{color:var(--err);border-color:rgba(255,139,123,.3);margin-left:auto;width:auto;padding:0 14px;font-size:13.5px;font-weight:700;display:flex;gap:8px;align-items:center}
+.card.own{margin-top:18px}.card.own .btn{margin-top:4px}
+.own-ok{display:flex;align-items:center;gap:8px;margin:4px 0 0;color:var(--accent);font-weight:700}.own-ok svg{width:18px;height:18px}
 .ib.swp{width:auto;padding:0 14px;font-size:13.5px;font-weight:700;display:flex;gap:8px;align-items:center;color:var(--accent);border-color:rgba(62,214,206,.35)}
 .ib.swp.on{background:rgba(62,214,206,.1)}
-@media (max-width:420px){.ex-f{flex-wrap:wrap}.ex-f .ib.swp{order:5;flex:1 1 100%;justify-content:center}}   /* 4.14: на телефоне «Заменить» – строкой ниже */
+@media (max-width:420px){.ex-f .ib.swp{order:5;flex:1 1 100%;justify-content:center}}   /* 4.14: на телефоне «Заменить» – строкой ниже */
+@container (max-width:380px){.ib.swp{order:5;flex:1 1 100%;justify-content:center}}   /* 4.16: то же в узкой колонке на компьютере и планшете */
 .swbox{margin-top:12px;padding:12px;border:1px solid rgba(62,214,206,.35);border-radius:14px;background:rgba(62,214,206,.04)}
 .swbox h4{margin:0 0 4px;font-size:14.5px}
 .swbox .sugg{margin-top:8px}
@@ -801,6 +804,14 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.17 (08.11.2026). Сервер – lite-fit-trenirovki 4.25.2. «В прошлый раз» и «Как в прошлый раз» в новой тренировке: упражнение
+ *   из базы ищется и по названию (hintOf) – сервер отдаёт подсказку и под номером, и под названием. Раньше в новой тренировке
+ *   подсказки не было, если в прошлой тренировке у этого упражнения был другой номер (копия – находила, у неё номер прежний).
+ * 4.16 (08.11.2026). Сервер – lite-fit-trenirovki 4.25.1 (только номер страницы). Редактор тренировки: в узкой колонке
+ *   (компьютер, 3–4 упражнения в ряд) кнопки «Заменить» и «Убрать» вылезали за карточку – теперь «Заменить» уходит строкой ниже
+ *   (.ex-f: flex-wrap и container-type; @container до 380px), как на телефоне.
+ * 4.15 (08.11.2026). Сервер – lite-fit-trenirovki 4.25.0. Клиент FREE: под упражнениями тренировки – «Хочу программу под себя»:
+ *   заявка на START ({ op:'fwant', fmt:'START', why:'own' }), ответ – в окне и в бот. Заявка уже есть – вместо кнопки строка.
  * 4.14 (07.11.2026). Сервер – без изменений (сохранение – прежним { op:'save' }). Тренер, редактор тренировки: внизу
  *   упражнения кнопка «Заменить» – поиск по базе (сразу – упражнения той же группы мышц) или своё упражнение; подходы, вес,
  *   повторы, суперсет и место в тренировке остаются. Календарь: в окне тренировки под «Скопировать» – «Перенести на другую
@@ -978,7 +989,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.14';
+var VERSION = '4.17';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -2188,8 +2199,17 @@ function copyForm() {
 }
 
 /* ---------- редактор тренировки ---------- */
+/** 4.17: «в прошлый раз» – по номеру упражнения из базы, иначе по названию (у прошлой тренировки номер мог быть другим). */
+function hintOf(it) {
+  if (!it || !S.hints) return null;
+  var e = exOf(it.exId), best = null;
+  [it.exId ? S.hints[it.exId] : null, S.hints['n:' + norm(it.name)], e ? S.hints['n:' + norm(e.name)] : null].forEach(function (h) {
+    if (h && h.s && (!best || String(h.d || '') > String(best.d || ''))) best = h;   // из найденных – самая свежая
+  });
+  return best;
+}
 function hintHtml(it) {
-  var hn = S.hints && (S.hints[it.exId] || S.hints['n:' + norm(it.name)]);
+  var hn = hintOf(it);
   if (!hn) return '';
   var x = { noW: hn.noW, sec: hn.sec };
   return '<p class="last">В прошлый раз, ' + dm(hn.d) + ': <b>' + esc(hn.s.map(function (s) { return one(x, s[0], s[1]); }).join(' · ')) + '</b>' + (hn.diff ? ' · сложность ' + hn.diff + ' из 5' : '') +
@@ -3609,6 +3629,11 @@ function viewRun() {
     var inner = g.map(function (i) { return runItem(w, w.items[i], i, NS[i]); }).join('');
     h += g.length > 1 ? '<div class="sup"><div class="sup-h">Суперсет ' + (gi + 1) + ' · ' + exWord(g.length) + '<span>Выполняйте упражнения подряд, отдых после круга</span></div>' + inner + '</div>' : inner;
   });
+  if (M.free && !M.closed) {                                                // 4.15: «Хочу программу под себя» – заявка на START
+    var ow = M.fwant && M.fwant.fmt === 'START';
+    h += '<div class="card own"><h3>Хотите программу под себя?</h3><p class="sub">Упражнения под Ваши цели, замены и контроль питания – в START.</p>' +
+      (ow ? '<p class="own-ok">' + IC.check + 'Заявка передана – тренер напишет Вам.</p>' : '<button class="btn sec" data-act="fown">Хочу программу под себя</button>') + '</div>';
+  }
   return h;
 }
 /** Соединение с сайтом, где лежат видео этой тренировки, открывается заранее — ролик стартует быстрее. */
@@ -4265,7 +4290,7 @@ var ACT = {
   pickOwn: function () { var it = mkItem(null, 3); it.name = cap(S.q.trim()); it.isOwn = true; addItem(it); },
   hintUse: function (b) {                                                  // 4.13: подходы, вес и повторы – как в прошлый раз
     var w = S.draft, id = b.getAttribute('data-id'), it = w && w.items.filter(function (x) { return x.id === id; })[0];
-    var hn = it && S.hints && (S.hints[it.exId] || S.hints['n:' + norm(it.name)]);
+    var hn = hintOf(it);
     if (!hn || !hn.s || !hn.s.length) return;
     var old = it.sets || [];
     it.sets = hn.s.slice(0, 10).map(function (x, k) {
@@ -4426,6 +4451,15 @@ var ACT = {
       if (!r.subOk) return toast(r.msg || 'Пока не вижу подписки', 'bad');  // окно остаётся – можно нажать ещё раз
       closeSheet(); if (S.view === 'run' && (myOf(S.run) || {}).st !== 'open') S.view = 'home';
       render(); toast(r.msg || 'Готово');
+    });
+  },
+  fown: function (b) {                                                     // 4.15: из тренировки FREE – заявка на START
+    b.disabled = true; b.textContent = 'Отправляю…';
+    ccall('fwant', { fmt: 'START', why: 'own' }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = 'Хочу программу под себя'; return toast(errText(r), 'bad'); }
+      M.fwant = r.fwant; pendSave(); rerenderKeep();
+      sheet('Программа под Вас', '<h2>Программа под Вас</h2><p class="lead">' + esc(r.msg || 'Заявка отправлена – тренер напишет Вам.') + '</p><button class="btn pri" data-act="close">Понятно</button>');
     });
   },
   fwant: function (b) {
