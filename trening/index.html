@@ -244,6 +244,11 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 @media (prefers-reduced-motion:reduce){.card.install.pulse{animation:none}}
 .row.lk .mn b{color:var(--muted)}
 .row.lk svg{flex:none;width:18px;height:18px;color:var(--dim)}
+.tipm{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:6px;border-radius:50%;background:var(--warm);color:#1d1006;font-size:13px;font-weight:900;line-height:1;vertical-align:2px}   /* 4.18: «!» – есть рекомендация тренера */
+.tip{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;padding:11px 13px;border-radius:14px;background:var(--warm-bg);border:1px solid rgba(255,154,82,.45);color:var(--text);font-size:14px}
+.tip>i{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--warm);color:#1d1006;font-style:normal;font-weight:900;font-size:15px}
+.tip>div{min-width:0}.tip b{display:block;color:var(--warm);font-size:12.5px;letter-spacing:.02em;margin-bottom:2px}.tip p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.ed-tip textarea{border-color:rgba(255,154,82,.45)}
 .desc{margin:0 0 12px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line2);font-size:14px;white-space:pre-line}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .acts .btn{width:auto;flex:1 1 130px}
@@ -804,6 +809,12 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.19 (09.11.2026). Сервер – lite-fit-trenirovki 4.26.1, lite-fit-fix 2.0. Заметка «От тренера» у клиента – с переносами строк:
+ *   тренер дописывает в неё ответом свайпом в Telegram на «начал(а) тренировку».
+ * 4.18 (08.11.2026). Сервер – lite-fit-trenirovki 4.26.0. Рекомендация тренера к упражнению – отдельно от техники (it.tip, до 400 знаков):
+ *   в редакторе своё поле «! Рекомендация клиенту» (ACT.openTip); у клиента – сразу видна в рамке со знаком «!», «!» и у названия
+ *   (в тренировке, в списке «Сегодня», во всплывающей карточке календаря). Техника: пустое поле, а в базе техника есть – строка
+ *   «Техника – из базы упражнений, клиент её видит» (сервер подставляет её клиенту); «Изменить для этой тренировки» – копия в поле.
  * 4.17 (08.11.2026). Сервер – lite-fit-trenirovki 4.25.2. «В прошлый раз» и «Как в прошлый раз» в новой тренировке: упражнение
  *   из базы ищется и по названию (hintOf) – сервер отдаёт подсказку и под номером, и под названием. Раньше в новой тренировке
  *   подсказки не было, если в прошлой тренировке у этого упражнения был другой номер (копия – находила, у неё номер прежний).
@@ -989,7 +1000,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.17';
+var VERSION = '4.19';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1664,7 +1675,7 @@ function peekBody(w, f) {
   if (f.note) h += '<p class="pk-n">' + esc(f.note) + '</p>';
   var NS = numsOf(f.items);
   return h + '<ol class="pk-l">' + f.items.map(function (it, i) {
-    return '<li><i class="num">' + NS[i] + '</i><span><b>' + esc(it.name || 'Упражнение') + '</b><small>' + esc(it.sets && it.sets.length ? planTxt(it) : '') + '</small></span></li>';
+    return '<li><i class="num">' + NS[i] + '</i><span><b>' + esc(it.name || 'Упражнение') + (it.tip ? '<span class="tipm" title="Есть рекомендация клиенту">!</span>' : '') + '</b><small>' + esc(it.sets && it.sets.length ? planTxt(it) : '') + '</small></span></li>';
   }).join('') + '</ol>';
 }
 /* наведение: всплывающая карточка рядом с тренировкой (только мышь; на телефоне – нажатие) */
@@ -2267,8 +2278,13 @@ function editItem(w, it, i, n, no) {
   h += '<div class="stp"><span>Подходов</span><button data-act="setsDec" data-i="' + i + '" aria-label="Меньше подходов"' + (it.sets.length <= 1 ? ' disabled' : '') + '>' + IC.minus + '</button><b class="num">' + it.sets.length + '</b><button data-act="setsInc" data-i="' + i + '" aria-label="Больше подходов"' + (it.sets.length >= 10 ? ' disabled' : '') + '>' + IC.plus + '</button></div>';
   h += '<div class="opt2">' + sw('noW', it.noW, 'Без веса', W ? '' : 'Графа веса убирается', 'data-i="' + i + '"') + sw('sec', it.sec, W ? 'Секунды' : 'Считать секунды, а не повторы', '', 'data-i="' + i + '" title="Считать секунды, а не повторы"') + '</div>';
   h += setsHtml(it, i);
-  if (it.desc || S.open['d' + it.id]) h += '<div class="mt">' + ft('d-' + it.id, 'Описание и рекомендации (клиент откроет по кнопке)', it.desc, 3, 'maxlength="800" data-f="desc" data-i="' + i + '"') + '</div>';
-  else h += '<button class="txtb" data-act="openDesc" data-i="' + i + '">' + IC.note + 'Добавить описание или рекомендации</button>';
+  // 4.18: рекомендация тренера – отдельно от техники; клиент видит её сразу, со знаком «!»
+  if (it.tip || S.open['t' + it.id]) h += '<div class="mt ed-tip">' + ft('t-' + it.id, '! Рекомендация клиенту', it.tip || '', 2, 'maxlength="400" data-f="tip" data-i="' + i + '" placeholder="Клиент увидит сразу, со знаком «!». Например: колени не заводить внутрь"') + '</div>';
+  else h += '<button class="txtb" data-act="openTip" data-i="' + i + '">' + IC.note + 'Добавить рекомендацию клиенту (со знаком «!»)</button>';
+  var bd = exOf(it.exId);
+  if (it.desc || S.open['d' + it.id]) h += '<div class="mt">' + ft('d-' + it.id, 'Техника выполнения (кнопка «Описание»)', it.desc, 3, 'maxlength="800" data-f="desc" data-i="' + i + '"') + '</div>';
+  else if (bd && bd.desc) h += '<p class="note" style="margin:8px 0 0">Техника – из базы упражнений, клиент её видит. <button class="vlnk in" data-act="openDesc" data-i="' + i + '">Изменить для этой тренировки</button></p>';
+  else h += '<button class="txtb" data-act="openDesc" data-i="' + i + '">' + IC.note + 'Добавить технику выполнения</button>';
   h += resHtml(w, it) + medNote(it, w);
   if (i > 0) h += '<div class="mt">' + sw('join', it.join, 'Вместе с предыдущим (суперсет)', 'Упражнения выполняются подряд', 'data-i="' + i + '"') + '</div>';
   h += '<div class="ex-f"><button class="ib" data-act="up" data-i="' + i + '" aria-label="Выше"' + (canMv(w.items, i, -1) ? '' : ' disabled') + '>' + IC.up + '</button><button class="ib" data-act="down" data-i="' + i + '" aria-label="Ниже"' + (canMv(w.items, i, 1) ? '' : ' disabled') + '>' + IC.down + '</button>' +
@@ -2432,7 +2448,7 @@ function draftOut(w, isNew) {
   });
   if (bad) return bad;
   return { id: isNew ? '' : w.id, nid: isNew ? w.id : '', cid: w.cid, date: w.date, note: w.note || '', items: w.items.map(function (it) {
-    return { id: it.id, exId: it.exId || '', name: it.name, grp: it.grp || '', video: fixUrl(it.video) || '', desc: it.desc || '', noW: !!it.noW, sec: !!it.sec, join: !!it.join,
+    return { id: it.id, exId: it.exId || '', name: it.name, grp: it.grp || '', video: fixUrl(it.video) || '', desc: it.desc || '', tip: String(it.tip || '').trim(), noW: !!it.noW, sec: !!it.sec, join: !!it.join,
       sets: it.sets.map(function (s) { return { w: s.w, r: s.r }; }), keep: it.keep !== false, addBase: !!it.isOwn && it.addBase !== false };
   }) };
 }
@@ -3011,7 +3027,7 @@ function viewMy() {
   td.forEach(function (w) {
     var p = runProgress(w);
     h += '<div class="card"><h3>' + titleOf(w) + '</h3><p class="sub">' + exWord(w.items.length) + (w.done ? ' · выполнена' + (w.ts && w.te ? ' за ' + fmtDur((w.te - w.ts) / 60000) : '') : (w.ts ? ' · идёт с ' + hm(w.ts) : '') + (p.ok ? ' · отмечено подходов: ' + p.ok + ' из ' + p.tot : '')) + '</p>' +
-      '<div class="rows" style="margin-bottom:14px">' + w.items.map(function (it, i) { return '<div class="row" style="min-height:0;padding:9px 0"><span class="mn"><b>' + esc(it.name) + '</b><small>' + esc(planTxt(it)) + (it.join && i > 0 ? ' · суперсет с предыдущим' : '') + '</small></span></div>'; }).join('') + '</div>' +
+      '<div class="rows" style="margin-bottom:14px">' + w.items.map(function (it, i) { return '<div class="row" style="min-height:0;padding:9px 0"><span class="mn"><b>' + esc(it.name) + (it.tip ? '<span class="tipm" title="Есть рекомендация тренера">!</span>' : '') + '</b><small>' + esc(planTxt(it)) + (it.join && i > 0 ? ' · суперсет с предыдущим' : '') + '</small></span></div>'; }).join('') + '</div>' +
       '<button class="btn pri" data-act="runW" data-id="' + w.id + '">' + (w.done ? 'Открыть результат' : w.ts || p.ok ? 'Продолжить тренировку' : 'Открыть тренировку') + '</button></div>';
   });
   if (M.free) {                                                              // 3.4: FREE – все тренировки по порядку
@@ -3596,8 +3612,9 @@ function playerHtml(url) {
 function runItem(w, it, i, no) {
   var url = it.video || '', k = url ? videoKind(url) : null;
   if (k && k.t === 'bad') { k = null; url = ''; }
-  var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn"><b>' + esc(it.name) + '</b><small>' + esc((it.grp ? it.grp + ' · ' : '') + 'план: ' + planTxt(it)) + '</small></div>' +
+  var h = '<div class="card ex" id="it-' + it.id + '"><div class="ex-h"><span class="ex-n num">' + no + '</span><div class="mn"><b>' + esc(it.name) + (it.tip ? '<span class="tipm" title="Рекомендация тренера">!</span>' : '') + '</b><small>' + esc((it.grp ? it.grp + ' · ' : '') + 'план: ' + planTxt(it)) + '</small></div>' +
     (muOk(it.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Какие мышцы работают">' + bodySvg(it.mu) + '</button>' : '') + '</div>';
+  if (it.tip) h += '<div class="tip"><i aria-hidden="true">!</i><div><b>Рекомендация тренера</b><p>' + esc(it.tip) + '</p></div></div>';   // 4.18
   var acts = '';
   if (k && k.t === 'link') acts += '<a class="btn sec sm hl" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + IC.play + 'Видео</a>';
   else if (k) acts += '<button class="btn sec sm hl" data-act="video" data-i="' + i + '">' + IC.play + (S.vid === it.id ? 'Скрыть видео' : 'Видео') + '</button>';
@@ -3622,7 +3639,7 @@ function viewRun() {
   if (canReset(w)) h += '<button class="rst" data-act="restart">' + IC.restart + 'Начали случайно? Сбросить и начать заново</button>';
   if (w.done) h += '<div class="banner done"><b>Тренировка выполнена ' + dm(w.doneAt || w.date) + (w.ts && w.te ? ' за ' + fmtDur((w.te - w.ts) / 60000) : '') + '.</b> Результат можно поправить, тренер увидит изменения.</div>';
   else if (!w.ts && !M.closed) h += '<div class="banner">Когда будете готовы, нажмите <b>«Начать тренировку»</b> внизу – пойдёт время. У каждого упражнения есть кнопки <b>«Видео»</b> и <b>«Описание»</b> – посмотрите технику перед первым подходом.</div>';
-  if (w.note) h += '<div class="banner"><b>От тренера.</b> ' + esc(w.note) + '</div>';
+  if (w.note) h += '<div class="banner" style="white-space:pre-line"><b>От тренера.</b> ' + esc(w.note) + '</div>';   // 4.19: дописанное свайпом – с новой строки
   if (M.free && !w.done && w.items.some(function (it) { return !it.noW; })) h += '<div class="banner"><b>Как подобрать вес.</b> Берите такой вес, чтобы после последнего повтора в запасе оставалось ещё 3–5 – тренируемся не до отказа. В графу «Вес» впишите, с каким работали.</div>';
   var NS = numsOf(w.items);
   groups(w.items).forEach(function (g, gi) {
@@ -4277,7 +4294,8 @@ var ACT = {
   cmSend: function (b) { var w = myOf(S.run), it = w && w.items[+b.getAttribute('data-i')]; if (it && String(it.comment || '').trim()) cmSendNow(w, it); },
   refToggle: function () { if (!S.ref) return; S.ref.open = !S.ref.open; loadRef(); rerenderKeep(); if (S.ref.open && !wide()) scrollToEl('refCard'); },
   openNote: function () { S.open.note = true; rerenderKeep('wNote'); },
-  openDesc: function (b) { var it = draftItem(b); S.open['d' + it.id] = true; rerenderKeep('d-' + it.id); },
+  openDesc: function (b) { var it = draftItem(b), e = exOf(it.exId); if (!it.desc && e && e.desc) { it.desc = e.desc; markDirty(); } S.open['d' + it.id] = true; rerenderKeep('d-' + it.id); },
+  openTip: function (b) { var it = draftItem(b); S.open['t' + it.id] = true; rerenderKeep('t-' + it.id); },   // 4.18
   pick: function (b) { var e = exOf(b.getAttribute('data-id')); if (e) addItem(mkItem(e, 3)); },
   swapOpen: function (b) {                                                 // 4.14: заменить упражнение, подходы остаются
     var it = draftItem(b); if (!it) return;
@@ -4633,6 +4651,7 @@ document.addEventListener('input', function (e) {
     else if (f === 'r') { v = numR(v); if (el.value !== v) el.value = v; it.sets[k].r = v; }
     else if (f === 'video') it.video = v;
     else if (f === 'desc') it.desc = v;
+    else if (f === 'tip') it.tip = v;
     else if (f === 'name') it.name = v;
     markDirty(); return;
   }
