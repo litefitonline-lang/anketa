@@ -603,6 +603,7 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
   body.tr .vd-r{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
   body.tr .bctl .mt{margin:0;order:-1}
   body.tr #baseList{columns:330px;column-gap:20px;margin-top:6px}
+  body.tr #baseList>.card{column-span:all;break-inside:avoid}   /* 4.19 правка 10.11: «Ничего не нашлось» – одной карточкой на всю ширину, не по колонкам */
   body.tr .bgrp{break-inside:avoid;padding-top:1px}
   body.tr .bgrp .grp-title{margin-top:14px}
 }
