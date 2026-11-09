@@ -150,7 +150,9 @@ var CONFIG = {
   // версия страницы анкеты
   // 4.5 (01.11.2026): отправка через сервер с ответом «принята» (сервер – файл lite-fit-fix 1.0); ответы сохраняются в телефоне
   //   и не пропадают, если закрыть страницу или пропадёт связь (до отправки, 7 дней); скрытое поле против ботов.
-  version: "4.5",
+  // 4.6 (08.11.2026): FREE – сервер (lite-fit-fix 1.8) сразу отвечает личной ссылкой на бота: на экране «Анкета отправлена» кнопка
+  //   «Получить тренировки в Telegram» (без Telegram – «во ВКонтакте»). Ссылки нет (сервер старый или не ответил) – как в 4.5.
+  version: "4.6",
   // ID полей Google Формы (entry.…)
   ids: {
     email:        "emailAddress",
@@ -268,7 +270,7 @@ var STEPS = [
       {key:"nutritionNote", type:"note", when:function(){ return (state.expect||[]).indexOf(NUTRITION)!==-1; },
        html:"Вы отметили питание – оно входит в формат <b>PRO</b>. Можно начать сразу с него, а можно пройти START и перейти в PRO после финального разбора. Сомневаетесь – выберите «Не знаю», тренер подскажет."},
       {key:"format", type:"radio", plan:true, aria:"Формат ведения", req:true, options:[
-        {value:"3 тренировки бесплатно", tag:"FREE", badge:"бесплатно", label:"3 тренировки, чтобы попробовать", sub:"Ссылку на тренировки тренер пришлёт в Telegram. Условие одно – подписка на наш канал"},
+        {value:"3 тренировки бесплатно", tag:"FREE", badge:"бесплатно", label:"3 тренировки, чтобы попробовать", sub:"Тренировки откроются сразу после анкеты – в нашем Telegram-боте. Условие одно – подписка на наш канал"},
         {value:"Lite Fit START - первый шаг на 14 дней", tag:"START", badge:"14 дней", label:"Первый шаг к тренировкам"},
         {value:"BASIC - полноценное сопровождение тренировок", tag:"BASIC", label:"Полноценное сопровождение тренировок"},
         {value:"PRO - тренировки + питание + расширенное сопровождение", tag:"PRO", label:"Тренировки, питание и расширенное сопровождение"},
@@ -579,9 +581,9 @@ function submit(btn){
   };
   if (!/^https:\/\/script\.google\.com\//.test(CONFIG.api || "")) { direct(); return; }
   apiPost(body).then(function(r){
-    if (r && r.ok) return done();
+    if (r && r.ok) return done(r);
     if (r && r.net) return new Promise(function(ok){ setTimeout(ok, 2500); }).then(function(){ return apiPost(body); }).then(function(r2){
-      if (r2 && r2.ok) return done();
+      if (r2 && r2.ok) return done(r2);
       if (r2 && r2.net) return direct();                                    // сервер недоступен – напрямую в форму, как в 4.4
       fail("Не получилось отправить: " + String((r2 && r2.error) || "сервер не принял анкету") + ".");
     });
@@ -589,8 +591,10 @@ function submit(btn){
   });
 }
 
-function done(){
+function done(r){
   draftDrop();
+  var fl = isFree() && r && r.free ? r.free : null;                        // 4.6: личная ссылка на бота FREE
+  var go = fl ? (!state.noTg && /^https:\/\/t\.me\//.test(fl.tg || "") ? {u:fl.tg, vk:false} : (/^https:\/\/vk\.me\//.test(fl.vk || "") ? {u:fl.vk, vk:true} : null)) : null;
   root.innerHTML = "";
   var name = (state.name||"").trim().split(/\s+/)[0];
   var w = el("div",{class:"lf-step lf-done"});
@@ -598,6 +602,16 @@ function done(){
   w.appendChild(el("h2",{class:"lf-title"}, "Анкета отправлена"));
   var hi = name ? esc(name)+", спасибо! " : "Спасибо! ";
   var freeTg = isFree() && !state.noTg;                                     // 4.2
+  if (go){                                                                  // 4.6: тренировки – сразу, без ожидания тренера
+    w.appendChild(el("p",{class:"lf-lead"}, hi + (go.vk
+      ? "Ваши 3 тренировки готовы. Нажмите кнопку ниже – откроются сообщения сообщества Lite Fit во ВКонтакте. Нажмите там «Начать»: бот проверит подписку на сообщество и сразу пришлёт тренировки."
+      : "Ваши 3 тренировки готовы. Нажмите кнопку ниже – откроется бот Lite Fit в Telegram. Нажмите в нём «Старт»: бот проверит подписку на наш канал и сразу пришлёт тренировки.")));
+    w.appendChild(el("a",{class:"lf-btn lf-primary",href:go.u,target:"_blank",rel:"noopener"}, (go.vk ? "" : ICON.tgDark) + (go.vk ? "Получить тренировки во ВКонтакте" : "Получить тренировки в Telegram")));
+    if (!go.vk && CONFIG.tgUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.tgUrl,target:"_blank",rel:"noopener"}, ICON.tg+"Подписаться на канал"));
+    if (CONFIG.siteUrl) w.appendChild(el("a",{class:"lf-btn lf-secondary",href:CONFIG.siteUrl}, "Вернуться на сайт"));
+    root.appendChild(w); scrollTop();
+    return;
+  }
   w.appendChild(el("p",{class:"lf-lead"}, freeTg
     ? hi + "Тренер проверит анкету и пришлёт Вам в Telegram ссылку на бота Lite Fit – через него откроются Ваши 3 тренировки. Условие одно – подписка на наш Telegram-канал: подпишитесь сейчас, и бот сразу откроет тренировки."
     : isFree() ? hi + "Тренер проверит анкету и свяжется с Вами удобным для Вас способом – пришлёт ссылку, по которой откроются Ваши 3 тренировки."
