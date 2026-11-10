@@ -1,4 +1,4 @@
-/* LF-SW 1.1 – Lite Fit: приложение открывается без сети, видео тренировки – из памяти телефона, уведомления.
+/* LF-SW 1.2 – Lite Fit: приложение открывается без сети, видео тренировки – из памяти телефона, уведомления.
  * Лежит в корне папки anketa на GitHub (рядом с index.html анкеты): …/anketa/sw.js, работает для …/anketa/.
  * Трогает только страницы тренировок и кабинета клиента, видео из папки Video и шрифты. Кабинет тренера, анкета
  * и запросы к серверу (script.google.com) идут как раньше, мимо него.
@@ -9,12 +9,13 @@
  * заранее (пока есть Wi-Fi или связь) и в зале играют из памяти. Хранится до 40 роликов, старые вытесняются.
  * 1.1: голосовые – voice.js и библиотеки lib/lame.min.js (запись) и lib/ogg-opus-decoder.min.js (прослушивание на iPhone)
  * тоже хранятся в телефоне.
+ * 1.2: fx.js (анимация панели и загрузка с логотипом) тоже хранится в телефоне – работает и без сети.
  */
-var VER = '1.1';
+var VER = '1.2';
 var SHELL = 'lf-shell-2', VIDEO = 'lf-video-1', FONTS = 'lf-fonts-1', KEEP = [SHELL, VIDEO, FONTS];
 var BASE = new URL('./', self.location.href).href;                     // …/anketa/
 var PAGES = { 'trening/': 'trening/index.html', 'trening/index.html': 'trening/index.html', 'cabinet/': 'cabinet/index.html', 'cabinet/index.html': 'cabinet/index.html' };
-var ASSETS = ['trening/index.html', 'cabinet/index.html', 'cabinet/config.js', 'push.js', 'voice.js', 'lib/lame.min.js', 'lib/ogg-opus-decoder.min.js', 'trening/manifest.webmanifest', 'cabinet/manifest.webmanifest',
+var ASSETS = ['trening/index.html', 'cabinet/index.html', 'cabinet/config.js', 'push.js', 'fx.js', 'voice.js', 'lib/lame.min.js', 'lib/ogg-opus-decoder.min.js', 'trening/manifest.webmanifest', 'cabinet/manifest.webmanifest',
   'trening/icon-192.png', 'trening/apple-touch-icon.png', 'cabinet/icon-192.png', 'cabinet/apple-touch-icon.png'];
 var VIDEO_MAX = 40, NET_WAIT = 4000;
 
