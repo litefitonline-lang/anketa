@@ -450,7 +450,11 @@ details.card[open]>summary{margin-bottom:12px}
 .meta{align-items:center}
 .tag.pro{color:var(--on-accent);background:var(--accent);border-color:var(--accent)}
 .pill.warm{color:var(--warm);border-color:var(--warm-bg)}
-.pill.debt{color:#FF6B6B;border-color:rgba(255,107,107,.45)}.tl-m .debt{color:#FF6B6B;font-weight:700}
+.pill.debt{color:#FF6B6B;border-color:rgba(255,107,107,.45)}
+.hist-h{all:unset;display:flex;justify-content:space-between;align-items:center;width:100%;cursor:pointer}.hist{margin-top:10px;display:flex;flex-direction:column}
+.hrow{border-top:1px solid var(--line)}.hrow-b{all:unset;display:grid;grid-template-columns:86px 92px 1fr;gap:8px;align-items:baseline;width:100%;padding:11px 0;cursor:pointer;font-size:14px}
+.hrow-b .hd{color:var(--dim,#8aa)}.hrow-b .hw{color:var(--dim,#8aa);min-width:0}.hrow.frz .hrow-b .hw{color:#8fd3ff}.hrow-b .debt{color:#FF6B6B;font-weight:700}.debt{color:#FF6B6B;font-weight:700}.btn.dots{width:auto;flex:0 0 auto;min-width:48px;padding:6px 14px;margin:0}.hrow.open .hrow-b{color:var(--text,#fff)}.hrow-x{padding:0 0 12px}.hrow-x .tli{border:0;padding:0;margin:0}
+.tot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:14px;color:var(--dim,#8aa)}.tot b{color:var(--text,#fff);font-size:16px}.tl-m .debt{color:#FF6B6B;font-weight:700}
 .pill.frz{color:#D9CCF7;border-color:#3B2E63}
 
 /* строки списков */
@@ -792,6 +796,7 @@ function planBody(x) {
  *   «Внести оплату» – «Пакет» или «Аванс». У пакета – «Стоимость пакета»: оплачено меньше – у клиента долг, у пакета кнопки
  *   «Доплатить» (клиент принёс деньги) и «Оплатить из аванса». Аванс – отдельной строкой «на счету», «Изменить» и «Удалить».
  *   Оплата без даты начала (старый «аванс» пакета) – теперь «без даты начала». Долг – в «Сегодня» и в карточке «Оплата».
+ *   Долг – «минус на балансе пакета» (−5 000 ₽). Стоимость тарифа по листу «Прайс» – фоном в «Оплачено сейчас» и в «Стоимости».
  *   Из аванса можно взять часть долга (остаток клиент доплатит). Рассрочка: «Оплачено сейчас» 0 или первый взнос – долг гаснет доплатами.
  * 2.3, правка 10.11: строка «Оплаты до перехода на лист „Платежи“» (сумма всех оплат клиента до переноса, без даты и пакета)
  *   больше не считается авансом: подпись «История до перехода», пояснение «все оплаты до ДД.ММ.ГГ», без кнопок.
@@ -1259,7 +1264,7 @@ function summ(c) {
   if (act && !tr && endIn === null && !/аванс/i.test(c.payStatus || '')) o.alerts.push({ text: 'Нет оплаты – внесите её во вкладке «Оплаты»', sub: 'pay' });
   if (/аванс/i.test(c.payStatus || '') && /назначьте/i.test(c.payStatus || '')) o.alerts.push({ text: 'Есть оплата пакета без даты начала – назначьте её', sub: 'pay' });
   var mo0 = payMoney(c);                                                    // 2.4: долг по пакету
-  if (mo0.debt > 0) { var dp = (c.pays || []).filter(function (p) { return p.k === 'pkg' && p.debt > 0; })[0], dt = dp ? payTo(dp) : ''; o.alerts.push({ text: 'Долг по пакету: ' + fmt(mo0.debt) + ' ₽' + (dt ? ' – пакет до ' + dm(dt) : '') + (mo0.dep ? '. На счету аванс ' + fmt(mo0.dep) + ' ₽ – можно оплатить из него' : ''), sub: 'pay' }); }
+  if (mo0.debt > 0) { var dp = (c.pays || []).filter(function (p) { return p.k === 'pkg' && p.debt > 0; })[0], dt = dp ? payTo(dp) : ''; o.alerts.push({ text: 'Баланс по пакету: −' + fmt(mo0.debt) + ' ₽' + (dt ? ' – пакет до ' + dm(dt) : '') + (mo0.dep ? '. На счету аванс ' + fmt(mo0.dep) + ' ₽ – можно оплатить из него' : ''), sub: 'pay' }); }
   (c.reports || []).forEach(function (r) {
     if (r.test && !D.admin) return;
     if (r.state !== 'sent') o.alerts.push({ text: 'Итоги месяца ' + r.n + (r.state === 'wait' ? ' ждут вашей проверки' : ' сохранены, но не отправлены клиенту'), sub: 'care' });
@@ -2393,28 +2398,34 @@ function nextPkgTxt(c, curP) {
 }
 /** 2.4: на счету (аванс) и долг клиента – сервер присылает итог в первой строке оплат. */
 function payMoney(c) { var f = (c.pays || [])[0] || {}; return { dep: Number(f.depAll) || 0, debt: Number(f.debtAll) || 0 }; }
-/** 2.4: стоимость пакета по умолчанию – как у прошлого пакета клиента с тем же сроком. */
-function costDef(c, days) { var x = (c.pays || []).filter(function (p) { return p.k === 'pkg' && p.cost != null && String(p.days) === String(days); })[0]; return x ? x.cost : ''; }
+/** 2.4: стоимость тарифа по листу «Прайс» (формат клиента × пакет); скидка Lite Fit – уже со скидкой. */
+function tariff(c, days) {
+  var pr = (L().prices || {})[String(c && c.format || '').toUpperCase() + '|' + String(days)];
+  if (!pr) return 0;
+  return c.disc && c.disc.pct ? Math.round(pr * (100 - c.disc.pct) / 100) : pr;
+}
+/** 2.4: стоимость пакета по умолчанию – по прайсу, иначе как у прошлого пакета клиента с тем же сроком. */
+function costDef(c, days) {
+  var t0 = tariff(c, days); if (t0) return t0;
+  var x = (c.pays || []).filter(function (p) { return p.k === 'pkg' && p.cost != null && String(p.days) === String(days); })[0]; return x ? x.cost : '';
+}
+function tariffTxt(c, days) {
+  var t0 = tariff(c, days);
+  return t0 ? 'Тариф ' + esc(c.format) + ' · ' + days + ' дн. – <b>' + fmt(t0) + ' ₽</b>' + (c.disc && c.disc.pct ? ' (со скидкой Lite Fit ' + c.disc.pct + ' %)' : '') + ' по прайсу' : '';
+}
 function payNow(p) { return !!(p.start && p.next && dn(p.start) <= T && T < dn(p.next)); }
 /** Правка 10.11: строка «Оплаты до перехода на лист „Платежи“» – итог старых оплат, не аванс и не пакет. */
 function payOld(p) { return !!p && !p.date && !p.start && /до перехода на лист/i.test(p.note || ''); }
 function payOf(c, row) { return (c.pays || []).filter(function (p) { return String(p.row) === String(row); })[0] || null; }
 function payHit(c, y, skipRow) { var n = dn(y); return (c.pays || []).filter(function (p) { return String(p.row) !== String(skipRow) && p.start && p.next && dn(p.start) <= n && n < dn(p.next); })[0] || null; }
 function payLine(p) { if (p.k === 'adv') return fmt(p.sum) + ' ₽ от ' + dm(p.date) + ', аванс'; if (p.k === 'dop') return (p.adv ? fmt(p.adv) + ' ₽ из аванса' : fmt(p.sum) + ' ₽ от ' + dm(p.date)) + ', доплата'; return fmt(p.sum) + ' ₽ от ' + dm(p.date) + (p.days ? ', пакет ' + p.days + ' дн.' : ''); }
-function subPay(c) {
-  if (!c.pays) return c.err ? loadingCard(c) : '<div class="card"><p class="muted" style="margin:0">Оплаты и заморозки загружаются…</p></div>';
-  var curP = c.pays.filter(payNow)[0], nx = c.payEnd ? ymd(dn(c.payEnd) + 1) : '', h = '';
-  h += '<div class="card"><h3>Оплата</h3><div class="kvs">' + kv('Оплачено до', c.payEnd ? dm(c.payEnd) + '.' + c.payEnd.slice(0, 4) : '—') +
-    kv('Пакет', (curP ? curP.days + ' дн.' + (curP.sess ? ' · тренировок: ' + esc(curP.sess) : '') : c.period ? c.period + ' дн.' : '—') + nextPkgTxt(c, curP)) +
-    kv('Следующая оплата', nx ? dm(nx) + (dn(nx) - T >= 0 && dn(nx) - T <= 5 ? ' <span style="color:var(--warm)">– через ' + days(dn(nx) - T) + '</span>' : dn(nx) < T ? ' <span style="color:var(--warm)">– просрочена</span>' : '') : '—') +
-    (function () { var mo = payMoney(c); return (mo.debt ? kv('Долг', '<span style="color:#FF6B6B">' + fmt(mo.debt) + ' ₽</span>') : '') + (mo.dep ? kv('На счету (аванс)', fmt(mo.dep) + ' ₽') : ''); })() +
-    kv('Статус оплаты', esc(c.payStatus || '—')) + kv('Скидка Lite Fit', c.disc ? c.disc.pct + ' % с ' + dm(c.disc.from) : 'нет') + '</div>' +
-    (c.arch ? '' : '<div class="btns"><button class="btn pri" data-act="payForm">Внести оплату</button><button class="btn sec" data-act="frzForm">Заморозка</button></div>') + '</div>';
-  var items = c.pays.map(function (p) { return { k: p.start || p.date, p: p }; }).concat((c.frzRows || []).map(function (z) { return { k: z.from, z: z }; }));
-  items.sort(function (a, b) { return a.k < b.k ? 1 : a.k > b.k ? -1 : 0; });
-  h += '<div class="card"><h3>История оплат</h3>';
-  if (!items.length) return h + '<p class="sub" style="margin:0">Оплат пока нет.</p></div>';
-  h += '<div class="tl">' + items.map(function (it) {
+/**
+ * 2.4: вкладка «Оплаты» – три блока. «Действующая оплата» (тариф, срок, тренировки, период, статус, скидка – если есть,
+ * стоимость и баланс пакета, заморозка «использовано … из …», следующий пакет; «Изменить» и «Закрыть досрочно» – в «⋯»).
+ * «Счёт клиента (аванс)». «История оплат» – свёрнута; оплаты и заморозки по датам одной строкой, нажатие – подробности
+ * и кнопки. Внизу – всего оплачено в приложении с первой даты.
+ */
+function payItem(c, it) {
     if (it.z) {
       var z = it.z, now = dn(z.from) <= T && dn(z.to) >= T, bad = z.check && z.check.indexOf('⚠') === 0;
       return '<div class="tli frz"><div class="tl-h"><b>Заморозка ' + dm(z.from) + ' – ' + dm(z.to) + '</b><span class="pill">' + days(z.days) + '</span></div>' +
@@ -2443,7 +2454,7 @@ function subPay(c) {
         (c.arch ? '' : '<div class="tl-b"><button class="btn sec sm" data-act="payDelForm" data-row="' + p.row + '">' + (p.adv ? 'Вернуть в аванс' : 'Удалить') + '</button></div>') + '</div>';
     }
     var to = payTo(p), now2 = payNow(p), fut = p.start && dn(p.start) > T, adv = !p.start, debt = p.k === 'pkg' && p.debt > 0, mo = payMoney(c);
-    var tag = (debt ? '<span class="pill debt">долг ' + fmt(p.debt) + ' ₽</span>' : '') + (adv ? '<span class="pill warm">без даты начала</span>' : now2 ? '<span class="pill on">идёт сейчас</span>' : fut ? '<span class="pill">впереди</span>' : '');
+    var tag = (debt ? '<span class="pill debt">−' + fmt(p.debt) + ' ₽</span>' : '') + (adv ? '<span class="pill warm">без даты начала</span>' : now2 ? '<span class="pill on">идёт сейчас</span>' : fut ? '<span class="pill">впереди</span>' : '');
     var disc = p.price ? 'по прайсу ' + fmt(p.price) + ' ₽' + (p.disc ? ', скидка ' + p.disc + ' %' : '') + (p.dwhy ? ' · ' + esc(p.dwhy) : '') : '';
     var btns = '';
     if (!c.arch) {
@@ -2455,11 +2466,75 @@ function subPay(c) {
     return '<div class="tli' + (now2 ? ' now' : '') + '"><div class="tl-h"><b class="num">' + fmt(p.sum) + ' ₽</b><span class="tag">' + (p.days ? p.days + ' дн.' : 'без пакета') + '</span>' + tag + '</div>' +
       '<div class="tl-m">Оплата ' + (p.date ? dm(p.date) + '.' + p.date.slice(2, 4) : '—') + (p.how ? ' · ' + esc(p.how) : '') + (p.sess ? ' · тренировок: ' + esc(p.sess) : '') + '</div>' +
       '<div class="tl-m">' + (adv ? '<span style="color:var(--warm)">Пакет без даты начала – назначьте её, когда клиент начнёт</span>' : 'Период <b class="num">' + dm(p.start) + ' – ' + (to ? dm(to) : '…') + '</b>' + (p.end ? ' <span style="color:var(--warm)">· закрыт досрочно</span>' : '') + (p.frzd ? ' · заморозка +' + days(p.frzd) : '')) + '</div>' +
-      (p.k === 'pkg' && p.cost != null ? '<div class="tl-m">Стоимость <b class="num">' + fmt(p.cost) + ' ₽</b> · оплачено ' + fmt(p.paid != null ? p.paid : p.sum) + ' ₽' + (debt ? ' · <span class="debt">долг ' + fmt(p.debt) + ' ₽</span>' : ' · оплачен полностью') + '</div>' : '') +   // 2.4
+      (p.k === 'pkg' && p.cost != null ? '<div class="tl-m">Стоимость <b class="num">' + fmt(p.cost) + ' ₽</b> · оплачено ' + fmt(p.paid != null ? p.paid : p.sum) + ' ₽' + (debt ? ' · <span class="debt">баланс −' + fmt(p.debt) + ' ₽</span>' : ' · оплачен полностью') + '</div>' : '') +   // 2.4
       (disc ? '<div class="tl-m">Скидка: ' + disc + '</div>' : '') + (p.note ? '<div class="tl-m dim">' + esc(p.note) + '</div>' : '') +
       (btns ? '<div class="tl-b">' + btns + '</div>' : '') + '</div>';
-  }).join('') + '</div>';
-  return h + '<p class="note">Клиент выполнил все тренировки раньше срока и платит за новый пакет? Нажмите «Закрыть досрочно» у текущего пакета – новый продолжит со следующего дня, без разрыва.</p></div>';
+}
+/** Одна строка истории: дата · сумма · что. */
+function payRowTxt(c, it) {
+  if (it.z) return [dm(it.z.from) + ' – ' + dm(it.z.to), '', '❄ заморозка ' + days(it.z.days)];
+  var p = it.p, d = p.date ? dm(p.date) + '.' + p.date.slice(2, 4) : '—';
+  if (payOld(p)) return ['до перехода', fmt(p.sum) + ' ₽', 'история до перехода'];
+  if (p.k === 'adv') return [d, fmt(p.sum) + ' ₽', 'аванс'];
+  if (p.k === 'dop') return [d, fmt(p.adv || p.sum) + ' ₽', p.adv ? 'из аванса' : 'доплата'];
+  return [d, fmt(p.sum) + ' ₽', (c.format ? esc(c.format) + ' ' : '') + (p.days ? p.days + ' дн.' : 'без пакета') + (p.sess ? ', ' + esc(p.sess) + ' тр.' : '') + (p.debt > 0 ? ' <span class="debt">−' + fmt(p.debt) + '</span>' : '')];
+}
+/** Заморозки внутри пакета p: использовано дней и лимит по договору (30 дн. – 14 дней; 3 и 6 мес. – 30 дней, 2 раза). */
+function payFrz(c, p) {
+  var a = dn(p.start), b = dn(payTo(p) || p.start), used = 0, n = 0;
+  (c.frzRows || []).forEach(function (z) { if (dn(z.from) >= a && dn(z.from) <= b) { used += Number(z.days) || 0; n++; } });
+  var big = Number(p.days) >= 90;
+  return { used: used, n: n, max: big ? 30 : 14, times: big ? 2 : 1 };
+}
+function subPay(c) {
+  if (!c.pays) return c.err ? loadingCard(c) : '<div class="card"><p class="muted" style="margin:0">Оплаты и заморозки загружаются…</p></div>';
+  var pk = c.pays.filter(function (p) { return !p.k || p.k === 'pkg'; }).filter(function (p) { return !payOld(p); });
+  var curP = pk.filter(payNow)[0], noStart = pk.filter(function (p) { return !p.start; })[0];
+  var nextP = pk.filter(function (p) { return p.start && dn(p.start) > T; }).sort(function (a, b) { return a.start < b.start ? -1 : 1; })[0];
+  var lastP = curP || pk.filter(function (p) { return p.start && dn(p.start) <= T; })[0] || nextP, mo = payMoney(c), f0 = c.pays[0] || {}, h = '';
+  // --- 1. действующая оплата
+  h += '<div class="card"><div class="tl-h" style="justify-content:space-between"><h3 style="margin:0">Действующая оплата</h3>' +
+    (!c.arch && lastP ? '<button class="btn sec sm dots" data-act="payMenu" data-row="' + lastP.row + '" aria-label="Ещё">⋯</button>' : '') + '</div>';
+  if (lastP) {
+    var to = payTo(lastP), left = to ? dn(to) - T : null, st = String(c.payStatus || '—').split(' · ')[0];
+    h += '<p style="margin:10px 0 2px;font-size:19px"><b>' + esc(c.format || 'Пакет') + ' · ' + days(lastP.days || 0) + (lastP.sess ? ' · ' + esc(lastP.sess) + ' ' + plural(+lastP.sess || 0, 'тренировка', 'тренировки', 'тренировок') : '') + '</b></p>' +
+      '<div class="kvs">' + kv('Период', dm(lastP.start) + ' – ' + (to ? dm(to) : '…') + (curP && left !== null ? ' <span class="muted">· осталось ' + days(Math.max(left + 1, 0)) + '</span>' : !curP ? ' <span style="color:var(--warm)">· закончился</span>' : '')) +
+      kv('Статус оплаты', esc(st));
+    if (lastP.price) h += kv('Скидка', (lastP.disc ? lastP.disc + ' %' : '') + (lastP.dwhy ? ' · ' + esc(lastP.dwhy) : '') + ' · по прайсу ' + fmt(lastP.price) + ' ₽');
+    else if (c.disc) h += kv('Скидка', 'Lite Fit ' + c.disc.pct + ' % с ' + dm(c.disc.from));
+    if (lastP.k === 'pkg' && lastP.cost != null) h += kv('Стоимость пакета', fmt(lastP.cost) + ' ₽' + (lastP.debt > 0 ? ' · оплачено ' + fmt(lastP.paid != null ? lastP.paid : lastP.sum) + ' ₽' : ' · оплачен полностью'));
+    if (lastP.debt > 0) h += kv('Баланс пакета', '<span style="color:#FF6B6B;font-weight:700">−' + fmt(lastP.debt) + ' ₽</span>');
+    if (curP) { var fz = payFrz(c, curP); h += kv('Заморозка', 'использовано ' + fz.used + ' из ' + fz.max + ' дн.' + (fz.times > 1 ? ' · раз: ' + fz.n + ' из ' + fz.times : '')); }
+    if (nextP && nextP !== lastP) h += kv('Следующий пакет', 'оплачен – с ' + dm(nextP.start) + (nextP.debt > 0 ? ' <span class="debt">−' + fmt(nextP.debt) + ' ₽</span>' : ''));
+    h += '</div>';
+  } else h += '<p class="sub" style="margin:10px 0 0">Действующего пакета нет.</p>';
+  if (noStart) h += '<div class="banner" style="margin-top:10px">Оплачен пакет без даты начала (' + fmt(noStart.sum) + ' ₽ от ' + dm(noStart.date) + '). ' +
+    (c.arch ? '' : '<button class="btn pri sm" data-act="payEditForm" data-row="' + noStart.row + '" data-f="start">Назначить дату начала</button>') + '</div>';
+  if (!c.arch) {
+    var dp = pk.filter(function (p) { return p.debt > 0; })[0];
+    h += '<div class="btns">' + (dp ? '<button class="btn pri" data-act="dopForm" data-row="' + dp.row + '">Доплатить</button>' + (mo.dep > 0 ? '<button class="btn pri" data-act="fromAdvForm" data-row="' + dp.row + '">Оплатить из аванса</button>' : '') : '') +
+      '<button class="btn ' + (dp ? 'sec' : 'pri') + '" data-act="payForm">Внести оплату</button><button class="btn sec" data-act="frzForm">Заморозка</button></div>';
+  }
+  h += '</div>';
+  // --- 2. счёт клиента
+  h += mo.dep > 0 ? '<div class="card"><div class="tl-h" style="justify-content:space-between"><h3 style="margin:0">Счёт клиента <span class="muted" style="font-weight:400">(аванс)</span></h3><b class="num" style="font-size:22px">' + fmt(mo.dep) + ' ₽</b></div>' +
+      '<p class="sub" style="margin:6px 0 0">У клиента в приложении – «депозит». Из него оплачивают минус по пакету.</p>' +
+      (c.arch ? '' : '<div class="btns"><button class="btn sec" data-act="advNew">Внести аванс</button></div>') + '</div>'
+    : '<div class="card" style="padding:12px 18px"><div class="tl-h" style="justify-content:space-between"><span>Счёт клиента <span class="muted">(аванс)</span>: <b class="num">0 ₽</b></span>' + (c.arch ? '' : '<button class="btn sec sm" data-act="advNew">Внести аванс</button>') + '</div></div>';
+  // --- 3. история
+  var items = c.pays.map(function (p) { return { k: p.start || p.date || '0000', id: 'p' + p.row, p: p }; }).concat((c.frzRows || []).map(function (z) { return { k: z.from, id: 'z' + z.from, z: z }; }));
+  items.sort(function (a, b) { return a.k < b.k ? 1 : a.k > b.k ? -1 : 0; });
+  h += '<div class="card"><button class="hist-h" data-act="payHist"><h3 style="margin:0">История оплат <span class="muted" style="font-weight:400">· ' + items.length + '</span></h3><span class="muted">' + (S.payHist ? '▲' : '▼') + '</span></button>';
+  if (S.payHist) {
+    if (!items.length) h += '<p class="sub" style="margin:10px 0 0">Оплат пока нет.</p>';
+    h += '<div class="hist">' + items.map(function (it) {
+      var r = payRowTxt(c, it), open = S.payOpen === it.id;
+      return '<div class="hrow' + (open ? ' open' : '') + (it.z ? ' frz' : '') + '"><button class="hrow-b" data-act="payRow" data-id="' + it.id + '"><span class="hd">' + r[0] + '</span><b class="num">' + r[1] + '</b><span class="hw">' + r[2] + '</span></button>' +
+        (open ? '<div class="hrow-x tl">' + payItem(c, it) + '</div>' : '') + '</div>';
+    }).join('') + '</div>';
+  }
+  h += '<div class="tot">' + (f0.firstAll ? 'С ' + dm(f0.firstAll) + '.' + f0.firstAll.slice(0, 4) + ' оплачено всего: ' : 'Оплачено всего: ') + '<b class="num">' + fmt(f0.totAll != null ? f0.totAll : 0) + ' ₽</b></div></div>';
+  return h;
 }
 /** 2.3: поля скидки – цена по прайсу и скидка в %, «Сумма» считается сама; причина. x – оплата, которую меняют. */
 function discFields(p, x) {
@@ -2808,18 +2883,20 @@ function pkgOpts() { return (L().pkgs || []).map(function (p) { return [String(p
 function pkgDef(want) { var o = pkgOpts(), w = String(want || ''); return o.some(function (x) { return x[0] === w; }) ? w : o.some(function (x) { return x[0] === '30'; }) ? '30' : (o[0] || [''])[0]; }
 /** Поля оплаты (общие для «Внести оплату» и «Перевести на PRO»). p — приставка к id полей. */
 function payFields(p, pkg, c) {
-  var cost = p === 'y';                                                     // 2.4: стоимость пакета – в «Внести оплату»
-  return '<div class="grid2">' + fi(p + 'Date', 'Дата оплаты', TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + TODAY + '"') + fi(p + 'Sum', cost ? 'Оплачено сейчас, ₽' : 'Сумма, ₽', '', 'text', 'inputmode="numeric"') + '</div>' +
-    (cost ? fi(p + 'Cost', 'Стоимость пакета, ₽', c ? costDef(c, pkgDef(pkg)) : '', 'text', 'inputmode="numeric" placeholder="как оплачено"') +
-      '<p class="note" style="margin:0 0 10px">Оплачено меньше стоимости – у клиента будет долг: у пакета появятся «Доплатить» и «Оплатить из аванса». Рассрочка – «Оплачено сейчас» 0 (или первый взнос), остальное – доплатами. Пусто – пакет оплачен полностью.</p>' : '') +
-    '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg)) + fs(p + 'Sess', 'Тренировок', [['', '– выберите –']].concat(L().sessions || []), '') + '</div>' +
+  var cost = p === 'y', pd = pkgDef(pkg), cd = cost && c ? costDef(c, pd) : '';   // 2.4: стоимость пакета – в «Внести оплату»; прайс – фоном
+  return '<div class="grid2">' + fi(p + 'Date', 'Дата оплаты', TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + TODAY + '"') +
+    fi(p + 'Sum', cost ? 'Оплачено сейчас, ₽' : 'Сумма, ₽', '', 'text', 'inputmode="numeric"' + (cd !== '' ? ' placeholder="' + fmt(cd) + '"' : '')) + '</div>' +
+    (cost ? '<p class="note" id="yTariff" style="margin:0 0 10px">' + (c ? tariffTxt(c, pd) : '') + '</p>' : '') +
+    (cost ? fi(p + 'Cost', 'Стоимость пакета, ₽', cd, 'text', 'inputmode="numeric" placeholder="как оплачено"') +
+      '<p class="note" style="margin:0 0 10px">Оплачено меньше стоимости – у пакета минус на балансе: появятся «Доплатить» и «Оплатить из аванса». Рассрочка – «Оплачено сейчас» 0 (или первый взнос), остальное – доплатами. «Стоимость» пусто – пакет оплачен полностью.</p>' : '') +
+    '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg), cost ? 'data-ch="payPkg"' : '') + fs(p + 'Sess', 'Тренировок', [['', '– выберите –']].concat(L().sessions || []), '') + '</div>' +
     '<p class="note" style="margin:0 0 10px">По числу тренировок и началу пакета в приложении тренировок сам встанет пакет «1 из N». «иное» – пакета там не будет, тренировки пойдут по порядку: № 1, № 2…</p>' +   // 2.0 (правка 31.10)
     fs(p + 'How', 'Способ оплаты', L().methods || [], L().method || '') + discFields(p) +   // 2.0: скидка в % или ценой по прайсу, с причиной
     ft(p + 'Note', 'Комментарий, если нужен', '', 2, 'maxlength="300"');
 }
 function payRead(p) {
   var sum = num(p + 'Sum'), ss = val(p + 'Sess');
-  if (sum === '' && document.getElementById(p + 'Cost') && num(p + 'Cost') > 0) sum = 0;   // 2.4: рассрочка – сейчас ничего не внесено, весь пакет в долг
+  if (sum === '' && document.getElementById(p + 'Cost')) return { err: 'Укажите, сколько клиент оплатил сейчас. Рассрочка без первого взноса – 0.' };   // 2.4: фоном – стоимость тарифа, сама сумма не подставляется
   if (!val(p + 'Date')) return { err: 'Укажите дату оплаты.' };
   if (sum === '' || isNaN(sum) || sum < 0) return { err: 'Укажите сумму.' };
   var cost = document.getElementById(p + 'Cost') ? num(p + 'Cost') : '';    // 2.4
@@ -3244,6 +3321,18 @@ var ACT = {
     });
   },
   /* --- 2.4: аванс, доплата, оплата из аванса --- */
+  payHist: function () { S.payHist = !S.payHist; render(); },
+  payRow: function (t) { var id = t.getAttribute('data-id'); S.payOpen = S.payOpen === id ? '' : id; render(); },
+  advNew: function () { ACT.payForm(); var k = document.getElementById('yKind'); if (k) { k.value = 'adv'; var ab = document.getElementById('yAdvBox'), pb = document.getElementById('yPkgBox'); if (ab) ab.hidden = false; if (pb) pb.hidden = true; } },
+  payMenu: function (t) {
+    var c = cur(), p = payOf(c, t.getAttribute('data-row'));
+    if (!p) return;
+    var can = payNow(p) && !p.end && p.days;
+    sheet('Пакет', '<h2>Пакет ' + (p.start ? dm(p.start) + ' – ' + dm(payTo(p) || p.start) : '') + '</h2><p class="lead">' + esc(c.name) + ': ' + payLine(p) + '.</p>' +
+      '<button class="btn sec" data-act="payEditForm" data-row="' + p.row + '">Изменить оплату</button>' +
+      (can ? '<button class="btn sec" data-act="endForm" data-row="' + p.row + '">Закрыть досрочно</button><p class="note" style="margin:0 0 10px">Клиент выполнил все тренировки раньше срока и платит за новый пакет – закройте этот, новый продолжит со следующего дня, без разрыва.</p>' : '') +
+      '<button class="btn danger" data-act="payDelForm" data-row="' + p.row + '">Удалить оплату</button><button class="btn sec" data-act="close">Закрыть</button>');
+  },
   advSave: function (t) {
     var c = cur(), q = advRead('a');
     if (q.err) { var fe = document.getElementById('ferrA'); if (fe) fe.textContent = q.err; return; }
@@ -3267,10 +3356,10 @@ var ACT = {
   dopForm: function (t) {
     var c = cur(), p = payOf(c, t.getAttribute('data-row'));
     if (!p || !(p.debt > 0)) return toast('Долга по этому пакету нет – обновите страницу', 'bad');
-    sheet('Доплата', '<h2>Доплата к пакету</h2><p class="lead">' + esc(c.name) + ': пакет ' + (p.start ? 'с ' + dm(p.start) : 'от ' + dm(p.date)) + ', стоимость ' + fmt(p.cost) + ' ₽, оплачено ' + fmt(p.paid) + ' ₽. <b>Долг: ' + fmt(p.debt) + ' ₽</b>.</p>' +
+    sheet('Доплата', '<h2>Доплата к пакету</h2><p class="lead">' + esc(c.name) + ': пакет ' + (p.start ? 'с ' + dm(p.start) : 'от ' + dm(p.date)) + ', стоимость ' + fmt(p.cost) + ' ₽, оплачено ' + fmt(p.paid) + ' ₽. <b>Баланс: −' + fmt(p.debt) + ' ₽</b>.</p>' +
       '<div class="grid2">' + fi('dDate', 'Дата оплаты', TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + TODAY + '"') + fi('dSum', 'Сумма, ₽', String(p.debt), 'text', 'inputmode="numeric"') + '</div>' +
       fs('dHow', 'Способ оплаты', L().methods || [], L().method || '') + ft('dNote', 'Комментарий, если нужен', '', 2, 'maxlength="300"') +
-      '<p class="note" style="margin:0">Можно частями: долг уменьшится на эту сумму. Больше долга – нельзя, лишнее внесите авансом.</p>' +
+      '<p class="note" style="margin:0">Можно частями: минус на балансе уменьшится на эту сумму. Больше долга – нельзя, лишнее внесите авансом.</p>' +
       '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="dopSave" data-row="' + p.row + '">Записать доплату</button><button class="btn sec" data-act="close">Отмена</button>');
   },
   dopSave: function (t) {
@@ -3745,6 +3834,13 @@ document.addEventListener('change', function (e) {
     return;
   }
   if (!c) return;
+  if (k === 'payPkg') {                                                    // 2.4: другой срок – другая стоимость по прайсу
+    var cd2 = costDef(c, v), se = document.getElementById('ySum'), ce2 = document.getElementById('yCost'), tx = document.getElementById('yTariff');
+    if (se) se.placeholder = cd2 !== '' ? fmt(cd2) : '';
+    if (ce2 && val('yDMode') !== 'on') ce2.value = cd2 !== '' ? String(cd2) : '';
+    if (tx) tx.innerHTML = tariffTxt(c, v);
+    return;
+  }
   if (k === 'payKind') { var ab = document.getElementById('yAdvBox'), pb = document.getElementById('yPkgBox'); if (ab) ab.hidden = v !== 'adv'; if (pb) pb.hidden = v === 'adv'; return; }   // 2.4
   if (k === 'payMode') { var bx = document.getElementById('yStartBox'); if (bx) bx.hidden = v !== 'own'; return; }   // 2.0
   if (k === 'dMode') { var px = e.target.getAttribute('data-p'), db = document.getElementById(px + 'DBox'); if (db) db.hidden = !v; if (v) discCalc(px); return; }   // 2.3
