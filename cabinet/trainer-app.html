@@ -2399,19 +2399,21 @@ function nextPkgTxt(c, curP) {
 /** 2.4: на счету (аванс) и долг клиента – сервер присылает итог в первой строке оплат. */
 function payMoney(c) { var f = (c.pays || [])[0] || {}; return { dep: Number(f.depAll) || 0, debt: Number(f.debtAll) || 0 }; }
 /** 2.4: стоимость тарифа по листу «Прайс» (формат клиента × пакет); скидка Lite Fit – уже со скидкой. */
-function tariff(c, days) {
-  var pr = (L().prices || {})[String(c && c.format || '').toUpperCase() + '|' + String(days)];
+function tariff(c, days, sess) {
+  var P0 = L().prices || {}, f = String(c && c.format || '').toUpperCase(), d = String(days || ''), n = /^\d+$/.test(String(sess || '')) ? String(+sess) : '';
+  var pr = P0[f + '|' + d + '|' + n] || P0[f + '|' + d + '|'] || P0[f + '||' + n] || P0[f + '||'] || P0[f + '|' + d];   // формат × срок × тренировок; пусто – любое
   if (!pr) return 0;
   return c.disc && c.disc.pct ? Math.round(pr * (100 - c.disc.pct) / 100) : pr;
 }
 /** 2.4: стоимость пакета по умолчанию – по прайсу, иначе как у прошлого пакета клиента с тем же сроком. */
-function costDef(c, days) {
-  var t0 = tariff(c, days); if (t0) return t0;
+function costDef(c, days, sess) {
+  var t0 = tariff(c, days, sess); if (t0) return t0;
   var x = (c.pays || []).filter(function (p) { return p.k === 'pkg' && p.cost != null && String(p.days) === String(days); })[0]; return x ? x.cost : '';
 }
-function tariffTxt(c, days) {
-  var t0 = tariff(c, days);
-  return t0 ? 'Тариф ' + esc(c.format) + ' · ' + days + ' дн. – <b>' + fmt(t0) + ' ₽</b>' + (c.disc && c.disc.pct ? ' (со скидкой Lite Fit ' + c.disc.pct + ' %)' : '') + ' по прайсу' : '';
+function tariffTxt(c, days, sess) {
+  var t0 = tariff(c, days, sess), n = /^\d+$/.test(String(sess || '')) ? +sess : 0;
+  if (!t0) return n || !(L().prices && Object.keys(L().prices).length) ? '' : 'Выберите число тренировок – подставим стоимость по прайсу.';
+  return 'Тариф ' + esc(c.format) + ' · ' + days + ' дн.' + (n ? ' · ' + n + ' ' + plural(n, 'тренировка', 'тренировки', 'тренировок') : '') + ' – <b>' + fmt(t0) + ' ₽</b>' + (c.disc && c.disc.pct ? ' (со скидкой Lite Fit ' + c.disc.pct + ' %)' : '') + ' по прайсу';
 }
 function payNow(p) { return !!(p.start && p.next && dn(p.start) <= T && T < dn(p.next)); }
 /** Правка 10.11: строка «Оплаты до перехода на лист „Платежи“» – итог старых оплат, не аванс и не пакет. */
@@ -2889,7 +2891,7 @@ function payFields(p, pkg, c) {
     (cost ? '<p class="note" id="yTariff" style="margin:0 0 10px">' + (c ? tariffTxt(c, pd) : '') + '</p>' : '') +
     (cost ? fi(p + 'Cost', 'Стоимость пакета, ₽', cd, 'text', 'inputmode="numeric" placeholder="как оплачено"') +
       '<p class="note" style="margin:0 0 10px">Оплачено меньше стоимости – у пакета минус на балансе: появятся «Доплатить» и «Оплатить из аванса». Рассрочка – «Оплачено сейчас» 0 (или первый взнос), остальное – доплатами. «Стоимость» пусто – пакет оплачен полностью.</p>' : '') +
-    '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg), cost ? 'data-ch="payPkg"' : '') + fs(p + 'Sess', 'Тренировок', [['', '– выберите –']].concat(L().sessions || []), '') + '</div>' +
+    '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg), cost ? 'data-ch="payPkg"' : '') + fs(p + 'Sess', 'Тренировок', [['', '– выберите –']].concat(L().sessions || []), '', cost ? 'data-ch="paySess"' : '') + '</div>' +
     '<p class="note" style="margin:0 0 10px">По числу тренировок и началу пакета в приложении тренировок сам встанет пакет «1 из N». «иное» – пакета там не будет, тренировки пойдут по порядку: № 1, № 2…</p>' +   // 2.0 (правка 31.10)
     fs(p + 'How', 'Способ оплаты', L().methods || [], L().method || '') + discFields(p) +   // 2.0: скидка в % или ценой по прайсу, с причиной
     ft(p + 'Note', 'Комментарий, если нужен', '', 2, 'maxlength="300"');
@@ -3834,11 +3836,11 @@ document.addEventListener('change', function (e) {
     return;
   }
   if (!c) return;
-  if (k === 'payPkg') {                                                    // 2.4: другой срок – другая стоимость по прайсу
-    var cd2 = costDef(c, v), se = document.getElementById('ySum'), ce2 = document.getElementById('yCost'), tx = document.getElementById('yTariff');
+  if (k === 'payPkg' || k === 'paySess') {                                // 2.4: другой срок или число тренировок – другая стоимость по прайсу
+    var pv = val('yPkg'), sv = val('ySess'), cd2 = costDef(c, pv, sv), se = document.getElementById('ySum'), ce2 = document.getElementById('yCost'), tx = document.getElementById('yTariff');
     if (se) se.placeholder = cd2 !== '' ? fmt(cd2) : '';
     if (ce2 && val('yDMode') !== 'on') ce2.value = cd2 !== '' ? String(cd2) : '';
-    if (tx) tx.innerHTML = tariffTxt(c, v);
+    if (tx) tx.innerHTML = tariffTxt(c, pv, sv);
     return;
   }
   if (k === 'payKind') { var ab = document.getElementById('yAdvBox'), pb = document.getElementById('yPkgBox'); if (ab) ab.hidden = v !== 'adv'; if (pb) pb.hidden = v === 'adv'; return; }   // 2.4
