@@ -813,6 +813,10 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.25 (12.11.2026, сервер – lite-fit-fix 2.0.6). База упражнений – через Артёма: правка упражнения и новое упражнение от других
+ *   тренеров уходят ему на согласование («На согласовании» вверху «Базы упражнений»: как увидит клиент, поправить, «Утвердить» /
+ *   «Отклонить» с причиной). Удалять, добавлять списком, подставлять ссылки – только Артём. Своё упражнение и новая ссылка на видео
+ *   в тренировке – сразу в тренировке, в базу – предложением.
  * 4.24 (11.11.2026). Пиксель VK Рекламы для FREE: у клиента FREE первое открытие тренировок – цель free_vydany, первая выполненная
  *   тренировка – free_trenirovka (каждая один раз на клиента и устройство). Счётчик грузится только у клиента FREE и только если
  *   задан PX_ID; у тренера и у клиентов START / BASIC / PRO пикселя нет.
@@ -825,7 +829,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  *   версии (u=1): если клиент поставит значок на экран отсюда, это уже новое приложение и карточки «Есть новая версия» не будет.
  *   Карточка остаётся только для старых значков, поставленных до единого кабинета.
  * 4.20 (10.11.2026, сервер – lite-fit-fix 2.0.4). У клиента вверху – депозит (деньги на счету, у тренера – «аванс») и, если по
- *   пакету осталось доплатить, небольшая красная строка «Долг … ₽ – оплатите до …» (M.money).
+ *   пакету осталось доплатить, небольшая красная строка «Баланс по пакету: −… ₽ – оплатите до …» (M.money).
  * 4.19 (09.11.2026). Сервер – lite-fit-trenirovki 4.26.1, lite-fit-fix 2.0. Заметка «От тренера» у клиента – с переносами строк:
  *   тренер дописывает в неё ответом свайпом в Telegram на «начал(а) тренировку».
  * 4.18 (08.11.2026). Сервер – lite-fit-trenirovki 4.26.0. Рекомендация тренера к упражнению – отдельно от техники (it.tip, до 400 знаков):
@@ -1017,7 +1021,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.24';
+var VERSION = '4.25';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1322,7 +1326,7 @@ function post(body, ms) {
   }, function (e) { clearTimeout(tm); throw e; });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1 };
+var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1, exok: 1, exno: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -1489,6 +1493,7 @@ var FULL = {};                   // тренировки целиком: { id: {
 function sumObj(a) { return { id: a[0], cid: String(a[1]), date: a[2], done: !!a[3], doneAt: a[4] || '', n: a[5] || 0, c: a[6] || 0, m: a[7] || 0, row: a[8] || 0, k: a[9] || 0, u: +a[10] || 0, dur: +a[11] || 0 }; }
 function setList(r) {
   D = { fuse: r.fuse || {}, trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], grps: r.grps || DEF_GRPS, band: r.band || DEF_BAND, clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj), vbase: r.vbase || '' };
+  if (r.exo !== undefined) { D.exo = !!r.exo; D.exq = r.exq instanceof Array ? r.exq : []; }   // 4.25: база через Артёма
   TODAY = D.today || TODAY;
   (r.full || []).forEach(function (w) { FULL[w.id] = w; });
   if (D.admin && S.own === '') S.own = D.clients.some(function (c) { return c.owner === D.trainer; }) ? D.trainer : '*';
@@ -2299,7 +2304,7 @@ function videoEdit(it, i) {
   if (b && b.video && !it.video && !S.open['v' + it.id])
     return '<div class="vid">' + IC.play + '<span class="mn">Видео подтянулось из базы · ' + esc(videoName(b.video)) + '</span><a href="' + esc(b.video) + '" target="_blank" rel="noopener noreferrer">Открыть</a></div>';
   var h = fi('v-' + it.id, 'Ссылка на видео: файл, Rutube, VK и другие', it.video, 'url', 'inputmode="url" autocomplete="off" autocapitalize="off" placeholder="видео ещё не добавлено" data-f="video" data-i="' + i + '"');
-  if (b) h += sw('keep', it.keep !== false, 'Запомнить ссылку в базе', 'Дальше видео подтянется само', 'data-i="' + i + '"');
+  if (b) h += exOwn() ? sw('keep', it.keep !== false, 'Запомнить ссылку в базе', 'Дальше видео подтянется само', 'data-i="' + i + '"') : sw('keep', it.keep !== false, 'Предложить ролик для базы', 'Артём посмотрит. Пока ролик – в этой тренировке', 'data-i="' + i + '"');   // 4.25
   return h;
 }
 /** Что сделал клиент: подходы, где он отступил от плана, подсвечены, рядом показан план. */
@@ -2322,7 +2327,7 @@ function editItem(w, it, i, n, no) {
     (b && muOk(b.mu) ? '<button class="figb" data-act="fig" data-i="' + i + '" aria-label="Мышцы" title="Мышцы – меняются в «Базе упражнений»">' + bodySvg(b.mu) + '</button>' : '') +
     '<span class="dh" draggable="true" data-drag="' + it.id + '" title="Перетащить мышью. На упражнение суперсета – добавить в суперсет, на середину соседнего в суперсете – поменять местами" aria-hidden="true">' + IC.drag + '</span></div>';
   if (own && it.isOwn) h += '<div class="stack" style="margin-bottom:10px">' + fi('n-' + it.id, 'Название упражнения', it.name, 'text', 'maxlength="80" autocomplete="off" data-f="name" data-i="' + i + '"') + '</div>';
-  h += '<div class="stack" style="margin-bottom:6px">' + videoEdit(it, i) + (own && it.isOwn ? sw('addBase', it.addBase !== false, 'Добавить упражнение в базу', 'Появится в подсказках у всех тренеров', 'data-i="' + i + '"') : '') + '</div>';
+  h += '<div class="stack" style="margin-bottom:6px">' + videoEdit(it, i) + (own && it.isOwn ? (exOwn() ? sw('addBase', it.addBase !== false, 'Добавить упражнение в базу', 'Появится в подсказках у всех тренеров', 'data-i="' + i + '"') : sw('addBase', it.addBase !== false, 'Предложить в базу', 'Артём посмотрит и добавит. В тренировке – уже сейчас', 'data-i="' + i + '"')) : '') + '</div>';
   h += '<div id="lh-' + it.id + '">' + hintHtml(it) + '</div>';
   h += '<div class="stp"><span>Подходов</span><button data-act="setsDec" data-i="' + i + '" aria-label="Меньше подходов"' + (it.sets.length <= 1 ? ' disabled' : '') + '>' + IC.minus + '</button><b class="num">' + it.sets.length + '</b><button data-act="setsInc" data-i="' + i + '" aria-label="Больше подходов"' + (it.sets.length >= 10 ? ' disabled' : '') + '>' + IC.plus + '</button></div>';
   h += '<div class="opt2">' + sw('noW', it.noW, 'Без веса', W ? '' : 'Графа веса убирается', 'data-i="' + i + '"') + sw('sec', it.sec, W ? 'Секунды' : 'Считать секунды, а не повторы', '', 'data-i="' + i + '" title="Считать секунды, а не повторы"') + '</div>';
@@ -2507,6 +2512,7 @@ function savedIn(r) {
   var s = sumObj(r.sum), old = sumOf(s.id);
   if (old) D.w[D.w.indexOf(old)] = s; else D.w.push(s);
   if (r.ex) D.ex = r.ex;
+  if (r.exq) D.exq = r.exq;                                               // 4.25
   memSave();
   return s;
 }
@@ -2577,11 +2583,60 @@ function viewBase() {
   var h = '<h1 class="hello">База упражнений</h1><div class="meta"><span class="pill">Упражнений: <b class="num">' + D.ex.length + '</b></span><span class="pill' + (withV ? ' ok' : '') + '">С видео: <b class="num">' + withV + '</b> из ' + D.ex.length + '</span></div>' +
     '<div class="seg bseg"><button data-act="bv" data-v="" class="' + (vid ? '' : 'on') + '">База</button><button data-act="bv" data-v="vid" class="' + (vid ? 'on' : '') + '">Видео</button></div>';
   if (vid) return h + viewVid();
-  h += '<div class="bctl"><button class="btn sec" data-act="exNew">' + IC.plus + 'Добавить упражнение</button>' + (D.admin ? '<button class="btn sec" data-act="exBulk">' + IC.note + 'Добавить списком</button>' : '') +
+  h += exqBlock();                                                          // 4.25: на согласовании
+  if (!exOwn()) h += '<p class="note" style="margin:0 0 10px">Изменения и новые упражнения уходят Артёму на согласование – в базе появятся после его «Утвердить». Удаляет упражнения только Артём.</p>';
+  h += '<div class="bctl"><button class="btn sec" data-act="exNew">' + IC.plus + 'Добавить упражнение</button>' + (D.admin && exOwn() ? '<button class="btn sec" data-act="exBulk">' + IC.note + 'Добавить списком</button>' : '') +
     '<div class="mt">' + fi('bQ', 'Поиск по названию', S.bq, 'text', 'autocomplete="off" data-f="bq"') + '</div></div>' +
     '<div class="chips">' + [['all', 'Все'], ['nov', 'Без видео · ' + (D.ex.length - withV)], ['vid', 'С видео · ' + withV], ['own', 'Свои · ' + own]].map(function (c) { return '<button data-act="bf" data-v="' + c[0] + '" class="' + (S.bf === c[0] ? 'on' : '') + '">' + c[1] + '</button>'; }).join('') + '</div>' +
     '<div id="bgF">' + baseChips() + '</div>';
   return h + '<div id="baseList">' + baseList() + '</div>';
+}
+/* 4.25: база упражнений – через Артёма. exOwn – меняет базу сразу (старый сервер без флага – как раньше). */
+function exOwn() { return !D || D.exo === undefined ? true : !!D.exo; }
+function exqList() { return D && D.exq instanceof Array ? D.exq : []; }
+var EXQ_F = { name: 'название', grp: 'группа мышц', cat: 'оборудование', video: 'видео', desc: 'описание техники', noW: 'без веса', sec: 'секунды', mu: 'мышцы' };
+var EXQ_ST = { wait: 'ждёт Артёма', ok: 'утверждено', no: 'отклонено' };
+function exqOf(id) { return exqList().filter(function (x) { return x.id === id; })[0] || null; }
+function exqWhat(x) { return x.kind === 'new' ? 'новое упражнение' : 'изменить: ' + (x.ch || []).map(function (k) { return EXQ_F[k] || k; }).join(', '); }
+function exqBlock() {
+  var l = exqList(), own = exOwn();
+  if (!l.length) return '';
+  var wait = l.filter(function (x) { return x.st === 'wait'; }).length;
+  return '<section class="bgrp"><div class="grp-title">' + (own ? 'На согласовании · ' + wait : 'Мои предложения в базу · ждут ' + wait) + '</div><div class="card"><div class="rows">' +
+    l.slice().reverse().map(function (x) {
+      var st = own ? '' : ' · ' + EXQ_ST[x.st] + (x.st === 'no' && x.why ? ': ' + x.why : '');
+      return '<button class="row" data-act="exqOpen" data-id="' + esc(x.id) + '"><span class="dot' + (x.st === 'ok' ? ' on' : '') + '"></span><span class="mn"><b>' + esc(x.name) + '</b><small>' +
+        esc((own ? x.by + ' · ' : '') + exqWhat(x) + ' · ' + dm(mskDay(x.at)) + st) + '</small></span><span class="chev">›</span></button>';
+    }).join('') + '</div></div></section>';
+}
+/** Карточка, какой упражнение станет после утверждения: новое – как предложили; правка – база сейчас + предложенные поля. */
+function exqCard(x) {
+  var now = x.now || {}, b = x.kind === 'new' ? null : exOf(x.exId) || x.was || {}, c = {};
+  if (!b) return { name: now.name || '', grp: now.grp || '', cat: now.cat || 'Другое', video: now.video || '', desc: now.desc || '', noW: !!now.noW, sec: !!now.sec };
+  ['name', 'grp', 'cat', 'video', 'desc', 'noW', 'sec'].forEach(function (k) { c[k] = b[k]; });
+  (x.ch || []).forEach(function (k) { if (k !== 'mu' && now[k] !== undefined) c[k] = now[k]; });
+  return c;
+}
+function exqTop(x, c) {
+  var mu = muShown(), k = c.video ? videoKind(c.video) : null, h = '';
+  h += '<p class="lead">' + esc(x.by) + ' · ' + dm(mskDay(x.at)) + (exOwn() ? '' : ' · <b>' + esc(EXQ_ST[x.st]) + '</b>' + (x.st === 'no' && x.why ? '. Причина: ' + esc(x.why) : '')) + '</p>';
+  if (x.lines && x.lines.length) h += '<div class="banner" style="white-space:pre-line">' + x.lines.map(esc).join('\n') + '</div>';
+  h += '<div class="lbl"><span>Как увидит клиент</span></div><div class="card ex"><div class="ex-h"><span class="ex-n num">1</span><div class="mn"><b>' + esc(c.name) + '</b><small>' +
+    esc([c.grp, c.noW ? 'без веса' : '', c.sec ? 'секунды' : ''].filter(Boolean).join(' · ')) + '</small></div>' + (muOk(mu) ? '<span class="figb">' + bodySvg(mu) + '</span>' : '') + '</div>';
+  if (k && k.t === 'link') h += '<div class="acts"><a class="btn sec sm hl" href="' + esc(c.video) + '" target="_blank" rel="noopener noreferrer">' + IC.play + 'Видео</a></div>';
+  else if (k && k.t !== 'bad') h += playerHtml(c.video);
+  else h += '<p class="note">Видео нет</p>';
+  if (c.desc) h += '<div class="desc">' + esc(c.desc) + '</div>';
+  return h + '</div>' + (exOwn() && x.st === 'wait' ? '<p class="note">Можно поправить карточку ниже – утвердится с правками.</p>' : '');
+}
+function exqBtns(x) {
+  if (exOwn() && x.st === 'wait') return '<button class="btn pri" data-act="exqOk">Утвердить</button>' +
+    ft('xWhy', 'Причина отказа – тренер увидит (можно не писать)', '', 2, 'maxlength="300"') + '<button class="btn danger" data-act="exqNo" style="margin-top:0">Отклонить</button>';
+  return '<button class="btn sec" data-act="close">Закрыть</button>';
+}
+function exFields() {
+  var E = S.exEdit;
+  return { name: val('xName'), grp: val('xGrp'), cat: val('xCat'), video: fixUrl(val('xVideo')), desc: val('xDesc'), noW: !!E.noW, sec: !!E.sec, mu: E.mu === null ? 'auto' : E.mu === false ? 'none' : E.mu };
 }
 /** Список упражнений из текста: строка – упражнение; через «;» или табуляцию можно дописать группу мышц и оборудование. */
 function bulkParse(t) {
@@ -2627,15 +2682,18 @@ function baseList() {
   });
   return h;
 }
-function exForm(id) {
+function exForm(id, rq) {
   var e = id ? exOf(id) : null, x = e || { name: '', grp: '', cat: 'Другое', video: '', desc: '', noW: false, sec: false };
-  S.exEdit = { id: id || '', noW: !!x.noW, sec: !!x.sec, del: false, mu: !e || e.mua ? null : e.mun ? false : { p: (e.mu && e.mu.p || []).slice(), s: (e.mu && e.mu.s || []).slice() }, muAuto: e && e.mua ? e.mu : null, muDirty: false };
+  if (rq) x = exqCard(rq);                                                  // 4.25: предложение тренера – карточка, какой она станет
+  S.exEdit = { id: id || '', noW: !!x.noW, sec: !!x.sec, del: false, mu: !e || e.mua ? null : e.mun ? false : { p: (e.mu && e.mu.p || []).slice(), s: (e.mu && e.mu.s || []).slice() }, muAuto: e && e.mua ? e.mu : null, muDirty: false, rq: rq || null };
+  if (rq && rq.now && rq.now.mu !== undefined && (rq.kind === 'new' || (rq.ch || []).indexOf('mu') >= 0)) { var qm = rq.now.mu; S.exEdit.mu = qm === 'none' ? false : qm && typeof qm === 'object' ? { p: (qm.p || []).slice(), s: (qm.s || []).slice() } : null; S.exEdit.muDirty = true; }
   var go = [['', 'не указана']].concat(grps().map(function (g) { return [g, g]; }));
   if (x.grp && grps().indexOf(x.grp) < 0) go.push([x.grp, x.grp + ' (прежняя)']);
   var cats = D.cats.slice(); D.ex.forEach(function (y) { if (y.cat && cats.indexOf(y.cat) < 0) cats.push(y.cat); });
   ['Фитнес-резинки', 'Другое'].forEach(function (c) { if (cats.indexOf(c) < 0) cats.push(c); }); if (x.cat && cats.indexOf(x.cat) < 0) cats.push(x.cat);
   var no = e ? exNum(e) : '', vno = e ? vidNum(e) : '';
-  sheet(e ? 'Упражнение' : 'Новое упражнение', '<h2>' + (e ? 'Упражнение' + (no ? ' № ' + no : '') : 'Новое упражнение') + '</h2>' +
+  var own = exOwn(), top = rq ? exqTop(rq, x) : !own ? '<p class="lead">' + (e ? 'Изменения' : 'Новое упражнение') + ' уйдут Артёму на согласование – в базе появятся после утверждения.</p>' : '';
+  sheet(rq ? 'На согласовании' : e ? 'Упражнение' : 'Новое упражнение', '<h2>' + (rq ? (rq.kind === 'new' ? 'Новое: ' : 'Изменить: ') + esc(rq.name) : e ? 'Упражнение' + (no ? ' № ' + no : '') : 'Новое упражнение') + '</h2>' + top +
     (vno ? '<p class="lead">Ролик этого упражнения называется ' + vno + '.mp4' + (e.vn ? ' (у ролика свой номер)' : '') + '. Ссылка подставляется сама: «База упражнений» → «Видео».</p>' : '') +
     fi('xName', 'Название', x.name, 'text', 'maxlength="80" autocomplete="off"') +
     fs('xGrp', 'Группа мышц', go, x.grp || '') +
@@ -2643,8 +2701,9 @@ function exForm(id) {
     fi('xVideo', 'Ссылка на видео: файл, Rutube, VK и другие', x.video, 'url', 'inputmode="url" autocomplete="off" autocapitalize="off" placeholder="видео ещё не добавлено"') +
     ft('xDesc', 'Описание техники (подставится в тренировку)', x.desc, 4, 'maxlength="800"') +
     '<div id="xSw">' + exSw() + '</div><div class="lbl"><span>Мышцы – фигура у клиента</span></div><div id="xMu">' + muEd() + '</div>' +
-    '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="exSave">Сохранить</button>' +
-    (e ? '<button class="btn danger" data-act="exDel" style="margin-top:0">Удалить из базы</button>' : ''));
+    '<p class="ferr" id="ferr" hidden></p>' + (rq ? exqBtns(rq) : '<button class="btn pri" data-act="exSave">' + (own ? 'Сохранить' : 'Отправить на согласование') + '</button>' +
+    (e && own ? '<button class="btn danger" data-act="exDel" style="margin-top:0">Удалить из базы</button>' : '')));
+  if (rq) S.exEdit.init = JSON.stringify(exFields());
 }
 /** Выбор мышц в карточке упражнения: нажатие – основная, ещё раз – помогает, ещё раз – убрать. */
 function muShown() { var E = S.exEdit; return E.mu === false ? null : E.mu === null ? E.muAuto : E.mu; }
@@ -2713,7 +2772,7 @@ function vidRows(P) {
       '<div class="mn"><b>' + esc(f.name) + '</b><small class="' + (st.c === 'bad' ? 'st-warn' : st.c === 'ok' ? 'st-ok' : '') + '">' + vidSize(f.size) + ' · ' + esc(st.t) + '</small>' +
       (st.add ? '<button class="vlnk" data-act="vidAdd" data-i="' + i + '">Добавить «' + esc(cap(f.txt)) + '» в базу</button>' : '') + '</div>' +
       '<label class="fld vin"><input id="vx-' + i + '" list="exAll" autocomplete="off" placeholder="первые буквы упражнения" value="' + esc(e ? e.name : f.txt) + '" data-f="vex" data-i="' + i + '" aria-label="Упражнение для ролика ' + esc(f.name) + '"></label>' +
-      '<span class="vto' + (st.c === 'bad' ? ' bad' : '') + '">' + (e ? '№ ' + vidNum(e) + '<button class="vlnk" data-act="vidNew" data-i="' + i + '" title="Если под этим номером уже загрузили не тот ролик: упражнение получит новый, ещё не использованный номер для видео">' + (S.vnew === i ? 'точно?' : 'другой №') + '</button>' : '–') + '</span></div>';
+      '<span class="vto' + (st.c === 'bad' ? ' bad' : '') + '">' + (e ? '№ ' + vidNum(e) + (exOwn() ? '' : '<!--') + '<button class="vlnk" data-act="vidNew" data-i="' + i + '" title="Если под этим номером уже загрузили не тот ролик: упражнение получит новый, ещё не использованный номер для видео">' + (S.vnew === i ? 'точно?' : 'другой №') + '</button>' + (exOwn() ? '' : '-->') : '–') + '</span></div>';
   }).join('');
 }
 /** Плеер справа. Перерисовывается только когда меняется ролик – иначе он загружался бы и начинался заново после каждого выбора упражнения. */
@@ -2756,11 +2815,11 @@ function vidInfo(P) {
 function ghUpload(base) { var m = /^https:\/\/([\w-]+)\.github\.io\/([\w.-]+)\/(.+)$/.exec(base || ''); return m ? 'https://github.com/' + m[1] + '/' + m[2] + '/upload/main/' + m[3] : ''; }
 function vidStore() {
   var up = ghUpload(D.vbase), h = '<div class="card vst"><h3>Папка с видео</h3>';
-  if (D.vbase && !S.vbEdit) h += '<p class="sub">' + esc(D.vbase) + (D.admin ? ' · <button class="vlnk in" data-act="vbEdit">изменить</button>' : '') + '</p>';
-  else if (D.admin) h += '<p class="sub">Адрес папки, куда загружаются сжатые ролики. Пример: https://litefitonline-lang.github.io/anketa/Video</p><div style="margin-bottom:12px">' + fi('vbIn', 'Адрес папки с видео', D.vbase, 'url', 'inputmode="url" autocomplete="off" autocapitalize="off"') + '</div>';
+  if (D.vbase && !S.vbEdit) h += '<p class="sub">' + esc(D.vbase) + (D.admin && exOwn() ? ' · <button class="vlnk in" data-act="vbEdit">изменить</button>' : '') + '</p>';
+  else if (D.admin && exOwn()) h += '<p class="sub">Адрес папки, куда загружаются сжатые ролики. Пример: https://litefitonline-lang.github.io/anketa/Video</p><div style="margin-bottom:12px">' + fi('vbIn', 'Адрес папки с видео', D.vbase, 'url', 'inputmode="url" autocomplete="off" autocapitalize="off"') + '</div>';
   else h += '<p class="sub">Адрес папки с видео ещё не задан – это делает владелец.</p>';
   h += '<div class="vst-b">' + (up ? '<a class="btn sec sm" href="' + esc(up) + '" target="_blank" rel="noopener noreferrer">' + IC.link + 'Загрузить ролики на GitHub</a>' : '') +
-    (D.admin ? '<button class="btn pri sm" data-act="vfill">' + IC.sync + 'Проверить папку и подставить ссылки</button>' : '') + '</div>';
+    (D.admin && exOwn() ? '<button class="btn pri sm" data-act="vfill">' + IC.sync + 'Проверить папку и подставить ссылки</button>' : '') + '</div>';
   if (S.vrep) h += '<div class="vrep">' + S.vrep.filter(function (l) { return l && !/^Папка: /.test(l); }).map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>';
   h += '<p class="note">Порядок: 1) ролики получают номера (ниже); 2) файл сжатия делает папку «Сжатые»; 3) ролики из неё загружаются в папку с видео; 4) кнопка «Проверить папку» привязывает их к упражнениям.</p></div>';
   return h;
@@ -3060,7 +3119,7 @@ function runProgress(w) { var tot = 0, ok = 0; (w.items || []).forEach(function 
 function moneyBox() {
   var m = M && M.money, h = '', f = function (x) { return Number(x).toLocaleString('ru-RU'); };
   if (!m) return '';
-  (m.debt || []).forEach(function (x) { h += '<div class="mny debt">Долг по пакету: <b>' + f(x.sum) + ' ₽</b>' + (x.till ? ' – оплатите до ' + dm(x.till) : '') + '</div>'; });
+  (m.debt || []).forEach(function (x) { h += '<div class="mny debt">Баланс по пакету: <b>−' + f(x.sum) + ' ₽</b>' + (x.till ? ' – оплатите до ' + dm(x.till) : '') + '</div>'; });
   if (m.dep > 0) h += '<div class="mny">На депозите: <b>' + f(m.dep) + ' ₽</b></div>';
   return h ? '<div class="mnys">' + h + '</div>' : '';
 }
@@ -4424,6 +4483,8 @@ var ACT = {
     call('exsave', { ex: { id: '', name: name, grp: '', cat: 'Другое', video: '', desc: '', noW: false, sec: false } }).then(function (r) {
       if (r.auth) return;
       if (!r.ok) { toast(errText(r), 'bad'); return vidPaint(-1); }
+      if (r.exq) D.exq = r.exq;
+      if (r.req) { memSave(); toast(r.msg); return vidPaint(-1); }          // 4.25: у тренера – предложение Артёму
       D.ex = r.ex; memSave();
       var e = exByName(name);
       if (e) { f.ex = e.id; f.txt = ''; f.src = 'pick'; vidRemember(); toast('«' + e.name + '» добавлено в базу, номер ' + vidNum(e)); }
@@ -4465,6 +4526,34 @@ var ACT = {
     a.href = u; a.download = 'Lite-Fit-nomera.bat'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
     toast('Файл скачан. Положите его в папку с роликами и запустите');
   },
+  exqOpen: function (b) {
+    var x = exqOf(b.getAttribute('data-id')); if (!x) return;
+    exForm(x.kind === 'new' ? '' : x.exId, x);
+    if (!exOwn() || x.st !== 'wait') Array.prototype.forEach.call(document.querySelectorAll('#viewer input, #viewer select, #viewer textarea, #xSw button, #xMu button'), function (el) { el.disabled = true; });
+  },
+  exqOk: function (b) {
+    var E = S.exEdit, x = E && E.rq; if (!x) return;
+    var f = exFields(), body = { id: x.id };
+    if (f.name.length < 2) return ferr('Впишите название упражнения.');
+    if (f.video === null) return ferr('Проверьте ссылку на видео: это должен быть адрес страницы или файла.');
+    if (JSON.stringify(f) !== E.init) body.ex = f;                          // Артём поправил карточку – утвердить с правками
+    b.disabled = true; b.textContent = 'Утверждаю…';
+    call('exok', body).then(function (r) {
+      if (r.auth) return;
+      if (r.ex) D.ex = r.ex; if (r.exq) D.exq = r.exq;
+      if (!r.ok) { memSave(); b.disabled = false; b.textContent = 'Утвердить'; return ferr(errText(r)); }
+      memSave(); closeSheet(); rerenderKeep(); toast(r.msg || 'Утверждено');
+    });
+  },
+  exqNo: function (b) {
+    var E = S.exEdit, x = E && E.rq; if (!x) return;
+    b.disabled = true; b.textContent = 'Отклоняю…';
+    call('exno', { id: x.id, why: val('xWhy') }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = 'Отклонить'; return ferr(errText(r)); }
+      if (r.exq) D.exq = r.exq; memSave(); closeSheet(); rerenderKeep(); toast(r.msg || 'Отклонено');
+    });
+  },
   exNew: function () { exForm(''); },
   exEdit: function (b) { exForm(b.getAttribute('data-id')); },
   xNoW: function () { S.exEdit.noW = !S.exEdit.noW; document.getElementById('xSw').innerHTML = exSw(); },
@@ -4480,7 +4569,7 @@ var ACT = {
   xMuNone: function () { S.exEdit.mu = false; S.exEdit.muDirty = true; muPaint(); },
   fig: function (b) { var it = MODE === 'client' ? runItemOf(b) : draftItem(b), mu = it ? muOf(it) : null; if (!muOk(mu)) return; sheet(it.name, '<h2>' + esc(it.name) + '</h2>' + bodySvg(mu, 'fig-big') + muLegend(mu) + '<p class="note" style="margin:0 0 14px">Слева – вид спереди, справа – сзади. Ярко – что работает основное, приглушённо – что помогает.</p><button class="btn sec" data-act="close">Понятно</button>'); },
   exSave: function (b) {
-    var name = val('xName'), u = fixUrl(val('xVideo')), e = exOf(S.exEdit.id);
+    var name = val('xName'), u = fixUrl(val('xVideo')), e = exOf(S.exEdit.id), own = exOwn();
     if (name.length < 2) return ferr('Впишите название упражнения.');
     if (u === null) return ferr('Проверьте ссылку на видео: это должен быть адрес страницы или файла, например https://rutube.ru/video/…');
     var twin = exByName(name); if (twin && twin !== e) return ferr('Упражнение с таким названием уже есть в базе.');
@@ -4488,8 +4577,8 @@ var ACT = {
     var E = S.exEdit, mu = E.muDirty ? (E.mu === null ? 'auto' : E.mu === false ? 'none' : E.mu) : undefined;
     call('exsave', { ex: { id: S.exEdit.id, name: name, grp: val('xGrp'), cat: val('xCat'), video: u, desc: val('xDesc'), noW: S.exEdit.noW, sec: S.exEdit.sec, mu: mu } }).then(function (r) {
       if (r.auth) return;
-      if (!r.ok) { b.disabled = false; b.textContent = 'Сохранить'; return ferr(errText(r)); }
-      D.ex = r.ex; memSave(); closeSheet(); rerenderKeep(); toast('Упражнение сохранено');
+      if (!r.ok) { b.disabled = false; b.textContent = own ? 'Сохранить' : 'Отправить на согласование'; return ferr(errText(r)); }
+      if (r.ex) D.ex = r.ex; if (r.exq) D.exq = r.exq; memSave(); closeSheet(); rerenderKeep(); toast(r.msg || 'Упражнение сохранено');
     });
   },
   exDel: function (b) {
