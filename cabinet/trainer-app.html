@@ -2885,14 +2885,20 @@ function pkgOpts() { return (L().pkgs || []).map(function (p) { return [String(p
 function pkgDef(want) { var o = pkgOpts(), w = String(want || ''); return o.some(function (x) { return x[0] === w; }) ? w : o.some(function (x) { return x[0] === '30'; }) ? '30' : (o[0] || [''])[0]; }
 /** Поля оплаты (общие для «Внести оплату» и «Перевести на PRO»). p — приставка к id полей. */
 function payFields(p, pkg, c) {
-  var cost = p === 'y', pd = pkgDef(pkg), cd = cost && c ? costDef(c, pd) : '';   // 2.4: стоимость пакета – в «Внести оплату»; прайс – фоном
-  return '<div class="grid2">' + fi(p + 'Date', 'Дата оплаты', TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + TODAY + '"') +
-    fi(p + 'Sum', cost ? 'Оплачено сейчас, ₽' : 'Сумма, ₽', '', 'text', 'inputmode="numeric"' + (cd !== '' ? ' placeholder="' + fmt(cd) + '"' : '')) + '</div>' +
-    (cost ? '<p class="note" id="yTariff" style="margin:0 0 10px">' + (c ? tariffTxt(c, pd) : '') + '</p>' : '') +
-    (cost ? fi(p + 'Cost', 'Стоимость пакета, ₽', cd, 'text', 'inputmode="numeric" placeholder="как оплачено"') +
-      '<p class="note" style="margin:0 0 10px">Оплачено меньше стоимости – у пакета минус на балансе: появятся «Доплатить» и «Оплатить из аванса». Рассрочка – «Оплачено сейчас» 0 (или первый взнос), остальное – доплатами. «Стоимость» пусто – пакет оплачен полностью.</p>' : '') +
-    '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pkgDef(pkg), cost ? 'data-ch="payPkg"' : '') + fs(p + 'Sess', 'Тренировок', [['', '– выберите –']].concat(L().sessions || []), '', cost ? 'data-ch="paySess"' : '') + '</div>' +
-    '<p class="note" style="margin:0 0 10px">По числу тренировок и началу пакета в приложении тренировок сам встанет пакет «1 из N». «иное» – пакета там не будет, тренировки пойдут по порядку: № 1, № 2…</p>' +   // 2.0 (правка 31.10)
+  // 2.4 (правка 12.11): у «Внести оплату» сначала пакет и число тренировок – по ним из прайса сразу встаёт стоимость; число
+  // тренировок – как в прошлом пакете клиента
+  var cost = p === 'y', pd = pkgDef(pkg), sl = L().sessions || [];
+  var s0 = '';
+  if (cost && c) { var lp = (c.pays || []).filter(function (x) { return (!x.k || x.k === 'pkg') && x.sess && x.days; })[0]; if (lp && sl.some(function (x) { return String(x instanceof Array ? x[0] : x) === String(lp.sess); })) s0 = String(lp.sess); }
+  var cd = cost && c ? costDef(c, pd, s0) : '';
+  var pkgRow = '<div class="grid2">' + fs(p + 'Pkg', 'Пакет', pkgOpts(), pd, cost ? 'data-ch="payPkg"' : '') + fs(p + 'Sess', 'Тренировок', [['', '– выберите –']].concat(sl), s0, cost ? 'data-ch="paySess"' : '') + '</div>' +
+    '<p class="note" style="margin:0 0 10px">По числу тренировок и началу пакета в приложении тренировок сам встанет пакет «1 из N». «иное» – пакета там не будет, тренировки пойдут по порядку: № 1, № 2…</p>';   // 2.0 (правка 31.10)
+  var sumRow = '<div class="grid2">' + fi(p + 'Date', 'Дата оплаты', TODAY, 'date', 'min="' + ymd(T - 60) + '" max="' + TODAY + '"') +
+    fi(p + 'Sum', cost ? 'Оплачено сейчас, ₽' : 'Сумма, ₽', '', 'text', 'inputmode="numeric"' + (cd !== '' ? ' placeholder="' + fmt(cd) + '"' : '')) + '</div>';
+  return (cost ? pkgRow + '<p class="note" id="yTariff" style="margin:0 0 10px">' + (c ? tariffTxt(c, pd, s0) : '') + '</p>' +
+      fi(p + 'Cost', 'Стоимость пакета, ₽', cd, 'text', 'inputmode="numeric" placeholder="выберите тренировки или впишите"') + sumRow +
+      '<p class="note" style="margin:0 0 10px">Оплачено меньше стоимости – у пакета минус на балансе: появятся «Доплатить» и «Оплатить из аванса». Рассрочка – «Оплачено сейчас» 0 (или первый взнос), остальное – доплатами. «Стоимость» пусто – пакет оплачен полностью.</p>'
+    : sumRow + pkgRow) +
     fs(p + 'How', 'Способ оплаты', L().methods || [], L().method || '') + discFields(p) +   // 2.0: скидка в % или ценой по прайсу, с причиной
     ft(p + 'Note', 'Комментарий, если нужен', '', 2, 'maxlength="300"');
 }
