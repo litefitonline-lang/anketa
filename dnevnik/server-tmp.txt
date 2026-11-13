@@ -1,5 +1,5 @@
 /**
- * ДНЕВНИК АРТЁМА 1.0.0 (13.11.2026)
+ * ДНЕВНИК АРТЁМА 1.0.1 (13.11.2026): 1.0.1 – хэштеги #идея / #личное в чате распознаются (\b не работал с русскими буквами)
  * Личный дневник: бот Telegram + мини-приложение в кнопке «Меню» бота → закрытая Google Таблица.
  *
  * Где работает: отдельный проект Apps Script под zaitsev.an1989@gmail.com (рядом с «Lite Fit – Контент», не внутри него).
@@ -31,7 +31,7 @@
  */
 
 const DN = {
-  VERSION: '1.0.0',
+  VERSION: '1.0.1',
   TZ: 'Europe/Moscow',
   SS_TITLE: 'Дневник Артёма (личное)',
   VOICE_TITLE: 'Дневник – голосовые',
@@ -316,9 +316,10 @@ function dnTagKb_(id, tag) {
 }
 function dnTagFromText_(text) {
   let tag = '';
-  if (/#(идея|идеи|idea)\b/i.test(text)) tag = 'idea';
-  if (/#(личное|лично|personal)\b/i.test(text)) tag = 'personal';
-  const clean = text.replace(/#(идея|идеи|idea|личное|лично|personal)(?=\s|$)/gi, '').replace(/[ \t]{2,}/g, ' ').trim();
+  const END = '(?=$|[\\s.,;:!?)])';                       // \b в JavaScript не работает с русскими буквами
+  if (new RegExp('#(идея|идеи|idea)' + END, 'i').test(text)) tag = 'idea';
+  if (new RegExp('#(личное|лично|personal)' + END, 'i').test(text)) tag = 'personal';
+  const clean = text.replace(new RegExp('#(идея|идеи|idea|личное|лично|personal)' + END, 'gi'), '').replace(/[ \t]{2,}/g, ' ').trim();
   return { tag: tag, text: clean };
 }
 function dnSavedText_(r, tag, type, text) {
