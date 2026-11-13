@@ -792,6 +792,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.5 (13.11.2026, сервер lite-fit-fix 2.0.7). «Задачи» → «Кому»: Мне, любой тренер, Всем. Задача тренеру – в его утреннем отчёте каждый
+ *   день, пока он не снимет её галочкой.
  * 2.4 (10.11.2026, сервер lite-fit-fix 2.0.4). Оплаты: стоимость пакета и долг, доплата, аванс на счету клиента.
  *   «Внести оплату» – «Пакет» или «Аванс». У пакета – «Стоимость пакета»: оплачено меньше – у клиента долг, у пакета кнопки
  *   «Доплатить» (клиент принёс деньги) и «Оплатить из аванса». Аванс – отдельной строкой «на счету», «Изменить» и «Удалить».
@@ -878,7 +880,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.4';
+var VERSION = '2.5';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -1905,7 +1907,7 @@ function taskRow(t) {
 function viewTasks() {
   var h = '<h2 class="sec-title">Задачи</h2>';
   h += '<div class="card"><h3>Новая задача</h3><div class="frm">' + ft('tText', 'Что сделать', '', 2, 'maxlength="500"') +
-    '<div class="grid2">' + fs('tWho', 'Кому', [['me', 'Мне'], ['all', 'Всем']], 'me') + fi('tDue', 'Срок, если есть', '', 'date', 'min="' + TODAY + '"') + '</div>' +
+    '<div class="grid2">' + fs('tWho', 'Кому', [['me', 'Мне']].concat((D.trainers || []).filter(function (n) { return n && n !== D.trainer; }).map(function (n) { return [n, n]; })).concat([['all', 'Всем']]), 'me') + fi('tDue', 'Срок, если есть', '', 'date', 'min="' + TODAY + '"') + '</div>' +
     '<button class="btn pri sm" data-act="taskAdd">Добавить</button></div></div>';
   var team = D.tasks.filter(function (t) { return t.kind === 'team'; }), cl = D.tasks.filter(function (t) { return t.kind === 'client'; });
   var mine = team.filter(function (t) { return t.mine; }), all = team.filter(function (t) { return !t.who; }), other = team.filter(function (t) { return t.who && !t.mine; });
@@ -1913,7 +1915,7 @@ function viewTasks() {
   h += box('Мои', mine, 'Своих задач нет.') + box('Всем', all, 'Общих задач нет.');
   if (cl.length) h += box('По клиентам', cl, '');
   if (other.length) h += box('Тренерам', other, '');
-  h += '<p class="muted" style="font-size:13px;margin:4px 2px 0">Галочка снимает задачу. Задачи приходят в утренний отчёт, как и раньше. Задачу по клиенту можно записать в его карточке, раздел «Обзор».</p>';
+  h += '<p class="muted" style="font-size:13px;margin:4px 2px 0">Галочка снимает задачу. Задачи приходят в утренний отчёт каждый день, пока их не снимут; задача тренеру – ему лично. Задачу по клиенту можно записать в его карточке, раздел «Обзор».</p>';
   return h;
 }
 
