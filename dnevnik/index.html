@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Дневник</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg:#071113; --card:#0E1C1F; --card2:#132629; --line:#1E3A3D;
+    --acc:#19E3CF; --acc2:#0FB5A5; --txt:#E8F6F5; --mut:#7FA3A2;
+    --idea:#FFD45C; --pers:#A99BFF; --bad:#FF6B6B;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  body{min-height:100vh;padding:16px 16px calc(96px + var(--safe-b))}
+  h1{font-size:22px;margin:4px 0 2px;letter-spacing:.3px}
+  .sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#0A6F66);display:grid;place-items:center;font-weight:800;color:#04201D}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+  textarea{width:100%;min-height:170px;resize:vertical;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;outline:none}
+  textarea:focus,input:focus{border-color:var(--acc)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{flex:1;min-width:120px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--txt);font:inherit;font-size:15px;text-align:center}
+  .chip.on.idea{border-color:var(--idea);background:rgba(255,212,92,.12);color:var(--idea)}
+  .chip.on.personal{border-color:var(--pers);background:rgba(169,155,255,.12);color:var(--pers)}
+  .chip.on.plain{border-color:var(--acc);background:rgba(25,227,207,.1);color:var(--acc)}
+  .btn{width:100%;padding:14px;border:0;border-radius:14px;background:var(--acc);color:#03201C;font:inherit;font-weight:700;font-size:16px}
+  .btn:disabled{opacity:.45}
+  .btn.ghost{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+  .btn.small{width:auto;padding:10px 14px;font-size:14px}
+  .mic{display:flex;align-items:center;gap:12px;margin:12px 0}
+  .micbtn{width:64px;height:64px;border-radius:50%;border:2px solid var(--acc);background:var(--card2);display:grid;place-items:center;flex:none}
+  .micbtn svg{width:28px;height:28px;fill:var(--acc)}
+  .micbtn.rec{background:var(--bad);border-color:var(--bad);animation:pulse 1.2s infinite}
+  .micbtn.rec svg{fill:#fff}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,107,107,.6)}70%{box-shadow:0 0 0 14px rgba(255,107,107,0)}100%{box-shadow:0 0 0 0 rgba(255,107,107,0)}}
+  .mictxt{color:var(--mut);font-size:14px}
+  .mictxt b{color:var(--txt);font-variant-numeric:tabular-nums}
+  label{display:block;color:var(--mut);font-size:13px;margin:10px 0 6px}
+  input[type=date],input[type=password],input[type=tel]{width:100%;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;outline:none;color-scheme:dark}
+  .pin{letter-spacing:8px;text-align:center;font-size:22px}
+  .seg{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px}
+  .seg button{flex:1;border:0;background:transparent;color:var(--mut);padding:10px 6px;border-radius:9px;font:inherit;font-size:14px}
+  .seg button.on{background:var(--acc);color:#03201C;font-weight:700}
+  .two{display:flex;gap:8px}.two>div{flex:1}
+  .out{white-space:pre-wrap;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;max-height:50vh;overflow:auto;user-select:text;-webkit-user-select:text}
+  .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:rgba(7,17,19,.96);border-top:1px solid var(--line);padding:8px 10px calc(8px + var(--safe-b));backdrop-filter:blur(8px)}
+  .tabs button{flex:1;border:0;background:transparent;color:var(--mut);font:inherit;font-size:13px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tabs button.on{color:var(--acc)}
+  .tabs svg{width:24px;height:24px;fill:currentColor}
+  .toast{position:fixed;left:16px;right:16px;bottom:calc(84px + var(--safe-b));background:#0F3B37;border:1px solid var(--acc2);color:var(--txt);padding:12px 14px;border-radius:14px;display:none;align-items:center;gap:10px;z-index:9}
+  .toast.err{background:#3B1414;border-color:var(--bad)}
+  .toast span{flex:1}
+  .toast button{border:0;background:transparent;color:var(--acc);font:inherit;font-weight:700}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+  .modal .card{width:100%;max-width:380px}
+  .hide{display:none!important}
+  .muted{color:var(--mut);font-size:13px}
+  .sw{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+  .tog{width:50px;height:30px;border-radius:15px;background:var(--line);position:relative;border:0;flex:none}
+  .tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+  .tog.on{background:var(--acc)}.tog.on::after{left:23px}
+  .center{text-align:center;padding:40px 10px}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="gate" class="center hide">
+  <div class="logo" style="margin:0 auto 14px;width:56px;height:56px;font-size:24px">Д</div>
+  <h1>Дневник</h1>
+  <p class="muted" id="gateMsg">Откройте дневник кнопкой «Дневник» в чате бота в Telegram.</p>
+</div>
+
+<div id="app" class="hide">
+  <div class="brand"><div class="logo">Д</div><div><h1>Дневник</h1></div></div>
+  <div class="sub" id="sub">Загружаю…</div>
+
+  <!-- ЗАПИСАТЬ -->
+  <section id="tabWrite">
+    <div class="card">
+      <textarea id="txt" placeholder="О чём думаете?"></textarea>
+      <div class="mic">
+        <button class="micbtn" id="micBtn" aria-label="Голосовое">
+          <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+        </button>
+        <div class="mictxt" id="micTxt">Нажмите и говорите. Ещё раз – стоп, текст появится в поле.</div>
+      </div>
+      <div class="row">
+        <button class="chip idea" data-tag="idea">💡 Идея</button>
+        <button class="chip personal" data-tag="personal">🔒 Личное</button>
+      </div>
+    </div>
+    <button class="btn" id="saveBtn">Записать</button>
+  </section>
+
+  <!-- ВЫГРУЗИТЬ -->
+  <section id="tabExport" class="hide">
+    <div class="card">
+      <div class="seg" id="segMode"><button data-v="day" class="on">Один день</button><button data-v="range">Период</button></div>
+      <div class="two">
+        <div><label id="lblFrom">Дата</label><input type="date" id="dFrom"></div>
+        <div id="boxTo" class="hide"><label>По</label><input type="date" id="dTo"></div>
+      </div>
+      <label>Что выгрузить</label>
+      <div class="seg" id="segTag"><button data-v="" class="on">Всё</button><button data-v="personal">🔒 Личное</button><button data-v="idea">💡 Идеи</button></div>
+      <label>Формат</label>
+      <div class="seg" id="segFmt"><button data-v="text" class="on">Текст</button><button data-v="pdf">PDF</button></div>
+      <label>PIN-код</label>
+      <input type="password" id="pin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="••••">
+    </div>
+    <button class="btn" id="expBtn">Выгрузить</button>
+
+    <div id="outBox" class="card hide" style="margin-top:12px">
+      <div class="muted" id="outInfo" style="margin-bottom:8px"></div>
+      <div class="out" id="out"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost small" id="copyBtn" style="flex:1">Копировать</button>
+        <button class="btn ghost small" id="chatBtn" style="flex:1">Прислать в чат</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="sw"><div><div>Убирать мои сообщения из чата</div><div class="muted">Записанное ботом исчезает из переписки, остаётся только в таблице</div></div><button class="tog" id="cleanTog"></button></div>
+      <button class="btn ghost small" id="pinChange" style="margin-top:8px">Сменить PIN-код</button>
+    </div>
+  </section>
+</div>
+
+<div class="tabs hide" id="tabs">
+  <button class="on" data-tab="Write"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>Записать</button>
+  <button data-tab="Export"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>Выгрузить</button>
+</div>
+
+<div class="toast" id="toast"><span id="toastTxt"></span><button id="toastBtn" class="hide">Отменить</button></div>
+
+<div class="modal" id="pinModal">
+  <div class="card">
+    <h1 id="pmTitle" style="font-size:19px">Придумайте PIN-код</h1>
+    <p class="muted" id="pmText">4–6 цифр. Без него дневник не выгрузить – даже с Вашего телефона.</p>
+    <div id="pmOldBox" class="hide"><label>Старый PIN-код</label><input type="password" id="pmOld" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6"></div>
+    <label>Новый PIN-код</label><input type="password" id="pm1" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6">
+    <label>Ещё раз</label><input type="password" id="pm2" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6">
+    <div style="height:12px"></div>
+    <button class="btn" id="pmSave">Сохранить</button>
+    <button class="btn ghost" id="pmCancel" style="margin-top:8px">Отмена</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var TG = window.Telegram && window.Telegram.WebApp;
+  var $ = function (id) { return document.getElementById(id); };
+  var qs = new URLSearchParams(location.search);
+  var API = qs.get('api') || '';
+  try { if (API) localStorage.setItem('dn_api', API); else API = localStorage.getItem('dn_api') || ''; } catch (e) {}
+  var INIT = TG ? TG.initData : '';
+  var st = { tag: '', audio: '', pinSet: false, clean: false, lastId: '', mode: 'day', expTag: '', fmt: 'text', pin: '', pinAt: 0, lastText: '', busy: false };
+
+  function gate(msg) { $('gate').classList.remove('hide'); $('app').classList.add('hide'); $('tabs').classList.add('hide'); if (msg) $('gateMsg').textContent = msg; }
+  if (!INIT || !API) { gate(!INIT ? 'Откройте дневник кнопкой «Дневник» в чате бота в Telegram.' : 'Не найден адрес дневника – откройте его кнопкой «Дневник» в чате бота.'); return; }
+
+  if (TG) {
+    TG.ready(); TG.expand();
+    try { TG.setHeaderColor('#071113'); TG.setBackgroundColor('#071113'); TG.setBottomBarColor && TG.setBottomBarColor('#071113'); } catch (e) {}
+    try { TG.disableVerticalSwipes && TG.disableVerticalSwipes(); } catch (e) {}
+  }
+  function haptic(t) { try { TG.HapticFeedback.notificationOccurred(t); } catch (e) {} }
+
+  function call(op, data) {
+    var body = { op: op, init: INIT };
+    for (var k in data) body[k] = data[k];
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (!j.ok) { var e = new Error(j.error || 'Ошибка'); e.lock = j.lock; throw e; } return j; });
+  }
+
+  var toastTimer = 0, undoId = '';
+  function toast(msg, err, undo) {
+    $('toastTxt').textContent = msg;
+    $('toast').classList.toggle('err', !!err);
+    undoId = undo || '';
+    $('toastBtn').classList.toggle('hide', !undo);
+    $('toast').style.display = 'flex';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { $('toast').style.display = 'none'; }, undo ? 8000 : 4500);
+  }
+  $('toastBtn').onclick = function () {
+    var id = undoId; $('toast').style.display = 'none';
+    call('undo', { id: id }).then(function (j) { setToday(j.today); toast('Запись отменена'); }).catch(function (e) { toast(e.message, true); });
+  };
+
+  function setToday(n) { $('sub').textContent = 'Сегодня записей: ' + n + ' · доступ только у Вас'; }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+  /* ---------- вкладки ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
+    b.onclick = function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (x) { x.classList.toggle('on', x === b); });
+      $('tabWrite').classList.toggle('hide', b.dataset.tab !== 'Write');
+      $('tabExport').classList.toggle('hide', b.dataset.tab !== 'Export');
+      if (b.dataset.tab === 'Export' && !st.pinSet) openPin(false);
+    };
+  });
+
+  /* ---------- метки ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.chip[data-tag]'), function (c) {
+    c.onclick = function () {
+      st.tag = st.tag === c.dataset.tag ? '' : c.dataset.tag;
+      Array.prototype.forEach.call(document.querySelectorAll('.chip[data-tag]'), function (x) { x.classList.toggle('on', x.dataset.tag === st.tag); });
+    };
+  });
+
+  /* ---------- записать ---------- */
+  $('saveBtn').onclick = function () {
+    var text = $('txt').value.trim();
+    if (!text && !st.audio) { toast('Напишите или наговорите что-нибудь', true); return; }
+    if (rec && rec.state === 'recording') { toast('Сначала остановите запись голоса', true); return; }
+    var btn = this; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Записываю…';
+    call('save', { text: text, tag: st.tag, audio: st.audio }).then(function (j) {
+      haptic('success');
+      $('txt').value = ''; st.audio = ''; st.tag = '';
+      Array.prototype.forEach.call(document.querySelectorAll('.chip[data-tag]'), function (x) { x.classList.remove('on'); });
+      setToday(j.today);
+      toast('✅ Записано в ' + j.time, false, j.id);
+    }).catch(function (e) { haptic('error'); toast(e.message, true); })
+      .then(function () { btn.disabled = false; btn.textContent = 'Записать'; });
+  };
+
+  /* ---------- голос ---------- */
+  var rec = null, stream = null, chunks = [], t0 = 0, tick = 0, actx = null, MAX_SEC = 360;
+  function fmtSec(s) { s = Math.floor(s); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
+
+  $('micBtn').onclick = function () {
+    if (rec && rec.state === 'recording') { rec.stop(); return; }
+    if (st.busy) return;
+    if (!navigator.mediaDevices || !window.MediaRecorder) { noMic(); return; }
+    try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
+    navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } }).then(function (s) {
+      stream = s; chunks = [];
+      var types = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus'], mime = '';
+      for (var i = 0; i < types.length; i++) if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(types[i])) { mime = types[i]; break; }
+      rec = mime ? new MediaRecorder(s, { mimeType: mime }) : new MediaRecorder(s);
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      rec.onstop = onStop;
+      rec.start(1000);
+      t0 = Date.now();
+      $('micBtn').classList.add('rec');
+      $('micTxt').innerHTML = 'Запись <b>0:00</b> · нажмите, чтобы закончить';
+      tick = setInterval(function () {
+        var s = (Date.now() - t0) / 1000;
+        $('micTxt').innerHTML = 'Запись <b>' + fmtSec(s) + '</b> · нажмите, чтобы закончить';
+        if (s >= MAX_SEC) rec.stop();
+      }, 250);
+      haptic('success');
+    }).catch(function () { noMic(); });
+  };
+  function noMic() {
+    $('micTxt').textContent = 'Микрофон в приложении недоступен. Закройте дневник и отправьте голосовое прямо в чат бота – оно тоже запишется.';
+    toast('Нет доступа к микрофону', true);
+  }
+
+  function onStop() {
+    clearInterval(tick);
+    $('micBtn').classList.remove('rec');
+    try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+    var mime = (rec && rec.mimeType) || (chunks[0] && chunks[0].type) || 'audio/webm';
+    var blob = new Blob(chunks, { type: mime });
+    if ((Date.now() - t0) < 800 || !blob.size) { $('micTxt').textContent = 'Слишком коротко. Нажмите и говорите.'; return; }
+    st.busy = true;
+    $('micTxt').innerHTML = '<span class="spin"></span>Распознаю…';
+    blob.arrayBuffer().then(function (ab) {
+      return decode(ab.slice(0)).then(function (buf) {
+        var pcm = toPcmChunks(buf);
+        return toB64(new Uint8Array(ab)).then(function (orig) {
+          return call('stt', { pcm: pcm, audio: blob.size < 12e6 ? orig : '', mime: mime });
+        });
+      });
+    }).then(function (j) {
+      st.audio = j.audio || '';
+      var t = $('txt');
+      t.value = (t.value.trim() ? t.value.trim() + '\n' : '') + (j.text || '');
+      $('micTxt').textContent = j.text ? 'Готово – проверьте текст и нажмите «Записать».' : 'Слов не разобрал. Попробуйте ещё раз или напишите.';
+      haptic(j.text ? 'success' : 'warning');
+    }).catch(function (e) {
+      $('micTxt').textContent = 'Не получилось: ' + e.message + '. Можно отправить голосовое прямо в чат бота.';
+      haptic('error');
+    }).then(function () { st.busy = false; });
+  }
+
+  function decode(ab) {
+    var ctx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    return new Promise(function (res, rej) {
+      var p = ctx.decodeAudioData(ab, res, function () { rej(new Error('запись не читается')); });
+      if (p && p.then) p.then(res, function () { rej(new Error('запись не читается')); });
+    });
+  }
+
+  // моно 16 кГц, куски до 25 с – режем в самом тихом месте между 18 и 25 с
+  function toPcmChunks(buf) {
+    var n = buf.length, ch = buf.numberOfChannels, mono = new Float32Array(n);
+    for (var c = 0; c < ch; c++) { var d = buf.getChannelData(c); for (var i = 0; i < n; i++) mono[i] += d[i] / ch; }
+    var ratio = buf.sampleRate / 16000, m = Math.floor(n / ratio), pcm = new Float32Array(m);
+    for (var j = 0; j < m; j++) {
+      var s = Math.floor(j * ratio), e = Math.min(n, Math.floor((j + 1) * ratio)), sum = 0;
+      for (var k = s; k < e; k++) sum += mono[k];
+      pcm[j] = e > s ? sum / (e - s) : 0;
+    }
+    var R = 16000, out = [], pos = 0, MAXL = 25 * R, MINL = 18 * R, F = R / 10;
+    while (pos < m) {
+      var end = Math.min(m, pos + MAXL);
+      if (end < m) {
+        var best = end, bestE = Infinity;
+        for (var f = pos + MINL; f + F <= pos + MAXL; f += F) {
+          var en = 0; for (var q = f; q < f + F; q++) en += pcm[q] * pcm[q];
+          if (en < bestE) { bestE = en; best = f + F / 2; }
+        }
+        end = Math.floor(best);
+      }
+      out.push(int16b64(pcm, pos, end));
+      pos = end;
+    }
+    return out;
+  }
+  function int16b64(f, a, b) {
+    var len = b - a, bytes = new Uint8Array(len * 2);
+    for (var i = 0; i < len; i++) {
+      var v = Math.max(-1, Math.min(1, f[a + i])), x = v < 0 ? v * 0x8000 : v * 0x7FFF;
+      x = x | 0; bytes[i * 2] = x & 255; bytes[i * 2 + 1] = (x >> 8) & 255;
+    }
+    return b64(bytes);
+  }
+  function b64(bytes) {
+    var s = '', CH = 0x8000;
+    for (var i = 0; i < bytes.length; i += CH) s += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+    return btoa(s);
+  }
+  function toB64(bytes) { return Promise.resolve(b64(bytes)); }
+
+  /* ---------- выгрузить ---------- */
+  function seg(id, key, cb) {
+    Array.prototype.forEach.call($(id).querySelectorAll('button'), function (b) {
+      b.onclick = function () {
+        Array.prototype.forEach.call($(id).querySelectorAll('button'), function (x) { x.classList.toggle('on', x === b); });
+        st[key] = b.dataset.v; if (cb) cb(b.dataset.v);
+      };
+    });
+  }
+  seg('segMode', 'mode', function (v) { $('boxTo').classList.toggle('hide', v !== 'range'); $('lblFrom').textContent = v === 'range' ? 'С' : 'Дата'; });
+  seg('segTag', 'expTag');
+  seg('segFmt', 'fmt');
+
+  function pinValue() {
+    var p = $('pin').value.trim();
+    if (!p && st.pin && Date.now() - st.pinAt < 5 * 60000) return st.pin;   // 5 минут не спрашиваем повторно
+    return p;
+  }
+  function doExport(toChat) {
+    var pin = pinValue();
+    if (!/^\d{4,6}$/.test(pin)) { toast('Введите PIN-код', true); $('pin').focus(); return Promise.resolve(); }
+    var from = $('dFrom').value, to = st.mode === 'range' ? $('dTo').value : from;
+    if (!from || !to) { toast('Выберите дату', true); return Promise.resolve(); }
+    var fmt = toChat ? 'text' : st.fmt;
+    return call('export', { pin: pin, from: from, to: to, tag: st.expTag, fmt: fmt, chat: !!toChat }).then(function (j) {
+      st.pin = pin; st.pinAt = Date.now(); $('pin').value = '';
+      if (!j.count) { $('outBox').classList.add('hide'); toast('За этот период записей нет'); return; }
+      haptic('success');
+      if (j.sent === 'pdf') { toast('📄 PDF в чате бота – оттуда можно переслать'); return; }
+      if (j.text) {
+        st.lastText = j.text; st.last = { from: from, to: to, tag: st.expTag };
+        $('out').textContent = j.text; $('outInfo').textContent = 'Записей: ' + j.count;
+        $('outBox').classList.remove('hide');
+      }
+      if (j.sent === 'text') toast('Текст в чате бота – оттуда можно переслать');
+    }).catch(function (e) {
+      haptic('error'); toast(e.message, true);
+      if (/PIN/.test(e.message)) { st.pin = ''; $('pin').value = ''; }
+    });
+  }
+  $('expBtn').onclick = function () {
+    if (!st.pinSet) { openPin(false); return; }
+    var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Собираю…';
+    doExport(false).then(function () { b.disabled = false; b.textContent = 'Выгрузить'; });
+  };
+  $('chatBtn').onclick = function () {
+    var b = this; b.disabled = true;
+    doExport(true).then(function () { b.disabled = false; });
+  };
+  $('copyBtn').onclick = function () {
+    var t = st.lastText;
+    var done = function () { haptic('success'); toast('Скопировано'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Не скопировалось – выделите текст вручную', true); }
+      document.body.removeChild(ta);
+    }
+  };
+
+  /* ---------- PIN ---------- */
+  function openPin(change) {
+    $('pmOldBox').classList.toggle('hide', !change);
+    $('pmTitle').textContent = change ? 'Сменить PIN-код' : 'Придумайте PIN-код';
+    $('pmText').textContent = change ? 'Введите старый и новый PIN-код.' : '4–6 цифр. Без него дневник не выгрузить – даже с Вашего телефона.';
+    $('pmOld').value = $('pm1').value = $('pm2').value = '';
+    $('pinModal').style.display = 'flex';
+    setTimeout(function () { (change ? $('pmOld') : $('pm1')).focus(); }, 100);
+    $('pmSave').onclick = function () {
+      var a = $('pm1').value.trim(), b = $('pm2').value.trim(), old = $('pmOld').value.trim();
+      if (!/^\d{4,6}$/.test(a)) { toast('PIN-код – от 4 до 6 цифр', true); return; }
+      if (a !== b) { toast('PIN-коды не совпали', true); return; }
+      var btn = $('pmSave'); btn.disabled = true;
+      call('pinset', { pin: a, old: change ? old : '' }).then(function () {
+        st.pinSet = true; st.pin = ''; $('pinModal').style.display = 'none'; haptic('success');
+        toast(change ? 'PIN-код изменён' : 'PIN-код задан. Запомните его');
+      }).catch(function (e) { toast(e.message, true); }).then(function () { btn.disabled = false; });
+    };
+  }
+  $('pmCancel').onclick = function () { $('pinModal').style.display = 'none'; };
+  $('pinChange').onclick = function () { openPin(true); };
+
+  /* ---------- уборка чата ---------- */
+  $('cleanTog').onclick = function () {
+    var on = !st.clean, pin = pinValue();
+    if (!/^\d{4,6}$/.test(pin)) { toast('Сначала введите PIN-код в поле выше', true); $('pin').focus(); return; }
+    call('clean', { on: on, pin: pin }).then(function (j) {
+      st.clean = j.clean; st.pin = pin; st.pinAt = Date.now(); $('pin').value = '';
+      $('cleanTog').classList.toggle('on', st.clean);
+      toast(st.clean ? 'Ваши сообщения будут убираться из чата' : 'Сообщения в чате остаются');
+    }).catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ---------- старт ---------- */
+  $('dFrom').value = $('dTo').value = today();
+  call('hello', {}).then(function (j) {
+    $('app').classList.remove('hide'); $('tabs').classList.remove('hide');
+    st.pinSet = j.pin; st.clean = j.clean;
+    $('cleanTog').classList.toggle('on', st.clean);
+    if (j.date) { $('dFrom').value = $('dTo').value = j.date; }
+    setToday(j.today);
+    if (!j.stt) $('micTxt').textContent = 'Распознавание голоса не подключено – пишите текстом.';
+    if (!j.pin) openPin(false);
+  }).catch(function (e) { gate(e.message); });
+})();
+</script>
+</body>
+</html>
