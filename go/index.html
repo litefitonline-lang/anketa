@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Lite Fit – 3 тренировки бесплатно</title>
+<style>
+  :root { --bg:#05090b; --fg:#fff; --muted:#b9c4c4; --turq:#3ed6ce; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         background:var(--bg); color:var(--fg); font-family:Montserrat, Manrope, Arial, sans-serif; padding:24px 16px; }
+  main { max-width:420px; width:100%; text-align:center; }
+  h1 { font-size:26px; line-height:1.2; margin:0 0 12px; }
+  h1 span { color:var(--turq); }
+  p { color:var(--muted); font-size:16px; line-height:1.45; margin:0 0 24px; }
+  a.btn { display:block; background:var(--turq); color:#05090b; text-decoration:none; font-weight:700;
+          font-size:17px; padding:16px 20px; border-radius:14px; }
+  small { display:block; margin-top:18px; color:#7d8a8a; font-size:13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>3 тренировки бесплатно – <span>и тренер видит каждую</span></h1>
+  <p>Открываем чат Lite Fit во ВКонтакте – там подберём тренировки за минуту.</p>
+  <a class="btn" id="go" href="https://vk.me/lite_fit_online">Открыть чат ВКонтакте</a>
+  <small>Если чат не открылся сам, нажмите на кнопку.</small>
+</main>
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search);
+    var out = new URLSearchParams();
+    ['ref', 'ref_source'].forEach(function (k) { if (q.get(k)) out.set(k, q.get(k)); });
+    if (!out.get('ref')) out.set('ref', 'go_site');
+    var url = 'https://vk.me/lite_fit_online?' + out.toString();
+    document.getElementById('go').href = url;
+    setTimeout(function () { location.replace(url); }, 300);
+  })();
+</script>
+</body>
+</html>
