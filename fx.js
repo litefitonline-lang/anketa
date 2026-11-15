@@ -1,4 +1,5 @@
-/* LF-FX 1.0.2 – Lite Fit: живая нижняя панель, загрузка с логотипом, отметка подхода «каплей».
+/* LF-FX 1.0.3 – Lite Fit: живая нижняя панель, загрузка с логотипом.
+ * 1.0.3 (15.11.2026): убрана «капля» на отметке подхода – галочка снова зеленеет сразу, без анимации (на телефонах подтормаживало).
  * Лежит в корне папки anketa на GitHub (рядом с push.js): …/anketa/fx.js. Подключается одной строкой
  * <script src="../fx.js" defer></script> в кабинете клиента, тренировках, кабинете тренера (trainer.html и trainer-app.html).
  *
@@ -63,16 +64,6 @@
     '.lfx-sp .f{fill:' + ACC + ';opacity:0;animation:lfxfill .4s .75s ease forwards}' +
     '@keyframes lfxdraw{to{stroke-dashoffset:0}}@keyframes lfxfill{to{opacity:1}}@keyframes lfxout{to{opacity:0;visibility:hidden}}' +
     '@keyframes lfxglow{0%{filter:none}45%{filter:drop-shadow(0 0 16px rgba(62,214,206,.6))}100%{filter:drop-shadow(0 0 5px rgba(62,214,206,.25))}}' +
-    /* подход каплей */
-    'html.lfx-on .okb{position:relative}' +
-    '.okb.lfx-fill{background:transparent!important;box-shadow:none!important}' +
-    '.okb.lfx-fill>svg:not(.lfx-liq){opacity:0!important;animation:lfxfill .2s .62s forwards}' +
-    '.lfx-liq{position:absolute;left:-2px;top:-2px;width:46px;height:46px;overflow:visible;pointer-events:none}' +
-    '.lfx-liq .lv{transform:translateY(48px);animation:lfxrise .62s .22s cubic-bezier(.3,.7,.3,1) forwards}' +
-    '.lfx-liq .wv{fill:' + ACC + ';animation:lfxwave .62s .22s linear}' +
-    '.lfx-liq .dl{fill:' + ACC + ';opacity:0;animation:lfxdrop .28s ease-in forwards}' +
-    '@keyframes lfxrise{to{transform:translateY(0)}}@keyframes lfxwave{to{transform:translateX(22px)}}' +
-    '@keyframes lfxdrop{0%{opacity:1;transform:translateY(-4px)}90%{opacity:1}100%{opacity:0;transform:translateY(24px)}}' +
     /* раздел «Оформление» в окне уведомлений */
     '.lfx-set{margin:16px 0 4px}' +
     '.lfx-g{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim,#5E7577);margin:6px 2px}' +
@@ -89,7 +80,7 @@
     '.lfx-pick [data-lfx-v="3"] i::after{content:"";position:absolute;left:18px;top:-7px;width:16px;height:16px;border-radius:50%;background:' + ACC + '}' +
     '.lfx-pick button[aria-pressed="true"]{border-color:' + ACC + ';box-shadow:inset 0 0 0 1px ' + ACC + '}' +
     '.lfx-pick.off{opacity:.45;pointer-events:none}' +
-    '@media (prefers-reduced-motion:reduce){.lfx-sp .s,.lfx-sp svg,.lfx-liq *{animation-duration:.01ms!important}.lfx-beam,.lfx-side{transition:none!important}}';
+    '@media (prefers-reduced-motion:reduce){.lfx-sp .s,.lfx-sp svg{animation-duration:.01ms!important}.lfx-beam,.lfx-side{transition:none!important}}';
   function css() {
     if (document.getElementById('lfx-css')) return;
     var st = document.createElement('style'); st.id = 'lfx-css'; st.textContent = CSS_TXT;
@@ -199,32 +190,10 @@
     S.bars = found.map(function (f) { return S.bars.filter(function (B) { return B.bar === f.bar && B.nav === f.nav; })[0] || f; });
   }
 
-  /* ---------- отметка подхода каплей ---------- */
-  var LIQ = '<svg class="lfx-liq" viewBox="0 0 46 46"><defs><clipPath id="lfxc"><circle cx="23" cy="23" r="21"/></clipPath></defs><g clip-path="url(#lfxc)"><g class="lv">' +
-    '<path class="wv" d="M-46 4 Q-34.5 -2 -23 4 T0 4 T23 4 T46 4 T69 4 V50 H-46Z"/></g></g><path class="dl" d="M23 -10 C25.5 -6 27.5 -3.5 27.5 -1 A4.5 4.5 0 0 1 18.5 -1 C18.5 -3.5 20.5 -6 23 -10Z"/></svg>';
-  function fillDrop(b) {
-    if (!b || b.classList.contains('lfx-fill')) return;
-    var old = b.querySelector('.lfx-liq'); if (old) old.parentNode.removeChild(old);
-    b.insertAdjacentHTML('afterbegin', LIQ); b.classList.add('lfx-fill');
-    setTimeout(function () { b.classList.remove('lfx-fill'); var l = b.querySelector('.lfx-liq'); if (l) l.parentNode.removeChild(l); }, 1000);
-  }
-  document.addEventListener('click', function (e) {
-    if (!S.on) return;
-    var b = e.target && e.target.closest ? e.target.closest('.okb') : null;
-    if (!b || b.classList.contains('on')) return;
-    var row = b.closest('[id]'); S.pend = { id: row ? row.id : '', el: b, at: Date.now() };
-    setTimeout(checkPend, 0);
-  }, true);
-  function checkPend() {
-    var P = S.pend; if (!P || Date.now() - P.at > 1500) { S.pend = null; return; }
-    var b = P.el && document.contains(P.el) ? P.el : (P.id ? (document.getElementById(P.id) || { querySelector: function () { return null; } }).querySelector('.okb') : null);
-    if (b && b.classList.contains('on')) { S.pend = null; fillDrop(b); }
-  }
-
   /* ---------- раздел «Оформление» в окне «Уведомления на телефон» ---------- */
   function setHtml() {
     return '<div class="lfx-g">Оформление</div>' +
-      '<button class="lfx-sw" role="switch" data-lfx="on" aria-checked="' + S.on + '"><span>Анимация и подсветка<small>Подсветка вкладок, загрузка с логотипом, отметка подхода каплей. На этом телефоне.</small></span><i></i></button>' +
+      '<button class="lfx-sw" role="switch" data-lfx="on" aria-checked="' + S.on + '"><span>Анимация и подсветка<small>Подсветка вкладок и загрузка с логотипом. На этом телефоне.</small></span><i></i></button>' +
       '<div class="lfx-pick' + (S.on ? '' : ' off') + '" role="group" aria-label="Вид нижней панели">' +
       [[1, 'Неон'], [2, 'Луч'], [3, 'Капля']].filter(function (x) { return x[0] !== 3 || clipOk(); }).map(function (x) {
         return '<button data-lfx-v="' + x[0] + '" aria-pressed="' + (S.v === x[0]) + '"><i></i>' + x[1] + '</button>';
@@ -275,7 +244,6 @@
         var t = ms[i].target;
         if (t.nodeType === 1 && t.closest && (t.closest('.tabs,nav.nav') || t.matches && t.matches('.tabs,nav.nav'))) { bar = true; break; }
       }
-      if (S.pend) checkPend();
       if (anyPanel()) inject();
       if (bar) { if (!S.bars.length || S.bars.some(function (B) { return !document.contains(B.bar) || !document.contains(B.nav); })) { rescan(); sweep(); } kick(false); }
     });
