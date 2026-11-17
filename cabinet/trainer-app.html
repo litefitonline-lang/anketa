@@ -792,6 +792,7 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.6 (17.11.2026, сервер lite-fit-fix 2.0.8). «Удалить все данные клиента» – только у Артёма: клиент → «Клиент» → внизу.
  * 2.5 (13.11.2026, сервер lite-fit-fix 2.0.7). «Задачи» → «Кому»: Мне, любой тренер, Всем. Задача тренеру – в его утреннем отчёте каждый
  *   день, пока он не снимет её галочкой.
  * 2.4 (10.11.2026, сервер lite-fit-fix 2.0.4). Оплаты: стоимость пакета и долг, доплата, аванс на счету клиента.
@@ -880,7 +881,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.5';
+var VERSION = '2.6';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -1033,7 +1034,7 @@ function stShort(s) { return String(s || '').replace(/^\S+\s+/, ''); }
 /* ================= СВЯЗЬ С СЕРВЕРОМ ================= */
 var WRITE = { norm: 1, normf: 1, calc: 1, steps: 1, plan: 1, plandel: 1, plancopy: 1, meas: 1, guide: 1, remind: 1, pay: 1, freeze: 1, freezedel: 1, status: 1, extend: 1,
   topro: 1, trial: 1, create: 1, take: 1, cablink: 1, cabreset: 1, msg: 1, fb: 1, mrsave: 1, mrsend: 1, taskadd: 1, taskdel: 1, ctask: 1,
-  freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1, newlink: 1, vklink: 1, payadv: 1, advedit: 1, paydop: 1, payfromadv: 1 };   // 2.4: аванс, доплата   // 2.3, правка 02.11: newlink, vklink
+  freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1, newlink: 1, vklink: 1, payadv: 1, advedit: 1, paydop: 1, payfromadv: 1, cdel: 1 };   // 2.4: аванс, доплата   // 2.3, правка 02.11: newlink, vklink
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /** 2.1: ms – сколько ждать ответа (по умолчанию 30 с); не ответил – запрос обрывается и считается сбоем связи. */
@@ -1123,7 +1124,7 @@ function wantCard(c) { return c.table ? !c.loaded || !!c.stale : !c.loaded && !c
 function setList(r, have) {
   var old = {};
   if (D) D.clients.forEach(function (c) { if (c.loaded) old[c.id] = c; });
-  D = { trainer: r.trainer, admin: !!r.admin, as: r.as || '', trainers: r.trainers || [], today: r.today, clients: r.clients || [], fresh: r.fresh || [], tasks: r.tasks || [], lists: r.lists || {}, botUser: r.botUser || '', vk: !!r.vk };
+  D = { trainer: r.trainer, admin: !!r.admin, boss: !!r.boss, as: r.as || '', trainers: r.trainers || [], today: r.today, clients: r.clients || [], fresh: r.fresh || [], tasks: r.tasks || [], lists: r.lists || {}, botUser: r.botUser || '', vk: !!r.vk };
   TODAY = D.today; T = dn(TODAY);
   var st = null;
   if (r.stale instanceof Array) { st = {}; r.stale.forEach(function (id) { st[id] = true; }); }
@@ -2379,6 +2380,8 @@ function subClient(c) {
   var st = startOf(c);
   h += '<div class="card"><h3>История</h3><div class="kvs">' + kv('Формат', esc(c.format || 'не выбран')) + (used.length > 1 ? kv('Был(а) на', esc(used.join(', '))) : '') +
     kv('Начало ведения', st ? ymdTxt(st) : '—') + kv('Тренер', esc(c.owner || '—')) + kv('Статус', esc(c.status || '—')) + (c.proFrom ? kv('Старт PRO', ymdTxt(c.proFrom)) : '') + '</div></div>';
+  if (D.boss && !D.as) h += '<div class="card"><h3>Удаление</h3><p class="sub">Все данные клиента удаляются из таблиц насовсем. Оплаты остаются без имени – выручка не меняется.</p>' +   // 2.6
+    '<button class="btn danger" data-act="cdelAsk">Удалить все данные клиента</button></div>';
   return h;
 }
 
@@ -3441,6 +3444,31 @@ var ACT = {
     }
     b.id = c.id; b.row = p.row; b.pdate = p.date; b.psum = p.sum;
     send('payedit', b, { btn: t }).then(finish);
+  },
+  cdelAsk: function (t) {                                                   // 2.6: удалить все данные клиента (только Артём)
+    var c = cur(); if (!c) return;
+    t.disabled = true;
+    call('cdelinfo', { id: c.id }).then(function (r) {
+      t.disabled = false;
+      if (!r || !r.ok) { if (r && r.auth) return; return toast(errText(r), 'bad'); }
+      sheet('Удалить все данные', '<h2>Удалить все данные клиента?</h2><p class="lead"><b>' + esc(r.name) + '</b> (ID ' + esc(r.id) + '). Вернуть будет нельзя.</p>' +
+        '<div class="card"><h3>Удалится</h3><div class="rows">' + r.lines.map(function (l) { return '<div class="row"><span class="mn">' + esc(l) + '</span></div>'; }).join('') + '</div></div>' +
+        (r.keep ? '<div class="banner">' + esc(r.keep) + '. Итог – на листе «Удалённые клиенты».</div>' : '<div class="banner">Итог – на листе «Удалённые клиенты».</div>') +
+        (r.noFree ? '<p class="note">Клиент был на ведении – если вернётся, FREE ему не выдаётся. Вернуться можно через анкету.</p>' : '<p class="note">Вернуться клиент сможет через анкету – как новый.</p>') +
+        fi('xDelName', 'Для подтверждения впишите имя: ' + r.name, '', 'text', 'autocomplete="off"') +
+        '<p class="ferr" id="ferr"></p><button class="btn danger" data-act="cdelGo" data-id="' + esc(r.id) + '">Удалить навсегда</button><button class="btn sec" data-act="close">Отмена</button>');
+    });
+  },
+  cdelGo: function (t) {
+    var id = t.getAttribute('data-id'), c = clientOf(id), nm = val('xDelName');
+    var norm = function (s) { return String(s || '').trim().toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' '); };
+    if (!c) return ferr('Клиент не найден – обновите страницу.');
+    if (norm(nm) !== norm(c.name)) return ferr('Впишите имя точно как в карточке: ' + c.name);
+    send('cdel', { id: id, name: nm }, { btn: t }).then(function (r) {
+      if (!r) return;
+      D.clients = D.clients.filter(function (x) { return String(x.id) !== String(id); });
+      closeSheet(); S.cid = null; render(); toast(r.msg || 'Данные клиента удалены');
+    });
   },
   payDelForm: function (t) {
     var c = cur(), p = payOf(c, t.getAttribute('data-row'));
