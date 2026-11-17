@@ -227,6 +227,16 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .mk i.d,.legend i.d{background:var(--accent)}
 .mk i.p,.legend i.p{border:1.5px solid var(--accent)}
 .mk i.m,.legend i.m{background:var(--warm)}
+.mk i.n,.legend i.n{border:1.5px dashed var(--muted)}
+.st-np{color:var(--warm);font-weight:700}
+.ed-head{position:relative}
+.pubsw{position:absolute;top:0;right:0;display:flex;align-items:center;gap:8px;padding:5px 6px 5px 11px;border:1px solid var(--line2);border-radius:99px;font-size:12px;font-weight:700;color:var(--muted);background:var(--card)}
+.pubsw.off{border-color:var(--warm);color:var(--warm)}
+.pubsw .sw{width:38px;height:22px}
+.pubsw .sw::after{top:2px;left:2px;width:16px;height:16px}
+.pubsw .sw.on::after{transform:translateX(16px)}
+.pubsw[disabled]{opacity:.6}
+.ed-head .pubsw+.back,.ed-head:has(.pubsw) .back{margin-right:150px}
 .mk b{font-size:9px;line-height:1;color:var(--muted)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -566,6 +576,8 @@ body.has-sheet .toast{bottom:auto;top:calc(var(--safe-t) + 66px)}
   body.tr .calB .wb{display:flex;flex-direction:column;gap:1px;padding-left:6px;border-left:2px solid var(--accent);min-width:0}
   body.tr .calB .wb.p{border-left-color:rgba(62,214,206,.45)}
   body.tr .calB .wb.m{border-left-color:var(--warm)}
+  body.tr .calB .wb.n{border-left:2px dashed var(--muted)}
+  body.tr .calB .wb.n span{color:var(--muted)}
   body.tr .calB .wb span{font-size:11.5px;font-weight:600;line-height:1.25;color:var(--text);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   body.tr .calB .wb span+span{margin-top:2px}
   body.tr .calB .wb.p span{color:var(--muted)}
@@ -813,6 +825,10 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.26 (17.11.2026, сервер – lite-fit-trenirovki 4.28.0, lite-fit-fix 2.0.11). Тренер: вверху тренировки маленький ползунок
+ *   «Опубликовано / Не опубликовано» ({ op:'pub', id, on } – сразу, правки не трогает). Неопубликованную клиент не видит (приложение,
+ *   план кабинета, напоминания); в списке – «не опубликована», в календаре – пунктир. Новые тренировки по умолчанию опубликованы,
+ *   копия – тоже. В сводке тренировки 13-й элемент – np.
  * 4.25 (12.11.2026, сервер – lite-fit-fix 2.0.6). База упражнений – через Артёма: правка упражнения и новое упражнение от других
  *   тренеров уходят ему на согласование («На согласовании» вверху «Базы упражнений»: как увидит клиент, поправить, «Утвердить» /
  *   «Отклонить» с причиной). Удалять, добавлять списком, подставлять ссылки – только Артём. Своё упражнение и новая ссылка на видео
@@ -1021,7 +1037,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.25';
+var VERSION = '4.26';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1326,7 +1342,7 @@ function post(body, ms) {
   }, function (e) { clearTimeout(tm); throw e; });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1, exok: 1, exno: 1 };
+var WRITE = { save: 1, pub: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1, exok: 1, exno: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -1490,7 +1506,7 @@ function wState(w) {
 /* ================= ТРЕНЕР: ДАННЫЕ ================= */
 var D = null;                    // { trainer, admin, today, def, cats, clients, ex, w:[{ id, cid, date, done, doneAt, n, c, m, row }] }
 var FULL = {};                   // тренировки целиком: { id: { id, cid, date, note, done, doneAt, items } }
-function sumObj(a) { return { id: a[0], cid: String(a[1]), date: a[2], done: !!a[3], doneAt: a[4] || '', n: a[5] || 0, c: a[6] || 0, m: a[7] || 0, row: a[8] || 0, k: a[9] || 0, u: +a[10] || 0, dur: +a[11] || 0 }; }
+function sumObj(a) { return { id: a[0], cid: String(a[1]), date: a[2], done: !!a[3], doneAt: a[4] || '', n: a[5] || 0, c: a[6] || 0, m: a[7] || 0, row: a[8] || 0, k: a[9] || 0, u: +a[10] || 0, dur: +a[11] || 0, np: !!a[12] }; }   // 4.26: np – не опубликована (клиент не видит)
 function setList(r) {
   D = { fuse: r.fuse || {}, trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], grps: r.grps || DEF_GRPS, band: r.band || DEF_BAND, clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj), vbase: r.vbase || '' };
   if (r.exo !== undefined) { D.exo = !!r.exo; D.exq = r.exq instanceof Array ? r.exq : []; }   // 4.25: база через Артёма
@@ -1626,8 +1642,9 @@ function wRow(w, act, who) {
   var d = pd(w.date), st = wState(w), extra = '';
   if (MODE === 'trainer') {
     var ac = access(w);
+    if (w.np && !w.done) extra += ' · <span class="st-np">не опубликована</span>';
     if (w.c || w.m) extra += ' · <span class="st-warn">' + chgTxt(w) + '</span>';
-    if (!w.done && ac.s === 'soon') extra += ' · клиент увидит с ' + dm(ac.from);
+    if (!w.done && !w.np && ac.s === 'soon') extra += ' · клиент увидит с ' + dm(ac.from);
     if (ac.s === 'closed') extra += ' · для клиента закрыта';
     if (w.u) extra += ' · <span class="st-new">' + (w.u > 1 ? 'новых комментариев: ' + w.u : 'новый комментарий') + '</span>'; else if (w.k) extra += ' · комментариев: ' + w.k;
     if (w.dur > 0) extra += ' · ' + fmtDur(w.dur); else if (w.dur < 0) extra += ' · <span class="st-new">клиент тренируется</span>';
@@ -1646,10 +1663,10 @@ function calHtml(cid, big) {
   for (var i = 0; i < lead; i++) h += '<span></span>';
   for (var d = 1; d <= days; d++) {
     var ds = m + '-' + pad(d), l = (by[ds] || []).sort(wSort);
-    var marks = l.slice(0, 3).map(function (w) { return '<i class="' + (w.done ? 'd' : w.date < TODAY ? 'm' : 'p') + '"></i>'; }).join('') + (l.length > 3 ? '<b>+</b>' : '');
+    var marks = l.slice(0, 3).map(function (w) { return '<i class="' + (w.done ? 'd' : w.np ? 'n' : w.date < TODAY ? 'm' : 'p') + '"></i>'; }).join('') + (l.length > 3 ? '<b>+</b>' : '');
     h += '<button data-act="calDay" data-d="' + ds + '" class="' + (ds === TODAY ? 'td ' : '') + (ds === S.calDay ? 'sel' : '') + '" aria-label="' + dMon(ds) + (l.length ? ', тренировок: ' + l.length : '') + '">' + d + '<span class="mk">' + marks + '</span></button>';
   }
-  return h + '</div><div class="legend"><span><i class="d"></i>выполнена</span><span><i class="p"></i>запланирована</span><span><i class="m"></i>клиент не отметил</span></div>';
+  return h + '</div><div class="legend"><span><i class="d"></i>выполнена</span><span><i class="p"></i>запланирована</span><span><i class="m"></i>клиент не отметил</span>' + (D.w.some(function (w) { return w.np && !w.done; }) ? '<span><i class="n"></i>не опубликована</span>' : '') + '</div>';
 }
 /* ---------- 2.7: календарь клиента на компьютере – упражнения прямо в клетках ---------- */
 var NM = {}, NMQ = {}, BIGR = null, BIGT = 0;
@@ -1696,7 +1713,7 @@ function calBig(cid, m, y, mo, days, lead, by) {
   for (var d = 1; d <= days; d++) {
     var ds = m + '-' + pad(d), l = (by[ds] || []).sort(wSort), tip = [], body = '';
     l.forEach(function (w) {
-      var nm = wNames(w), st = w.done ? 'd' : w.date < TODAY ? 'm' : 'p', lab = numFor(w);
+      var nm = wNames(w), st = w.done ? 'd' : w.np ? 'n' : w.date < TODAY ? 'm' : 'p', lab = numFor(w) + (w.np && !w.done ? ' (не опубликована)' : '');
       if (!nm) miss++;
       tip.push(lab + (nm && nm.length ? ': ' + nm.join(', ') : ''));
       var li = nm ? nm.slice(0, l.length > 1 ? 2 : 4).map(function (n) { return '<span>' + esc(nmShort(n)) + '</span>'; }).join('') : '<span class="nm0">' + exWord(w.n) + '</span>';
@@ -1707,7 +1724,7 @@ function calBig(cid, m, y, mo, days, lead, by) {
       ' aria-label="' + dMon(ds) + (l.length ? ', тренировок: ' + l.length : '') + '"><b class="cn">' + d + '</b>' + body + '</button>';
   }
   nmNeed(String(cid), m, miss);
-  return h + '</div><div class="legend"><span><i class="d"></i>выполнена</span><span><i class="p"></i>запланирована</span><span><i class="m"></i>клиент не отметил</span></div>';
+  return h + '</div><div class="legend"><span><i class="d"></i>выполнена</span><span><i class="p"></i>запланирована</span><span><i class="m"></i>клиент не отметил</span>' + (D.w.some(function (w) { return w.np && !w.done; }) ? '<span><i class="n"></i>не опубликована</span>' : '') + '</div>';
 }
 /* ---------- 2.9: тренировка целиком без перехода – наведение (компьютер) или нажатие в календаре ---------- */
 var PEEKQ = {}, PEEK = { el: null, id: '' }, HOVER = !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches);
@@ -2395,10 +2412,11 @@ function suggHtml() {
 }
 function viewEdit() {
   var w = S.draft, c = clientOf(w.cid), ac = access(w), nch = chgCount(w), RF = refParts(w), W = wide(), TP = isTpl(c);
-  var h = '<div class="ed' + (RF.panel && W ? ' has-ref' : '') + '"><div class="ed-m"><div class="ed-head"><button class="back" data-act="editBack">' + IC.back + (S.ret === 'fsets' ? 'Наборы FREE' : S.ret === 'cal' ? 'Календарь' : S.ret === 'coms' ? 'Комментарии' : esc(c.name)) + '</button><h1 class="hello" id="wTitle">Тренировка ' + (TP ? (Number(String(w.date).slice(-1)) || 1) : numFor(w)) + '</h1>' +
+  var s0 = S.isNew ? null : sumOf(w.id), NP = !!(s0 ? s0.np : w.np) && !w.done;   // 4.26: «Опубликовано / Не опубликовано»
+  var h = '<div class="ed' + (RF.panel && W ? ' has-ref' : '') + '"><div class="ed-m"><div class="ed-head">' + (S.isNew || TP || w.done ? '' : pubSw(NP)) + '<button class="back" data-act="editBack">' + IC.back + (S.ret === 'fsets' ? 'Наборы FREE' : S.ret === 'cal' ? 'Календарь' : S.ret === 'coms' ? 'Комментарии' : esc(c.name)) + '</button><h1 class="hello" id="wTitle">Тренировка ' + (TP ? (Number(String(w.date).slice(-1)) || 1) : numFor(w)) + '</h1>' +
     '<div class="meta"><span class="pill">' + esc(c.name) + '</span><span class="pill">' + exWord(w.items.length) + '</span>' + (w.done ? '<span class="pill ok">выполнена ' + dm(w.doneAt || w.date) + '</span>' : '') +
     (nch.c ? '<span class="pill warn">клиент изменил: ' + nch.c + '</span>' : '') + (nch.m ? '<span class="pill warn">не выполнено: ' + nch.m + '</span>' : '') +
-    runPill(w) + (TP ? '<span class="pill warn">' + (isBaseW(w) ? 'набор Lite Fit – для всех тренеров' : 'своя тренировка набора') + '</span>' : '<span class="pill" id="accPill">' + accTxt(ac) + '</span>') + '</div>';
+    runPill(w) + (TP ? '<span class="pill warn">' + (isBaseW(w) ? 'набор Lite Fit – для всех тренеров' : 'своя тренировка набора') + '</span>' : '<span class="pill' + (NP ? ' warn' : '') + '" id="accPill">' + (NP ? 'не опубликована – клиент не видит' : accTxt(ac)) + '</span>') + '</div>';
   if (!S.isNew) h += '<div class="ed-top">' + (TP ? '' : '<button class="btn sec sm" data-act="moveW">' + IC.cal + 'Перенести</button>') + '<button class="btn sec sm" data-act="copyW">' + IC.copy + 'Копировать</button></div>';
   var lb = numFor(w);
   if (lb === 'сверх пакета') h += '<div class="banner warn">Эта тренировка сверх пакета: пакет закончился или все его тренировки уже выполнены. Новый пакет встанет сам, когда в кабинете тренера внесут оплату (вкладка «Оплаты»).</div>';
@@ -2438,6 +2456,11 @@ function loadRef() {
   needFull(id).then(function () { if (S.view === 'edit' && S.ref && S.ref.id === id) rerenderKeep(); });
 }
 /** Время тренировки у тренера: «время 52 мин» или «клиент тренируется с 18:05». st, en – отметки времени клиента. */
+/** 4.26: маленький ползунок вверху тренировки. Сразу меняет видимость для клиента ({ op:'pub' }), правки тренировки не трогает. */
+function pubSw(np) {
+  return '<button class="pubsw' + (np ? ' off' : '') + '" id="pubSw" data-act="pubW" role="switch" aria-checked="' + (np ? 'false' : 'true') + '" title="' + (np ? 'Клиент тренировку не видит. Нажмите, чтобы опубликовать' : 'Клиент видит тренировку. Нажмите, чтобы скрыть') + '">' +
+    (np ? 'Не опубликовано' : 'Опубликовано') + '<span class="sw' + (np ? '' : ' on') + '"></span></button>';
+}
 function runPill(w) {
   if (!w || !w.st) return '';
   if (w.done && w.en) return '<span class="pill ok">время ' + fmtDur((w.en - w.st) / 60000) + '</span>';
@@ -4244,6 +4267,24 @@ var ACT = {
   copyMsg: function () { copyText(val('copyBox')); },
   copyLink: function (b) { copyText(b.getAttribute('data-v')); },
   newW: function () { newWForm(); },
+  pubW: function (b) {
+    var w = S.draft, s = w && sumOf(w.id);
+    if (!w || !s || b.disabled) return;
+    var on = !!s.np;
+    b.disabled = true;
+    call('pub', { id: w.id, on: on }).then(function (r) {
+      b.disabled = false;
+      if (!r || r.auth) return;
+      if (!r.ok) return toast(errText(r), 'bad');
+      var ns = sumObj(r.sum), old = sumOf(ns.id);
+      if (old) D.w[D.w.indexOf(old)] = ns;
+      if (FULL[w.id]) FULL[w.id].np = !!r.np;
+      w.np = !!r.np;
+      memSave();
+      rerenderKeep();
+      if (r.warn) toast((r.msg || 'Готово') + '. Но ' + r.warn, 'bad'); else toast(r.msg || 'Готово');
+    });
+  },
   moveW: function () {
     var w = S.draft;
     sheet('Перенести тренировку', '<h2>Перенести тренировку</h2><p class="lead">Сейчас: ' + esc(cap(longDate(w.date))) + '. Тренировка сохранится на новую дату сразу' + (S.dirty ? ' вместе с Вашими правками' : '') + '; в кабинете клиента дата поменяется сама.</p>' +
