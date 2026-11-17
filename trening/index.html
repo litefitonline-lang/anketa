@@ -232,6 +232,50 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 .ed-head{position:relative}
 .pubsw{position:absolute;top:0;right:0;display:flex;align-items:center;gap:8px;padding:5px 6px 5px 11px;border:1px solid var(--line2);border-radius:99px;font-size:12px;font-weight:700;color:var(--muted);background:var(--card)}
 .pubsw.off{border-color:var(--warm);color:var(--warm)}
+/* 4.27: похвала в тренировке */
+.pzl{display:flex;align-items:center;gap:6px;margin:-2px 0 2px 30px;font-size:13px;font-weight:700;color:var(--accent)}
+.pzl svg{width:14px;height:14px;flex:none}
+.pzl.rec{color:#FFB57D}
+.set.rec input{border-color:var(--warm)}
+.pz{position:fixed;left:50%;bottom:calc(var(--tab-h) + var(--safe-b) + 20px);transform:translate(-50%,16px);opacity:0;z-index:55;width:min(440px,calc(100% - 28px));box-sizing:border-box;background:var(--card2);border:1px solid var(--accent);border-radius:16px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 16px 34px -12px #000;transition:opacity .25s,transform .25s;pointer-events:none}
+.pz.show{opacity:1;transform:translate(-50%,0)}
+.pz.top{top:calc(var(--safe-t) + 12px);bottom:auto;transform:translate(-50%,-16px);border-color:var(--warm);background:#2A1A0C}
+.pz.top.show{transform:translate(-50%,0)}
+.pz>i{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(62,214,206,.16);border:1px solid var(--accent)}
+.pz.top>i{background:var(--warm);border-color:var(--warm)}
+.pz>i svg{width:19px;height:19px}
+.pz .mn{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pz b{font-size:15px;line-height:1.3}
+.pz.top b{color:#FFB57D}
+.pz span{font-size:13.5px;color:#C6D6D7}
+.pz .nx{color:var(--accent);font-weight:700;font-size:13px}
+.pzr{text-align:center}
+.pzr .pzlogo{width:150px;height:auto;display:block;margin:4px auto 10px}
+.pzr .pzlab{display:block;max-width:100%;overflow:hidden;font-weight:800;letter-spacing:.05em;color:var(--accent);line-height:1.1;white-space:nowrap;margin:0 auto 14px;animation:pzIn .3s ease-out both}
+@keyframes pzIn{from{opacity:0;transform:scale(1.25)}to{opacity:1;transform:none}}
+.pzr h2{margin:0 0 4px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.pzr .lead{margin:0 0 16px}
+.pzs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.pzs div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 6px}
+.pzs b{display:block;font-size:17px;white-space:nowrap}
+.pzs small{color:var(--muted);font-size:12px}
+.pzb{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 10px}
+.pzb.rec{background:#2A1A0C;border-color:rgba(255,154,82,.6)}
+.pzb h4{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.pzb.rec h4{color:#FFB57D}
+.pzb.mo h4{color:var(--muted)}
+.pzb p{display:flex;justify-content:space-between;gap:10px;margin:4px 0;font-size:14.5px}
+.pzb p span{min-width:0}
+.pzb p b{white-space:nowrap}
+.nmrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nmrow .hello{min-width:0}
+.pzsw{flex:none;display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 0 8px 6px;margin:0 0 8px}
+.pzsw .sw{width:34px;height:20px}
+.pzsw .sw::after{top:2px;left:2px;width:14px;height:14px}
+.pzsw .sw.on::after{transform:translateX(14px)}
+.pzsw[disabled]{opacity:.5}
+@media (prefers-reduced-motion:reduce){.pz{transition:none}.pzr .pzlab{animation:none}}
+
 .pubsw .sw{width:38px;height:22px}
 .pubsw .sw::after{top:2px;left:2px;width:16px;height:16px}
 .pubsw .sw.on::after{transform:translateX(16px)}
@@ -825,6 +869,12 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.27 (18.11.2026, сервер – lite-fit-fix 2.0.12). Похвала в тренировке – только у клиентов, которым тренер включил ползунок
+ *   «Похвала» (в строке с именем клиента; по умолчанию выключен). У подхода – «+2 повтора – больше плана», «+2,5 кг к прошлому
+ *   разу», «Рекорд» (сравнение с прошлым и лучшим результатом – данные pv и pb приходят с тренировкой, на экране их нет);
+ *   рекорд – плашка сверху. Все подходы упражнения (сета) отмечены – плашка «двигаемся дальше». «Завершить» – отчёт: логотип,
+ *   под ним надпись (20 вариантов по уровню), время, подходы, поднято, рекорды, прибавки, больше плана; сводка уходит тренеру
+ *   (res: pz). Скачок больше трети к лучшему – рекордом не считается, тренеру «Проверьте». Без вибрации, анимация одна – надпись.
  * 4.26 (17.11.2026, сервер – lite-fit-trenirovki 4.28.0, lite-fit-fix 2.0.11). Тренер: вверху тренировки маленький ползунок
  *   «Опубликовано / Не опубликовано» ({ op:'pub', id, on } – сразу, правки не трогает). Неопубликованную клиент не видит (приложение,
  *   план кабинета, напоминания); в списке – «не опубликована», в календаре – пунктир. Новые тренировки по умолчанию опубликованы,
@@ -1037,7 +1087,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.26';
+var VERSION = '4.27';
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAABICAMAAABFncKdAAAAwFBMVEVd8eou4bMNq6tO5bIxzeBC3dUFfX1F2dFQrq40u+L///9IttkA/39/f39//38Af/8VuHEAAP8Afz8/f79S4tkAAAA91c041tE91c02ycpH1dE91c091c0A//891c091c081c47vb045Mw417tA29NG189E19BIystI5c9V//9E19A04+M7//xC2dEA/wAz/9IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACc6ptdAAAAMHRSTlMHCAQHDecCkAQHAQgCAgICAwEEBHMA8A9KCw2RrQHOai4HCwn6L08PDANqCQSvAQVRYlRJAAAIhElEQVR42q1YCXuruA41S7a2d5n3hggLDDYOW0KS///vRl7YmrbpfHPdJWw5COlIOoIlyY1rHQBw+gHFNG1x2qKllNmgP7vP7QVmY/pX+Q36jDhvQSTzYslLwEGm31zNvNG8OyXjDsUSWKPMjn9iFSmqGZmFIPNNkWfLtd775sqPxxJhBq4gO+WSPMUAESqEaXHoIECE2bHYdS12SMfpwi5C+oY5bwJBn+nxKHk4Acd1cTS4wLoDcgPTxZcYtbpcEC5VVV3MqlDhhc5RaDvCoCMArwp0BxfAS8Urc7I8Zvx1AlbpMSdb2C25mX1xu9lP81/QTyLsuplfc9icEe6MW7cRCEAS0mUCBgu8Tf7zUtoAdxMwJ+CFzx/Wm+qV+A5wyA2wnoNngKvP7cBh/1N/B3mLa2BrMf/s6gh5U6bItt8F7tY+9sCKsjZcWiegvhL185q/PAeOCJhXHwBvTTVAGPr54kGdTyapMsVF4tnxGbBQBjiegHF0xU/RXHNaOz5TaeBXm605wxeDrALxxBV8ZXGHtNU7604FH6aLod1Z4OwSAEMpa8nx/pXF74CtxSFvXC2BmXzRvd6YY7VGqAuzNjtUDie4c35fMFEcbPDMAbFyRU/Ec8A4m1GBpJIkTT1wJbCQ1qaIR69Kt8PbfirCzhVmVyRbTzf7AD33wNUMLO61KbtN3TYeNyV/wMv9ztMyy/OslLg/LIErITjW8GvBYzECw2F6vkE4v+/q01x3r1Tb0uu4l8sAF66IQfPzRiJzmWctxhF4bjEDL13w6kVBp+c9L+5zbLRaBA8MTNndrY+tV3s2ArNHYLkCbk6rziH51iaTAZaQFuYS7oCNxap7tDgAB1wuXHHagCd3WebutgxGYCntTQvyxRy8yRV8qgwBjsDnsnDBS8+N80teUxwz/4wGODbA7vpjWs08VhPdIucLymDlb1ZSK8idG+LXuHnfRqXtCMbisS2XuAjeyIoaOgWx5v2vBMADU6PzwNTD3gOfamr2NnjFeKiMZh9PrjCZ61ZdK3cs67gDpqeGvvEBNWqiNDS3ekJUiwiXHWsnYA9yLNwyppzDcgyPj1gKXNXegIEeqMhTSCzxtX86T8HHzFuuVI3AFfqUyK+Nv0dhtQR97qhlCh7zYvHFamFx9wVwxA9jUmzOau1kqktBQOrvvKQ2WGBX3eAh2keJ7uqMV9zVOXM3jFaZt+PVvYt353x5CCzd2tbUuR/rhLLh3lqIzS5B9rtxyJsmwbiZUIqSByRzslO59oTzselUN0FZsF4NRvWZAn9uBuofYX02Be1cvzC2HatbCopEFxJ/y5UnAmsxB58QiBGpMc5V0Pc8MGDh/w8gMTQFPRKUiaC8iBB7RVKPU5NkwHcmlAuyQSAYlZ58LHwXq/9In1XaakANxCh5LYoMInO+5zriyqflwEHtQxVEVWWMLRxDnMHt3nUQrrwMEyKiNnzbCqPd/rJdD41nTznff9bqBi5PI3BugVMjAhzdKtuo2MrHdqcZqSKp3Yg+CIOAvQPm3NlajO4gz/7yPc/ymIkHVhAF0APHQuxFch/0W7JSRQyCmf5Z4WoNT5bA4p5+IP8Br3S7U0aiWDVW6e9w1rCJOtT1FLUsc1SzpWPOvBA/AkZVZyZ41V1D4fKsnZ0RdHKzK6YZxOLW9X0CdplXPQKfipbGASmJVbrOfaUFTzkSTwFVkMng1FyQlZRA/QjMl8DFcmI5U1Uzpe6KO29WTqKl9s64GLEx5mDpSLfJg/us3SwrYgecczb00aBU+Jt8ONTuSeV12ZcdMLeU8cDZWGlc7HzwLPDFW7ycFztwwAXky6KXvFngthhzgrqdd/UZ3RhpW1O7lFirVaMHbq+b2fOpaUXJcDgvks3fOMdAvdPH4oNCf5SVs6QI/t75Xk+EqxOjw9HRxFo9DrfU9/3cOwN/aLFED0yGpP4IWNiVIWPXp2xmD4pefAgMHpj0ZumPeJnLw/IB96zgx3JqgngpYxds2yEfLQbfpWiKjew3NY4MlulULiM15boe6db7LktKLqIZlpoL/k7iyWL0Fpcv25FsuXfr5AdElaxmkJWuIE1SMWSoIhgCMQaPRIy3KysbqwGVj92IW6QAwaI6mcyrrI9fPXDbvizmsdEVOh71yOb6P6OoelkscTPZ4rJmz7oinCxejAovI7AMJ2VxzEMqBm8WOPc8KxoSMm/rejoVIVePaWpaPpBrD6Ye4ygANtd9b3qTpGrq8oI6tYZ3062j28V2sdrMedczrmZT3FEVznetoL4ryzwv6Iof5OQ+aU6lT8tNA927xuKDZ+dJEaq2pZm3X3UeCFqimtbBjbv3WFEQGhAF52aiGceHwXJmhcklOJB6fdfTqLu3WutDXQ17zZXC2PI4rsaw5WnLHgdWy2PgzyZw8vCuvs0sDdTduzdPsas+GIRd5j0F7lGeyv0EjAc3w9CcR4rlwyF4oYS+WnfKuxz8CxFRVXZOTRGwg/vPD7/hBsjq2SsU3mamNzgRBNbcItWkhfrPvulfNu2fuPgiSZCU2jzZvrIzWpFGVCL/+vQrRE4jDuneqMyiiVUzrZUixnMFd6PkBuioH5YFGaB0xRuXyvj1qy+mIT9ltRmGGL7uW0RNgrNt271iXKMCmo6VaHl2pOSVZuK3OZ7LVrMvH5LdqUecik/eVzoVR7GXZC6Fr6RDVvzVLT55/8RIHFilcTzZSuHW8XS0//3fpkxPJZWjsZ9mVCB/JM+AGWVqWn61UtJYx7TDZtzniE/fxDFqB6YE8KpiEaknChxqTQ7vdNd1FVQDQxLWRRHHHe47DVQ1ON8/fw3HfJFQh4MiChAriBr0h8qGjg6QzqQoZBz6AdCcQ/6dN6Hs+SUCiBPpJfrWG85/A5yE9/oqYZ/8cWDRYw1h8ueBE3EQofiXwP8A66dNbm8IYpYAAAAASUVORK5CYII=';
@@ -2111,7 +2161,7 @@ function clientRows(list, arch) {
 function accNote(c) { var a = accOf(c), d = shift(TODAY, 7); return 'Пример: тренировку на ' + dm(d) + ' клиент видит с ' + dm(shift(d, -a.b)) + ' по ' + dm(shift(d, a.a)) + '.'; }
 function viewClient() {
   var c = clientOf(S.cid), l = wList(c.id).reverse(), dn = l.filter(function (w) { return w.done; }).length, a = accOf(c);
-  var h = '<button class="back" data-act="home">' + IC.back + 'Клиенты</button><h1 class="hello">' + esc(c.name) + '</h1>' +
+  var h = '<button class="back" data-act="home">' + IC.back + 'Клиенты</button><div class="nmrow"><h1 class="hello">' + esc(c.name) + '</h1>' + (c.tpl ? '' : pzSwHtml(c)) + '</div>' +
     '<div class="meta">' + (c.format ? '<span class="pill">' + esc(c.format) + '</span>' : '') + '<span class="pill">Тренировок: <b class="num">' + l.length + '</b></span><span class="pill">Выполнено: <b class="num">' + dn + '</b></span></div>';
   var nb = '<button class="btn pri" data-act="newW" style="margin-top:14px">' + IC.plus + 'Новая тренировка на ' + dMon(S.calDay) + '</button>';
   BIGR = bigCal();
@@ -2955,6 +3005,7 @@ function setMy(r) {
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
   TODAY = M.today || TODAY;
+  M.pz = !!r.pz; if (M.pz) pzLogoLoad();                                 // 4.27
   S.loadedAt = Date.now(); pendSave();
 }
 var pushT = null, pushing = false;
@@ -3000,6 +3051,7 @@ function resBody(w, p) {
     if (it.more && it.more.length) o.more = it.more.map(function (e) { return { c: e.c, t: e.t }; });   // 2.5: следующие комментарии
     return o; }) };
   if (p.done !== undefined) b.done = p.done;
+  if (p.pz && p.done === true) b.pz = p.pz;                                // 4.27: похвала – сводка тренеру
   if (p.reset) b.reset = true;
   if (p.cn && p.cn.length) b.cn = p.cn.slice();
   if (w.ts) b.st = w.ts;
@@ -3136,6 +3188,176 @@ function prefetchVideos() {
 }
 /** Номер тренировки у клиента: «4 из 12», «№ 7»; пусто – сверх пакета (номер не показываем). */
 function labOf(w) { return w.lab === undefined ? '№ ' + w.num : w.lab; }
+
+/* ---------- 4.27: похвала в тренировке (только если тренер включил «Похвала») ---------- */
+var PZ_LAB = {
+  a: ['Справились!', 'Чистая работа', 'Так держать', 'Шаг вперёд', 'В форме', 'На все 100', 'Засчитано'],
+  b: ['Отличник Lite Fit', 'Сильная тренировка', 'Прогресс засчитан', 'Выше планки', 'Сила растёт', 'Мощно!', 'Железная воля'],
+  c: ['Рекорд дня', 'Новая высота', 'Чемпионский день', 'Огонь!', 'Стальной характер', 'Лучший день']
+};
+var PZ_TXT = {
+  rec: ['Новый рекорд: {x}. Это Ваш лучший результат!', 'Рекорд! {x} – лучше, чем когда-либо.', 'Личный рекорд: {x}. Браво!', 'Вот это да – рекорд: {x}!'],
+  up: ['Сегодня Вы добавили {x}. Так и растёт сила!', '{x} к прошлому разу. Отличная работа!', 'Есть прибавка: {x}. Так держать!', 'Плюс к прошлому разу: {x}. Растём!', 'Сильнее, чем в прошлый раз: {x}.', '{x} – прогресс налицо!', 'Прибавили {x}. Мощно!'],
+  more: ['Больше, чем в плане. Сильный подход!', 'План перевыполнен – тренер увидит.', 'Сверх плана! Отличная работа.', 'Вы сделали больше задуманного. Мощно!', 'Больше плана – так держать!', 'Выше плана. Вот это настрой!'],
+  done: ['Готово! Двигаемся дальше.', 'Есть! Упражнение закрыто.', 'Отлично, идём дальше.', 'Упражнение выполнено. Так держать!', 'Хорошая работа. Дальше – больше.', 'Готово. Держим темп!', 'Сделано! Ещё чуть-чуть.', 'Отлично получилось. Вперёд!', 'Есть контакт! Идём дальше.', 'Чисто сделано. Продолжаем!']
+};
+var PZ_IC = {
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+  rec: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>'
+};
+function pzN(x) { var n = parseFloat(String(x == null ? '' : x).replace(',', '.')); return isFinite(n) ? n : 0; }
+function pzKg(n) { return String(Math.round(n * 100) / 100).replace('.', ','); }
+function pzReps(it, n) { return it.sec ? n + ' сек' : n + ' ' + plural(n, 'повтор', 'повтора', 'повторов'); }
+function pzPick(list, key) {
+  var last = ''; try { last = LS.get(key) || ''; } catch (e) {}
+  var pool = list.filter(function (x) { return x !== last; }); if (!pool.length) pool = list;
+  var v = pool[Math.floor(Math.random() * pool.length)]; try { LS.set(key, v); } catch (e) {}
+  return v;
+}
+function pzFill(t, x) { return t.replace('{x}', x).replace(/^([a-zа-яё+])/, function (c) { return c.toUpperCase(); }); }
+/** Подход: что показать. { rec, chk, t } или null. Прошлого результата на экране нет – только прибавка. */
+function pzSetOf(it, k) {
+  if (!M || !M.pz) return null;
+  var s = it.sets[k]; if (!s || !s.ok) return null;
+  var W = it.noW ? 0 : pzN(s.fw), R = pzN(s.fr), pw = it.noW ? 0 : pzN(s.w), pr = pzN(s.r), pb = it.pb, o = { rec: false, chk: false, t: '' };
+  if (!R) return null;
+  if (pb && W > 0 && pb.w > 0) {
+    if (W > pb.w * 1.34) o.chk = true;
+    else if (W > pb.w || (W === pb.w && R > (pb.rw || 0))) o.rec = true;
+  } else if (pb && !W && pb.r > 0 && (it.noW || !pb.w)) {
+    if (R > pb.r * 1.5 && R - pb.r > 5) o.chk = true;
+    else if (R > pb.r) o.rec = true;
+  }
+  var more = '', up = '', pv = it.pv && it.pv[k];
+  if (W > 0 && pw > 0 && W > pw) more = '+' + pzKg(W - pw) + ' кг – больше плана';
+  else if (pr > 0 && R > pr && (!pw || W >= pw)) more = '+' + pzReps(it, R - pr) + ' – больше плана';
+  if (pv) {
+    var lw = it.noW ? 0 : pzN(pv[0]), lr = pzN(pv[1]);
+    if (W > 0 && lw > 0 && W > lw) up = '+' + pzKg(W - lw) + ' кг к прошлому разу';
+    else if (lr > 0 && R > lr && (!lw || W === lw)) up = '+' + pzReps(it, R - lr) + ' к прошлому разу';
+  }
+  if (o.chk) o.rec = false;
+  o.t = o.rec ? 'Рекорд' + (more || up ? ' · ' + (more || up) : '') : (more || up);
+  return o.t || o.rec ? o : null;
+}
+function pzLabHtml(it, k, x) {
+  if (!x || !x.t) return '';
+  return '<div class="pzl' + (x.rec ? ' rec' : '') + '" id="pzl-' + it.id + '-' + k + '">' + (x.rec ? PZ_IC.rec : PZ_IC.up) + esc(x.t) + '</div>';
+}
+/** Перерисовать метку одного подхода (без перерисовки экрана). */
+function pzPaintSet(it, k) {
+  var row = document.getElementById('set-' + it.id + '-' + k), old = document.getElementById('pzl-' + it.id + '-' + k);
+  if (old) old.parentNode.removeChild(old);
+  if (!row) return null;
+  var x = it.sets[k].ok ? pzSetOf(it, k) : null;
+  row.className = 'set' + (it.sets[k].ok ? ' ok' : '') + (x && x.rec ? ' rec' : '');
+  if (x && x.t) row.insertAdjacentHTML('afterend', pzLabHtml(it, k, x));
+  return x;
+}
+var PZ_SEEN = {}, pzT = {};
+/** Плашка: рекорд – сверху, итог упражнения – снизу. Новая сменяет прежнюю на том же месте (очереди нет). */
+function pzShow(kind, title, sub, next) {
+  var top = kind === 'rec', id = top ? 'pzboxT' : 'pzboxB', el = document.getElementById(id);
+  if (!el) { el = document.createElement('div'); el.id = id; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
+  el.className = 'pz' + (top ? ' top' : '');
+  el.innerHTML = '<i>' + (top ? PZ_IC.rec.replace('currentColor', '#2A1206') : kind === 'done' ? PZ_IC.ok.replace('currentColor', '#3ED6CE') : PZ_IC.up.replace('currentColor', '#3ED6CE')) + '</i><div class="mn"><b>' + esc(title) + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : '') + (next ? '<span class="nx">' + esc(next) + '</span>' : '') + '</div>';
+  void el.offsetWidth; el.className += ' show';
+  clearTimeout(pzT[id]);
+  pzT[id] = setTimeout(function () { el.className = el.className.replace(' show', ''); }, 3200);
+}
+function pzHide() { ['pzboxT', 'pzboxB'].forEach(function (id) { var el = document.getElementById(id); clearTimeout(pzT[id]); if (el) el.className = el.className.replace(' show', ''); }); }
+/** Итог упражнения: { rec: '62,5 кг × 8', up: '+2,5 кг', more: '+4 повтора', chk } – только по отмеченным подходам. */
+function pzItemOf(it) {
+  var o = { rec: '', up: '', more: '', chk: '' }, tw = 0, twR = 0, lt = 0, ltR = 0, sum = 0, lsum = 0, mk = 0, mr = 0, recW = -1, recR = 0;
+  it.sets.forEach(function (s, k) {
+    if (!s.ok) return;
+    var W = it.noW ? 0 : pzN(s.fw), R = pzN(s.fr), x = pzSetOf(it, k);
+    if (W > tw || (W === tw && R > twR)) { tw = W; twR = R; }
+    sum += R;
+    if (x && x.chk && !o.chk) o.chk = it.noW || !W ? pzReps(it, R) + ' при лучших ' + pzReps(it, it.pb.r) : pzKg(W) + ' кг при лучших ' + pzKg(it.pb.w) + ' кг';
+    if (x && x.rec && (W > recW || (W === recW && R > recR))) { recW = W; recR = R; }
+    var pw = it.noW ? 0 : pzN(s.w), pr = pzN(s.r);
+    if (W > 0 && pw > 0 && W > pw) mk = Math.max(mk, W - pw);
+    else if (pr > 0 && R > pr && (!pw || W >= pw)) mr += R - pr;
+  });
+  (it.pv || []).forEach(function (v) { var W = it.noW ? 0 : pzN(v[0]), R = pzN(v[1]); if (W > lt || (W === lt && R > ltR)) { lt = W; ltR = R; } lsum += R; });
+  if (recW >= 0) o.rec = recW > 0 ? pzKg(recW) + ' кг × ' + recR : pzReps(it, recR);
+  if (it.pv && it.pv.length) {
+    if (tw > 0 && lt > 0 && tw > lt) o.up = '+' + pzKg(tw - lt) + ' кг';
+    else if ((!lt || tw === lt) && sum > lsum && lsum > 0) o.up = '+' + pzReps(it, sum - lsum);
+  }
+  if (mk) o.more = '+' + pzKg(mk) + ' кг'; else if (mr) o.more = '+' + pzReps(it, mr);
+  return o;
+}
+/** Отметили подход: метка; рекорд – плашка сверху; все подходы упражнения (сета) – плашка «двигаемся дальше». */
+function pzOnSet(w, i, k) {
+  var it = w.items[i], x = pzPaintSet(it, k);
+  if (!it.sets[k].ok) return;
+  var rk = 'r' + w.id + it.id;                                            // плашка рекорда – одна на упражнение
+  if (x && x.rec && !PZ_SEEN[rk]) {
+    PZ_SEEN[rk] = 1;
+    var s = it.sets[k], W = it.noW ? 0 : pzN(s.fw), R = pzN(s.fr);
+    pzShow('rec', 'Новый рекорд!', it.name + ': ' + (W > 0 ? pzKg(W) + ' кг × ' + R : pzReps(it, R)) + ' – Ваш лучший результат');
+  }
+  var G = groups(w.items), g = null, gi = 0;
+  G.forEach(function (x, n) { if (x.indexOf(i) >= 0) { g = x; gi = n; } });
+  if (!g || !g.every(function (j) { return w.items[j].sets.every(function (s) { return s.ok; }); })) return;
+  var gk = 'g' + w.id + w.items[g[0]].id;
+  if (PZ_SEEN[gk]) return;
+  PZ_SEEN[gk] = 1;
+  var best = null;
+  g.forEach(function (j) { var r = pzItemOf(w.items[j]); r.name = w.items[j].name; if (!best || (r.rec && !best.rec) || (!best.rec && r.up && !best.up) || (!best.rec && !best.up && r.more && !best.more)) best = r; });
+  var title, sub = (best.rec || best.up ? best.name + ' · ' : '') + (g.length > 1 ? 'суперсет ' : 'упражнение ') + (gi + 1) + ' из ' + G.length + ' готово';
+  sub = sub.charAt(0).toUpperCase() + sub.slice(1);
+  if (best.rec) title = pzFill(pzPick(PZ_TXT.rec, 'lf_pz_t1'), best.rec);
+  else if (best.up) title = pzFill(pzPick(PZ_TXT.up, 'lf_pz_t2'), best.up);
+  else if (best.more) title = pzPick(PZ_TXT.more, 'lf_pz_t3');
+  else title = pzPick(PZ_TXT.done, 'lf_pz_t4');
+  var nx = '';
+  for (var n = gi + 1; n < G.length; n++) { var f = w.items[G[n][0]]; if (!G[n].every(function (j) { return w.items[j].sets.every(function (s) { return s.ok; }); })) { nx = 'Двигаемся дальше: ' + f.name; break; } }
+  if (!nx) nx = runProgress(w).ok >= runProgress(w).tot ? 'Всё выполнено – нажмите «Завершить тренировку»' : '';
+  pzShow(best.rec ? 'up' : best.up || best.more ? 'up' : 'done', title, sub, nx);
+}
+/** Итог тренировки: для отчёта и для тренера (srv). */
+function pzSum(w) {
+  var r = { rec: [], up: [], more: [], chk: [], kg: 0, ok: 0, tot: 0, lev: '', lab: '' };
+  w.items.forEach(function (it) {
+    it.sets.forEach(function (s) { r.tot++; if (!s.ok) return; r.ok++; if (!it.noW && !it.sec) r.kg += pzN(s.fw) * pzN(s.fr); });
+    if (!it.sets.some(function (s) { return s.ok; })) return;
+    var x = pzItemOf(it);
+    if (x.rec) r.rec.push([it.name, x.rec]);
+    if (x.up) r.up.push([it.name, x.up]);
+    if (x.more) r.more.push([it.name, x.more]);
+    if (x.chk) r.chk.push([it.name, x.chk]);
+  });
+  r.kg = Math.round(r.kg);
+  r.lev = r.ok < r.tot * 0.8 ? '' : r.rec.length ? 'c' : r.up.length || r.more.length ? 'b' : 'a';
+  if (r.lev) r.lab = pzPick(PZ_LAB[r.lev], 'lf_pz_lab');
+  var j = function (L) { return L.slice(0, 8).map(function (x) { return x[0] + ' ' + x[1]; }); };
+  r.srv = { lab: r.lab, rec: j(r.rec), up: j(r.up), more: j(r.more), chk: j(r.chk), kg: r.kg };
+  return r;
+}
+var PZ_LOGO = 'pz-logo.png', pzLogoOk = false;
+function pzLogoLoad() { if (pzLogoOk) return; pzLogoOk = true; try { var im = new Image(); im.src = PZ_LOGO; } catch (e) {} }
+function pzReport(w, r) {
+  pzHide();
+  var rows = function (L) { return L.map(function (x) { return '<p><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b></p>'; }).join(''); };
+  var lab = r.lab.toUpperCase(), fsz = Math.max(16, Math.min(30, Math.floor(330 / Math.max(lab.length, 1) / 0.72)));
+  var h = '<div class="pzr"><img class="pzlogo" src="' + PZ_LOGO + '" alt="Lite Fit" onerror="this.src=\'' + LOGO + '\'">' +
+    (r.lab ? '<span class="pzlab" style="font-size:' + fsz + 'px">' + esc(lab) + '</span>' : '') +
+    '<h2>' + esc(titleOf(w)) + ' выполнена!</h2><p class="lead">' + (r.lab ? (r.rec.length ? 'Новый рекорд – сегодня Вы сильнее, чем когда-либо.' : r.up.length || r.more.length ? 'Сегодня Вы стали сильнее – это видно в цифрах.' : 'Все подходы выполнены. Так держать!') : 'Засчитано ' + r.ok + ' из ' + r.tot + ' подходов. В следующий раз доделаем!') + '</p>' +
+    '<div class="pzs"><div><b>' + (w.ts && w.te ? fmtDur((w.te - w.ts) / 60000) : '–') + '</b><small>время</small></div><div><b>' + r.ok + ' / ' + r.tot + '</b><small>подходов</small></div><div><b>' + (r.kg ? r.kg.toLocaleString('ru-RU') + ' кг' : '–') + '</b><small>поднято</small></div></div>';
+  if (r.rec.length) h += '<div class="pzb rec"><h4>Рекорды</h4>' + rows(r.rec) + '</div>';
+  if (r.up.length) h += '<div class="pzb"><h4>Прибавка к прошлому разу</h4>' + rows(r.up) + '</div>';
+  if (r.more.length) h += '<div class="pzb mo"><h4>Больше плана</h4>' + rows(r.more) + '</div>';
+  h += '<button class="btn pri" data-act="close">Готово</button><p class="note" style="margin:10px 0 0">Итог увидит и тренер</p></div>';
+  sheet('Отчёт', h);
+}
+/** Тренер: ползунок «Похвала» в строке с именем клиента (по умолчанию выключен). */
+function pzSwHtml(c) {
+  return '<button class="pzsw" data-act="pzTog" role="switch" aria-checked="' + (c.pz ? 'true' : 'false') + '" title="Похвала в тренировке: метки у подходов, «двигаемся дальше», отчёт с логотипом">Похвала<span class="sw' + (c.pz ? ' on' : '') + '"></span></button>';
+}
 function titleOf(w) { var l = labOf(w); return 'Тренировка' + (l ? ' ' + l : ''); }
 function runProgress(w) { var tot = 0, ok = 0; (w.items || []).forEach(function (it) { it.sets.forEach(function (s) { tot++; if (s.ok) ok++; }); }); return { tot: tot, ok: ok }; }
 /** 4.20: депозит и долг по пакету – небольшими строками под приветствием. */
@@ -3730,10 +3952,11 @@ function runSets(it, i) {
   var h = '<div class="sets' + (it.noW ? ' now' : '') + '"><div class="sets-h"><span>№</span>' + (it.noW ? '' : '<span>Вес, кг</span>') + '<span>' + u + '</span><span>Готово</span></div>';
   it.sets.forEach(function (s, k) {
     var fw = s.ok || s.fw !== '' ? s.fw : s.w, fr = s.ok || s.fr !== '' ? s.fr : s.r;
-    h += '<div class="set' + (s.ok ? ' ok' : '') + '" id="set-' + it.id + '-' + k + '"><b class="num">' + (k + 1) + '</b>' +
+    var pzx = s.ok ? pzSetOf(it, k) : null;                                // 4.27: похвала у подхода
+    h += '<div class="set' + (s.ok ? ' ok' : '') + (pzx && pzx.rec ? ' rec' : '') + '" id="set-' + it.id + '-' + k + '"><b class="num">' + (k + 1) + '</b>' +
       (it.noW ? '' : '<input id="fw-' + it.id + '-' + k + '" inputmode="decimal" autocomplete="off" value="' + esc(fw) + '" data-f="fw" data-i="' + i + '" data-k="' + k + '" aria-label="Вес, подход ' + (k + 1) + '">') +
       '<input id="fr-' + it.id + '-' + k + '" inputmode="numeric" autocomplete="off" value="' + esc(fr) + '" data-f="fr" data-i="' + i + '" data-k="' + k + '" aria-label="' + u + ', подход ' + (k + 1) + '">' +
-      '<button class="okb' + (s.ok ? ' on' : '') + '" data-act="setOk" data-i="' + i + '" data-k="' + k + '" aria-pressed="' + (s.ok ? 'true' : 'false') + '" aria-label="Подход ' + (k + 1) + ' выполнен">' + IC.check + '</button></div>';
+      '<button class="okb' + (s.ok ? ' on' : '') + '" data-act="setOk" data-i="' + i + '" data-k="' + k + '" aria-pressed="' + (s.ok ? 'true' : 'false') + '" aria-label="Подход ' + (k + 1) + ' выполнен">' + IC.check + '</button></div>' + pzLabHtml(it, k, pzx);
   });
   return h + '</div>';
 }
@@ -4267,6 +4490,17 @@ var ACT = {
   copyMsg: function () { copyText(val('copyBox')); },
   copyLink: function (b) { copyText(b.getAttribute('data-v')); },
   newW: function () { newWForm(); },
+  pzTog: function (b) {                                                    // 4.27: «Похвала» у клиента
+    var c = clientOf(S.cid); if (!c || b.disabled) return;
+    b.disabled = true;
+    call('praise', { cid: c.id, on: !c.pz }).then(function (r) {
+      b.disabled = false;
+      if (!r || r.auth) return;
+      if (!r.ok) return toast(errText(r), 'bad');
+      c.pz = r.pz ? 1 : 0; memSave(); rerenderKeep();
+      toast(r.pz ? 'Похвала включена – клиент увидит её в следующей тренировке' : 'Похвала выключена');
+    });
+  },
   pubW: function (b) {
     var w = S.draft, s = w && sumOf(w.id);
     if (!w || !s || b.disabled) return;
@@ -4784,6 +5018,7 @@ var ACT = {
     b.className = 'okb' + (s.ok ? ' on' : ''); b.setAttribute('aria-pressed', s.ok ? 'true' : 'false');
     var row = document.getElementById('set-' + it.id + '-' + k); if (row) row.className = 'set' + (s.ok ? ' ok' : '');
     var p = runProgress(w), el = document.getElementById('prog'); if (el) el.innerHTML = 'Подходов: <b class="num">' + p.ok + '</b> из ' + p.tot;
+    if (M.pz && !w.done) pzOnSet(w, i, k);                                  // 4.27: похвала
   },
   diff: function (b) {
     var w = myOf(S.run), i = +b.getAttribute('data-i'), v = +b.getAttribute('data-v'), it = w.items[i];
@@ -4802,8 +5037,10 @@ var ACT = {
   },
   finishAny: function () {
     var w = myOf(S.run); if (!w.done) { M.doneN++; if (M.totalDone != null) M.totalDone++; if (M.pk && w.lab) { M.pk.done++; M.pk.left = Math.max(M.pk.left - 1, 0); } }
+    var pzWas = !w.done;
     w.done = true; w.doneAt = TODAY; w.te = w.ts ? Date.now() : 0; touch(w, true); closeSheet(); render(); window.scrollTo(0, 0);
-    toast(titleOf(w) + ' выполнена' + (w.ts ? ' за ' + fmtDur((w.te - w.ts) / 60000) : ''));
+    if (M.pz && pzWas) { var pzR = pzSum(w); if (PEND[w.id]) { PEND[w.id].pz = pzR.srv; pendSave(); } pzReport(w, pzR); }   // 4.27: отчёт
+    else toast(titleOf(w) + ' выполнена' + (w.ts ? ' за ' + fmtDur((w.te - w.ts) / 60000) : ''));
     pxGoal('free_trenirovka');                                              // 4.24: FREE – первая выполненная
   },
   undone: function () { var w = myOf(S.run); if (w.done) { M.doneN = Math.max(M.doneN - 1, 0); if (M.totalDone != null) M.totalDone--; if (M.pk && w.lab) { M.pk.done = Math.max(M.pk.done - 1, 0); M.pk.left = Math.min(M.pk.left + 1, M.pk.n); } } w.done = false; w.doneAt = ''; w.te = 0; touch(w, false); rerenderKeep(); toast('Отметка снята'); }
@@ -4849,6 +5086,7 @@ document.addEventListener('input', function (e) {
     if (f === 'fw') { v = numW(v); if (el.value !== v) el.value = v; ri.sets[k].fw = v; }
     else if (f === 'fr') { v = numR(v); if (el.value !== v) el.value = v; ri.sets[k].fr = v; }
     else return;                                                          // 2.4: комментарий – только через окно «Написать тренеру»
+    if (M.pz && ri.sets[k].ok && !rw.done) pzPaintSet(ri, k);               // 4.27
     touch(rw);
   }
 });
