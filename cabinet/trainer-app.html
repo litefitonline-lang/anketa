@@ -792,6 +792,9 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.7 (18.11.2026). Замеры: в «Результатах» – последние 5 замеров (самый давний уходит, когда появляется новый), «Изм.» – между первым
+ *   и последним из показанных. Нажатие на день с внесёнными замерами в календаре – окно с замерами за этот день и разницей
+ *   с предыдущими; при наведении – подсказка с первыми значениями.
  * 2.6 (17.11.2026, сервер lite-fit-fix 2.0.8). «Удалить все данные клиента» – только у Артёма: клиент → «Клиент» → внизу.
  * 2.5 (13.11.2026, сервер lite-fit-fix 2.0.7). «Задачи» → «Кому»: Мне, любой тренер, Всем. Задача тренеру – в его утреннем отчёте каждый
  *   день, пока он не снимет её галочкой.
@@ -881,7 +884,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.6';
+var VERSION = '2.7';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -2165,7 +2168,8 @@ function measCal(c) {
     var st = '';
     if (col) { st = filled(col) ? 'm-done' : n > T ? 'm-plan' : n >= T - late ? 'm-due' : 'm-miss'; cls.push(st); }
     var lab = dm(y) + (st === 'm-done' ? ', замеры внесены' : st === 'm-plan' ? ', замеры запланированы' : st === 'm-due' ? ', замеры ждут' : st === 'm-miss' ? ', замеры пропущены' : '');
-    g += '<button data-act="mDay" data-d="' + y + '" class="' + cls.join(' ') + '" aria-label="' + lab + '">' + (n - first + 1) + '</button>';
+    var tip = st === 'm-done' ? m.names.map(function (nm, i) { return col.values[i] != null ? mShort(nm).label + ' ' + fmt(col.values[i], 1) : ''; }).filter(String).slice(0, 4).join(' · ') + ' – нажмите, чтобы открыть все' : '';   // 2.7
+    g += '<button data-act="mDay" data-d="' + y + '" class="' + cls.join(' ') + '" aria-label="' + lab + '"' + (tip ? ' title="' + esc(tip) + '"' : '') + '>' + (n - first + 1) + '</button>';
   }
   return '<div class="mcal"><div class="mcal-h"><button data-act="mMon" data-m="-1" aria-label="Предыдущий месяц"' + (key <= lo ? ' disabled' : '') + '>‹</button>' +
     '<b>' + MONTHS_N[mm - 1] + ' ' + yy + '</b><button data-act="mMon" data-m="1" aria-label="Следующий месяц"' + (key >= hi ? ' disabled' : '') + '>›</button></div>' +
@@ -2176,10 +2180,22 @@ function measCal(c) {
     (c.frz && c.frz.length ? '<span><i style="background:rgba(120,160,255,.25)"></i>заморозка</span>' : '') + '</div></div>';
 }
 /** Нажатие на день календаря замеров. */
+/** 2.7: замеры клиента за выбранный день – значения и разница с предыдущими замерами. */
+function measShow(c, col) {
+  var m = c.meas, got = measCols(c).filter(filled), k = got.map(function (x) { return x.date; }).indexOf(col.date), pr = k > 0 ? got[k - 1] : null;
+  var rows = m.names.map(function (nm, i) {
+    var v = col.values[i], d = pr && v != null && pr.values[i] != null ? v - pr.values[i] : null;
+    return '<tr><td>' + esc(mShort(nm).label) + '</td><td class="t">' + fmt(v, 1) + (v != null && m.units && m.units[i] ? ' <span class="muted" style="font-weight:400">' + esc(m.units[i]) + '</span>' : '') + '</td>' +
+      (pr ? '<td class="' + (d == null ? '' : d < 0 ? 'dn' : d > 0 ? 'up' : '') + '">' + (d == null ? '—' : signed(d, 1)) + '</td>' : '') + '</tr>';
+  }).join('');
+  sheet('Замеры', '<h2>Замеры ' + longDate(col.date) + '</h2><p class="lead">' + esc(c.name) + (pr ? ' · разница с замерами ' + dm(pr.date) : ' · первые замеры') + '</p>' +
+    '<div class="mwrap"><table class="mtable"><tr><th>Замер</th><th>' + dm(col.date) + '</th>' + (pr ? '<th>к ' + dm(pr.date) + '</th>' : '') + '</tr>' + rows + '</table></div>' +
+    '<button class="btn sec mt" data-act="close">Закрыть</button>');
+}
 function measTap(c, y) {
   var m = c.meas, n = dn(y), col = measCols(c).filter(function (x) { return x.date === y; })[0];
   if (n < dn(c.start) || n > dn(c.end)) return toast('Вне дневника клиента (' + dm(c.start) + '–' + dm(c.end) + ')', '');
-  if (col && filled(col)) return toast('Замеры за ' + dm(y) + ' уже внесены', '');
+  if (col && filled(col)) return measShow(c, col);                       // 2.7: замеры за этот день
   if (n < T) return toast('Прошедшую дату менять нельзя', '');
   if (m.mode === 'manual') return inline('meas', col ? { id: c.id, del: y } : { id: c.id, add: y });
   var nx = measNext(c);
@@ -2211,12 +2227,14 @@ function subMeas(c) {
 
   var got = cols.filter(filled);
   if (!got.length) return h + '<div class="card"><h3>Результаты</h3><p class="sub" style="margin:0">Замеров пока нет.</p></div>' + photosCard(c);
-  var a = got[0], b = got[got.length - 1], one = got.length < 2;
-  h += '<div class="card"><h3>Результаты</h3><p class="sub">Замеров сделано: ' + got.length + '.</p><div class="mwrap"><table class="mtable"><tr><th>Замер</th><th>' + dm(a.date) + '</th>' + (one ? '' : '<th>' + dm(b.date) + '</th><th>Изм.</th>') + '</tr>' +
+  var M5 = got.slice(-5), a = M5[0], b = M5[M5.length - 1], one = M5.length < 2;     // 2.7: последние 5 замеров, самый давний уходит
+  h += '<div class="card"><h3>Результаты</h3><p class="sub">Замеров сделано: ' + got.length + (got.length > 5 ? ' · в таблице последние 5' : '') + '. Нажмите дату в календаре – откроются замеры за этот день.</p><div class="mwrap"><table class="mtable"><tr><th>Замер</th>' +
+    M5.map(function (x, k) { return '<th>' + (k === M5.length - 1 && !one ? '<b style="color:var(--text)">' + dm(x.date) + '</b>' : dm(x.date)) + '</th>'; }).join('') + (one ? '' : '<th>Изм.</th>') + '</tr>' +
     m.names.map(function (nm, i) {
       var d = a.values[i] != null && b.values[i] != null ? b.values[i] - a.values[i] : null;
-      return '<tr><td>' + esc(mShort(nm).label) + '</td><td>' + fmt(a.values[i], 1) + '</td>' + (one ? '' : '<td class="t">' + fmt(b.values[i], 1) + '</td><td class="' + (d == null ? '' : d < 0 ? 'dn' : d > 0 ? 'up' : '') + '">' + (d == null ? '—' : signed(d, 1)) + '</td>') + '</tr>';
-    }).join('') + '</table></div></div>';
+      return '<tr><td>' + esc(mShort(nm).label) + '</td>' + M5.map(function (x, k) { return '<td' + (k === M5.length - 1 && !one ? ' class="t"' : '') + '>' + fmt(x.values[i], 1) + '</td>'; }).join('') +
+        (one ? '' : '<td class="' + (d == null ? '' : d < 0 ? 'dn' : d > 0 ? 'up' : '') + '">' + (d == null ? '—' : signed(d, 1)) + '</td>') + '</tr>';
+    }).join('') + '</table></div>' + (one ? '' : '<p class="note" style="margin:8px 0 0">«Изм.» – разница между ' + dm(a.date) + ' и ' + dm(b.date) + '.</p>') + '</div>';
   var withData = m.names.map(function (nm, i) {
     return { i: i, pts: got.filter(function (x) { return x.values[i] != null; }).map(function (x) { return { n: dn(x.date), v: x.values[i], d: x.date }; }) };
   }).filter(function (x) { return x.pts.length >= 2; });
