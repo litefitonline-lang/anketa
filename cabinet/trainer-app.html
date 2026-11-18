@@ -640,6 +640,8 @@ body.wide .md .chips{flex-wrap:wrap;overflow:visible}
 .mcal-g button.m-plan{border-color:var(--accent);color:var(--accent)}
 .mcal-g button.m-done{background:var(--accent);color:var(--on-accent)}
 .mcal-g button.m-done.today::after{background:var(--on-accent)}
+.mcal-g button.m-sel{box-shadow:0 0 0 3px var(--warm);z-index:1}                   /* 2.8: период «Изм.» */
+.mpick{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--warm-bg);border:1px solid var(--warm);color:var(--warm);font-size:13.5px;font-weight:600}
 .mcal-g button.m-due{background:var(--warm-bg);border-color:var(--warm);color:var(--warm)}
 .mcal-g button.m-miss{background:rgba(255,139,123,.12);color:var(--err)}
 .mcal-l{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin-top:10px}
@@ -792,6 +794,8 @@ function planBody(x) {
 
 /* ================= КАБИНЕТ ТРЕНЕРА ================= */
 /*
+ * 2.8 (18.11.2026). Замеры: «Изм.» по умолчанию – от самого первого замера до последнего; «Выбрать период» – две даты
+ *   в календаре, «Изм.» считается между ними (выбранные дни обведены), «С первого замера» – сброс.
  * 2.7 (18.11.2026). Замеры: в «Результатах» – последние 5 замеров (самый давний уходит, когда появляется новый), «Изм.» – между первым
  *   и последним из показанных. Нажатие на день с внесёнными замерами в календаре – окно с замерами за этот день и разницей
  *   с предыдущими; при наведении – подсказка с первыми значениями.
@@ -884,7 +888,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.7';
+var VERSION = '2.8';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -2167,11 +2171,14 @@ function measCal(c) {
     if (n === T) cls.push('today');
     var st = '';
     if (col) { st = filled(col) ? 'm-done' : n > T ? 'm-plan' : n >= T - late ? 'm-due' : 'm-miss'; cls.push(st); }
+    var rg = mRange(c); if (st === 'm-done' && rg && (y === rg.a.date || y === rg.b.date) && rg.own) cls.push('m-sel');   // 2.8
     var lab = dm(y) + (st === 'm-done' ? ', замеры внесены' : st === 'm-plan' ? ', замеры запланированы' : st === 'm-due' ? ', замеры ждут' : st === 'm-miss' ? ', замеры пропущены' : '');
     var tip = st === 'm-done' ? m.names.map(function (nm, i) { return col.values[i] != null ? mShort(nm).label + ' ' + fmt(col.values[i], 1) : ''; }).filter(String).slice(0, 4).join(' · ') + ' – нажмите, чтобы открыть все' : '';   // 2.7
     g += '<button data-act="mDay" data-d="' + y + '" class="' + cls.join(' ') + '" aria-label="' + lab + '"' + (tip ? ' title="' + esc(tip) + '"' : '') + '>' + (n - first + 1) + '</button>';
   }
-  return '<div class="mcal"><div class="mcal-h"><button data-act="mMon" data-m="-1" aria-label="Предыдущий месяц"' + (key <= lo ? ' disabled' : '') + '>‹</button>' +
+  var pk = S.mrg && S.mrg.id === c.id && S.mrg.pick ? S.mrg : null;
+  return (pk ? '<div class="mpick">' + (pk.pick === 1 ? 'Нажмите в календаре первую дату периода' : 'Первая дата – ' + dm(pk.a) + '. Нажмите вторую') + ' · <button class="lnk" data-act="mRgOff">отмена</button></div>' : '') +
+    '<div class="mcal"><div class="mcal-h"><button data-act="mMon" data-m="-1" aria-label="Предыдущий месяц"' + (key <= lo ? ' disabled' : '') + '>‹</button>' +
     '<b>' + MONTHS_N[mm - 1] + ' ' + yy + '</b><button data-act="mMon" data-m="1" aria-label="Следующий месяц"' + (key >= hi ? ' disabled' : '') + '>›</button></div>' +
     '<div class="mcal-w">' + ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>' +
     '<div class="mcal-g">' + g + '</div>' +
@@ -2180,6 +2187,15 @@ function measCal(c) {
     (c.frz && c.frz.length ? '<span><i style="background:rgba(120,160,255,.25)"></i>заморозка</span>' : '') + '</div></div>';
 }
 /** Нажатие на день календаря замеров. */
+/** 2.8: период «Изм.»: по умолчанию – с самого первого замера по последний; выбранный тренером – из S.mrg. */
+function mRange(c) {
+  var got = measCols(c).filter(filled);
+  if (got.length < 2) return null;
+  var r = S.mrg && S.mrg.id === c.id && !S.mrg.pick && S.mrg.a && S.mrg.b ? S.mrg : null, f = function (d) { return got.filter(function (x) { return x.date === d; })[0]; };
+  var a = r && f(r.a), b = r && f(r.b);
+  if (a && b) return { a: a, b: b, own: true };
+  return { a: got[0], b: got[got.length - 1], own: false };
+}
 /** 2.7: замеры клиента за выбранный день – значения и разница с предыдущими замерами. */
 function measShow(c, col) {
   var m = c.meas, got = measCols(c).filter(filled), k = got.map(function (x) { return x.date; }).indexOf(col.date), pr = k > 0 ? got[k - 1] : null;
@@ -2194,6 +2210,14 @@ function measShow(c, col) {
 }
 function measTap(c, y) {
   var m = c.meas, n = dn(y), col = measCols(c).filter(function (x) { return x.date === y; })[0];
+  if (S.mrg && S.mrg.id === c.id && S.mrg.pick) {                          // 2.8: выбор периода для «Изм.»
+    if (!col || !filled(col)) return toast('Выберите день с внесёнными замерами', '');
+    if (S.mrg.pick === 1) { S.mrg = { id: c.id, pick: 2, a: y }; return render(); }
+    if (y === S.mrg.a) return toast('Выберите другую дату', '');
+    var a = S.mrg.a < y ? S.mrg.a : y, b = S.mrg.a < y ? y : S.mrg.a;
+    S.mrg = { id: c.id, pick: 0, a: a, b: b }; render();
+    return toast('«Изм.» – с ' + dm(a) + ' по ' + dm(b), 'ok');
+  }
   if (n < dn(c.start) || n > dn(c.end)) return toast('Вне дневника клиента (' + dm(c.start) + '–' + dm(c.end) + ')', '');
   if (col && filled(col)) return measShow(c, col);                       // 2.7: замеры за этот день
   if (n < T) return toast('Прошедшую дату менять нельзя', '');
@@ -2227,14 +2251,15 @@ function subMeas(c) {
 
   var got = cols.filter(filled);
   if (!got.length) return h + '<div class="card"><h3>Результаты</h3><p class="sub" style="margin:0">Замеров пока нет.</p></div>' + photosCard(c);
-  var M5 = got.slice(-5), a = M5[0], b = M5[M5.length - 1], one = M5.length < 2;     // 2.7: последние 5 замеров, самый давний уходит
+  var M5 = got.slice(-5), one = M5.length < 2, RG = mRange(c) || { a: M5[0], b: M5[M5.length - 1], own: false };     // 2.7: последние 5 замеров, самый давний уходит
   h += '<div class="card"><h3>Результаты</h3><p class="sub">Замеров сделано: ' + got.length + (got.length > 5 ? ' · в таблице последние 5' : '') + '. Нажмите дату в календаре – откроются замеры за этот день.</p><div class="mwrap"><table class="mtable"><tr><th>Замер</th>' +
     M5.map(function (x, k) { return '<th>' + (k === M5.length - 1 && !one ? '<b style="color:var(--text)">' + dm(x.date) + '</b>' : dm(x.date)) + '</th>'; }).join('') + (one ? '' : '<th>Изм.</th>') + '</tr>' +
     m.names.map(function (nm, i) {
-      var d = a.values[i] != null && b.values[i] != null ? b.values[i] - a.values[i] : null;
+      var d = RG.a.values[i] != null && RG.b.values[i] != null ? RG.b.values[i] - RG.a.values[i] : null;   // 2.8: период «Изм.»
       return '<tr><td>' + esc(mShort(nm).label) + '</td>' + M5.map(function (x, k) { return '<td' + (k === M5.length - 1 && !one ? ' class="t"' : '') + '>' + fmt(x.values[i], 1) + '</td>'; }).join('') +
         (one ? '' : '<td class="' + (d == null ? '' : d < 0 ? 'dn' : d > 0 ? 'up' : '') + '">' + (d == null ? '—' : signed(d, 1)) + '</td>') + '</tr>';
-    }).join('') + '</table></div>' + (one ? '' : '<p class="note" style="margin:8px 0 0">«Изм.» – разница между ' + dm(a.date) + ' и ' + dm(b.date) + '.</p>') + '</div>';
+    }).join('') + '</table></div>' + (one ? '' : '<p class="note" style="margin:8px 0 0">«Изм.» – с ' + dm(RG.a.date) + ' по ' + dm(RG.b.date) + (RG.own ? '' : ' (с первого замера)') + '.</p>' +
+      '<div class="row2" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sec sm" data-act="mRgPick">Выбрать период в календаре</button>' + (RG.own ? '<button class="btn sec sm" data-act="mRgOff">С первого замера</button>' : '') + '</div>') + '</div>';
   var withData = m.names.map(function (nm, i) {
     return { i: i, pts: got.filter(function (x) { return x.values[i] != null; }).map(function (x) { return { n: dn(x.date), v: x.values[i], d: x.date }; }) };
   }).filter(function (x) { return x.pts.length >= 2; });
@@ -3223,6 +3248,8 @@ var ACT = {
   retry: function () { boot(); },
   mMon: function (t) { var c = cur(); if (!c) return; var k = S.mcal && S.mcal.id === c.id ? S.mcal.m : TODAY.slice(0, 7), y = +k.slice(0, 4), m = +k.slice(5, 7) - 1 + (+t.getAttribute('data-m'));
     var d = new Date(Date.UTC(y, m, 1)); S.mcal = { id: c.id, m: d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) }; render(); },
+  mRgPick: function () { var c = cur(); if (!c) return; S.mrg = { id: c.id, pick: 1 }; render(); var el = app.querySelector('.mpick'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); },   // 2.8
+  mRgOff: function () { S.mrg = null; render(); },
   mDay: function (t) { var c = cur(); if (c && c.meas) measTap(c, t.getAttribute('data-d')); },
   mMove: function (t) { var c = cur(); closeSheet(); if (c) inline('meas', { id: c.id, next: t.getAttribute('data-d') }); },
   ptsHow: function () { sheet('Баллы и медали', ptsHowHtml()); },
