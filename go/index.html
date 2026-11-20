@@ -33,6 +33,11 @@
     ['ref', 'ref_source'].forEach(function (k) { if (q.get(k)) out.set(k, q.get(k)); });
     if (!out.get('ref')) out.set('ref', 'go_site');
     var url = 'https://vk.me/lite_fit_online?' + out.toString();
+    if (/^ny[_-]/i.test(out.get('ref') || '')) {                       // NY6: «6 недель до Нового года» – тест в чате
+      document.title = 'Lite Fit – 6 недель до Нового года';
+      document.querySelector('h1').innerHTML = 'До Нового года 6 недель – <span>тест за 2 минуты</span>';
+      document.querySelector('p').textContent = 'Открываем чат Lite Fit во ВКонтакте – там 7 вопросов и Ваш результат.';
+    }
     document.getElementById('go').href = url;
     setTimeout(function () { location.replace(url); }, 300);
   })();

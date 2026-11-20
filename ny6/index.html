@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Заявка NY6 · Lite Fit</title>
+<style>
+  :root { --bg:#05090B; --card:#0E1A1C; --line:#1d2f32; --ink:#E8F4F3; --mut:#8FA5A7; --teal:#3ED6CE; --teal2:#0FB5AC; --red:#ff7a7a; --gold:#f5c76a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+  .wrap { max-width:560px; margin:0 auto; padding:18px 16px 40px; }
+  h1 { font-size:20px; margin:4px 0 2px; }
+  .sub { color:var(--mut); font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; }
+  .card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut); margin:0 0 8px; font-weight:600; }
+  .row { display:flex; justify-content:space-between; gap:12px; padding:5px 0; border-bottom:1px solid var(--line); }
+  .row:last-child { border-bottom:0; }
+  .row b { font-weight:500; color:var(--mut); flex:0 0 42%; }
+  .row span { text-align:right; word-break:break-word; }
+  .chip { display:inline-block; padding:3px 10px; border-radius:99px; font-size:13px; background:#12353a; color:var(--teal); }
+  .chip.paid { background:#173a1f; color:#8fe39b; } .chip.ref { background:#2a2a2a; color:#aaa; } .chip.wait { background:#3a3017; color:var(--gold); }
+  .btn { display:block; width:100%; padding:13px; margin:8px 0 0; border-radius:12px; border:0; font:inherit; font-weight:600; cursor:pointer; text-align:center; text-decoration:none; }
+  .pri { background:var(--teal); color:#04201f; } .sec { background:#15282b; color:var(--ink); border:1px solid var(--line); } .dan { background:transparent; color:var(--red); border:1px solid #4a2626; }
+  .btn:disabled { opacity:.5; }
+  select, input { width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:#081214; color:var(--ink); font:inherit; margin-top:6px; }
+  label { display:block; color:var(--mut); font-size:13px; margin-top:10px; }
+  .two { display:flex; gap:8px; } .two > * { flex:1; }
+  .msg { padding:11px 12px; border-radius:10px; margin:10px 0; white-space:pre-line; }
+  .ok { background:#10302c; color:#bff3ee; } .err { background:#3a1616; color:#ffd0d0; }
+  .hist { white-space:pre-line; color:var(--mut); font-size:13px; }
+  .stream { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .stream:last-child { border-bottom:0; }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sub">Lite Fit · «6 недель до Нового года»</div>
+  <h1 id="title">Заявка NY6</h1>
+  <div id="state" class="sub">Загружаю…</div>
+  <div id="note"></div>
+  <div id="main" class="hide">
+    <div class="card"><h2>Клиент</h2><div id="who"></div></div>
+    <div class="card" id="acts"><h2>Действия</h2>
+      <a class="btn sec" id="write" target="_blank" rel="noopener">Написать клиенту</a>
+      <button class="btn sec" id="take">Взять себе</button>
+      <div id="assignBox" class="hide">
+        <label>Назначить тренера</label>
+        <div class="two"><select id="to"></select><button class="btn sec" id="assign" style="margin-top:6px">Назначить</button></div>
+      </div>
+      <div id="payBox">
+        <label>Оплата (после первой беседы и перевода по СБП)</label>
+        <div class="two"><input id="sum" inputmode="numeric"><input id="method" value="СБП"></div>
+        <button class="btn pri" id="paid">Оплачено</button>
+      </div>
+      <label>Поток</label>
+      <div class="two"><select id="stream"></select><button class="btn sec" id="move" style="margin-top:6px">Перенести</button></div>
+      <div id="refBox">
+        <label>Отказ – причина (необязательно)</label>
+        <input id="why" maxlength="200">
+        <button class="btn dan" id="refuse">Отказ</button>
+      </div>
+    </div>
+    <div class="card"><h2>Тест</h2><div id="test"></div></div>
+    <div class="card"><h2>Потоки</h2><div id="streams"></div></div>
+    <div class="card"><h2>История</h2><div id="hist" class="hist"></div></div>
+  </div>
+</div>
+<script>
+var VERSION = '1.0';
+var Q = new URLSearchParams(location.search), API = Q.get('api') || '', Z = Q.get('z') || '', T = Q.get('t') || '', D = null;
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function note(text, ok) { $('note').innerHTML = text ? '<div class="msg ' + (ok ? 'ok' : 'err') + '">' + esc(text) + '</div>' : ''; }
+function call(op, extra) {
+  var body = Object.assign({ a: 'ny6', op: op, z: Z, t: T }, extra || {});
+  var btns = document.querySelectorAll('button'); btns.forEach(function (b) { b.disabled = true; });
+  return fetch(API, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); })
+    .then(function (j) { btns.forEach(function (b) { b.disabled = false; }); if (!j.ok) { note(j.error || 'ошибка'); if (!D) $('state').textContent = j.error || 'ошибка'; return null; } D = j; draw(); if (j.msg) note(j.msg, true); return j; })
+    .catch(function (e) { btns.forEach(function (b) { b.disabled = false; }); note('Нет связи с сервером: ' + e.message + '. Обновите страницу.'); });
+}
+function rows(list) { return list.filter(function (x) { return x[1] !== '' && x[1] != null; }).map(function (x) { return '<div class="row"><b>' + esc(x[0]) + '</b><span>' + esc(x[1]) + '</span></div>'; }).join(''); }
+function draw() {
+  var a = D.app, st = a['Статус NY6'] || '–';
+  $('title').textContent = (a['Имя'] || a['Имя в мессенджере'] || 'Заявка') + ' · NY6';
+  var cls = st === 'оплачено' ? 'paid' : st === 'отказ' ? 'ref' : st === 'лист ожидания' ? 'wait' : '';
+  $('state').innerHTML = '<span class="chip ' + cls + '">' + esc(st) + '</span> · ответственный: ' + esc(a['Ответственный'] || '–') + ' · Вы: ' + esc(D.me);
+  $('main').classList.remove('hide');
+  $('who').innerHTML = rows([['Имя', a['Имя'] || a['Имя в мессенджере']], ['Телефон', a['Телефон']], ['Канал', a['Канал']], ['Где', a['Где']], ['Поток', a['Поток']],
+    ['ID клиента', a['ID клиента']], ['Источник', a['Источник']], ['Заявка', a['Заявка']], ['Оплачено', a['Оплачено'] ? a['Оплачено'] + ' · ' + a['Сумма'] + ' ₽ · ' + a['Кто принял'] : ''],
+    ['Вопрос', a['Вопрос']], ['Согласие', a['Согласие 18+ и данные']]]);
+  $('test').innerHTML = rows([['Тип', a['Тип'] ? a['Тип'] + ' (S ' + a['S'] + ' · E ' + a['E'] + ' · T ' + a['T'] + ' · B ' + a['B'] + ')' : ''], ['Цель', a['Ответ 1']], ['«С понедельника»', a['Ответ 2']],
+    ['Ломает план', a['Ответ 3']], ['Питание', a['Ответ 4']], ['Занималась', a['Ответ 5']], ['Вечером', a['Ответ 6']], ['Время', a['Ответ 7']]]) || '<div class="sub">Тест не пройден</div>';
+  $('streams').innerHTML = D.streams.map(function (s) { return '<div class="stream"><span>' + esc(s.id) + ' · ' + esc(s.start) + '–' + esc(s.end) + '</span><span>' + (s.open ? 'свободно ' + s.free + ' из ' + s.seats + ', приём до ' + esc(s.until) : 'приём закрыт') + '</span></div>'; }).join('');
+  $('stream').innerHTML = D.streams.map(function (s) { return '<option value="' + esc(s.id) + '"' + (s.id === a['Поток'] ? ' selected' : '') + '>' + esc(s.id) + ' · ' + esc(s.start) + ' (' + s.free + ')</option>'; }).join('');
+  $('hist').textContent = a['История'] || '–';
+  if (D.write) { $('write').href = D.write; $('write').classList.remove('hide'); } else $('write').classList.add('hide');
+  var paid = st === 'оплачено', closed = paid || st === 'отказ';
+  $('take').classList.toggle('hide', closed || String(a['Ответственный']).toLowerCase() === String(D.me).toLowerCase());
+  $('assignBox').classList.toggle('hide', !D.owner || closed);
+  $('to').innerHTML = (D.trainers || []).map(function (n) { return '<option' + (n === a['Ответственный'] ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+  $('payBox').classList.toggle('hide', closed);
+  $('refBox').classList.toggle('hide', closed);
+  if (!$('sum').value) $('sum').value = D.price;
+}
+$('take').onclick = function () { call('take'); };
+$('assign').onclick = function () { call('assign', { to: $('to').value }); };
+$('move').onclick = function () { call('move', { to: $('stream').value }); };
+$('paid').onclick = function () {
+  var b = $('paid');
+  if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Точно оплачено ' + $('sum').value + ' ₽? Нажмите ещё раз'; setTimeout(function () { b.dataset.sure = ''; b.textContent = 'Оплачено'; }, 6000); return; }
+  b.dataset.sure = ''; b.textContent = 'Оплачено';
+  call('paid', { sum: $('sum').value, method: $('method').value });
+};
+$('refuse').onclick = function () {
+  var b = $('refuse');
+  if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Точно отказ? Нажмите ещё раз'; setTimeout(function () { b.dataset.sure = ''; b.textContent = 'Отказ'; }, 6000); return; }
+  b.dataset.sure = ''; b.textContent = 'Отказ';
+  call('refuse', { why: $('why').value });
+};
+if (!API || !Z || !T) $('state').textContent = 'Неполная ссылка – откройте заявку из сообщения бота.';
+else call('get');
+</script>
+</body>
+</html>
