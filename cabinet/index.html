@@ -1877,7 +1877,7 @@ function viewPhoto() {
   var n = photoMonth(), h = '<h2 class="sec-title">Фото</h2>';
   var canUp = !D.closed && !fzNow() && !period().before && !period().after;
   var lk = locked('collage');                                 // пробный кабинет: стартовые фото открыты, коллаж – в PRO
-  h += '<div class="card"><h3>' + (lk ? 'Стартовые фото' : 'Месяц ' + n) + '</h3><p class="sub">' + (lk ? 'Фас, профиль и спина – ваша точка «до». Фото видит только ваш тренер.' : 'Три фото раз в месяц: фас, профиль и спина. Фото видит только ваш тренер.') + '</p><div class="slots">' +
+  h += '<div class="card"><h3>' + (lk ? 'Стартовые фото' : 'Месяц ' + n) + '</h3><p class="sub">' + (ny6() ? 'Фас, профиль и спина – на старте, через 3 недели и в финале. В последний день потока из них соберётся Ваш коллаж «до / после». Фото видит только Ваш тренер.' : lk ? 'Фас, профиль и спина – ваша точка «до». Фото видит только ваш тренер.' : 'Три фото раз в месяц: фас, профиль и спина. Фото видит только ваш тренер.') + '</p><div class="slots">' +
     KINDS.map(function (k) {
       var cur = photosOf(k[0]).filter(function (p) { return monthOf(p) === n; }).pop();
       var key = cur ? cur.date + '|' + k[0] : '', src = key && thumbs[key];
