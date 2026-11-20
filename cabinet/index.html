@@ -490,6 +490,8 @@ details.card[open]>summary{margin-bottom:12px}
  * кнопка «Открыть тренировки» (приложение тренировок в том же окне).
  * 3.0.1 (25.10.2026): у клиента START (D.trial.start, сервер 4.3.1) – «START · день N из 14», «START закончился»; слово «пробный» –
  * только у настоящего пробного кабинета.
+ * 3.8 (20.11.2026): кабинет NY6 «6 недель» (сервер – D.ny6): шаги, итоги месяца, план закрыты, тренировки – в приложении;
+ *   коллаж «до / после» открывается в финале; до старта потока – баннер «Старт потока…», данные вносятся с даты старта.
  * 3.0 (25.10.2026): кабинет клиента BASIC с таблицей (перевели с PRO на BASIC, сервер 4.3.0 – D.basic): «Сегодня» – формат BASIC,
  * кнопка «Открыть тренировки» (приложение тренировок по тому же ключу) и «Что откроется в PRO»; «Тренировки» – переход в приложение;
  * «Прогресс», «Замеры», «Фото» – замок «в PRO», данные сохранены. «Вернуться в PRO» – заявка тренеру. У PRO и пробного – без изменений.
@@ -506,7 +508,7 @@ details.card[open]>summary{margin-bottom:12px}
  * (../sw.js хранит страницу). Запрос к серверу ждёт не дольше 25 секунд (фото – 2 минуты). Личная ссылка запоминается в
  * телефоне только после того, как сервер её принял. Документы открываются только по ссылкам https. Страницу нельзя
  * встроить в чужой сайт. */
-var VERSION = '3.7';
+var VERSION = '3.8';
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var LIM = { w: [30, 250, 'Вес'], kcal: [0, 10000, 'Калории'], p: [0, 1000, 'Белки'], f: [0, 1000, 'Жиры'], c: [0, 1500, 'Углеводы'], steps: [0, 100000, 'Шаги'] };
@@ -993,7 +995,8 @@ var PRO_ADDS = ['Личная норма питания – тренер кор�
   'Итоги месяца – PDF с результатами и рекомендациями тренера'];
 function trial() { return (D && D.trial) || null; }
 function basic() { return !!(D && D.basic && !D.trial); }                  // 3.0: BASIC с таблицей – всё, кроме тренировок, «в PRO»
-function locked(k) { var tr = trial(); return !!(tr && tr.lock && tr.lock[k]); }
+function locked(k) { var tr = trial(); return !!(tr && tr.lock && tr.lock[k]) || !!(D && D.ny6 && D.ny6.lock && D.ny6.lock[k]); }   // 3.8: + NY6
+function ny6() { return (D && D.ny6) || null; }
 function lockCard(title, text, btn) {
   return '<div class="card lock"><div class="lk"><span class="lk-ic">' + IC.lock + '</span><div style="flex:1;min-width:0"><h3>' + title + ' <span class="tag-pro">PRO</span></h3>' +
     '<p class="sub">' + text + '</p></div></div>' + (btn === false ? '' : proBtn('sec')) + '</div>';
@@ -1046,7 +1049,8 @@ function header() {
   var ban = '';
   if (D.closed) ban = '<div class="banner warn">Ведение завершено. Все ваши данные сохранены, вносить новые уже нельзя.</div>';
   else if (p.after) ban = '<div class="banner warn">Период ведения закончился ' + longDate(D.end) + '. Если продолжаем – тренер продлит дневник, и здесь снова можно будет вносить данные.</div>';
-  else if (p.before) ban = '<div class="banner">Ведение начнётся ' + longDate(D.start) + '. Пока можно посмотреть кабинет.</div>';
+  else if (p.before) ban = ny6() ? '<div class="banner trial"><b>Старт потока – ' + longDate(D.start) + '.</b> С этого дня откроются дневник питания, вес, замеры и фото. А пока можно посмотреть кабинет и гайды.</div>'
+    : '<div class="banner">Ведение начнётся ' + longDate(D.start) + '. Пока можно посмотреть кабинет.</div>';
   else if (fzNow()) ban = '<div class="banner frz">⏸ <b>Заморозка до ' + longDate(fzNow().to) + '</b> – продолжим ' + longDate(fzNow().resume) + '. Сейчас кабинет открыт только для просмотра, вносить данные не нужно.</div>';
   else if (fzNext()) ban = '<div class="banner frz">Заморозка с ' + longDate(fzNext().from) + ' по ' + longDate(fzNext().to) + '. В эти дни данные не вносятся, напоминаний не будет.</div>';
   if (tr) ban = tr.ended ? trialBanner() : trialBanner() + ban;
@@ -1206,7 +1210,7 @@ function viewToday() {
   // форма
   var mDay = mo && mo.date === day;
   var title = day === D.today ? 'Внести за сегодня' : 'Внести за ' + longDate(day);
-  h += '<div class="card"><h3>' + title + '</h3><p class="sub">' + (canEdit ? 'Можно внести и поправить данные за сегодня и два прошлых дня. Вес – по желанию, хоть каждый день.' : fzNow() ? 'Идёт заморозка – данные сейчас не вносятся.' : fzOf(day) ? 'Этот день – заморозка, данные не вносятся.' : 'Эту дату изменить уже нельзя.') + '</p>' +
+  h += '<div class="card"><h3>' + title + '</h3><p class="sub">' + (canEdit ? 'Можно внести и поправить данные за сегодня и два прошлых дня. Вес – по желанию, хоть каждый день.' : fzNow() ? 'Идёт заморозка – данные сейчас не вносятся.' : fzOf(day) ? 'Этот день – заморозка, данные не вносятся.' : (period().before ? 'Вносить данные можно будет с ' + longDate(D.start) + '.' : 'Эту дату изменить уже нельзя.')) + '</p>' +
     '<button class="how-l" data-act="howto">Как считать питание</button>' +
     '<div class="grid2">' + fld('w', mDay ? 'Вес, кг · день замеров' : 'Вес, кг · по желанию', v.w, 1, 'decimal', canEdit) + (noSteps ? '<div class="fld-lk"><b>' + IC.lock + 'Шаги</b>назначает тренер · в PRO</div>' : fld('steps', 'Шаги', v.steps, 0, 'numeric', canEdit)) + '</div><div class="gap"></div>' +
     fld('kcal', 'Калории, ккал', v.kcal, 0, 'numeric', canEdit) + '<div class="gap"></div>' +
@@ -1403,6 +1407,7 @@ function viewTrain() {
   var h = '<h2 class="sec-title">Тренировки</h2>' +                                         // 3.1: приложение тренировок – в том же окне
     '<div class="card"><p class="sub" style="margin:0 0 12px">Тренировки с видео упражнений, отметками подходов и вопросами тренеру – в приложении тренировок.</p>' +
     '<button class="btn pri" data-act="wkOpen">' + IC.train + 'Открыть тренировки</button></div>';   // 3.3
+  if (locked('plan') && ny6()) return h;                                    // 3.8: NY6 – тренировки только в приложении
   if (locked('plan')) return h + lockCard('План тренировок', 'В PRO тренер ставит ваши тренировки по датам: что делать и когда. В день тренировки бот присылает напоминание, а вы отмечаете выполнение и длительность.') + guidesCard();
   if (!plan.length) return h + '<div class="card"><p class="muted" style="margin:0">На ближайшие две недели тренер ещё не поставил тренировки. Как только план появится – он будет здесь, а в день тренировки придёт напоминание.</p></div>';
   if (past.length) h += '<div class="stats"><div class="stat hl"><div class="k">Выполнено</div><div class="v num">' + done + ' <small>из ' + past.length + '</small></div></div>' +
@@ -1891,6 +1896,7 @@ function viewPhoto() {
   h += consentCard();
 
   // коллаж
+  if (locked('collage2')) return h + '<div class="card lock"><div class="lk"><span class="lk-ic">' + IC.lock + '</span><div style="flex:1;min-width:0"><h3>Коллаж «до / после»</h3><p class="sub">Откроется в финале потока – ' + longDate(ny6().end) + '. Добавляйте фото по плану: старт, через 3 недели и финал – в последний день соберём «старт и сейчас».</p></div></div></div>';   // 3.8: NY6
   if (lk) return h + lockCard('Коллаж «до/после»', ((D.photos || []).length ? 'Стартовые фото сохранены. ' : '') + 'В PRO вы каждый месяц добавляете новые фото, а коллаж «старт и сейчас» собирается сам – первый появится через 30 дней.');
   var list = photosOf(S.kind), a = list[0], b = list[list.length - 1];
   var pair = a && b && monthOf(a) !== monthOf(b);
@@ -2150,7 +2156,8 @@ if (DEMO) (function () {
     DB.photos = DB.photos.filter(function (p) { return p.date === ymd(s); });
   }
   if (qs.has('money')) DB.money = { dep: 7000, debt: [{ sum: 5000, till: ymd(t + 4), start: ymd(t - 26) }] };   // ?demo&money – депозит и долг (3.6)
-  if (qs.has('basic')) DB.basic = { tg: '' };                                // ?demo&basic – как выглядит кабинет BASIC (3.0)
+  if (qs.has('basic')) DB.basic = { tg: '' };
+  if (qs.has('ny6')) { DB.ny6 = { start: DB.start, end: DB.end, pre: false, lock: { steps: true, report: true, plan: true, collage2: true } }; DB.plan = []; DB.reports = []; if (DB.norm) DB.norm.steps = null; }   // ?demo&ny6 (3.8)                                // ?demo&basic – как выглядит кабинет BASIC (3.0)
   function thumb(date, kind) {
     var c = document.createElement('canvas'); c.width = 360; c.height = 480; var x = c.getContext('2d');
     var g = x.createLinearGradient(0, 0, 0, 480); g.addColorStop(0, '#16302F'); g.addColorStop(1, '#0A1415'); x.fillStyle = g; x.fillRect(0, 0, 360, 480);
