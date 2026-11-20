@@ -897,6 +897,8 @@ function planBody(x) {
  * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
  * сервер сообщает, какие карточки устарели, и перечитываются только они (до шести запросов одновременно). Внизу главной —
  * сколько секунд заняли список и карточки. Фото в памяти не хранятся. Закрыли доступ или сменили ПИН-код — память стирается.
+ * 3.0 (20.11.2026). NY6: у оплаченного клиента – «Где и с чем» (op 'ny6fix', lite-fit-ny6 1.0.18): тренер исправляет ошибку клиента,
+ *   неопубликованные автотренировки заменяются на нужный набор.
  * 2.9 (20.11.2026). Вкладки: Клиенты · Free · NY6 · Заявки · Задачи. «Сегодня» – плашкой вверху «Клиентов» (на компьютере –
  *   справа, пока клиент не выбран). В «Клиентах» все форматы группами, NY6 – своей группой. «NY6» – клиенты потоков по потокам:
  *   тренировки впереди, не опубликованные, выполненные (op 'ny6', lite-fit-ny6 1.0.13). «Заявки» (бывшие «Новые») – и заявки NY6.
@@ -905,7 +907,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.9';
+var VERSION = '3.0';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -1973,7 +1975,8 @@ function viewNy6() {
       var w = x.wk || {}, warn = ny6Warn(x), own = clientOf(x.id);
       var sub = ny6Week(x) + ' · ' + (w.total ? 'тренировок ' + w.total + ': впереди опубликовано ' + w.ahead + (w.unpub ? ', не опубликовано ' + w.unpub : '') + ', выполнено ' + w.done : 'тренировок нет') + (D.admin && !D.as ? ' · ' + x.owner : '');
       return '<' + (own ? 'button data-open="' + esc(x.id) + '" data-sub="over"' : 'div') + ' class="row"><span class="dot ' + (warn ? 'warm' : '') + '"></span><span class="mn"><b>' + esc(x.name) + '</b><small>' + esc(sub) + '</small></span>' +
-        (warn ? '<span class="st warm">опубликуйте тренировки</span>' : '') + (own ? '<span class="chev">›</span></button>' : '</div>');
+        (warn ? '<span class="st warm">опубликуйте тренировки</span>' : '') + (own ? '<span class="chev">›</span></button>' : '</div>') +
+        '<button class="txtb" data-act="ny6Fix" data-id="' + esc(x.id) + '" style="margin:-6px 0 6px 34px;font-size:13px">Где и с чем: ' + esc(x.where || '–') + ' · исправить</button>';   // 3.0
     }).join('') + '</div>' : '<p class="muted" style="margin:0">Оплаченных клиентов в этом потоке ' + (D.admin && !D.as ? '' : 'у Вас ') + 'пока нет.</p>') + '</div>';
   });
   h += '<p class="muted" style="font-size:13px;margin:4px 2px 0">Тренировки клиента – в его карточке, раздел «Тренировки». Первые 3 бот ставит сам при оплате – их нужно проверить и опубликовать.</p>';
@@ -3953,6 +3956,21 @@ var ACT = {
 
   ny6Guide: function () { var g = NY && NY.r && NY.r.guide; if (g) sheet('Как вести клиента NY6', '<div class="gd">' + g + '</div>'); },   // 2.9
   ny6Re: function () { ny6Load(true); },
+  ny6Fix: function (t) {                                                   // 3.0: клиент ошибся в «Где и с чем»
+    var id = t.getAttribute('data-id'), x = ny6List().filter(function (y) { return y.id === id; })[0];
+    if (!x) return;
+    sheet('Где и с чем – ' + x.name, '<p class="muted" style="margin-top:0">Сейчас: <b>' + esc(x.where || '–') + '</b>. Если клиент ошибся – выберите верно. Не опубликованные автотренировки заменятся на набор под новый выбор, опубликованные и выполненные останутся как есть.</p>' +
+      [['hg', 'Дома с гантелями'], ['he', 'Дома с эспандером'], ['gw', 'В зале – женщина'], ['gm', 'В зале – мужчина']].map(function (o) {
+        return '<button class="btn mt" data-act="ny6FixGo" data-id="' + esc(id) + '" data-w="' + o[0] + '" style="width:100%">' + o[1] + '</button>';
+      }).join('') + '<p class="muted" style="font-size:13px">Вес, рост, возраст и пол для нормы питания правятся в таблице клиента – норма пересчитается сама.</p>');
+  },
+  ny6FixGo: function (t) {
+    var id = t.getAttribute('data-id'), w = t.getAttribute('data-w');
+    call('ny6fix', { id: id, where: w }).then(function (r) {
+      if (!r || !r.ok) return toast((r && r.error) || 'Не получилось', 'bad');
+      closeSheet(); toast(r.msg || 'Готово'); ny6Load(true);
+    });
+  },
 
   /* --- 2.1: подтверждение и выход с устройства --- */
   sureOk: function (t) { if (SURE) SURE(t); else closeSheet(); },
