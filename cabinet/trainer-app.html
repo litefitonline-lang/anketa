@@ -897,6 +897,7 @@ function planBody(x) {
  * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
  * сервер сообщает, какие карточки устарели, и перечитываются только они (до шести запросов одновременно). Внизу главной —
  * сколько секунд заняли список и карточки. Фото в памяти не хранятся. Закрыли доступ или сменили ПИН-код — память стирается.
+ * 3.1 (20.11.2026). Вкладка «Free» – кнопка «📖 Как вести клиента FREE» (текст guide_free, лист «NY6 Тексты»).
  * 3.0 (20.11.2026). NY6: у оплаченного клиента – «Где и с чем» (op 'ny6fix', lite-fit-ny6 1.0.18): тренер исправляет ошибку клиента,
  *   неопубликованные автотренировки заменяются на нужный набор.
  * 2.9 (20.11.2026). Вкладки: Клиенты · Free · NY6 · Заявки · Задачи. «Сегодня» – плашкой вверху «Клиентов» (на компьютере –
@@ -907,7 +908,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '3.0';
+var VERSION = '3.1';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -1950,7 +1951,7 @@ function ny6Load(force) {
     NY.busy = false; NY.at = Date.now();
     if (r && r.ok) { NY.r = r; NY.err = ''; } else NY.err = r && /неизвестное действие/.test(r.error || '') ? 'Вкладка заработает после обновления сервера.' : errText(r);
     paintTabs();
-    if ((S.tab === 'ny6' || S.tab === 'fresh') && !S.cid && !document.getElementById('viewer')) bgRender();
+    if ((S.tab === 'ny6' || S.tab === 'fresh' || S.tab === 'free') && !S.cid && !document.getElementById('viewer')) bgRender();
   });
 }
 function ny6List() { return NY && NY.r ? NY.r.list || [] : []; }
@@ -3231,6 +3232,8 @@ function viewFree() {
   var h = '<h2 class="sec-title">Free · 3 тренировки</h2>', ff = freshFree(), mine = myFree();
   var was = byRank(D.clients.filter(function (c) { return !isFree(c) && c.free && c.free.at; }));
   h += '<p class="muted" style="font-size:13px;margin:-4px 2px 12px">Заявки FREE: взять клиента, выдать доступ, перевести в START, BASIC или PRO. FREE даётся клиенту один раз.</p>';
+  ny6Load(false);                                                          // 3.1: инструкция FREE приходит с данными NY6
+  if (NY && NY.r && NY.r.guideFree) h += '<button class="guide-b" data-act="freeGuide"><span style="font-size:22px">📖</span><span class="mn"><b>Как вести клиента FREE</b><small>Заявка, старт, неделя, переход</small></span><span class="chev">›</span></button>';
   if (FREE_SOON) h += '<div class="banner">Тренировки FREE ставятся сами: после «Старт» бот спросит клиента, где ему удобнее заниматься (для зала – ещё пол), и сразу поставит 3 тренировки. Клиенту без Telegram поставьте их сами – кнопка «Поставить тренировки».</div>';
   h += '<div class="grp">Новые заявки FREE · ' + ff.length + '</div>';
   h += ff.length ? ff.map(function (f) { return freeCard(f, true, false).replace('<h3>FREE · 3 тренировки</h3>', '<h3>' + esc(f.name) + '</h3>'); }).join('')
@@ -3955,6 +3958,7 @@ var ACT = {
   },
 
   ny6Guide: function () { var g = NY && NY.r && NY.r.guide; if (g) sheet('Как вести клиента NY6', '<div class="gd">' + g + '</div>'); },   // 2.9
+  freeGuide: function () { var g = NY && NY.r && NY.r.guideFree; if (g) sheet('Как вести клиента FREE', '<div class="gd">' + g + '</div>'); },   // 3.1
   ny6Re: function () { ny6Load(true); },
   ny6Fix: function (t) {                                                   // 3.0: клиент ошибся в «Где и с чем»
     var id = t.getAttribute('data-id'), x = ny6List().filter(function (y) { return y.id === id; })[0];
