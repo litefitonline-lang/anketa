@@ -24,6 +24,7 @@
   .pri { background:var(--teal); color:#04201f; } .sec { background:#15282b; color:var(--ink); border:1px solid var(--line); } .dan { background:transparent; color:var(--red); border:1px solid #4a2626; }
   .btn:disabled { opacity:.5; }
   select, input { width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:#081214; color:var(--ink); font:inherit; margin-top:6px; }
+  input[type=date] { color-scheme: dark; }
   label { display:block; color:var(--mut); font-size:13px; margin-top:10px; }
   .two { display:flex; gap:8px; } .two > * { flex:1; }
   .msg { padding:11px 12px; border-radius:10px; margin:10px 0; white-space:pre-line; }
@@ -50,8 +51,13 @@
         <div class="two"><select id="to"></select><button class="btn sec" id="assign" style="margin-top:6px">Назначить</button></div>
       </div>
       <div id="payBox">
-        <label>Оплата (после первой беседы и перевода по СБП)</label>
-        <div class="two"><input id="sum" inputmode="numeric"><input id="method" value="СБП"></div>
+        <label>1. Реквизиты клиенту – Ваш номер для СБП (<span id="bank">Сбербанк</span>)</label>
+        <input id="sbp" inputmode="tel" placeholder="89161234567">
+        <button class="btn sec" id="payreq">Отправить реквизиты клиенту</button>
+        <div id="invInfo" class="sub" style="margin-top:6px"></div>
+        <label style="margin-top:16px">2. Оплата пришла – проверьте и нажмите «Оплачено»</label>
+        <div class="two"><input id="sum" inputmode="numeric" aria-label="Сумма, ₽"><input id="pdate" type="date" aria-label="Дата оплаты"></div>
+        <input id="method" aria-label="Способ оплаты">
         <button class="btn pri" id="paid">Оплачено</button>
       </div>
       <label>Поток</label>
@@ -68,7 +74,7 @@
   </div>
 </div>
 <script>
-var VERSION = '1.0';
+var VERSION = '1.1';
 var Q = new URLSearchParams(location.search), API = Q.get('api') || '', Z = Q.get('z') || '', T = Q.get('t') || '', D = null;
 function $(id) { return document.getElementById(id); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -102,16 +108,26 @@ function draw() {
   $('to').innerHTML = (D.trainers || []).map(function (n) { return '<option' + (n === a['Ответственный'] ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
   $('payBox').classList.toggle('hide', closed);
   $('refBox').classList.toggle('hide', closed);
-  if (!$('sum').value) $('sum').value = D.price;
+  if (!$('sum').value) $('sum').value = (D.inv && D.inv.sum) || D.price;
+  if (!$('pdate').value) $('pdate').value = D.today || '';
+  if (!$('method').value) $('method').value = 'СБП ' + (D.bank || 'Сбербанк');
+  if (!$('sbp').value) $('sbp').value = D.sbp || '';
+  $('bank').textContent = D.bank || 'Сбербанк';
+  $('invInfo').textContent = D.inv ? '✓ Отправлено ' + D.inv.at + ' (' + D.inv.by + '). Можно отправить ещё раз.' : 'Клиент получит: тренер, сумма, СБП, банк и Ваш номер.';
+  $('payreq').textContent = D.inv ? 'Отправить реквизиты ещё раз' : 'Отправить реквизиты клиенту';
 }
 $('take').onclick = function () { call('take'); };
 $('assign').onclick = function () { call('assign', { to: $('to').value }); };
 $('move').onclick = function () { call('move', { to: $('stream').value }); };
+$('payreq').onclick = function () {
+  if (!$('sbp').value.replace(/\D/g, '')) { note('Впишите номер телефона для СБП'); return; }
+  call('payreq', { phone: $('sbp').value, sum: $('sum').value });
+};
 $('paid').onclick = function () {
   var b = $('paid');
-  if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Точно оплачено ' + $('sum').value + ' ₽? Нажмите ещё раз'; setTimeout(function () { b.dataset.sure = ''; b.textContent = 'Оплачено'; }, 6000); return; }
+  if (b.dataset.sure !== '1') { b.dataset.sure = '1'; var dd = ($('pdate').value || '').split('-'); b.textContent = 'Точно оплачено ' + $('sum').value + ' ₽' + (dd.length === 3 ? ' ' + dd[2] + '.' + dd[1] : '') + '? Нажмите ещё раз'; setTimeout(function () { b.dataset.sure = ''; b.textContent = 'Оплачено'; }, 6000); return; }
   b.dataset.sure = ''; b.textContent = 'Оплачено';
-  call('paid', { sum: $('sum').value, method: $('method').value });
+  call('paid', { sum: $('sum').value, method: $('method').value, date: $('pdate').value });
 };
 $('refuse').onclick = function () {
   var b = $('refuse');
