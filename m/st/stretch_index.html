@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Растяжка с Дарьей · Lite Fit</title>
+<meta name="description" content="Офлайн-растяжка Lite Fit по вторникам и четвергам в 20:00 в КДЦ «Заря». Группа до 12 человек. Запись онлайн.">
+<meta property="og:title" content="Растяжка с Дарьей · Lite Fit">
+<meta property="og:description" content="Вторник и четверг, 20:00 · КДЦ «Заря». Небольшая группа, спокойный темп и внимание к каждому.">
+<meta property="og:image" content="darya.jpg">
+<meta name="theme-color" content="#05090B">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05090B;--card:#0C1618;--card2:#0F1D20;--line:#1E3A3C;--line2:#2A4B4D;--acc:#3ED6CE;--accD:#1F8E88;--onAcc:#04211F;--tx:#F2F7F7;--tx2:#8FA5A7;--tx3:#5E7577;--warm:#FF9A52;--warmBg:#3A2210;--err:#FF8B7B;--glow:rgba(62,214,206,.55)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:500 16px/1.55 Manrope,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--acc);text-decoration:none}
+img{display:block;max-width:100%}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+header.bar{position:sticky;top:0;z-index:10;background:rgba(5,9,11,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header.bar .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em}
+.logo img{width:34px;height:34px;border-radius:9px}
+.logo span{color:var(--tx2);font-weight:600;font-size:13px}
+.cta-mini{background:var(--acc);color:var(--onAcc);font-weight:800;font-size:14px;padding:9px 14px;border-radius:11px}
+
+.hero{position:relative}
+.hero .ph{position:relative;aspect-ratio:1/1.02;overflow:hidden;border-radius:0 0 28px 28px;max-width:560px;margin:0 auto}
+.hero .ph img{width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+.hero .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,9,11,0) 35%,rgba(5,9,11,.75) 72%,var(--bg) 100%)}
+.hero .txt{position:relative;margin-top:-150px;z-index:2}
+.kicker{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);background:rgba(62,214,206,.1);border:1px solid rgba(62,214,206,.3);padding:5px 10px;border-radius:999px}
+h1{font-size:40px;line-height:1.05;margin:14px 0 10px;font-weight:800;letter-spacing:-.01em}
+.lead{color:var(--tx2);font-size:16px;margin:0}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.fact b{display:block;font-size:17px;font-weight:800}
+.fact span{font-size:12px;color:var(--tx2)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border-radius:15px;font:800 16px/1 Manrope,sans-serif;border:1px solid var(--line2);background:var(--card);color:var(--tx);cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--onAcc);box-shadow:0 12px 36px -14px var(--glow)}
+.btn:disabled{opacity:.55;cursor:default}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+section{padding:36px 0 4px}
+h2{font-size:26px;line-height:1.15;margin:0 0 14px;font-weight:800}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+p{margin:0 0 12px}
+.muted{color:var(--tx2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.steps{display:grid;gap:10px;counter-reset:s}
+.step{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.step::before{counter-increment:s;content:counter(s);flex-shrink:0;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;color:var(--acc);background:rgba(62,214,206,.1);border:1px solid rgba(62,214,206,.3)}
+.step b{display:block}
+.step span{color:var(--tx2);font-size:15px}
+.who{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.who img{width:64px;height:64px;border-radius:18px;object-fit:cover;object-position:50% 30%;border:1px solid var(--line2)}
+.who b{display:block;font-size:18px}
+.who span{color:var(--tx2);font-size:14px}
+.price{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}
+.price:last-of-type{border-bottom:0}
+.price b{font-size:17px}
+.price small{display:block;color:var(--tx2);font-size:13px;font-weight:600;margin-top:2px}
+.price .v{font-size:22px;font-weight:800;white-space:nowrap}
+.price.best .v{color:var(--acc)}
+.badge{display:inline-block;font-size:11px;font-weight:800;color:var(--onAcc);background:var(--acc);padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.place{display:grid;gap:10px}
+.place .card{display:flex;gap:12px;align-items:flex-start}
+.place .ic{font-size:22px;line-height:1.2}
+.bring{display:grid;gap:10px}
+.bring .card{display:flex;gap:12px;align-items:flex-start;padding:14px 16px}
+.bring .ic{font-size:22px}
+.health b{display:block;margin:4px 0 6px}
+.health ul{margin:0 0 14px;padding-left:20px;color:var(--tx2)}
+.health ul:last-child{margin-bottom:0}
+.health li{margin:4px 0}
+.gal{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:0 16px 6px;scrollbar-width:none}
+.gal::-webkit-scrollbar{display:none}
+.gal img{flex:0 0 78%;max-width:400px;aspect-ratio:3/4;object-fit:cover;border-radius:16px;border:1px solid var(--line);scroll-snap-align:center}
+.pers{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.plist{display:grid;gap:10px}
+.plist div{display:flex;flex-direction:column;gap:2px;padding-left:14px;border-left:2px solid var(--acc)}
+.plist b{font-size:16px}
+.plist span{font-size:15px;color:var(--tx2)}
+.dph{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.dph img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--line);cursor:zoom-in}
+.dph img:nth-child(3){object-position:50% 45%}
+.gal-hint{font-size:13px;color:var(--tx3);margin-top:8px;text-align:center}
+
+form{display:grid;gap:4px}
+label.f{display:block;font-size:13px;font-weight:800;color:var(--tx2);margin:14px 2px 6px}
+label.f i{color:var(--acc);font-style:normal}
+input[type=text],input[type=tel],select{font:500 16px Manrope,sans-serif;color:var(--tx);background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:14px;width:100%;outline:none;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(62,214,206,.15)}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--tx2) 50%),linear-gradient(135deg,var(--tx2) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat}
+.hint{font-size:13px;color:var(--tx3);margin:6px 2px 0}
+.check{display:flex;gap:12px;align-items:flex-start;padding:14px;margin-top:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;cursor:pointer;font-size:15px}
+.check input{width:22px;height:22px;flex-shrink:0;margin:0;accent-color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-block;padding:10px 14px;border-radius:999px;border:1px solid var(--line2);background:var(--card2);font-size:14px;font-weight:700;color:var(--tx2)}
+.chips input:checked+span{border-color:var(--acc);color:var(--acc);background:rgba(62,214,206,.08)}
+.newday{color:var(--acc);font-weight:700}
+.err{color:var(--err);font-weight:700;font-size:14px;margin:12px 2px 0;display:none}
+.err.on{display:block}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.done{text-align:center;padding:28px 18px}
+.done .big{font-size:44px}
+.done h3{font-size:22px;margin:8px 0}
+.links{display:grid;gap:8px}
+.links a{display:flex;justify-content:space-between;align-items:center;padding:15px 16px;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--tx);font-weight:700}
+.links a span{color:var(--acc)}
+footer{padding:40px 0 calc(40px + env(safe-area-inset-bottom));text-align:center;color:var(--tx3);font-size:13px}
+footer b{color:var(--tx2)}
+
+.nav{display:none}
+.hero-in{position:relative}
+.galwrap{position:relative}
+.gal img{cursor:zoom-in;user-select:none;-webkit-user-drag:none}
+.garr{display:none;position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:52px;height:52px;border-radius:50%;border:1px solid var(--line2);background:rgba(12,22,24,.85);color:var(--acc);font:400 30px/1 Manrope,sans-serif;cursor:pointer;backdrop-filter:blur(6px)}
+.garr:hover{background:var(--acc);color:var(--onAcc);border-color:var(--acc)}
+.garr.prev{left:8px}.garr.next{right:8px}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(3,6,7,.94);display:flex;align-items:center;justify-content:center}
+.lb[hidden]{display:none}
+.lb img{max-width:92vw;max-height:86vh;border-radius:14px;object-fit:contain}
+.lb .garr{display:block}
+.lbx{position:absolute;top:16px;right:16px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line2);background:var(--card);color:var(--tx);font-size:18px;cursor:pointer}
+.lbn{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:var(--tx2);font-size:14px}
+@media (min-width:960px){
+  .dph{grid-template-columns:repeat(4,1fr);gap:10px}
+  body{font-size:17px}
+  .wrap{max-width:1180px;padding:0 32px}
+  header.bar .wrap{height:68px}
+  .nav{display:flex;gap:26px;margin-left:auto;margin-right:24px}
+  .nav a{color:var(--tx2);font-weight:600;font-size:15px}
+  .nav a:hover{color:var(--acc)}
+  .hero-in{max-width:1180px;margin:0 auto;padding:48px 32px 24px;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+  .hero .ph{order:2;max-width:none;margin:0;aspect-ratio:4/4.4;border-radius:28px;border:1px solid var(--line)}
+  .hero .ph::after{background:linear-gradient(180deg,rgba(5,9,11,0) 60%,rgba(5,9,11,.45) 100%)}
+  .hero .txt{order:1;margin:0;padding:0;max-width:none}
+  h1{font-size:76px;margin-top:22px}
+  .lead{font-size:20px;max-width:520px}
+  .facts{max-width:560px;gap:12px}
+  .hero .btn.pri{max-width:360px}
+  h2{font-size:32px}
+  section{padding:64px 0 8px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+  .pair-form{grid-template-columns:1.2fr .8fr}
+  .pair-form > section:last-child{position:sticky;top:96px}
+  .health{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;padding:26px 28px}
+  .health ul{margin-bottom:0}
+  .bring{grid-template-columns:1fr}
+  .galwrap{margin:0 -8px}
+  .gal{margin:0;padding:0 8px 8px;gap:16px;scroll-snap-type:x proximity}
+  .gal img{flex:0 0 auto;width:auto;max-width:none;height:480px;aspect-ratio:3/4}
+  .gal.drag{scroll-snap-type:none;cursor:grabbing}
+  .gal.drag img{cursor:grabbing}
+  .garr{display:block}
+  .gal-hint{display:none}
+  .card{padding:22px 24px}
+  #formCard{padding:28px 32px}
+  footer{padding-top:64px}
+}
+@media (min-width:1400px){
+  .wrap,.hero-in{max-width:1320px}
+  h1{font-size:88px}
+  .gal img{height:540px}
+}
+
+.hero .ph{aspect-ratio:1/.78}
+.nextl{text-align:center;font-size:14px;color:var(--tx2);margin-top:10px;font-weight:600}
+.nextl b{color:var(--acc)}
+.formtop{padding-top:8px}
+.formtop section{padding-top:28px}
+.hbox{margin-top:10px;font-size:14px}
+.hbox ul{margin:6px 0 10px 18px;padding:0}
+.sbar{position:fixed;left:12px;right:12px;bottom:12px;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;border-radius:15px;background:var(--acc);color:var(--onAcc);font:800 16px/1 Manrope,sans-serif;box-shadow:0 12px 36px -10px rgba(0,0,0,.6);transform:translateY(140%);transition:transform .25s}
+.sbar.on{transform:none}
+footer{padding-bottom:84px}
+@media (min-width:960px){.sbar{display:none}.formtop{max-width:720px}.hero .ph{aspect-ratio:4/4.4}}
+</style>
+<!-- пиксель VK Рекламы (Top.Mail.Ru) 3813680: просмотр страницы + цели rastyazhka_forma_vidna, rastyazhka_nachali, rastyazhka_zapis -->
+<script type="text/javascript">
+var _tmr = window._tmr || (window._tmr = []);
+_tmr.push({id: "3813680", type: "pageView", start: (new Date()).getTime()});
+(function (d, w, id) {
+  if (d.getElementById(id)) return;
+  var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true; ts.id = id;
+  ts.src = "https://top-fwz1.mail.ru/js/code.js";
+  var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+  if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+})(document, window, "tmr-code");
+</script>
+<noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3813680;js=na" style="position:absolute;left:-9999px;" alt="Top.Mail.Ru" /></div></noscript>
+</head>
+<body>
+
+<header class="bar"><div class="wrap">
+  <div class="logo"><img src="logo.png" alt="Lite Fit">Lite Fit <span>· растяжка</span></div>
+  <nav class="nav"><a href="#about">Как проходит</a><a href="#price">Стоимость</a><a href="#place">Где и когда</a><a href="#zdorovie">Противопоказания</a><a href="#foto">Фото</a></nav>
+  <a class="cta-mini" href="#zapis">Записаться</a>
+</div></header>
+
+<div class="hero"><div class="hero-in">
+  <div class="ph"><img src="darya.jpg" alt="Дарья – тренер Lite Fit"></div>
+  <div class="wrap txt">
+    <span class="kicker">Lite Fit · офлайн-группа</span>
+    <h1>Растяжка<br>с Дарьей</h1>
+    <p class="lead">Вторник и четверг, 20:00 · КДЦ «Заря». Небольшая группа, спокойный темп и внимание к каждому.</p>
+    <div class="facts">
+      <div class="fact"><b>Вт и Чт</b><span>в 20:00</span></div>
+      <div class="fact"><b>до 12</b><span>человек в группе</span></div>
+      <div class="fact"><b>750 ₽</b><span>разовое занятие</span></div>
+    </div>
+    <a class="btn pri" href="#zapis">Записаться на занятие</a>
+    <div class="nextl" id="nextHero"></div>
+  </div>
+</div></div>
+
+<div class="wrap formtop">
+  <section id="zapis">
+    <div class="eyebrow">Запись за минуту</div>
+    <h2>Записаться на растяжку</h2>
+    <p class="muted" id="nextLine">Вторник и четверг, 20:00 · КДЦ «Заря». Первое занятие – 750 ₽, оплата на месте.</p>
+
+    <div class="card" id="formCard">
+      <form id="f" novalidate>
+        <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label class="f" for="fname">Имя <i>*</i></label>
+        <input type="text" id="fname" name="fname" autocomplete="given-name" placeholder="Например: Анна" required>
+        
+
+        <label class="f" for="phone">Телефон <i>*</i></label>
+        <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 900 000-00-00" required>
+        <div class="hint">По этому номеру бот узнает Вас в Telegram</div>
+
+        <label class="check"><input type="checkbox" id="noTg"> У меня нет Telegram</label>
+        <div id="noTgBox" style="display:none">
+          <label class="f" for="via">Как с Вами связаться? <i>*</i></label>
+          <select id="via">
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="ВК">ВКонтакте</option>
+            <option value="MAX">MAX</option>
+            <option value="Звонок">Звонок по телефону</option>
+          </select>
+          <div id="linkBox" style="display:none">
+            <label class="f" for="link">Ссылка на профиль <i>*</i></label>
+            <input type="text" id="link" placeholder="vk.ru/…" autocomplete="off">
+          </div>
+          <div class="hint">Дарья напишет туда и будет напоминать о занятиях лично</div>
+        </div>
+
+        <label class="f">Когда Вам удобнее? <i>*</i></label>
+        <div class="chips" id="days">
+          <label><input type="radio" name="days" value="вт"><span>Вторник</span></label>
+          <label><input type="radio" name="days" value="чт"><span>Четверг</span></label>
+          <label><input type="radio" name="days" value="вт, чт"><span>Оба дня</span></label>
+        </div>
+        <div class="hint">Бот будет напоминать только про выбранные дни. Записаться можно на любой</div>
+
+        <div id="fromBox"><label class="f">Откуда Вы о нас узнали?</label>
+        <div class="chips" id="from">
+          <label><input type="radio" name="from" value="Листовка"><span>Листовка</span></label>
+          <label><input type="radio" name="from" value="Рекомендация"><span>От друзей</span></label>
+          <label><input type="radio" name="from" value="Соцсети"><span>Соцсети</span></label>
+          <label><input type="radio" name="from" value="Клиент Lite Fit"><span>Я уже с Lite Fit</span></label>
+          <label><input type="radio" name="from" value="Другое"><span>Другое</span></label>
+        </div></div>
+
+        <label class="check"><input type="checkbox" id="health"> <span>Я прочитал(а) <a href="#zdorovie" id="hLink">противопоказания</a>. Если что-то из списка про меня – посоветуюсь с врачом и предупрежу Дарью <i style="color:var(--acc);font-style:normal">*</i></span></label>
+        <div id="hBox" class="card health hbox" hidden></div>
+
+        <label class="check"><input type="checkbox" id="photoOk"> <span>Можно фотографировать меня на занятии для соцсетей Lite Fit</span></label>
+        <label class="check"><input type="checkbox" id="consent"> <span>Согласен(на) на <a id="consentLink" href="#" target="_blank" rel="noopener">обработку персональных данных</a> для записи на занятия <i style="color:var(--acc);font-style:normal">*</i></span></label>
+
+        <div class="err" id="err"></div>
+        <div style="margin-top:16px"><button class="btn pri" type="submit" id="go">Записаться на растяжку</button></div>
+        <div class="hint" style="text-align:center;margin-top:10px">Заранее ничего платить не нужно</div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<main class="wrap">
+
+  <div class="pair">
+  <section>
+    <div class="eyebrow">Знакомо?</div>
+    <h2>Тело вроде не болит, но и свободно уже не двигается</h2>
+    <p>День прошёл за столом или за рулём. К вечеру тянет поясницу, плечи сами поднялись к ушам, а наклониться за упавшими ключами – уже маленькое событие. Ничего страшного, просто тело месяцами живёт в одной позе и привыкает к ней.</p>
+    <p class="muted">Растяжка – не про шпагат для фото. Она про спину, которая отпускает, шею, которая перестаёт каменеть, и ощущение после занятия, когда хочется распрямиться, а не лечь.</p>
+  </section>
+
+  <section id="about">
+    <div class="eyebrow">Как проходит занятие</div>
+    <h2>Время для себя – без спешки и сравнений</h2>
+    <div class="steps">
+      <div class="step"><div><b>Разогрев</b><span>Мягко включаем суставы и мышцы, чтобы тело было готово тянуться.</span></div></div>
+      <div class="step"><div><b>Растяжка всего тела</b><span>Спина, бёдра, задняя поверхность ног, плечи и грудной отдел – там, где чаще всего «зажато».</span></div></div>
+      <div class="step"><div><b>В своей амплитуде</b><span>Дарья показывает упражнение и подсказывает облегчённый вариант, если что-то пока не получается.</span></div></div>
+      <div class="step"><div><b>Расслабление</b><span>Спокойно завершаем, чтобы домой Вы ушли с лёгкостью, а не с усталостью.</span></div></div>
+    </div>
+    <p class="muted" style="margin-top:14px">Подходит, даже если Вы никогда не занимались: каждый работает в своём темпе и на своём уровне.</p>
+  </section>
+  </div>
+
+  <div class="pair">
+  <section>
+    <div class="eyebrow">Кто ведёт</div>
+    <div class="card">
+      <div class="who"><img src="darya.jpg" alt=""><div><b>Дарья</b><span>тренер Lite Fit</span></div></div>
+      <p style="margin:0">Внимательна к деталям и слышит человека: заметит, где Вы зажимаетесь, и подскажет, как выполнить упражнение именно Вам. На растяжке у неё нет «правильной картинки», под которую нужно подстроиться, – есть Ваше тело и то, что ему сейчас подходит.</p>
+      <div class="dph">
+        <img src="darya-1.jpg" alt="Дарья в растяжке: выпад с прогибом" loading="lazy">
+        <img src="darya-2.jpg" alt="Дарья: скрутка сидя" loading="lazy">
+        <img src="darya-3.jpg" alt="Дарья: мостик с опорой на предплечья" loading="lazy">
+        <img src="darya-4.jpg" alt="Дарья: боковое вытяжение" loading="lazy">
+      </div>
+      <div class="pers">
+        <div class="eyebrow" style="margin:0 0 6px">Персональные тренировки</div>
+        <h3 style="margin:0 0 12px;font-size:21px;line-height:1.25">Когда хочется не только гибкости, но и силы</h3>
+        <div class="plist">
+          <div><b>Под Ваше тело</b><span>Дарья знает Вас по растяжке: учтёт зажимы, ограничения и то, что уже получается.</span></div>
+          <div><b>Силовая и растяжка в один день</b><span>Во вторник или четверг – персональная тренировка в зале, а в 20:00 растяжка в группе: сначала сила, потом гибкость.</span></div>
+          <div><b>Техника под присмотром</b><span>Тренер рядом, нагрузка растёт постепенно, без травм и «через силу».</span></div>
+        </div>
+        <p class="muted" style="margin:12px 0 14px">Зал Animal Gym, ул. Ленина, 11А, стр. 2. Дальше можно продолжить онлайн с Lite Fit – где бы Вы ни были.</p>
+        <a class="btn" href="https://t.me/d_glotova" target="_blank" rel="noopener">Спросить Дарью о персональных</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="price">
+    <div class="eyebrow">Стоимость</div>
+    <h2>Разово или абонементом</h2>
+    <div class="card">
+      <div class="price"><div><b>Разовое занятие</b><small>оплата на месте</small></div><div class="v">750 ₽</div></div>
+      <div class="price best"><div><b>Абонемент на 4 занятия <span class="badge">выгоднее</span></b><small>1 раз в неделю · 650 ₽ за занятие · действует 5 недель</small></div><div class="v">2 600 ₽</div></div>
+      <div class="price best"><div><b>Абонемент на 8 занятий</b><small>2 раза в неделю – вторник и четверг · 650 ₽ за занятие · действует 5 недель</small></div><div class="v">5 200 ₽</div></div>
+    </div>
+    <p class="muted" style="margin-top:12px">5 недель – с запасом: если одно-два занятия придётся пропустить, абонемент всё равно успеете использовать целиком. Место в группе в Ваши дни бронируется автоматически.</p>
+    <p class="muted" style="margin-top:12px">Оплата наличными или переводом на занятии.</p>
+  </section>
+  </div>
+
+  <div class="pair">
+  <section id="place">
+    <div class="eyebrow">Где и когда</div>
+    <div class="place">
+      <div class="card"><div class="ic">🕗</div><div><b>Каждый вторник и четверг в 20:00</b><div class="muted"><span class="newday">Четверг – с 5 ноября.</span> Можно ходить в один день или в оба. Группа – до 12 человек. Если мест нет, бот поставит Вас в лист ожидания и напишет, как только место освободится.</div></div></div>
+      <div class="card"><div class="ic">📍</div><div><b>КДЦ «Заря»</b><div class="muted">мкр. Заря, ул. Ленина, 6</div><a href="https://yandex.ru/maps/?text=%D0%9A%D0%94%D0%A6%20%C2%AB%D0%97%D0%B0%D1%80%D1%8F%C2%BB%2C%20%D0%BC%D0%BA%D1%80.%20%D0%97%D0%B0%D1%80%D1%8F%2C%20%D1%83%D0%BB.%20%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D0%B0%2C%206" target="_blank" rel="noopener">Открыть на карте →</a></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Что взять с собой</div>
+    <h2>Чтобы чувствовать себя комфортно</h2>
+    <div class="bring">
+      <div class="card"><div class="ic">🧘‍♀️</div><div><b>Одежда</b><div class="muted">Удобная форма, которая не сковывает движения: легинсы или шорты, топ или футболка. Слишком свободную одежду лучше оставить дома, чтобы ничего не мешало.</div></div></div>
+      <div class="card"><div class="ic">🧦</div><div><b>Носки</b><div class="muted">Нескользящие – или можно заниматься босиком, если Вам так комфортнее.</div></div></div>
+      <div class="card"><div class="ic">💧</div><div><b>Вода</b><div class="muted">Бутылочка, чтобы попить во время тренировки.</div></div></div>
+    </div>
+    <p class="muted" style="margin-top:12px">Коврики и весь инвентарь есть на месте – об этом можно не переживать ❤️</p>
+  </section>
+  </div>
+
+  <section id="zdorovie">
+    <div class="eyebrow">Перед первым занятием</div>
+    <h2>Противопоказания</h2>
+    <p class="muted">Растяжка подходит почти всем, но есть состояния, при которых сначала нужен совет врача.</p>
+    <div class="card health">
+      <div class="hcol"><b>Сначала – к врачу, если у Вас:</b>
+      <ul>
+        <li>заболевания суставов, артроз, остеопороз</li>
+        <li>тромбоз, варикоз, тромбофлебит, атеросклероз</li>
+        <li>недавний вывих или перелом</li>
+        <li>беременность</li>
+      </ul></div>
+      <div class="hcol"><b>Подождите с занятиями:</b>
+      <ul>
+        <li>при обострении воспаления суставов (артрит, бурсит, тендинит) – пока не пройдёт острая фаза</li>
+      </ul></div>
+      <div class="hcol"><b>Можно заниматься, предупредив Дарью:</b>
+      <ul>
+        <li>остеохондроз – без скруток позвоночника; растяжка ног и плечевого пояса как раз помогает</li>
+        <li>любые травмы и ограничения – Дарья подберёт щадящий вариант</li>
+        <li>во время менструации – по самочувствию, в щадящем режиме</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section id="foto">
+    <div class="eyebrow">Наши занятия</div>
+    <div class="galwrap">
+    <button class="garr prev" type="button" aria-label="Назад">‹</button>
+    <button class="garr next" type="button" aria-label="Дальше">›</button>
+    <div class="gal">
+      <img src="group-3.jpg" alt="Занятие по растяжке Lite Fit" loading="lazy">
+      <img src="group-4.jpg" alt="Занятие по растяжке Lite Fit" loading="lazy">
+      <img src="group-1.jpg" alt="Занятие по растяжке Lite Fit" loading="lazy">
+      <img src="group-2.jpg" alt="Занятие по растяжке Lite Fit" loading="lazy">
+      <img src="group-5.jpg" alt="Занятие по растяжке Lite Fit" loading="lazy">
+    </div>
+    </div>
+    <div class="gal-hint">листайте →</div>
+  </section>
+
+  <div>
+  <section>
+    <div class="eyebrow">Остались вопросы?</div>
+    <div class="links">
+      <a href="https://t.me/d_glotova" target="_blank" rel="noopener">Написать Дарье в Telegram <span>→</span></a>
+      <a href="https://vk.ru/d_glotovaa" target="_blank" rel="noopener">Дарья ВКонтакте <span>→</span></a>
+      <a href="https://t.me/litefit_stretching" target="_blank" rel="noopener">Канал о растяжке в Telegram <span>→</span></a>
+      <a href="https://vk.ru/litefit_stretching" target="_blank" rel="noopener">Сообщество в ВК <span>→</span></a>
+    </div>
+  </section>
+  </div>
+</main>
+
+<a class="sbar" id="sbar" href="#zapis">Записаться · Вт и Чт в 20:00</a>
+
+<div class="lb" id="lb" hidden><button class="lbx" type="button" aria-label="Закрыть">✕</button><button class="garr prev" type="button" aria-label="Назад">‹</button><img alt=""><button class="garr next" type="button" aria-label="Дальше">›</button><div class="lbn"></div></div>
+
+<footer><div class="wrap"><b>Lite Fit</b> · Свобода · Забота · Результат<br><a href="soglasie.html" style="color:var(--tx3)">Согласие на обработку данных</a> · <a href="politika.html" style="color:var(--tx3)">Политика обработки данных</a></div></footer>
+
+<script>
+'use strict';
+/* ======== НАСТРОЙКИ СТРАНИЦЫ ======== */
+// Ссылка веб-приложения Apps Script (…/exec) – та же, что в таблице «Настройки»
+const API_URL = 'https://script.google.com/macros/s/AKfycbyBIm10j4s4CQUl_UcG9neW05wXFD61vv8_7AFR3UqAmHOfI8WHAiuMXDT2fn4tLOze/exec';
+// Ссылка на текст согласия на обработку персональных данных
+const CONSENT_URL = 'soglasie.html';
+// Куда писать, если запись не отправилась
+const DARYA_TG = 'https://t.me/d_glotova';
+/* ==================================== */
+
+const $ = s => document.querySelector(s);
+const qs = new URLSearchParams(location.search);
+const SRC = qs.get('src') || qs.get('utm_source') || '';
+// пометка «Четверг – с 5 ноября» сама исчезает после первого четверга
+if (Date.now() > new Date('2026-11-06T00:00:00+03:00').getTime()) document.querySelectorAll('.newday').forEach(e => e.remove());
+if (CONSENT_URL) $('#consentLink').href = CONSENT_URL; else $('#consentLink').removeAttribute('href');
+
+$('#noTg').addEventListener('change', e => { $('#noTgBox').style.display = e.target.checked ? 'block' : 'none'; });
+$('#via').addEventListener('change', e => { $('#linkBox').style.display = (e.target.value === 'ВК' || e.target.value === 'MAX') ? 'block' : 'none'; });
+
+function showErr(t) { const e = $('#err'); e.textContent = t; e.classList.add('on'); }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+$('#f').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  $('#err').classList.remove('on');
+  let fname = $('#fname').value.trim().replace(/\s+/g, ' ');
+  let lname = '';
+  const phone = $('#phone').value.trim();
+  const digits = phone.replace(/\D/g, '');
+  const noTg = $('#noTg').checked;
+  const via = $('#via').value;
+  const link = $('#link').value.trim();
+  const fromEl = document.querySelector('input[name=from]:checked');
+  const daysEl = document.querySelector('input[name=days]:checked');
+  if (fname.length < 2) return showErr('Укажите, пожалуйста, имя');
+  if (fname.indexOf(' ') > 0) { lname = fname.slice(fname.indexOf(' ') + 1); fname = fname.slice(0, fname.indexOf(' ')); }
+  if (digits.length < 10) return showErr('Проверьте номер телефона');
+  if (noTg && (via === 'ВК' || via === 'MAX') && !link) return showErr('Добавьте ссылку на профиль, чтобы Дарья могла написать');
+  if (!daysEl) return showErr('Выберите, когда Вам удобнее заниматься');
+  if (!$('#health').checked) return showErr('Отметьте, что прочитали противопоказания');
+  if (!$('#consent').checked) return showErr('Нужно согласие на обработку персональных данных');
+  const btn = $('#go');
+  btn.disabled = true; btn.textContent = 'Отправляю…';
+  try {
+    const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({
+      action: 'anketa', firstName: fname, lastName: lname, phone: phone, noTelegram: noTg, via: via, link: link,
+      from: fromEl ? fromEl.value : '', days: daysEl.value, src: SRC, consent: true, healthAck: true, photoOk: !!($('#photoOk') && $('#photoOk').checked), website: document.querySelector('[name=website]').value,
+    }) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'Не получилось отправить');
+    done(j, noTg, via);
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Записаться на растяжку';
+    showErr((e && e.message && !/fetch|network|JSON/i.test(e.message) ? e.message : 'Не получилось отправить') + '. Попробуйте ещё раз или напишите Дарье в Telegram.');
+  }
+});
+
+function done(j, noTg, via) {
+  pxGoal('rastyazhka_zapis');
+  let html;
+  if (noTg) {
+    const where = { 'WhatsApp': 'в WhatsApp', 'ВК': 'ВКонтакте', 'MAX': 'в MAX', 'Звонок': 'или позвонит' }[via] || '';
+    html = `<div class="done"><div class="big">🙌</div><h3>Заявка отправлена</h3><p class="muted">Дарья напишет Вам ${esc(where)}, расскажет детали и будет напоминать о занятиях.</p><p class="muted" style="margin:0">До встречи на ковриках!</p></div>`;
+  } else if (j.connected) {
+    html = `<div class="done"><div class="big">✅</div><h3>Готово</h3><p class="muted">Бот уже подключён – напоминания о занятиях будут приходить в Telegram.</p></div>`;
+  } else {
+    html = `<div class="done"><div class="big">📲</div><h3>Остался один шаг</h3><p class="muted">Подключите бота: откройте его и нажмите «Старт». Он пришлёт напоминание перед занятием, и Вы запишетесь одной кнопкой.</p>` +
+      (j.bot ? `<a class="btn pri" href="${esc(j.bot)}" target="_blank" rel="noopener" style="margin-top:8px">Открыть бота в Telegram</a>` : `<a class="btn pri" href="${DARYA_TG}" target="_blank" rel="noopener">Написать Дарье</a>`) + `</div>`;
+  }
+  $('#formCard').innerHTML = html;
+  $('#zapis').scrollIntoView({ behavior: 'smooth' });
+}
+
+
+
+// цели пикселя VK: форма на экране, начали заполнять, запись отправлена
+const PX_ID = 3813680, pxDone = {};
+function pxGoal(g) { if (pxDone[g]) return; pxDone[g] = 1; try { (window._tmr || (window._tmr = [])).push({ id: PX_ID, type: 'reachGoal', goal: g }); } catch (e) {} }
+(function () {
+  const form = $('#zapis');
+  if (form && 'IntersectionObserver' in window) new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { pxGoal('rastyazhka_forma_vidna'); o.disconnect(); } }, { threshold: 0.25 }).observe(form);
+  $('#f').addEventListener('focusin', () => pxGoal('rastyazhka_nachali'));
+  $('#f').addEventListener('change', () => pxGoal('rastyazhka_nachali'));
+})();
+// для пришедших по рекламе и ссылкам с меткой – вопрос «откуда узнали» не нужен
+if (SRC) { const fb = $('#fromBox'); if (fb) fb.style.display = 'none'; }
+// противопоказания – раскрываются прямо в форме, без ухода вниз
+(function () {
+  const l = $('#hLink'), box = $('#hBox'), src = document.querySelector('#zdorovie .health');
+  if (!l || !box || !src) return;
+  l.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); if (!box.innerHTML) box.innerHTML = src.innerHTML; box.hidden = !box.hidden; });
+})();
+// ближайшее занятие (вт и чт, 20:00 по Москве)
+(function () {
+  const now = new Date(), msk = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
+  const DN = ['воскресенье','понедельник','вторник','среду','четверг','пятницу','субботу'];
+  const MN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  for (let i = 0; i < 8; i++) {
+    const d = new Date(msk); d.setDate(msk.getDate() + i);
+    const wd = d.getDay();
+    if (wd !== 2 && wd !== 4) continue;
+    if (i === 0 && msk.getHours() >= 19) continue;
+    const when = i === 0 ? 'сегодня' : (i === 1 ? 'завтра' : (wd === 2 ? 'во ' : 'в ') + DN[wd]);
+    const t = 'Ближайшее занятие – <b>' + when + ', ' + d.getDate() + ' ' + MN[d.getMonth()] + ', в 20:00</b>';
+    const h = $('#nextHero'); if (h) h.innerHTML = t;
+    break;
+  }
+})();
+// нижняя кнопка на телефоне: видна, пока на экране нет ни первого экрана, ни формы
+(function () {
+  const bar = $('#sbar'), hero = document.querySelector('.hero'), form = $('#zapis');
+  if (!bar || !hero || !form || !('IntersectionObserver' in window)) return;
+  const vis = new Map();
+  const io = new IntersectionObserver(es => { es.forEach(e => vis.set(e.target, e.isIntersecting)); bar.classList.toggle('on', !vis.get(hero) && !vis.get(form)); });
+  io.observe(hero); io.observe(form);
+})();
+
+/* ===== Галерея: стрелки, перетаскивание мышью, просмотр на весь экран ===== */
+(function () {
+  const gal = document.querySelector('.gal');
+  if (!gal) return;
+  const imgs = Array.from(gal.querySelectorAll('img'));
+  const step = () => Math.max(gal.clientWidth * 0.7, 280);
+  document.querySelector('.galwrap .prev').onclick = () => gal.scrollBy({ left: -step(), behavior: 'smooth' });
+  document.querySelector('.galwrap .next').onclick = () => gal.scrollBy({ left: step(), behavior: 'smooth' });
+  // перетаскивание мышью (на компьютере)
+  let down = false, sx = 0, sl = 0, moved = 0;
+  gal.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; down = true; moved = 0; sx = e.clientX; sl = gal.scrollLeft; });
+  window.addEventListener('pointermove', e => { if (!down) return; const dx = e.clientX - sx; moved = Math.max(moved, Math.abs(dx)); if (moved > 4) gal.classList.add('drag'); gal.scrollLeft = sl - dx; });
+  window.addEventListener('pointerup', () => { if (!down) return; down = false; setTimeout(() => gal.classList.remove('drag'), 0); });
+  gal.addEventListener('dragstart', e => e.preventDefault());
+  // просмотр
+  const lb = document.getElementById('lb'), big = lb.querySelector('img'), num = lb.querySelector('.lbn');
+  let cur = 0, set = imgs;
+  const show = i => { cur = (i + set.length) % set.length; big.src = set[cur].src; num.textContent = (cur + 1) + ' / ' + set.length; };
+  const open = (i, list) => { set = list || imgs; show(i); lb.hidden = false; document.body.style.overflow = 'hidden'; };
+  const dph = Array.from(document.querySelectorAll('.dph img'));
+  dph.forEach((im, i) => im.addEventListener('click', () => open(i, dph)));
+  const close = () => { lb.hidden = true; document.body.style.overflow = ''; };
+  imgs.forEach((im, i) => im.addEventListener('click', () => { if (moved > 4) return; open(i); }));
+  lb.querySelector('.prev').onclick = e => { e.stopPropagation(); show(cur - 1); };
+  lb.querySelector('.next').onclick = e => { e.stopPropagation(); show(cur + 1); };
+  lb.querySelector('.lbx').onclick = close;
+  lb.addEventListener('click', e => { if (e.target === lb) close(); });
+  document.addEventListener('keydown', e => {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') close(); else if (e.key === 'ArrowLeft') show(cur - 1); else if (e.key === 'ArrowRight') show(cur + 1);
+  });
+  let tx = 0;
+  lb.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1)); });
+})();
+</script>
+</body>
+</html>
