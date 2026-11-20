@@ -57,7 +57,7 @@
         <div id="invInfo" class="sub" style="margin-top:6px"></div>
         <label style="margin-top:16px">2. Оплата пришла – проверьте и нажмите «Оплачено»</label>
         <div class="two"><input id="sum" inputmode="numeric" aria-label="Сумма, ₽"><input id="pdate" type="date" aria-label="Дата оплаты"></div>
-        <input id="method" aria-label="Способ оплаты">
+        <select id="method" aria-label="Способ оплаты"></select>
         <button class="btn pri" id="paid">Оплачено</button>
       </div>
       <label>Поток</label>
@@ -74,7 +74,7 @@
   </div>
 </div>
 <script>
-var VERSION = '1.1';
+var VERSION = '1.2';
 var Q = new URLSearchParams(location.search), API = Q.get('api') || '', Z = Q.get('z') || '', T = Q.get('t') || '', D = null;
 function $(id) { return document.getElementById(id); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -110,7 +110,9 @@ function draw() {
   $('refBox').classList.toggle('hide', closed);
   if (!$('sum').value) $('sum').value = (D.inv && D.inv.sum) || D.price;
   if (!$('pdate').value) $('pdate').value = D.today || '';
-  if (!$('method').value) $('method').value = 'СБП ' + (D.bank || 'Сбербанк');
+  var ms = (D.methods && D.methods.length) ? D.methods : ['СБП ' + (D.bank || 'Сбербанк')], cur = $('method').value || D.method || '';
+  $('method').innerHTML = (cur && ms.indexOf(cur) === -1 ? '<option value="">выберите способ</option>' : '') + ms.map(function (m) { return '<option' + (m === cur ? ' selected' : '') + '>' + esc(m) + '</option>'; }).join('');
+  if (!cur) $('method').insertAdjacentHTML('afterbegin', '<option value="" selected>выберите способ</option>');
   if (!$('sbp').value) $('sbp').value = D.sbp || '';
   $('bank').textContent = D.bank || 'Сбербанк';
   $('invInfo').textContent = D.inv ? '✓ Отправлено ' + D.inv.at + ' (' + D.inv.by + '). Можно отправить ещё раз.' : 'Клиент получит: тренер, сумма, СБП, банк и Ваш номер.';
@@ -127,6 +129,7 @@ $('paid').onclick = function () {
   var b = $('paid');
   if (b.dataset.sure !== '1') { b.dataset.sure = '1'; var dd = ($('pdate').value || '').split('-'); b.textContent = 'Точно оплачено ' + $('sum').value + ' ₽' + (dd.length === 3 ? ' ' + dd[2] + '.' + dd[1] : '') + '? Нажмите ещё раз'; setTimeout(function () { b.dataset.sure = ''; b.textContent = 'Оплачено'; }, 6000); return; }
   b.dataset.sure = ''; b.textContent = 'Оплачено';
+  if (!$('method').value) { note('Выберите способ оплаты'); return; }
   call('paid', { sum: $('sum').value, method: $('method').value, date: $('pdate').value });
 };
 $('refuse').onclick = function () {
