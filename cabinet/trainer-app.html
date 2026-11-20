@@ -897,6 +897,8 @@ function planBody(x) {
  * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
  * сервер сообщает, какие карточки устарели, и перечитываются только они (до шести запросов одновременно). Внизу главной —
  * сколько секунд заняли список и карточки. Фото в памяти не хранятся. Закрыли доступ или сменили ПИН-код — память стирается.
+ * 3.2 (20.11.2026). NY6 – финал: у выпускницы итог потока и «Зачёт и продолжение» (op 'ny6credit', lite-fit-ny6 1.0.24): цены оферты,
+ *   с зачётом 3 900 ₽ при 3 и 6 месяцах, отметка один раз, клиенту – «Готово!».
  * 3.1 (20.11.2026). Вкладка «Free» – кнопка «📖 Как вести клиента FREE» (текст guide_free, лист «NY6 Тексты»).
  * 3.0 (20.11.2026). NY6: у оплаченного клиента – «Где и с чем» (op 'ny6fix', lite-fit-ny6 1.0.18): тренер исправляет ошибку клиента,
  *   неопубликованные автотренировки заменяются на нужный набор.
@@ -908,7 +910,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '3.1';
+var VERSION = '3.2';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -1062,7 +1064,7 @@ function stShort(s) { return String(s || '').replace(/^\S+\s+/, ''); }
 /* ================= СВЯЗЬ С СЕРВЕРОМ ================= */
 var WRITE = { norm: 1, normf: 1, calc: 1, steps: 1, plan: 1, plandel: 1, plancopy: 1, meas: 1, guide: 1, remind: 1, pay: 1, freeze: 1, freezedel: 1, status: 1, extend: 1,
   topro: 1, trial: 1, create: 1, take: 1, cablink: 1, cabreset: 1, msg: 1, fb: 1, mrsave: 1, mrsend: 1, taskadd: 1, taskdel: 1, ctask: 1,
-  freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1, newlink: 1, vklink: 1, payadv: 1, advedit: 1, paydop: 1, payfromadv: 1, cdel: 1 };   // 2.4: аванс, доплата   // 2.3, правка 02.11: newlink, vklink
+  freetake: 1, freegive: 1, fmt: 1, cinfo: 1, cmsg: 1, payend: 1, payedit: 1, paydel: 1, newlink: 1, vklink: 1, payadv: 1, advedit: 1, paydop: 1, payfromadv: 1, cdel: 1, ny6credit: 1 };   // 3.2: ny6credit   // 2.4: аванс, доплата   // 2.3, правка 02.11: newlink, vklink
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /** 2.1: ms – сколько ждать ответа (по умолчанию 30 с); не ответил – запрос обрывается и считается сбоем связи. */
@@ -1977,12 +1979,19 @@ function viewNy6() {
       var sub = ny6Week(x) + ' · ' + (w.total ? 'тренировок ' + w.total + ': впереди опубликовано ' + w.ahead + (w.unpub ? ', не опубликовано ' + w.unpub : '') + ', выполнено ' + w.done : 'тренировок нет') + (D.admin && !D.as ? ' · ' + x.owner : '');
       return '<' + (own ? 'button data-open="' + esc(x.id) + '" data-sub="over"' : 'div') + ' class="row"><span class="dot ' + (warn ? 'warm' : '') + '"></span><span class="mn"><b>' + esc(x.name) + '</b><small>' + esc(sub) + '</small></span>' +
         (warn ? '<span class="st warm">опубликуйте тренировки</span>' : '') + (own ? '<span class="chev">›</span></button>' : '</div>') +
-        '<button class="txtb" data-act="ny6Fix" data-id="' + esc(x.id) + '" style="margin:-6px 0 6px 34px;font-size:13px">Где и с чем: ' + esc(x.where || '–') + ' · исправить</button>';   // 3.0
+        (x.fin ? ny6FinLine(x) : '<button class="txtb" data-act="ny6Fix" data-id="' + esc(x.id) + '" style="margin:-6px 0 6px 34px;font-size:13px">Где и с чем: ' + esc(x.where || '–') + ' · исправить</button>');   // 3.0; 3.2: после финала – зачёт
     }).join('') + '</div>' : '<p class="muted" style="margin:0">Оплаченных клиентов в этом потоке ' + (D.admin && !D.as ? '' : 'у Вас ') + 'пока нет.</p>') + '</div>';
   });
   h += '<p class="muted" style="font-size:13px;margin:4px 2px 0">Тренировки клиента – в его карточке, раздел «Тренировки». Первые 3 бот ставит сам при оплате – их нужно проверить и опубликовать.</p>';
   return h;
 }
+/** 3.2: выпускница NY6 – итог потока и кнопка «Зачёт и продолжение». */
+function ny6FinLine(x) {
+  var f = x.fin, td = NY.r.today, cr = f.ok && td <= f.until;
+  var t = 'Финал: занятий ' + f.done + ' из 18 · ' + (f.used ? 'зачёт использован – ' + esc(f.usedTariff) + ', ' + f.usedMonths + ' мес.' : f.bought ? 'продолжение – ' + esc(f.boughtTariff) : cr ? '✅ зачёт 3 900 ₽ до ' + dm(f.until) : f.ok ? 'срок зачёта истёк ' + dm(f.until) : '📞 без зачёта – позвонить') + (f.req && !f.used && !f.bought ? ' · клиент хочет ' + esc(f.req) : '');
+  return '<div style="margin:-6px 0 8px 34px;font-size:13px">' + t + (f.used || f.bought ? '' : ' · <button class="txtb" data-act="ny6Cr" data-id="' + esc(x.id) + '" style="font-size:13px;padding:0">Зачёт и продолжение</button>') + '</div>';
+}
+function rubs(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽'; }
 function ny6Apps() {
   var A = ny6AppList();
   if (!NY || !NY.r) return NY && NY.err ? '<div class="card"><p class="muted" style="margin:0">NY6: ' + esc(NY.err) + '</p></div>' : '';
@@ -3959,6 +3968,34 @@ var ACT = {
 
   ny6Guide: function () { var g = NY && NY.r && NY.r.guide; if (g) sheet('Как вести клиента NY6', '<div class="gd">' + g + '</div>'); },   // 2.9
   freeGuide: function () { var g = NY && NY.r && NY.r.guideFree; if (g) sheet('Как вести клиента FREE', '<div class="gd">' + g + '</div>'); },   // 3.1
+  ny6Cr: function (t) {                                                    // 3.2: зачёт 3 900 ₽ и продолжение после финала NY6
+    var id = t.getAttribute('data-id'), x = ny6List().filter(function (y) { return y.id === id; })[0];
+    if (!x || !x.fin) return;
+    var f = x.fin, P = NY.r.prices || {}, C = NY.r.credit || 3900, cr = f.ok && NY.r.today <= f.until;
+    var why = !f.ok ? (f.done < 16 ? 'занятий ' + f.done + ' из 18' : 'нет финальных замеров') : !cr ? 'срок зачёта истёк ' + dm(f.until) : '';
+    var h = '<p class="muted" style="margin-top:0">' + (cr ? '✅ <b>Зачёт 3 900 ₽ до ' + dm(f.until) + '</b> – при пакете на 3 или 6 месяцев. На 1 месяц зачёт не применяется.' : '⚪ <b>Зачёт не применяется</b> – ' + esc(why) + '. Отметьте продолжение по обычной цене.') +
+      '</p><p class="muted" style="font-size:13px">Сначала договоритесь с клиентом, переведите его в BASIC или PRO и внесите оплату. Потом выберите тариф и срок – клиенту уйдёт «Готово!».</p>';
+    Object.keys(P).forEach(function (k) {
+      var v = P[k];
+      h += '<div style="margin:10px 0 4px;font-weight:600">' + esc(k) + '</div><div class="grid3">' + [[1, v[0]], [3, v[1]], [6, v[2]]].map(function (o) {
+        var c = cr && o[0] > 1, sum = c ? o[1] - C : o[1];
+        return '<button class="btn sec" data-act="ny6CrGo" data-id="' + esc(id) + '" data-t="' + esc(k) + '" data-m="' + o[0] + '" data-c="' + (c ? 1 : 0) + '" data-s="' + sum + '" style="height:auto;padding:8px 4px;font-size:12.5px;line-height:1.3">' +
+          o[0] + ' мес.<br><b>' + rubs(sum) + '</b>' + (c ? '<br><s class="muted">' + rubs(o[1]) + '</s>' : '') + '</button>';
+      }).join('') + '</div>';
+    });
+    sheet('Зачёт и продолжение – ' + x.name, h);
+  },
+  ny6CrGo: function (t) {
+    var id = t.getAttribute('data-id'), k = t.getAttribute('data-t'), m = +t.getAttribute('data-m'), c = t.getAttribute('data-c') === '1', sum = +t.getAttribute('data-s');
+    sure(k + ' на ' + m + ' мес. – ' + rubs(sum) + '?', c ? 'Зачёт NY6 3 900 ₽ будет использован, повторно его не дать. Клиенту уйдёт «Готово! … к оплате – ' + rubs(sum) + ' с учётом зачёта».' : 'Без зачёта. Клиенту уйдёт «Готово!» с тарифом и сроком.', 'Да, отметить', function (b) {
+      b.disabled = true; b.textContent = 'Отмечаю…';
+      call('ny6credit', { id: id, tariff: k, months: m, credit: c }).then(function (r) {
+        closeSheet();
+        if (!r || !r.ok) return toast((r && r.error) || 'Не получилось', 'bad');
+        toast(r.msg || 'Готово'); ny6Load(true);
+      });
+    });
+  },
   ny6Re: function () { ny6Load(true); },
   ny6Fix: function (t) {                                                   // 3.0: клиент ошибся в «Где и с чем»
     var id = t.getAttribute('data-id'), x = ny6List().filter(function (y) { return y.id === id; })[0];
