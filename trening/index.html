@@ -866,6 +866,9 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 #pkBox{margin-bottom:14px}
 .calB .wb[data-peek]{cursor:pointer;border-radius:4px}
 .calB .wb[data-peek]:hover{background:rgba(62,214,206,.08)}
+/* демо: компактная строка (3.10 / 4.33) */
+.demol{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--warm-bg);background:rgba(255,154,82,.06);border-radius:12px;padding:6px 6px 6px 14px;margin:0 0 14px;font-size:13px;color:var(--warm)}
+.demol button{flex:none;height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--warm);background:transparent;color:var(--warm);font:inherit;font-weight:700;cursor:pointer}
 </style>
 <script src="../fx.js" defer></script>   <!-- LF-FX 1.0: живая панель, загрузка с логотипом; нет файла – страница работает как раньше -->
 </head>
@@ -1110,7 +1113,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.32';
+var VERSION = '4.33';                  // 4.33: демо «Ольга Тест» (?demo) – для показа приложения новым клиентам
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1121,6 +1124,10 @@ var LS = {
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
+/* 4.33: демо (?demo) – клиент «Ольга Тест». Сервер не вызывается, память телефона не трогается (ключи настоящих клиентов и тренера
+   на этом телефоне целы): всё живёт до перезагрузки страницы. Перезашли или нажали «Сбросить» – снова исходные данные. */
+var DEMO = qs.has('demo');
+if (DEMO) { (function () { var mem = {}; LS = { get: function (k) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; }, set: function (k, v) { mem[k] = String(v); }, del: function (k) { delete mem[k]; } }; })(); window.LFPush = null; }
 var SAMETOP = (function () { if (window.top === window) return true; try { return window.top.location.origin === location.origin; } catch (e) { return false; } })();
 if (!SAMETOP) {                                                         // 4.10: встроили в чужой сайт – не запускаемся
   app.innerHTML = '<div class="center"><h2>Lite Fit</h2><p><a class="btn pri" href="' + location.href.replace(/"/g, '%22') + '" target="_top" rel="noopener">Открыть приложение</a></p></div>';
@@ -1129,13 +1136,14 @@ if (!SAMETOP) {                                                         // 4.10:
 var OPENW = (qs.get('w') || '').trim();
 var INCAB = qs.get('in') === '1' && window.top !== window;          // 4.4: открыто внутри кабинета
 NV_NEW = qs.get('from') === 'cab' || qs.has('u') || INCAB;
-if (!LS.get('lf_wk_k') && !LS.get('lf_tr_k') && !LS.get('lf_k')) LS.set('lf_nv_new', '1');   // 4.22: на этом значке входа ещё не было – значок новый
+if (!DEMO && !LS.get('lf_wk_k') && !LS.get('lf_tr_k') && !LS.get('lf_k')) LS.set('lf_nv_new', '1');   // 4.22: на этом значке входа ещё не было – значок новый
 if (LS.get('lf_nv_new') === '1') NV_NEW = true;
 if (!NV_NEW && (qs.get('k') || qs.get('t')) && !nvStandalone()) {      // 4.21: в браузере по старой ссылке – значок отсюда будет уже новым
   try { var nu = new URL(location.href); nu.searchParams.set('u', '1'); history.replaceState(history.state, '', nu.href); NV_NEW = true; } catch (e) {}
 }
 var TKEY = (qs.get('t') || '').trim().toLowerCase(), CKEY = (qs.get('k') || '').trim().toLowerCase(), MODE = '';
-if (TKEY) { MODE = 'trainer'; LS.set('lf_tr_k', TKEY); LS.set('lf_wk_mode', 'trainer'); }
+if (DEMO) { TKEY = ''; CKEY = 'demo'; MODE = 'client'; NV_NEW = true; }
+else if (TKEY) { MODE = 'trainer'; LS.set('lf_tr_k', TKEY); LS.set('lf_wk_mode', 'trainer'); }
 else if (CKEY) { MODE = 'client'; LS.set('lf_wk_k', CKEY); LS.set('lf_wk_mode', 'client'); }
 else {
   var m0 = LS.get('lf_wk_mode');
@@ -1144,7 +1152,7 @@ else {
 }
 (function () {                                                          // 4.23: значок на экране – раз в сутки серверу «установлен»
   try {
-    if (!(MODE === 'client' && CKEY && API && !INCAB) || !nvStandalone()) return;
+    if (DEMO || !(MODE === 'client' && CKEY && API && !INCAB) || !nvStandalone()) return;
     var last = +(LS.get('lf_inst') || 0);
     if (Date.now() - last < 86400000) return;
     var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -1407,6 +1415,7 @@ var S = { pg: '', pb: false, bg: '', bb: false, bv: '', vnew: -1, vrep: null, vb
 (function () { var v = qs.get('v'); if (['next', 'show', 'help', 'coach', 'aw'].indexOf(v) >= 0) S.ctab = v; })();   // 3.9: вкладка из ссылки бота
 /** 4.10: запрос ждёт не дольше ms (по умолчанию 25 с) – в зале со слабой связью не висит минутами; дальше – как «нет связи». */
 function post(body, ms) {
+  if (DEMO) return demoApi(body);                                          // 4.33
   var ctl = typeof AbortController === 'function' ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, ms || 25000) : 0;
   return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', signal: ctl ? ctl.signal : undefined }).then(function (r) { return r.text(); }).then(function (t) {
     clearTimeout(tm);
@@ -1458,6 +1467,7 @@ function ccall(op, body, quiet, keep) {
   Object.keys(body || {}).forEach(function (k) { b[k] = body[k]; });
   if (!quiet) busy(1);
   var n = 0;
+  if (DEMO) keep = false;
   var send = function () { return keep ? fetch(API, { method: 'POST', body: JSON.stringify(b), redirect: 'follow', keepalive: true }).then(function (r) { return r.text(); }).then(function (t) { return JSON.parse(t); }) : post(b); };
   var go = function () { n++; return send().catch(function () { return n < 3 && !keep ? sleep(1500 * n).then(go) : NET; }); };
   return go().then(function (r) {
@@ -3162,7 +3172,7 @@ function loadMy(first, quiet) {
     if (!r.ok) { S.offline = !!r.net; if (M) paintSync(); else screen('Не получилось загрузить', errText(r), true); return; }
     S.offline = false; if (FMV) { cvArm(); return; }              // 4.5: ответ на перенос ещё в пути – его данные новее
     setMy(r); updCheck(r); try { prefetchVideos(); } catch (e) {}
-    pxGoal('free_vydany');                                                  // 4.24: FREE – первое открытие
+    if (!DEMO) pxGoal('free_vydany');                                                  // 4.24: FREE – первое открытие
     if (M.cabk && qs.get('from') === 'cab') {                               // 4.2: открыл кабинет, а кабинет у клиента уже есть – назад в кабинет
       LS.del('lf_wko_' + CKEY.slice(0, 12)); location.replace('../cabinet/?k=' + encodeURIComponent(M.cabk)); return;
     }
@@ -3430,7 +3440,7 @@ function moneyBox() {
 function viewMy() {
   var l = M.list.slice().sort(wSort), first = String(M.name).split(/\s+/)[0];
   var td = l.filter(function (w) { return w.date === TODAY && w.st === 'open'; }), next = l.filter(function (w) { return w.date > TODAY; }), past = l.filter(function (w) { return w.date < TODAY && w.st === 'open'; }).reverse();
-  var h = nvCard(nvLink()) + '<h1 class="hello">' + esc(first) + ', Ваши тренировки</h1>' + moneyBox();   // 4.3; 4.20: депозит и долг
+  var h = (DEMO ? demoBar() : nvCard(nvLink())) + '<h1 class="hello">' + esc(first) + ', Ваши тренировки</h1>' + moneyBox();   // 4.3; 4.20: депозит и долг
   if (M.pk) {
     var pk = M.pk, ended = pk.end < TODAY;
     h += '<div class="card pack"><div class="pk-h"><h3>Ваш пакет</h3><span class="pill' + (ended ? ' warn' : ' ok') + '">' + (ended ? 'закончился ' + dm(pk.end) : pk.s > TODAY ? 'начнётся ' + dMon(pk.s) : 'до ' + dMon(pk.end)) + '</span></div>' +
@@ -3861,7 +3871,7 @@ function standalone() { return (window.matchMedia && matchMedia('(display-mode: 
 function isIos() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
 function installHow() { return isIos() ? 'Safari: кнопка «Поделиться» внизу → «На экран „Домой“» → «Добавить».' : 'Chrome: меню ⋮ вверху справа → «Добавить на главный экран» или «Установить приложение».'; }
 function installCard() {
-  if (INCAB || standalone() || LS.get('lf_wk_inst_hide')) return '';
+  if (DEMO || INCAB || standalone() || LS.get('lf_wk_inst_hide')) return '';
   return '<div class="card install' + (INST_N < 3 ? ' pulse' : '') + '"><div class="ic">' + IC.home + '</div><div style="flex:1"><p><b>Добавьте Lite Fit на экран телефона</b></p><p>' + installHow() + '</p>' +
     (deferredInstall ? '<button class="btn sec sm mt" data-act="install">Добавить</button>' : '') + '</div><button class="x" data-act="hideInstall" aria-label="Скрыть">' + IC.x + '</button></div>';
 }
@@ -5388,6 +5398,116 @@ function boot() {
     pushInit();                                                             // 4.10: уведомления на телефон
   }
 }
+/* ================= 4.33: ДЕМО ================= */
+var DEMO_DB = null;
+function demoYmd(k) { var d = new Date(Date.parse(TODAY + 'T12:00:00Z') + k * 864e5); return d.toISOString().slice(0, 10); }
+function demoStamp(k, hm) { return demoYmd(k) + ' ' + hm; }
+/** Упражнения демо: те же видео и техника, что в базе Lite Fit. */
+var DEMO_EX = {
+  sq: ['Приседания со штангой', 'Ноги и ягодицы', 1, 'Штанга лежит на верхней части спины, не на шее. Стопы на ширине плеч, носки немного развёрнуты.\nВдохните, напрягите живот и опускайтесь, отводя таз назад, до параллели бёдер с полом.\nСпина прямая, колени по линии носков, пятки на полу.\nВставайте, толкаясь всей стопой, на выдохе.'],
+  rdl: ['Румынская тяга с гантелями', 'Ноги и ягодицы', 38, 'Встаньте прямо, стопы на ширине таза, гантели перед бёдрами, колени чуть согнуты.\nОтводите таз назад и наклоняйтесь с прямой спиной, гантели скользят вдоль ног.\nОпускайтесь до натяжения задней поверхности бедра – обычно до середины голени, плечи не скругляются.\nВыпрямитесь, подавая таз вперёд и сжимая ягодицы. Выдох – на подъёме.'],
+  lun: ['Выпады с гантелями назад', 'Ноги и ягодицы', 32, 'Встаньте прямо, гантели в опущенных руках.\nШагните назад и опуститесь, пока оба колена не согнутся примерно под 90°, заднее колено почти касается пола.\nПереднее колено над стопой, корпус ровный, вес на пятке передней ноги.\nВернитесь, толкаясь передней ногой. Повторы – на каждую ногу. Можно без гантелей.'],
+  gb: ['Ягодичный мост со штангой', 'Ноги и ягодицы', 39, 'Сядьте на пол спиной к скамье, лопатки на краю скамьи, штанга на сгибе бёдер (подложите валик), стопы на ширине таза.\nПоднимите таз, толкаясь пятками, до прямой линии от колен до плеч, наверху сожмите ягодицы на 1–2 секунды.\nПодбородок к груди, рёбра опущены – поясница не прогибается, колени не сводятся внутрь.\nОпускайте таз медленно, не касаясь пола, и сразу следующий повтор. Выдох – на подъёме.'],
+  ext: ['Разгибание ног в тренажёре', 'Ноги и ягодицы', 50, 'Сядьте плотно, спина прижата к спинке, валик – на нижней части голени над стопой, колени на одной оси с тренажёром.\nРазогните ноги почти до прямых и задержитесь на секунду.\nНе отрывайте таз от сиденья и не помогайте рывком.\nОпускайте медленно, не бросая вес.'],
+  lat: ['Вертикальная тяга в блоке', 'Спина', 67, 'Сядьте, зафиксируйте ноги под валиками, хват чуть шире плеч.\nНачните движение с опускания плеч и лопаток вниз, затем тяните рукоять к верхней части груди – локти опускаются вниз к корпусу.\nКорпус немного отклонён назад и неподвижен, плечи не поднимаются к ушам.\nВозвращайте рукоять вверх медленно, полностью выпрямляя руки.'],
+  sp: ['Жим гантелей сидя', 'Плечи', 25, 'Сядьте на скамью или стул с прямой спиной, стопы на полу, гантели у плеч, ладони вперёд.\nВыжмите гантели вверх над головой до почти прямых рук.\nПоясница не прогибается, корпус не отклоняется назад, плечи не поднимаются к ушам.\nОпускайте гантели медленно до уровня ушей. Выдох – на жиме.'],
+  row: ['Горизонтальная тяга в блоке', 'Спина', 68, 'Сядьте, стопы на упоре, колени чуть согнуты, спина прямая.\nНачните движение со сведения лопаток, затем руками дотяните рукоять к поясу – локти идут вдоль корпуса.\nКорпус неподвижен – не откидывайтесь назад рывком.\nВозвращайте руки вперёд медленно: лопатки расходятся, спина остаётся прямой.'],
+  lr: ['Отведение рук с гантелями в стороны стоя', 'Плечи', 44, 'Встаньте прямо, гантели в опущенных руках, локти чуть согнуты, корпус слегка наклонён вперёд.\nПоднимите руки через стороны до уровня плеч – ведут локти, кисти не выше локтей.\nПлечи не поднимаются к ушам, корпус не раскачивается.\nОпускайте медленно. Лучше лёгкий вес и чистая техника.'],
+  pl: ['Планка', 'Пресс и корпус', 94, 'Упор на предплечья: локти под плечами, ноги вместе или на ширине таза.\nТело – прямая линия от головы до пяток: живот и ягодицы напряжены, таз не поднимается и не провисает.\nШея продолжает линию спины, взгляд в пол.\nДышите ровно и держите положение всё время подхода. Тяжело – с колен.'],
+  bp: ['Жим гантелей лёжа', 'Грудь', 19, 'Сядьте на скамью, гантели на бёдрах, лягте и поднимите их над грудью. Лопатки сведены и прижаты, стопы на полу.\nОпускайте гантели к низу груди, локти под углом около 45° к корпусу, в нижней точке предплечья должны быть параллельны друг другу.\nВыжмите гантели вверх, слегка сводя их над грудью, не выпрямляя локти до щелчка.\nТаз и лопатки не отрываются от скамьи. Выдох – на жиме.'],
+  dr: ['Тяга гантели одной рукой к поясу в наклоне', 'Спина', 42, 'Обопритесь коленом и ладонью одной стороны на скамью, стул или диван, спина прямая и почти параллельна полу.\nГантель в свободной руке, рука выпрямлена вниз, плечо опущено.\nНачните движение с лопатки, затем тяните гантель к поясу – локоть идёт вдоль корпуса.\nОпускайте медленно до прямой руки, корпус не разворачивается. Повторы – на каждую руку.'],
+  cu: ['Сгибание рук с гантелями стоя', 'Руки', 45, 'Встаньте прямо, гантели в опущенных руках, ладони вперёд, локти прижаты к корпусу.\nСогните руки, поднимая гантели к плечам, – двигаются только предплечья.\nКорпус не раскачивается, локти не уходят вперёд.\nОпускайте медленно до почти прямых рук.']
+};
+/** Упражнение: [ключ, подходов, вес, повторы, { tip, noW, sec, join, done: [[вес, повторы]…], diff, comment, rp, pv, pb }]. */
+function demoItem(n, x) {
+  var e = DEMO_EX[x[0]], o = x[4] || {}, sets = [];
+  for (var i = 0; i < x[1]; i++) {
+    var d = o.done && o.done[i];
+    sets.push({ w: o.noW ? '' : String(x[2]).replace('.', ','), r: String(x[3]), fw: d ? String(d[0]).replace('.', ',') : '', fr: d ? String(d[1]) : '', ok: !!d });
+  }
+  var it = { id: 'd' + n, name: e[0], grp: e[1], video: 'https://litefitonline-lang.github.io/anketa/Video/' + e[2] + '.mp4', desc: e[3], tip: o.tip || '',
+    noW: !!o.noW, sec: !!o.sec, min: false, join: !!o.join, sets: sets, diff: o.diff || 0, comment: o.comment || '', media: [],
+    cr: false, cs: !!o.comment, rp: o.rp || null, mr: null, mu: null, more: [] };
+  if (o.pv) it.pv = o.pv;
+  if (o.pb) it.pb = o.pb;
+  return it;
+}
+function demoBuild() {
+  var n = 0, mk = function (L) { return L.map(function (x) { return demoItem(++n, x); }); };
+  var rp1 = { t: 'Ольга, так и должно быть на последнем подходе – значит, вес подобран верно. В следующий раз держите паузу внизу на секунду.', at: demoStamp(-3, '20:41'), by: 'Дарья', mid: '', img: '', aud: '', rd: demoStamp(-3, '21:02') };
+  var w1 = { id: 'demo1', num: 1, lab: '1 из 12', date: demoYmd(-3), st: 'open', from: demoYmd(-10), to: demoYmd(4), done: true, doneAt: demoYmd(-3), n: 5,
+    note: 'Первая тренировка – знакомимся с техникой. Вес лёгкий, главное – чисто.', ts: Date.parse(demoYmd(-3) + 'T15:58:00Z'), te: Date.parse(demoYmd(-3) + 'T16:52:00Z'),
+    items: mk([
+      ['sq', 3, 30, 12, { done: [[30, 12], [30, 12], [30, 12]], diff: 3 }],
+      ['lat', 3, 35, 12, { done: [[35, 12], [35, 12], [35, 10]], diff: 4, comment: 'Последний подход дался тяжело, на 10 повторах остановилась', rp: rp1 }],
+      ['sp', 3, 8, 12, { done: [[8, 12], [8, 12], [8, 12]], diff: 3 }],
+      ['rdl', 3, 12, 12, { done: [[12, 12], [12, 12], [12, 12]], diff: 2 }],
+      ['pl', 2, '', 40, { noW: true, sec: true, done: [['', 40], ['', 45]], diff: 4 }]
+    ]) };
+  var w2 = { id: 'demo2', num: 2, lab: '2 из 12', date: demoYmd(0), st: 'open', from: demoYmd(-7), to: demoYmd(7), done: false, doneAt: '', n: 5,
+    note: 'Ноги и ягодицы. Перед тренировкой – разминка 7–10 минут, после – растяжка из гайда.', ts: 0, te: 0,
+    items: mk([
+      ['sq', 4, 32.5, 12, { tip: 'Добавили 2,5 кг – держите ту же глубину, что в прошлый раз', pv: [['30', '12'], ['30', '12'], ['30', '12']], pb: { w: 30, rw: 12, r: 12 } }],
+      ['rdl', 3, 14, 12, { pv: [['12', '12'], ['12', '12'], ['12', '12']], pb: { w: 12, rw: 12, r: 12 } }],
+      ['lun', 3, 6, 10, { tip: '10 повторов на каждую ногу' }],
+      ['gb', 3, 40, 15, {}],
+      ['ext', 3, 25, 15, {}]
+    ]) };
+  var w3 = { id: 'demo3', num: 3, lab: '3 из 12', date: demoYmd(2), st: 'open', from: demoYmd(-5), to: demoYmd(9), done: false, doneAt: '', n: 6,
+    note: 'Верх тела. Жим и тяга гантели – суперсетом: сделали подход одного, сразу подход другого, потом отдых.', ts: 0, te: 0,
+    items: mk([
+      ['bp', 3, 10, 12, {}],
+      ['dr', 3, 12, 12, { join: true, tip: '12 повторов на каждую руку' }],
+      ['row', 3, 30, 12, {}],
+      ['lr', 3, 4, 15, {}],
+      ['cu', 3, 6, 12, {}],
+      ['pl', 3, '', 45, { noW: true, sec: true, pv: [['', '40'], ['', '45']], pb: { w: 0, rw: 0, r: 45 } }]
+    ]) };
+  var msgs = [
+    { id: 'dm2', k: 'reply', t: rp1.t, at: rp1.at, by: 'Дарья', ex: 'Вертикальная тяга в блоке', com: 'Последний подход дался тяжело, на 10 повторах остановилась', wid: 'demo1', rd: rp1.rd },
+    { id: 'dm1', k: 'go', t: 'Ольга, добро пожаловать в Lite Fit! Тренировки появляются здесь по датам. Отмечайте подходы, пишите вопросы к упражнениям – я отвечу.', at: demoStamp(-4, '10:15'), by: 'Дарья', rd: demoStamp(-4, '12:40') }
+  ];
+  return { ok: true, wk: '', name: 'Ольга Тест', today: TODAY, acc: { b: 7, a: 7 }, total: 12, doneN: 1, list: [w3, w2, w1], totalDone: 1, pk: null, pay: '', msgs: msgs,
+    aw: { name: 'Лучший подопечный Lite Fit', cur: { ok: 1, n: 12, left: 11, end: demoYmd(39), medal: false }, streak: 1, need: 3, disc: 10, m: [{ s: demoYmd(-64), n: 12, at: demoYmd(-6) }], d: '', x: null },
+    closed: false, at: Date.now(), cv: '0', tg: { on: true }, free: false, fend: '', fwant: null, fowner: '', fmt: 'PRO', cabk: '', fch: null, pz: true };
+}
+/** Ответ «сервера» в демо: тренировки из памяти, результат – в память. */
+function demoApi(b) {
+  if (!DEMO_DB) DEMO_DB = demoBuild();
+  var op = b && b.op, r = { ok: false, error: 'в демо это действие недоступно' };
+  if (op === 'my') r = DEMO_DB;
+  else if (op === 'cv') r = { ok: true, v: '0' };
+  else if (op === 'mread') r = { ok: true, at: demoStamp(0, '12:00') };
+  else if (op === 'img') r = { ok: false, error: 'в демо фото и видео тренеру не отправляются' };
+  else if (op === 'res') {
+    var w = DEMO_DB.list.filter(function (x) { return x.id === b.id; })[0];
+    if (!w) r = { ok: false, gone: true, error: 'тренировка не найдена' };
+    else {
+      (b.items || []).forEach(function (bi) {
+        var it = w.items.filter(function (x) { return x.id === bi.id; })[0]; if (!it) return;
+        (bi.sets || []).forEach(function (s, k) { if (it.sets[k]) { it.sets[k].fw = s.fw; it.sets[k].fr = s.fr; it.sets[k].ok = !!s.ok; } });
+        it.diff = bi.diff || 0; it.comment = bi.comment || '';
+      });
+      if (b.reset) w.items.forEach(function (it) { it.sets.forEach(function (s) { s.fw = ''; s.fr = ''; s.ok = false; }); it.diff = 0; it.comment = ''; });
+      if (b.st !== undefined) w.ts = b.st;
+      if (b.en !== undefined) w.te = b.en;
+      if (b.done !== undefined) { w.done = b.done === true; w.doneAt = w.done ? TODAY : ''; }
+      DEMO_DB.doneN = DEMO_DB.totalDone = DEMO_DB.list.filter(function (x) { return x.done; }).length;
+      DEMO_DB.aw.cur.ok = DEMO_DB.doneN; DEMO_DB.aw.cur.left = DEMO_DB.aw.cur.n - DEMO_DB.doneN;
+      r = { ok: true, id: w.id, done: w.done };
+    }
+  }
+  r = JSON.parse(JSON.stringify(r));
+  return sleep(op === 'cv' ? 60 : 350).then(function () { return r; });
+}
+function demoBar() {
+  return '<div class="demol"><span>Демо · клиент «Ольга Тест» · данные выдуманные</span><button data-act="demoReset">Сбросить</button></div>';
+}
+ACT.demoReset = function () {
+  if (INCAB) { try { window.parent.postMessage({ lf: 1, type: 'demoReset' }, location.origin); return; } catch (e) {} }
+  location.reload();
+};
+
 boot();
 })();
 </script>

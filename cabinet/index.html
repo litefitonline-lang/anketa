@@ -463,6 +463,9 @@ details.card[open]>summary{margin-bottom:12px}
 .pt-big .mn{flex:1;min-width:0}
 .pt-big small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
 .pt-mon{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+/* демо: компактная строка (3.10 / 4.33) */
+.demol{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--warm-bg);background:rgba(255,154,82,.06);border-radius:12px;padding:6px 6px 6px 14px;margin:0 0 14px;font-size:13px;color:var(--warm)}
+.demol button{flex:none;height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--warm);background:transparent;color:var(--warm);font:inherit;font-weight:700;cursor:pointer}
 </style>
 <script src="config.js"></script>
 <script src="../push.js"></script>
@@ -509,7 +512,7 @@ details.card[open]>summary{margin-bottom:12px}
  * (../sw.js хранит страницу). Запрос к серверу ждёт не дольше 25 секунд (фото – 2 минуты). Личная ссылка запоминается в
  * телефоне только после того, как сервер её принял. Документы открываются только по ссылкам https. Страницу нельзя
  * встроить в чужой сайт. */
-var VERSION = '3.9';
+var VERSION = '3.10';                  // 3.10: демо «Ольга Тест» – тренировки открываются внутри, кнопка «Сбросить демо»
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
 var LIM = { w: [30, 250, 'Вес'], kcal: [0, 10000, 'Калории'], p: [0, 1000, 'Белки'], f: [0, 1000, 'Жиры'], c: [0, 1500, 'Углеводы'], steps: [0, 100000, 'Шаги'] };
@@ -1057,7 +1060,8 @@ function header() {
   if (tr) ban = tr.ended ? trialBanner() : trialBanner() + ban;
   if (ny6() && ny6().guide && !D.closed) ban += '<details class="card" style="margin:10px 0"><summary><b>📖 Как проходит поток</b></summary><div class="how" style="margin-top:8px">' + ny6().guide + '</div></details>';   // 3.9
   if (basic()) { ban = D.closed ? ban : ''; pills = pills.filter(function (x) { return x.indexOf('День ') < 0 && x.indexOf('Старт ') < 0; }); }
-  if (DEMO) ban = '<div class="banner trial"><b>' + (tr ? 'Это демо пробного кабинета Lite Fit.</b> Так кабинет выглядит в первые 14 дней.' : 'Это демо-кабинет Lite Fit PRO.</b>') + ' Данные выдуманные – нажимайте всё, ничего не сохранится. Хотите такой же для себя?' +
+  if (DEMO && qs.has('p')) ban = '<div class="demol"><span>Демо · клиент «Ольга Тест» · данные выдуманные</span><button data-act="demoReset">Сбросить</button></div>' + ban;   // 3.10: ссылка для показа клиентам
+  else if (DEMO) ban = '<div class="banner trial"><b>' + (tr ? 'Это демо пробного кабинета Lite Fit.</b> Так кабинет выглядит в первые 14 дней.' : 'Это демо-кабинет Lite Fit PRO.</b>') + ' Данные выдуманные – нажимайте всё, ничего не сохранится. Хотите такой же для себя?' +
     '<a class="btn pri" href="../" target="_blank" rel="noopener">Оставить заявку</a></div>' + ban;
   return '<div class="top"><img src="' + LOGO + '" alt="Lite Fit"><div class="topr"><button class="sync' + (S.busy || obBusy ? ' busy' : '') + (OB.length && !obBusy ? ' pend' : '') + '" data-act="refresh" aria-label="Обновить данные">' +
     '<span class="sync-t">' + syncText() + '</span>' + IC.sync + '</button>' +
@@ -1139,10 +1143,10 @@ function nvCopy() {
 function nvHide() { LS.set('lf_nv_hide', '1'); }
 /* ---------- 3.3: тренировки внутри кабинета ---------- */
 function wkOpen() {
-  if (document.getElementById('wkf') || DEMO) return;
+  if (document.getElementById('wkf')) return;
   var d = document.createElement('div');
   d.id = 'wkf'; d.className = 'wkf';
-  d.innerHTML = '<iframe src="../trening/?k=' + encodeURIComponent(KEY) + '&in=1" title="Тренировки" allow="clipboard-write; fullscreen; autoplay; camera; microphone" allowfullscreen></iframe>';
+  d.innerHTML = '<iframe src="../trening/?' + (DEMO ? 'demo' : 'k=' + encodeURIComponent(KEY)) + '&in=1" title="Тренировки" allow="clipboard-write; fullscreen; autoplay; camera; microphone" allowfullscreen></iframe>';
   document.body.appendChild(d);
   document.documentElement.style.overflow = 'hidden';
   try { history.pushState({ wkf: 1 }, ''); } catch (e) {}
@@ -1157,6 +1161,7 @@ function wkClose(fromPop) {
 }
 window.addEventListener('popstate', function () { if (document.getElementById('wkf')) wkClose(true); });
 window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.lf === 1 && e.data.type === 'wkClose') wkClose(false); });
+window.addEventListener('message', function (e) { if (DEMO && e.origin === location.origin && e.data && e.data.lf === 1 && e.data.type === 'demoReset') location.replace(location.pathname + location.search); });   // 3.10
 function viewToday() {
   var day = curDay(), v = byDate[day] || {}, list = editDays();
   var canEdit = list.some(function (x) { return x.ymd === day && x.ok; });
@@ -2064,6 +2069,7 @@ document.addEventListener('click', function (e) {
   else if (act === 'measFixCancel') { S.measureFix = false; render(); }
   else if (act === 'collage') makeCollage();
   else if (act === 'wkOpen') wkOpen();
+  else if (act === 'demoReset') location.replace(location.pathname + location.search);   // 3.10: сначала, в исходный вид
   else if (act === 'nvCopy') nvCopy();
   else if (act === 'nvHide') { nvHide(); render(); }
   else if (act === 'hideInstall') { LS.set('lf_inst_hide', '1'); render(); }
@@ -2130,7 +2136,7 @@ if (DEMO) (function () {
     [5, '09:00', 'Кардио', 'Велотренажёр 40 минут в спокойном темпе', false, '']
   ].map(function (p, i) { return { row: 10 + i, date: ymd(t + p[0]), time: p[1], type: p[2], desc: p[3], done: p[4], comment: p[5], min: p[4] && i === 0 ? 55 : null }; });
   var DB = {
-    ok: true, v: VERSION, name: 'Анна Демо', trainer: 'Дарья', closed: false, today: ymd(t), editDays: 2, start: ymd(s), end: ymd(e),
+    ok: true, v: VERSION, name: 'Ольга Тест', trainer: 'Дарья', closed: false, today: ymd(t), editDays: 2, start: ymd(s), end: ymd(e),
     hist: hist, weight: { start: hist[0][2], now: null }, norm: { kcal: 1825, p: 137, f: 57, c: 191, steps: 8000 },
     consent: { value: 'private', at: null },
     bot: { user: 'LiteFitDemoBot', link: 'https://t.me/LiteFitDemoBot?start=demo', linked: true },
@@ -2139,7 +2145,7 @@ if (DEMO) (function () {
     guides: [{ name: 'Питание', url: 'https://litefitonline-lang.github.io/anketa/', view: '' }, { name: 'Разминка', url: 'https://litefitonline-lang.github.io/anketa/', view: '' }],
     freeze: qs.has('fz') ? { now: { from: ymd(t - 1), to: ymd(t + 3), resume: ymd(t + 4) }, list: [{ from: ymd(t - 1), to: ymd(t + 3) }] } : { now: null, list: [] },   // ?demo&fz – вид во время заморозки
     reports: [{ n: 1, from: ymd(s), to: ymd(s + 29), trainer: 'Дарья', fixed: false, url: 'https://litefitonline-lang.github.io/anketa/', view: '',
-      comment: 'Анна, первый месяц – отличная база: питание почти без пропусков, калории стабильно в норме. Белка пока не хватает – добавляем его в каждый приём пищи.',
+      comment: 'Ольга, первый месяц – отличная база: питание почти без пропусков, калории стабильно в норме. Белка пока не хватает – добавляем его в каждый приём пищи.',
       goal: 'Белок от 100 г в день и 8 000 шагов минимум 5 дней в неделю.' }],
     photos: [['front', 'фас', s], ['side', 'профиль', s], ['back', 'спина', s], ['front', 'фас', t - 3]].map(function (p) {
       var n = Math.floor((p[2] - s) / 30) + 1; return { date: ymd(p[2]), kind: p[1], code: p[0], month: ymd(p[2]).slice(0, 7) + ' месяц ' + n, n: n };
