@@ -131,6 +131,7 @@ svg{width:22px;height:22px;flex:none}
  *   тренера (хранятся на сервере). Нажатие на уведомление открывает кабинет сразу на тренировке. Свой значок для экрана
  *   «Домой» (trainer.webmanifest) – уведомлениям на iPhone он нужен. Правка 02.11: окно не уходит под строку состояния iPhone,
  *   внизу – «Готово».
+ * 2.2 (20.11.2026). Разделы кабинета: Клиенты · Free · NY6 · Заявки · Задачи («Сегодня» – плашкой в «Клиентах», trainer-app 2.9).
  * 1.9 (25.10.2026). Раздел «Наборы FREE» (приложение тренировок 3.0) – в блоке «Тренировки».
  * 1.8 (25.10.2026). Внутри – два приложения, каждое без своего меню: кабинет тренера (trainer-app.html: Сегодня, Клиенты,
  *   Free, Новые, Задачи) и приложение тренировок (../trening/: Тренировки, Календарь, Комментарии, База упражнений). Оба
@@ -139,7 +140,7 @@ svg{width:22px;height:22px;flex:none}
  *   «Тренировки» в карточке клиента открывает тренировки этого клиента. Старые ссылки на приложение тренировок
  *   (в том числе из Telegram с ?w=) ведут сюда же.
  */
-var VERSION = '2.1';
+var VERSION = '2.2';
 var LOGO = 'data:image/png;base64,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';
 var LS = {
   get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -151,6 +152,7 @@ if (KEY) LS.set('lf_tr_k', KEY); else KEY = LS.get('lf_tr_k') || '';
 var DEVK = 'lf_tr_d_' + KEY.slice(0, 10);
 function ic(d) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
 var I = {
+  ny6: ic('<path d="M12 3l4.5 6h-2.2l3.7 5h-2.5l3 4H5.5l3-4H6l3.7-5H7.5z"/><path d="M12 18v3"/>'),
   home: ic('<circle cx="12" cy="12" r="9" opacity=".35"/><path d="M12 3a9 9 0 0 1 8.5 12"/><circle cx="12" cy="12" r="5" opacity=".35"/><path d="M12 7a5 5 0 0 1 4.3 7.5"/>'),
   clients: ic('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M16.5 14.3c2.6.3 4.5 2.6 4.5 5.7"/>'),
   free: ic('<rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8.5V20"/><path d="M12 8.5c-1.5-3.5-5.5-4-5.5-1.5S10 8.5 12 8.5zM12 8.5c1.5-3.5 5.5-4 5.5-1.5S14 8.5 12 8.5z"/>'),
@@ -166,7 +168,7 @@ var I = {
   x: ic('<path d="M6 6l12 12M18 6L6 18"/>')
 };
 // раздел: [код, название, приложение, на телефоне – внизу]
-var SECS = [['home', 'Сегодня', 'A', 1], ['clients', 'Клиенты', 'A', 1], ['free', 'Free', 'A', 1], ['fresh', 'Новые', 'A', 0], ['tasks', 'Задачи', 'A', 0],
+var SECS = [['clients', 'Клиенты', 'A', 1], ['free', 'Free', 'A', 1], ['ny6', 'NY6', 'A', 1], ['fresh', 'Заявки', 'A', 0], ['tasks', 'Задачи', 'A', 0],   // 2.2
   ['train', 'Тренировки', 'B', 1], ['cal', 'Календарь', 'B', 0], ['coms', 'Комментарии', 'B', 0], ['base', 'База упражнений', 'B', 0], ['fsets', 'Наборы FREE', 'B', 0]];
 function secOf(s) { return SECS.filter(function (x) { return x[0] === s; })[0] || null; }
 var main = document.getElementById('main'), navEl = document.getElementById('nav'), moreEl = document.getElementById('more'), pshEl = document.getElementById('psh');
@@ -212,9 +214,9 @@ function paintFrames() {
 /* ---------- переходы ---------- */
 function go(s, opt) {
   opt = opt || {};
-  if (!secOf(s)) s = 'home';
+  if (s === 'home' || !secOf(s)) s = 'clients';                          // 2.2: «Сегодня» – в «Клиентах»
   var app = appOf(s);
-  if (app === 'B' && AUTH.A !== 'ok' && !hasDev()) { s = 'home'; app = 'A'; }   // ПИН-код ещё не введён – сначала кабинет
+  if (app === 'B' && AUTH.A !== 'ok' && !hasDev()) { s = 'clients'; app = 'A'; }   // ПИН-код ещё не введён – сначала кабинет
   CUR = s;
   if (!F[app]) load(app);
   paintFrames();
@@ -288,7 +290,7 @@ window.addEventListener('message', function (e) {
     }
     if (m.state === 'pin' || m.state === 'key') {
       if (app === 'B' && AUTH.A === 'ok' && hasDev() && was !== 'pin') { reload('B'); return; }
-      if (app === 'B' && appOf(CUR) === 'B') go('home');
+      if (app === 'B' && appOf(CUR) === 'B') go('clients');
     }
   } else if (m.type === 'go' && secOf(m.s)) {
     go(m.s, { silent: !!m.cid });
@@ -327,7 +329,7 @@ function paintPush() {
   var h = '<div class="pin"><div class="h"><span>Уведомления на телефон</span><button data-pa="close" aria-label="Закрыть">' + I.x + '</button></div>', st = PUSH.st, B = PUSH.busy;
   var box = function (t, p, btns) { return '<div class="box"><b>' + t + '</b><p>' + p + '</p>' + (btns ? '<div class="row2">' + btns + '</div>' : '') + '</div>'; };
   if (!window.LFPush || !API) h += box('Уведомления недоступны', 'Модуль уведомлений не загрузился. Закройте кабинет и откройте снова.');
-  else if (!hasDev()) h += box('Сначала войдите в кабинет', 'Введите ПИН-код в разделе «Сегодня» – потом здесь можно включить уведомления.');
+  else if (!hasDev()) h += box('Сначала войдите в кабинет', 'Введите ПИН-код в разделе «Клиенты» – потом здесь можно включить уведомления.');
   else if (st === 'install') h += box('Нужен значок на экране «Домой»', 'На iPhone уведомления работают только из значка кабинета: откройте ссылку кабинета в Safari → «Поделиться» → «На экран «Домой»», затем откройте кабинет со значка (iOS 16.4 и новее).');
   else if (st === 'denied') h += box('Уведомления запрещены в настройках', 'Разрешите их: Настройки телефона → Уведомления → Lite Fit тренер, затем вернитесь сюда.', '<button class="pb pri" data-pa="on"' + (B ? ' disabled' : '') + '>Включить</button>');
   else if (st === 'unsupported') h += box('Этот браузер не умеет уведомления', esc(LFPush.why() || 'Откройте кабинет в Chrome или Safari.'));
@@ -385,10 +387,10 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !p
 
 /* ---------- старт ---------- */
 (function start() {
-  var s = (location.hash || '').replace(/^#/, '') || qs.get('s') || 'home';
+  var s = (location.hash || '').replace(/^#/, '') || qs.get('s') || 'clients';
   if (qs.get('w')) s = 'train';
-  if (!secOf(s)) s = 'home';
-  if (appOf(s) === 'B' && !hasDev()) { WANT = s; s = 'home'; }
+  if (s === 'home' || !secOf(s)) s = 'clients';
+  if (appOf(s) === 'B' && !hasDev()) { WANT = s; s = 'clients'; }
   CUR = s;
   paintNav();
   load('A');

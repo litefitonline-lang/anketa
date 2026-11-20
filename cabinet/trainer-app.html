@@ -53,6 +53,20 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none;background:none;bo
 
 /* карточки */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.today{border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:14px}
+.today>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;min-height:52px}
+.today>summary::-webkit-details-marker{display:none}
+.today>summary b{font-size:16px}
+.today>summary .ts{flex:1;font-size:13px;color:var(--muted)}
+.today>summary .ts.warm{color:var(--warm)}
+.today>summary .chv{transition:transform .2s;color:var(--dim);font-style:normal}
+.today[open]>summary .chv{transform:rotate(90deg)}
+.today .today-b{padding:0 12px 4px}
+.today .today-b .card{background:var(--card2)}
+.guide-b{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--accent-d);background:rgba(62,214,206,.06);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;color:var(--text)}
+.guide-b b{display:block}.guide-b small{color:var(--muted)}
+.ny-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.gd h3{margin:16px 0 6px}.gd p,.gd li{line-height:1.5}.gd ul{padding-left:18px;margin:6px 0}
 .card h3{margin:0 0 4px;font-size:17px;font-weight:800;letter-spacing:-.01em}
 .card .sub{font-size:13px;color:var(--muted);margin:0 0 14px}
 .sec-title{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:6px 0 12px}
@@ -883,12 +897,15 @@ function planBody(x) {
  * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
  * сервер сообщает, какие карточки устарели, и перечитываются только они (до шести запросов одновременно). Внизу главной —
  * сколько секунд заняли список и карточки. Фото в памяти не хранятся. Закрыли доступ или сменили ПИН-код — память стирается.
+ * 2.9 (20.11.2026). Вкладки: Клиенты · Free · NY6 · Заявки · Задачи. «Сегодня» – плашкой вверху «Клиентов» (на компьютере –
+ *   справа, пока клиент не выбран). В «Клиентах» все форматы группами, NY6 – своей группой. «NY6» – клиенты потоков по потокам:
+ *   тренировки впереди, не опубликованные, выполненные (op 'ny6', lite-fit-ny6 1.0.13). «Заявки» (бывшие «Новые») – и заявки NY6.
  * 1.0 (08.10.2026). Страница работает через то же веб-приложение, что и кабинет клиента: запросы { a:'tr', op, t, d }.
  * t — личный ключ тренера из ссылки, d — отметка устройства, на котором уже введён ПИН-код (ПИН-код спрашивается один раз).
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '2.8';
+var VERSION = '2.9';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -915,7 +932,8 @@ window.addEventListener('resize', function () {
 });
 window.addEventListener('message', function (e) {
   if (!EMBED || e.origin !== location.origin || !e.data || e.data.lf !== 1 || e.data.to !== 'A') return;
-  var m = e.data, tabs = ['home', 'clients', 'free', 'fresh', 'tasks'];
+  var m = e.data, tabs = ['clients', 'free', 'ny6', 'fresh', 'tasks'];
+  if (m.type === 'nav' && m.s === 'home') m.s = 'clients';               // 2.9: «Сегодня» – в «Клиентах»
   if (m.type === 'nav' && tabs.indexOf(m.s) >= 0) {
     if (!D) { S.tab = m.s; return; }
     if (S.tab === m.s && !S.cid && !m.force) return;
@@ -1011,7 +1029,7 @@ function gen(n) {
 var AS = '';                     // владелец: «как видит тренер» (имя) или '' — все клиенты
 
 var D = null;                    // { trainer, admin, as, trainers, today, clients, fresh, tasks, lists, botUser }
-var S = { tab: 'home', cid: null, sub: 'over', filter: 'all', q: '', day: null, mSel: null, busy: 0, loadedAt: 0, pinName: '', listY: 0, sending: false, allPhotos: false, more: false,
+var S = { tab: 'clients', cid: null, sub: 'over', filter: 'all', q: '', day: null, mSel: null, busy: 0, loadedAt: 0, pinName: '', listY: 0, sending: false, allPhotos: false, more: false,
   unsure: false, memFresh: false, offline: false, diag: { list: null, listSrv: null, st: null, inl: 0, n: 0, ms: 0, srv: 0, kept: 0, ping: null, ping0: null, w: null, d: null, kb: null, k: 1, tries: 1 } };
 var T = 0, TODAY = '';           // сегодня по серверу: номер дня и ГГГГ-ММ-ДД
 var NAV = [];                    // что открыто поверх списка: 'client', 'sheet' — для кнопки «Назад» телефона
@@ -1318,13 +1336,14 @@ function allAlerts() {
   return out;
 }
 /** 1.4: клиенты по значимости: PRO, BASIC, START, бесплатные (последняя оплата – 0 ₽), без формата. */
-var RANKS = ['PRO', 'BASIC', 'START', 'Бесплатные', 'FREE · 3 тренировки', 'Без формата'];
+var RANKS = ['PRO', 'BASIC', 'START', 'NY6 · 6 недель', 'Бесплатные', 'FREE · 3 тренировки', 'Без формата'];   // 2.9: + NY6
 function fmtRank(c) {
   var f = String(c.format || '').toUpperCase();
-  if (f === 'FREE') return 4;                                              // 1.7
+  if (f === 'FREE') return 5;                                              // 1.7
+  if (f === 'NY6') return 3;                                               // 2.9
   var p = c.pays && c.pays[0];
-  if (p && p.sum === 0) return 3;
-  return f === 'PRO' ? 0 : f === 'BASIC' ? 1 : f === 'START' ? 2 : 5;
+  if (p && p.sum === 0) return 4;
+  return f === 'PRO' ? 0 : f === 'BASIC' ? 1 : f === 'START' ? 2 : 6;
 }
 /* ---------- 1.7: FREE ---------- */
 function isFree(c) { return !!c && String(c.format || '').toUpperCase() === 'FREE'; }
@@ -1502,7 +1521,7 @@ function ptsLoadAll(force) {
     if (!r || !r.ok || S.out) return;
     PTSA = { list: r.list || {}, at: Date.now() };
     LS.set(PTS_LS, JSON.stringify(PTSA));
-    if (D && !document.getElementById('viewer') && (S.cid || S.tab === 'home' || S.tab === 'free')) bgRender();
+    if (D && !document.getElementById('viewer')) { if (S.cid || S.tab === 'free') bgRender(); else if (S.tab === 'clients') todayPaint(); }
   }, function () { S.ptsBusy = false; });
 }
 /** Баллы клиента – так же, как их видит клиент в кабинете (дневник в кабинете тренера – за последние 200 дней). */
@@ -1602,9 +1621,9 @@ function paintSync() {
   b.classList.toggle('busy', S.busy > 0 || active > 0 || (S.unsure && !S.offline) || (D && !loadState().done && queue.length > 0));
   var t = $('.sync-t', b); if (t) t.textContent = syncText();
 }
-var TABS = [['home', 'Сегодня', IC.today], ['clients', 'Клиенты', IC.people], ['free', 'Free', IC.gift], ['fresh', 'Новые', IC.add], ['tasks', 'Задачи', IC.list]];
+var TABS = [['clients', 'Клиенты', IC.people], ['free', 'Free', IC.gift], ['ny6', 'NY6', IC.today], ['fresh', 'Заявки', IC.add], ['tasks', 'Задачи', IC.list]];   // 2.9
 function paintTabs() {
-  var cnt = { home: allAlerts().length, fresh: freshOther().length, free: freshFree().length + freeTodo() };
+  var cnt = { clients: allAlerts().length, fresh: freshOther().length + ny6AppCnt(), free: freshFree().length + freeTodo(), ny6: ny6Cnt() };
   if (EMBED) { tabsEl.classList.add('hidden'); toShell({ type: 'badges', b: cnt }); toShell({ type: 'sec', s: S.tab }); return; }
   tabsEl.classList.remove('hidden');
   var on = S.tab;
@@ -1689,11 +1708,11 @@ function render(nav) {
   document.body.classList.toggle('wide', wd); wideWas = wd;
   if (wd && (S.tab === 'clients' || c)) {                                   // 1.8: компьютер – список слева, карточка справа
     if (c) S.tab = 'clients';
-    body = '<div class="md"><div class="md-l">' + viewClients() + '</div><div class="md-r">' + (c ? viewClient(c) :
-      '<div class="md-0"><h3>Выберите клиента</h3><p>Слева – список. Справа откроется карточка клиента: данные, обзор, питание, план PRO, замеры, прогресс, оплаты, документы, ведение.</p></div>') + '</div></div>';
+    body = '<div class="md"><div class="md-l">' + viewClients(true) + '</div><div class="md-r">' + (c ? viewClient(c) : '<div id="todayPane">' + viewHome('pane') + '</div>' + clientsFoot() +
+      '<div class="md-0" style="display:none"><h3>Выберите клиента</h3><p>Слева – список. Справа откроется карточка клиента: данные, обзор, питание, план PRO, замеры, прогресс, оплаты, документы, ведение.</p></div>') + '</div></div>';
     app.innerHTML = header() + staleBanner() + '<div class="' + (nav && !c ? 'view' : '') + '">' + body + '</div>';
   } else {
-    body = c ? viewClient(c) : S.tab === 'free' ? viewFree() : S.tab === 'fresh' ? viewFresh() : S.tab === 'tasks' ? viewTasks() : S.tab === 'clients' ? viewClients() : viewHome();
+    body = c ? viewClient(c) : S.tab === 'free' ? viewFree() : S.tab === 'ny6' ? viewNy6() : S.tab === 'fresh' ? viewFresh() : S.tab === 'tasks' ? viewTasks() : viewClients();
     if (wd && !c) body = '<div class="wcols">' + body + '</div>';
     app.innerHTML = (c ? '' : header() + staleBanner()) + '<div class="' + (nav ? 'view' : '') + '">' + body + '</div>';
   }
@@ -1709,8 +1728,7 @@ function softRender(id) {
   paintSync();
   if (document.getElementById('viewer')) return;
   if (S.cid) { if (String(S.cid) === String(id)) bgRender(); return; }
-  if (S.tab === 'home') bgRender();
-  else if (S.tab === 'clients') { var box = document.getElementById('clist'); if (box) box.innerHTML = clientRows(); paintTabs(); }
+  if (S.tab === 'clients') { var box = document.getElementById('clist'); if (box) box.innerHTML = clientRows(); todayPaint(); paintTabs(); }
   else paintTabs();
 }
 function sheet(title, html) {
@@ -1771,7 +1789,7 @@ function viewPin(err) {
 }
 
 /* ================= СЕГОДНЯ ================= */
-function viewHome() {
+function viewHome(mode) {                                                 // 2.9: mode 'strip' / 'pane' – «Сегодня» внутри «Клиентов»
   var al = allAlerts(), h = '', ls = loadState();
   if (S.unsure) h += '<div class="banner' + (S.offline ? ' warn' : '') + '">' + (S.offline ? 'Нет связи с сервером. ' : '') + 'Показаны данные на <b class="num">' + whenTxt(S.loadedAt) + '</b>' + (S.offline ? '. Изменения сохранить не получится, пока связь не вернётся.' : ' – сверяю, что изменилось.') + '</div>';
   else if (!ls.done) h += '<div class="banner">Обновляю данные клиентов: <b class="num">' + ls.got + ' из ' + ls.n + '</b>. Список уже можно смотреть – поводы для внимания дополняются.</div>';
@@ -1822,6 +1840,7 @@ function viewHome() {
     grp('Пробный кабинет', G.trial, 'dim', function (c, s) { var tr = trialSt(c); return 'день ' + tr.day + ' из ' + tr.total + ' – ' + (s.state === 'ok' ? 'всё внесено' : s.text); }) +
     grp('Обновляются', G.load, 'dim', function (c, s) { return s.text; }) + '</div>';
 
+  if (mode) return h;
   var mine = D.tasks.slice(0, 3);
   h += '<div class="card"><h3>Задачи</h3>' + (mine.length ? '<div class="rows">' + mine.map(taskRow).join('') + '</div>' : '<p class="sub" style="margin:0">Задач нет.</p>') +
     '<button class="btn sec sm mt" data-tab="tasks">Все задачи</button></div>';
@@ -1855,11 +1874,13 @@ function verGt(a, b) {
 }
 
 /* ================= КЛИЕНТЫ ================= */
-var FILTERS = [['all', 'Все'], ['pro', 'PRO'], ['trial', 'Пробный'], ['free', 'FREE'], ['nocab', 'Без кабинета'], ['frz', 'Заморозка'], ['arch', 'Архив']];
+var FILTERS = [['all', 'Все'], ['pro', 'PRO'], ['basic', 'BASIC'], ['ny6', 'NY6'], ['trial', 'Пробный'], ['free', 'FREE'], ['nocab', 'Без кабинета'], ['frz', 'Заморозка'], ['arch', 'Архив']];
 function inFilter(c, f) {
   if (f === 'arch') return !!c.arch;
   if (c.arch) return false;
   if (f === 'pro') return c.format === 'PRO';
+  if (f === 'basic') return c.format === 'BASIC';
+  if (f === 'ny6') return c.format === 'NY6';
   if (f === 'trial') return !!c.trial;
   if (f === 'free') return isFree(c);
   if (f === 'nocab') return !c.table;
@@ -1879,21 +1900,102 @@ function clientRows() {
   });
   return h + (open ? '</div>' : '');
 }
-function viewClients() {
-  return '<h2 class="sec-title">Клиенты</h2>' +
+function viewClients(wide) {
+  return (wide ? '' : todayStrip()) + '<h2 class="sec-title">Клиенты</h2>' +
     '<label class="fld plain" style="margin-bottom:10px"><input id="q" type="search" placeholder="Поиск по имени" value="' + esc(S.q) + '" autocomplete="off" enterkeyhint="search"></label>' +
     '<div class="chips">' + FILTERS.map(function (f) {
       var n = D.clients.filter(function (c) { return inFilter(c, f[0]); }).length;
-      if ((f[0] === 'arch' || f[0] === 'free') && !n) return '';
+      if ((f[0] === 'arch' || f[0] === 'free' || f[0] === 'ny6' || f[0] === 'basic') && !n) return '';
       return '<button data-filter="' + f[0] + '" class="' + (S.filter === f[0] ? 'on' : '') + '">' + f[1] + ' ' + n + '</button>';
     }).join('') + '</div>' +
     '<div class="card" id="clist">' + clientRows() + '</div>' +
-    '<p class="muted" style="font-size:13px;margin:4px 2px 0">' + (D.admin && !D.as ? 'Здесь клиенты всех тренеров.' : 'Здесь только ' + (D.as ? 'клиенты тренера ' + esc(D.as) : 'ваши клиенты') + '.') + ' Новые заявки без тренера – на вкладках «Новые» и «Free».</p>';
+    '<p class="muted" style="font-size:13px;margin:4px 2px 0">' + (D.admin && !D.as ? 'Здесь клиенты всех тренеров.' : 'Здесь только ' + (D.as ? 'клиенты тренера ' + esc(D.as) : 'ваши клиенты') + '.') + ' Новые заявки без тренера – на вкладках «Заявки» и «Free».</p>' + (wide ? '' : clientsFoot());
+}
+
+/* ================= 2.9: «Сегодня» плашкой, вкладка NY6 ================= */
+function clientsFoot() {
+  return '<p class="muted" style="font-size:12px;text-align:center;margin:18px 0 0">Кабинет тренера · версия ' + VERSION + PATCH + (D.admin ? diagText() : '') + '</p>' +
+    '<p style="text-align:center;margin:10px 0 0"><button class="lnk" data-act="logoutAsk" style="font-size:13px;font-weight:600;color:var(--muted)">Выйти с устройства</button></p>';
+}
+function planTodayN() {
+  var n = 0;
+  D.clients.forEach(function (c) { if (c.loaded && !c.arch && c.status === ST_ACTIVE && !locked(c, 'plan')) (c.plan || []).forEach(function (p) { if (p.date === TODAY) n++; }); });
+  return n;
+}
+function todayHead() {
+  var al = allAlerts().length + (freshFree().length ? 1 : 0) + (freshOther().length ? 1 : 0), pl = planTodayN();
+  return '<b>Сегодня</b><span class="ts' + (al ? ' warm' : '') + '">' + (al ? 'требуют внимания: <b class="num">' + al + '</b>' : 'всё спокойно') + ' · по плану: <b class="num">' + pl + '</b></span><i class="chv">›</i>';
+}
+function todayStrip() {
+  return '<details class="today" id="todayBox"' + (S.todayOpen ? ' open' : '') + '><summary>' + todayHead() + '</summary><div class="today-b" id="todayBody">' + viewHome('strip') + '</div></details>';
+}
+/** Пришли новые данные – обновить только «Сегодня» (поиск и список клиентов не трогаем). */
+function todayPaint() {
+  var b = document.getElementById('todayBox');
+  if (b) { var sm = b.querySelector('summary'), bd = document.getElementById('todayBody'); if (sm) sm.innerHTML = todayHead(); if (bd) bd.innerHTML = viewHome('strip'); }
+  var p = document.getElementById('todayPane'); if (p) p.innerHTML = viewHome('pane');
+  paintTabs();
+}
+document.addEventListener('toggle', function (e) { if (e.target && e.target.id === 'todayBox') S.todayOpen = e.target.open; }, true);
+
+var NY = null;                                                             // { r: ответ op 'ny6', at, busy, err }
+function ny6Load(force) {
+  if (!D) return;
+  if (NY && NY.busy) return;
+  if (!force && NY && NY.at && Date.now() - NY.at < 120000) return;
+  NY = NY || {}; NY.busy = true;
+  call('ny6', {}, true).then(function (r) {
+    NY.busy = false; NY.at = Date.now();
+    if (r && r.ok) { NY.r = r; NY.err = ''; } else NY.err = r && /неизвестное действие/.test(r.error || '') ? 'Вкладка заработает после обновления сервера.' : errText(r);
+    paintTabs();
+    if ((S.tab === 'ny6' || S.tab === 'fresh') && !S.cid && !document.getElementById('viewer')) bgRender();
+  });
+}
+function ny6List() { return NY && NY.r ? NY.r.list || [] : []; }
+function ny6AppList() { return ny6List().filter(function (x) { return x.st !== 'оплачено'; }); }
+function ny6AppCnt() { return ny6AppList().filter(function (x) { return x.claimed || !x.inv; }).length; }
+function ny6Warn(x) { var td = NY.r.today; return x.st === 'оплачено' && x.wk && x.start && td >= dmAdd(x.start, -1) && td <= x.end && x.wk.ahead < 2; }
+function ny6Cnt() { return ny6List().filter(function (x) { return ny6Warn(x); }).length; }
+function dmAdd(ymd, n) { var d = dn(ymd); if (d === null) return ''; var t = new Date((d + n) * 864e5); return t.toISOString().slice(0, 10); }
+function ny6Week(x) { var td = NY.r.today; if (!x.start || td < x.start) return 'старт ' + dm(x.start); if (td > x.end) return 'поток завершён'; return 'неделя ' + Math.min(6, Math.floor((dn(td) - dn(x.start)) / 7) + 1) + ' из 6'; }
+function viewNy6() {
+  ny6Load(false);
+  var h = '<div class="ny-h"><h2 class="sec-title">NY6 · 6 недель до Нового года</h2><button class="txtb" data-act="ny6Re">Обновить</button></div>';
+  if (NY && NY.r && NY.r.guide) h += '<button class="guide-b" data-act="ny6Guide"><span style="font-size:22px">📖</span><span class="mn"><b>Как вести клиента NY6</b><small>По дням: старт, питание, замеры, разборы, финал</small></span><span class="chev">›</span></button>';
+  if (!NY || !NY.r) return h + '<div class="card"><p class="muted" style="margin:0">' + (NY && NY.err ? esc(NY.err) : 'Загружаю…') + '</p></div>';
+  var L = ny6List(), paid = L.filter(function (x) { return x.st === 'оплачено'; }), apps = ny6AppList();
+  if (apps.length) h += '<button class="row card" data-tab="fresh" style="padding:14px 16px"><span class="dot warm"></span><span class="mn"><b>Заявки NY6 в работе: ' + apps.length + '</b><small>Реквизиты, оплата, вопросы – на вкладке «Заявки»</small></span><span class="chev">›</span></button>';
+  NY.r.streams.forEach(function (s) {
+    var mine = paid.filter(function (x) { return x.stream === s.id; });
+    if (!mine.length && !s.open) return;
+    h += '<div class="grp">' + esc(s.id) + ' · ' + dm(s.start) + '–' + dm(s.end) + ' · оплачено ' + s.paid + ' из ' + s.seats + (s.open ? ' · приём до ' + dm(s.until) : '') + '</div>';
+    h += '<div class="card">' + (mine.length ? '<div class="rows">' + mine.map(function (x) {
+      var w = x.wk || {}, warn = ny6Warn(x), own = clientOf(x.id);
+      var sub = ny6Week(x) + ' · ' + (w.total ? 'тренировок ' + w.total + ': впереди опубликовано ' + w.ahead + (w.unpub ? ', не опубликовано ' + w.unpub : '') + ', выполнено ' + w.done : 'тренировок нет') + (D.admin && !D.as ? ' · ' + x.owner : '');
+      return '<' + (own ? 'button data-open="' + esc(x.id) + '" data-sub="over"' : 'div') + ' class="row"><span class="dot ' + (warn ? 'warm' : '') + '"></span><span class="mn"><b>' + esc(x.name) + '</b><small>' + esc(sub) + '</small></span>' +
+        (warn ? '<span class="st warm">опубликуйте тренировки</span>' : '') + (own ? '<span class="chev">›</span></button>' : '</div>');
+    }).join('') + '</div>' : '<p class="muted" style="margin:0">Оплаченных клиентов в этом потоке ' + (D.admin && !D.as ? '' : 'у Вас ') + 'пока нет.</p>') + '</div>';
+  });
+  h += '<p class="muted" style="font-size:13px;margin:4px 2px 0">Тренировки клиента – в его карточке, раздел «Тренировки». Первые 3 бот ставит сам при оплате – их нужно проверить и опубликовать.</p>';
+  return h;
+}
+function ny6Apps() {
+  var A = ny6AppList();
+  if (!NY || !NY.r) return NY && NY.err ? '<div class="card"><p class="muted" style="margin:0">NY6: ' + esc(NY.err) + '</p></div>' : '';
+  if (!A.length) return '';
+  return '<div class="grp">NY6 · 6 недель · ' + A.length + '</div>' + A.map(function (x) {
+    var line = x.claimed ? '💳 Клиент сообщил об оплате – проверьте поступление и нажмите «Оплачено»' : x.st === 'вопрос' ? '❓ Вопрос: «' + x.q + '»' : x.st === 'лист ожидания' ? '⏳ Лист ожидания' :
+      x.inv ? '⏳ Реквизиты отправлены ' + x.inv + ' – ждём оплату' : '📝 Ждёт реквизиты';
+    return '<div class="card"><h3>' + esc(x.name) + '</h3><p class="sub">' + esc((x.stream || '') + (x.start ? ' · старт ' + dm(x.start) : '') + ' · ' + (x.ch === 'vk' ? 'ВКонтакте' : 'Telegram') + (x.phone ? ' · ' + x.phone : '') + (D.admin && !D.as ? ' · ' + (x.owner || '–') : '')) + '</p>' +
+      '<p style="margin:6px 0 10px">' + esc(line) + '</p>' + (x.where ? '<p class="note" style="margin:0 0 10px">Где и с чем: ' + esc(x.where) + (x.type ? ' · тип теста ' + esc(x.type) : '') + '</p>' : '') +
+      '<div class="grid2">' + (x.page ? '<a class="btn pri" href="' + esc(x.page) + '" target="_blank" rel="noopener">Открыть заявку</a>' : '') + (x.write ? '<a class="btn sec" href="' + esc(x.write) + '" target="_blank" rel="noopener">Написать</a>' : '') + '</div></div>';
+  }).join('');
 }
 
 /* ================= НОВЫЕ ================= */
 function viewFresh() {
-  var h = '<h2 class="sec-title">Новые клиенты</h2>', list = freshOther();
+  ny6Load(false);
+  var h = '<h2 class="sec-title">Заявки</h2>' + ny6Apps() + (ny6AppList().length ? '<div class="grp">Новые клиенты без тренера</div>' : ''), list = freshOther();
   if (!list.length) return h + '<div class="card"><p class="muted" style="margin:0">Новых заявок без тренера сейчас нет. Когда придёт анкета, клиент появится здесь.' + (freshFree().length ? ' Заявки FREE – на вкладке «Free».' : '') + '</p></div>';
   h += '<p class="muted" style="font-size:13px;margin:-4px 2px 12px">Заявки, у которых ещё нет ответственного. Берёте клиента – становитесь его тренером. Заявки FREE – на вкладке «Free».</p>';
   list.forEach(function (f) {
@@ -3849,6 +3951,9 @@ var ACT = {
     });
   },
 
+  ny6Guide: function () { var g = NY && NY.r && NY.r.guide; if (g) sheet('Как вести клиента NY6', '<div class="gd">' + g + '</div>'); },   // 2.9
+  ny6Re: function () { ny6Load(true); },
+
   /* --- 2.1: подтверждение и выход с устройства --- */
   sureOk: function (t) { if (SURE) SURE(t); else closeSheet(); },
   logoutAsk: function () {
@@ -3985,6 +4090,7 @@ function loadList(first, manual) {
       return;
     }
     S.stale = r.page && verGt(r.page, VERSION) ? r.page : '';
+    setTimeout(function () { ny6Load(!!manual); }, 300);                      // 2.9: вкладка NY6 – счётчики
     S.diag.list = Date.now() - t0; S.diag.listSrv = r.ms != null ? r.ms : null; S.diag.st = r.st || null;
     S.diag.n = 0; S.diag.ms = 0; S.diag.srv = 0; S.diag.inl = 0;
     S.diag.w = r._w != null ? r._w : null; S.diag.d = r._d != null ? r._d : null; S.diag.kb = r._kb != null ? r._kb : null; S.diag.k = r._k || 1; S.diag.tries = r._n || 1;
@@ -4009,7 +4115,7 @@ function loadList(first, manual) {
     if (manual) toast('Обновлено', 'ok');
     if (S.diag.ping == null) {                                             // один раз за открытие: сколько длится запрос, в котором сервер ничего не делает
       var tp = Date.now(); S.diag.ping = 0;
-      sleep(1500).then(function () { tp = Date.now(); return call('ping', {}, true); }).then(function (p) { S.diag.ping = p && p.ok ? Date.now() - tp : 0; if (!S.cid && S.tab === 'home' && !document.getElementById('viewer')) bgRender(); });
+      sleep(1500).then(function () { tp = Date.now(); return call('ping', {}, true); }).then(function (p) { S.diag.ping = p && p.ok ? Date.now() - tp : 0; if (!S.cid && S.tab === 'clients' && !document.getElementById('viewer')) todayPaint(); });
     }
   });
 }
@@ -4038,7 +4144,7 @@ document.addEventListener('visibilitychange', function () {
   if (!document.hidden && D && (S.unsure || Date.now() - S.loadedAt > 5 * 60000) && !document.getElementById('viewer')) refresh(false);
 });
 function boot() {
-  if (EMBED) { document.body.classList.add('emb'); var s0 = new URLSearchParams(location.search).get('s'); if (['home', 'clients', 'free', 'fresh', 'tasks'].indexOf(s0) >= 0) S.tab = s0; }
+  if (EMBED) { document.body.classList.add('emb'); var s0 = new URLSearchParams(location.search).get('s'); if (s0 === 'home') s0 = 'clients'; if (['clients', 'free', 'ny6', 'fresh', 'tasks'].indexOf(s0) >= 0) S.tab = s0; }
   document.body.classList.toggle('wide', WIDE());
   var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   if (!local && !/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(API)) return screen('Кабинет ещё не настроен', 'Не указан адрес приёмника в файле config.js. Напишите Артёму.');
