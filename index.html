@@ -164,7 +164,7 @@ var CONFIG = {
   // номера разделов Google Формы: 0,1,2… по числу разделов
   pageHistory: "0,1,2,3,4,5",
   siteUrl: "https://taplink.cc/litefit",
-  offerUrl: "https://docs.google.com/document/d/1ggdsTyFEWn8hu0T_QIp7G2aGGpUUXIeEM2ktiq1x2Dc/view",
+  offerUrl: "https://litefitonline-lang.github.io/anketa/oferta.html",
   // 4.4: согласие на обработку персональных данных и политика – отдельные страницы
   consentUrl: "https://litefitonline-lang.github.io/anketa/soglasie.html",
   policyUrl: "https://litefitonline-lang.github.io/anketa/politika.html",
@@ -183,7 +183,9 @@ var CONFIG = {
   // 4.9 (09.11.2026): пиксель VK Рекламы 3812613 и (по номеру LF_YM) Яндекс Метрика; цель «free_anketa» – только после успешной отправки
   //   анкеты FREE, «anketa» – любой анкеты. Метка источника: src + все utm_* (source, content, campaign, medium, term) – «taplink · source=vk_ads · content=dzhinsy».
   // 4.8 (09.11.2026): «Lite Fit» в подсказке с кодом – ссылка на диалог; «Начать» – кнопкой или словом (у кого диалог уже был, кнопки нет).
-  version: "4.10",
+  // 4.11 (21.11.2026): оферта – Редакция № 4 на странице oferta.html (вместо Google-документа Ред. № 2); согласие на обработку данных
+  //   уходит в Google Форму (entry.549631684); в политике и согласии – ИНН и адрес оператора.
+  version: "4.11",
   // ID полей Google Формы (entry.…)
   ids: {
     email:        "emailAddress",
@@ -204,6 +206,8 @@ var CONFIG = {
     targetWeight: "entry.542155565",
     consult:      "entry.364933439",
     offer:        "entry.601355959",
+    // 4.11: галочка согласия на обработку данных теперь записывается в Google Форму (вопрос «Согласие на обработку персональных данных»)
+    pd:           "entry.549631684",
     // 4.1: новые вопросы формы – номера показывает пункт таблицы «(разово) 4.1 – FREE: анкета и таблица»
     src:          "entry.551080972",
     repost:       "entry.960819753",
@@ -337,7 +341,7 @@ var STEPS = [
       ]},
       {key:"subTg", type:"sub", when:function(){ return isFree() && !state.noTg; }},   // 4.2: условие FREE – подписка на канал
       {key:"repost", type:"text", label:"Ссылка на репост", when:isFree, hint:"Поделились постом Lite Fit у себя? Вставьте ссылку на него", ph:"https://…"},
-      {key:"pd", type:"consent", req:true, pd:true},                          // 4.4: согласие на обработку данных – отдельно от оферты
+      {key:"pd", type:"consent", req:true, pd:true, value:"Даю согласие на обработку моих персональных данных, включая сведения о здоровье, на условиях, указанных выше"},                          // 4.4: согласие на обработку данных – отдельно от оферты
       {key:"offer", type:"consent", req:true, value:"Ознакомлен"},
       {key:"hp", type:"hp"}                                                     // 4.5: скрытое поле – человек его не видит и не заполняет
     ]}
