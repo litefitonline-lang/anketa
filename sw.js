@@ -10,8 +10,11 @@
  * 1.1: голосовые – voice.js и библиотеки lib/lame.min.js (запись) и lib/ogg-opus-decoder.min.js (прослушивание на iPhone)
  * тоже хранятся в телефоне.
  * 1.2: fx.js (анимация панели и загрузка с логотипом) тоже хранится в телефоне – работает и без сети.
+ * 1.3 (21.11.2026): ролики – и из хранилища Яндекса (storage.yandexcloud.net/litefit-prod-video/video/, основной источник),
+ *   и из папки Video (запасной). Ролик ищется в памяти под обоими адресами; не скачался с основного – берётся с запасного.
  */
-var VER = '1.2';
+var VER = '1.3';
+var YA_V = 'https://storage.yandexcloud.net/litefit-prod-video/video/';
 var SHELL = 'lf-shell-2', VIDEO = 'lf-video-1', FONTS = 'lf-fonts-1', KEEP = [SHELL, VIDEO, FONTS];
 var BASE = new URL('./', self.location.href).href;                     // …/anketa/
 var PAGES = { 'trening/': 'trening/index.html', 'trening/index.html': 'trening/index.html', 'cabinet/': 'cabinet/index.html', 'cabinet/index.html': 'cabinet/index.html' };
@@ -30,6 +33,25 @@ self.addEventListener('activate', function (e) {
     return Promise.all(ks.filter(function (k) { return /^lf-/.test(k) && KEEP.indexOf(k) === -1; }).map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
+
+/** 1.3: имя нашего ролика (17.mp4) по адресу в любой из двух папок; иначе ''. */
+function vfile(href) {
+  var p = String(href || '').split('#')[0].split('?')[0];
+  if (p.indexOf(YA_V) === 0) p = p.slice(YA_V.length);
+  else if (p.indexOf(BASE + 'Video/') === 0) p = p.slice(BASE.length + 6);
+  else return '';
+  return /^[0-9A-Za-z_-]+\.mp4$/i.test(p) ? p.toLowerCase() : '';
+}
+/** Адреса ролика в памяти: сначала запрошенный, потом другой папки. */
+function vkeys(href) {
+  var f = vfile(href), a = String(href).split('#')[0].split('?')[0];
+  if (!f) return [a];
+  return [a, a.indexOf(YA_V) === 0 ? BASE + 'Video/' + f : YA_V + f];
+}
+function vmatch(c, href) {
+  var ks = vkeys(href);
+  return c.match(ks[0]).then(function (h) { return h || (ks[1] ? c.match(ks[1]) : undefined); });
+}
 
 function rel(url) { return url.href.indexOf(BASE) === 0 ? url.pathname.slice(new URL(BASE).pathname.length) : null; }
 
@@ -58,9 +80,8 @@ function asset(req, cacheName) {
 
 /** Видео: из памяти (с поддержкой запросов по частям – так играет iPhone), иначе из сети как обычно. */
 function video(req) {
-  var url = req.url.split('#')[0].split('?')[0];
   return caches.open(VIDEO).then(function (c) {
-    return c.match(url).then(function (hit) {
+    return vmatch(c, req.url).then(function (hit) {
       if (!hit) return fetch(req);
       var range = req.headers.get('range');
       if (!range) return hit;
@@ -82,6 +103,7 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') { e.respondWith(asset(req, FONTS)); return; }
+  if (req.url.indexOf(YA_V) === 0 && vfile(req.url)) { e.respondWith(video(req)); return; }   // 1.3: ролик из Яндекса
   if (url.origin !== self.location.origin) return;
   var r = rel(url);
   if (r === null) return;
@@ -90,18 +112,24 @@ self.addEventListener('fetch', function (e) {
   if (ASSETS.indexOf(r) !== -1 && !PAGES[r]) { e.respondWith(asset(req, SHELL)); return; }
 });
 
-/** Скачать ролики заранее: только свои (папка Video), по одному, до VIDEO_MAX; старые вытесняются. */
+/** Скачать ролики заранее: только свои (Яндекс или папка Video), по одному, до VIDEO_MAX; старые вытесняются. */
 function prefetch(urls) {
   return caches.open(VIDEO).then(function (c) {
     var list = (urls || []).map(function (u) { try { return new URL(u, BASE); } catch (e) { return null; } })
-      .filter(function (u) { return u && u.origin === self.location.origin && /^Video\/[^/]+\.(mp4|m4v|mov|webm)$/i.test(rel(u) || ''); })
+      .filter(function (u) { return u && vfile(u.href); })
       .map(function (u) { return u.origin + u.pathname; }).slice(0, VIDEO_MAX);
+    var get = function (u) { return fetch(u, { cache: 'no-cache' }).then(function (r) { if (r && r.ok && r.status === 200) return r; throw new Error('нет'); }); };
     var chain = Promise.resolve();
     list.forEach(function (u) {
+      var ks = vkeys(u);
       chain = chain.then(function () {
-        return c.match(u).then(function (hit) {
-          if (hit) { return c.delete(u).then(function () { return c.put(u, hit); }); }   // свежее – в конец очереди
-          return fetch(u, { cache: 'no-cache' }).then(function (r) { if (r && r.ok && r.status === 200) return c.put(u, r); }).catch(function () {});
+        return c.match(ks[0]).then(function (hit) {
+          if (hit) { return c.delete(ks[0]).then(function () { return c.put(ks[0], hit); }); }   // свежее – в конец очереди
+          return (ks[1] ? c.match(ks[1]) : Promise.resolve()).then(function (old) {
+            if (old) return;                                                  // уже лежит под адресом другой папки
+            return get(ks[0]).catch(function () { return ks[1] ? get(ks[1]) : null; })   // основной не ответил – запасной
+              .then(function (r) { if (r) return c.put(ks[0], r); }).catch(function () {});
+          });
         });
       });
     });

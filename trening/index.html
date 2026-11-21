@@ -885,6 +885,11 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.35 (21.11.2026). Видео упражнений: основной источник – хранилище Яндекса (storage.yandexcloud.net/litefit-prod-video/video/),
+ *   запасной – папка Video на GitHub, файлы с теми же номерами. Ролик с основного адреса не начал грузиться за 2 с или выдал
+ *   ошибку – плеер сам берёт его с запасного. Какой источник основной – vsrc в ответе сервера ('ya' | 'gh', меню таблицы
+ *   «Видео: основной источник»); нет поля – Яндекс. Ссылки в базе и в старых тренировках не меняются: номер ролика берётся
+ *   из ссылки. Заранее в телефон сохраняется ролик с основного адреса (sw.js 1.3).
  * 4.34 (21.11.2026). Наборы NY6 (сервер lite-fit-ny6 1.0.27): в «Наборах» переключатель FREE · NY6 – 4 варианта (зал женщины /
  *   мужчины, дом резинки / гантели) × 6 недель × 3 тренировки; «Скопировать клиенту» – неделя на даты потока клиента (Пн/Ср/Пт),
  *   не опубликованы (op 'n6copy'). В карточке клиента NY6 – «Неделя из набора NY6». Наборы NY6 правит только владелец.
@@ -1116,7 +1121,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.34';                  // 4.33: демо «Ольга Тест» (?demo) – для показа приложения новым клиентам
+var VERSION = '4.35';                  // 4.33: демо «Ольга Тест» (?demo) – для показа приложения новым клиентам
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1602,7 +1607,7 @@ var D = null;                    // { trainer, admin, today, def, cats, clients,
 var FULL = {};                   // тренировки целиком: { id: { id, cid, date, note, done, doneAt, items } }
 function sumObj(a) { return { id: a[0], cid: String(a[1]), date: a[2], done: !!a[3], doneAt: a[4] || '', n: a[5] || 0, c: a[6] || 0, m: a[7] || 0, row: a[8] || 0, k: a[9] || 0, u: +a[10] || 0, dur: +a[11] || 0, np: !!a[12] }; }   // 4.26: np – не опубликована (клиент не видит)
 function setList(r) {
-  D = { fuse: r.fuse || {}, trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], grps: r.grps || DEF_GRPS, band: r.band || DEF_BAND, clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj), vbase: r.vbase || '' };
+  D = { fuse: r.fuse || {}, trainer: r.trainer, admin: !!r.admin, today: r.today, def: r.def || { before: 3, after: 2 }, cats: r.cats || [], grps: r.grps || DEF_GRPS, band: r.band || DEF_BAND, clients: r.clients || [], ex: r.ex || [], w: (r.w || []).map(sumObj), vbase: r.vbase || '', vsrc: r.vsrc || '' };
   if (r.exo !== undefined) { D.exo = !!r.exo; D.exq = r.exq instanceof Array ? r.exq : []; }   // 4.25: база через Артёма
   TODAY = D.today || TODAY;
   (r.full || []).forEach(function (w) { FULL[w.id] = w; });
@@ -3147,7 +3152,7 @@ function setMy(r) {
   var keep = {};
   if (M) M.list.forEach(function (w) { if (PEND[w.id] && w.items) keep[w.id] = w; });           // несохранённое не затираем ответом сервера
   var rdWas = {}; if (M && M.msgs) M.msgs.forEach(function (m) { if (m.rd) rdWas[m.id] = m.rd; });
-  M = { fmt: r.fmt || '', cabk: r.cabk || '', fch: r.fch || null, free: !!r.free, fend: r.fend || '', fwant: r.fwant || null, fowner: r.fowner || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
+  M = { vsrc: r.vsrc || '', fmt: r.fmt || '', cabk: r.cabk || '', fch: r.fch || null, free: !!r.free, fend: r.fend || '', fwant: r.fwant || null, fowner: r.fowner || '', name: r.name, today: r.today, acc: r.acc || { b: 3, a: 2 }, total: r.total || 0, doneN: r.doneN || 0, list: r.list || [], closed: !!r.closed, pk: r.pk || null, totalDone: r.totalDone,
     pay: r.pay || '', aw: r.aw || null, tg: r.tg || null, money: r.money || null, msgs: (r.msgs || []).map(function (m) { if (!m.rd && rdWas[m.id]) m.rd = rdWas[m.id]; return m; }) };
   M.list = M.list.map(function (w) { var k = keep[w.id]; if (k && w.items) { w.items = k.items; w.ts = k.ts; w.te = k.te; if (PEND[w.id].done !== undefined) { w.done = k.done; w.doneAt = k.doneAt; } } return w; });
   Object.keys(PEND).forEach(function (id) { var w = myOf(id); if (!w || !w.items) delete PEND[id]; });
@@ -3329,7 +3334,7 @@ function prefetchVideos() {
   var urls = [];
   M.list.forEach(function (w) {
     if (w.st !== 'open' || w.done || !w.items || w.date < TODAY) return;
-    w.items.forEach(function (it) { var u = String(it.video || ''); if (/\/anketa\/Video\/[^/?#]+\.(mp4|m4v|mov|webm)$/i.test(u.split('?')[0]) && urls.indexOf(u) < 0) urls.push(u); });
+    w.items.forEach(function (it) { if (!vidNo(it.video)) return; var u = vidUrls(it.video).src; if (urls.indexOf(u) < 0) urls.push(u); });   // 4.35: с основного адреса
   });
   if (urls.length) LFPush.prefetch(urls.slice(0, 40));
 }
@@ -4112,9 +4117,44 @@ function diffHtml(it, i) {
   for (var n = 1; n <= 5; n++) h += '<button data-act="diff" data-i="' + i + '" data-v="' + n + '" class="' + (it.diff === n ? 'on' : n < it.diff ? 'in' : '') + '" aria-label="Сложность ' + n + ' из 5">' + n + '</button>';
   return h + '</div>';
 }
+/* ---------- 4.35: видео – основной источник и запасной ---------- */
+var VID_BASE = { ya: 'https://storage.yandexcloud.net/litefit-prod-video/video/', gh: 'https://litefitonline-lang.github.io/anketa/Video/' };
+var VID_WAIT = 2000;                   // столько ждём начала загрузки с основного адреса, потом – запасной
+/** Основной источник: 'ya' (Яндекс) или 'gh' (GitHub) – из ответа сервера; по умолчанию Яндекс. */
+function vidMain() { var s = (MODE === 'trainer' ? D && D.vsrc : M && M.vsrc) || 'ya'; return s === 'gh' ? 'gh' : 'ya'; }
+/** Имя файла нашего ролика (17.mp4), если ссылка ведёт в одну из двух папок; иначе ''. */
+function vidNo(u) {
+  var p = String(u || '').trim().split('#')[0].split('?')[0];
+  var m = /^https:\/\/litefitonline-lang\.github\.io\/anketa\/Video\/([0-9A-Za-z_-]+\.mp4)$/i.exec(p) || /^https:\/\/storage\.yandexcloud\.net\/litefit-prod-video\/video\/([0-9a-z_-]+\.mp4)$/.exec(p);
+  return m ? m[1].toLowerCase() : '';
+}
+/** { src – основной адрес, alt – запасной }; чужая ссылка остаётся как есть, без запасного. */
+function vidUrls(u) {
+  var f = vidNo(u); if (!f) return { src: String(u || ''), alt: '' };
+  var a = vidMain(), b = a === 'ya' ? 'gh' : 'ya';
+  return { src: VID_BASE[a] + f, alt: VID_BASE[b] + f };
+}
+function vidSwap(el) {
+  var a = el.getAttribute('data-alt'); if (!a || el.getAttribute('data-sw')) return;
+  el.setAttribute('data-sw', '1'); clearTimeout(el._vt);
+  el.src = a; el.load();
+  var p = el.play && el.play(); if (p && p.catch) p.catch(function () {});
+}
+function vidWait(el) {
+  if (!el || el.tagName !== 'VIDEO' || !el.getAttribute('data-alt') || el.getAttribute('data-sw') || el.readyState >= 1) return;
+  clearTimeout(el._vt);
+  el._vt = setTimeout(function () { if (el.readyState < 1 && el.isConnected) vidSwap(el); }, VID_WAIT);
+}
+document.addEventListener('loadstart', function (e) { vidWait(e.target); }, true);
+document.addEventListener('play', function (e) { vidWait(e.target); }, true);
+document.addEventListener('loadedmetadata', function (e) { if (e.target && e.target.tagName === 'VIDEO') clearTimeout(e.target._vt); }, true);
+// телефон сам решил не грузить ролик до нажатия (iPhone) – это не сбой, ждём «play»
+document.addEventListener('suspend', function (e) { var t = e.target; if (t && t.tagName === 'VIDEO' && t.readyState < 1 && t.networkState === 1) clearTimeout(t._vt); }, true);
+document.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'VIDEO' && t.getAttribute('data-alt')) vidSwap(t); }, true);
+
 function playerHtml(url) {
   var k = videoKind(url);
-  if (k.t === 'file') return '<video class="vplay" src="' + esc(k.src) + '" controls playsinline autoplay loop preload="auto"></video>';
+  if (k.t === 'file') { var vu = vidUrls(k.src); return '<video class="vplay" src="' + esc(vu.src) + '"' + (vu.alt ? ' data-alt="' + esc(vu.alt) + '"' : '') + ' controls playsinline autoplay loop preload="auto"></video>'; }
   if (k.t === 'frame') return '<div class="vframe' + (k.tall ? ' tall' : '') + '"><iframe src="' + esc(k.src) + '" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen title="Видео упражнения"></iframe></div>' +
     '<p class="note" style="margin:6px 0 12px">Не открылось? <a class="lnk" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Смотреть на ' + esc(k.name) + '</a></p>';
   return '';
@@ -4168,7 +4208,7 @@ function preconnect(w) {
   var seen = {};
   (w.items || []).forEach(function (it) {
     if (!it.video) return;
-    var o = ''; try { o = new URL(videoKind(it.video).src).origin; } catch (e) { return; }
+    var o = ''; try { var vk = videoKind(it.video); o = new URL(vk.t === 'file' ? vidUrls(vk.src).src : vk.src).origin; } catch (e) { return; }
     if (seen[o] || document.querySelector('link[data-pc="' + o + '"]')) return;
     seen[o] = true;
     var l = document.createElement('link'); l.rel = 'preconnect'; l.href = o; l.setAttribute('data-pc', o); document.head.appendChild(l);
