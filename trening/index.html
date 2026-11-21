@@ -885,6 +885,9 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
 'use strict';
 /*
  * LITE FIT — тренировки (своя замена TRNR). Одна страница для тренера и клиента.
+ * 4.34 (21.11.2026). Наборы NY6 (сервер lite-fit-ny6 1.0.27): в «Наборах» переключатель FREE · NY6 – 4 варианта (зал женщины /
+ *   мужчины, дом резинки / гантели) × 6 недель × 3 тренировки; «Скопировать клиенту» – неделя на даты потока клиента (Пн/Ср/Пт),
+ *   не опубликованы (op 'n6copy'). В карточке клиента NY6 – «Неделя из набора NY6». Наборы NY6 правит только владелец.
  * 4.32 (20.11.2026). Карточка клиента NY6: недели 1–6 потока и «→ неделя N+1» – копия тренировок недели на следующую, не
  *   опубликованы (op 'wcopy', lite-fit-ny6 1.0.19). На следующей неделе уже есть тренировки – второе нажатие подтверждает.
  * 4.31 (19.11.2026). Сервер – без изменений. Клиент, который был на FREE и перешёл в другой формат (START, BASIC…), – карточка
@@ -1113,7 +1116,7 @@ body.emb .app{padding-bottom:calc(var(--safe-b,0px) + 110px)}
  * Клиент: тренировки приходят одним запросом и хранятся на телефоне; отметки подходов сохраняются сами через пару секунд,
  * несохранённое лежит в памяти телефона и уходит при следующем открытии.
  */
-var VERSION = '4.33';                  // 4.33: демо «Ольга Тест» (?demo) – для показа приложения новым клиентам
+var VERSION = '4.34';                  // 4.33: демо «Ольга Тест» (?demo) – для показа приложения новым клиентам
 var NV_NEW = false;                    // 4.3: открыто по новой ссылке – карточка «Есть новая версия» не нужна
 var API = String(window.LF_API || '').trim();
 var LOGO = 'data:image/png;base64,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';
@@ -1424,7 +1427,7 @@ function post(body, ms) {
   }, function (e) { clearTimeout(tm); throw e; });
 }
 function busy(d) { S.busy = Math.max(S.busy + d, 0); paintSync(); }
-var WRITE = { save: 1, pub: 1, praise: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1, exok: 1, exno: 1, wcopy: 1 };
+var WRITE = { n6copy: 1, save: 1, pub: 1, praise: 1, del: 1, cset: 1, exsave: 1, exdel: 1, seen: 1, vfill: 1, vnum: 1, exadd: 1, reply: 1, tmsg: 1, freeset: 1, tplput: 1, fuse: 1, fswap: 1, exok: 1, exno: 1, wcopy: 1 };
 var jn = 0;
 function newJid() { return 'j' + Date.now().toString(36) + (jn++).toString(36) + Math.random().toString(36).slice(2, 6); }
 /**
@@ -1902,6 +1905,78 @@ function fsetOf(place, sex, eq) { return place === 'дом' ? (eq === 'ган' ?
 /** Из какого набора каждая из 3 тренировок клиента FREE. */
 function fwKinds(fw) { var k0 = fsetOf(fw.place, fw.sex, fw.eq), ks = fw.ks instanceof Array ? fw.ks : []; return [0, 1, 2].map(function (i) { return FSETS.some(function (s) { return s[0] === ks[i]; }) ? ks[i] : k0; }); }
 function isTpl(c) { return !!c && !!c.tpl; }
+/* ---------- 4.34: наборы NY6 – 6 недель × 3 тренировки ---------- */
+var N6SETS = [['n6gw', 'Зал · женщины'], ['n6gm', 'Зал · мужчины'], ['n6hm', 'Дом · резинки'], ['n6hd', 'Дом · гантели']], N6DAY = '2099-03-';
+var N6WK = ['Знакомство', 'Прогресс: +1 подход', 'Новые упражнения', 'Прогресс: +1 подход', 'Новые, пары без отдыха', 'Финиш: +1 подход'];
+function isN6Set(cid) { return /^n6(gw|gm|hm|hd)$/.test(String(cid)); }
+function n6Slot(set, k) { return D.w.filter(function (w) { return w.cid === set && w.date === N6DAY + pad(k); }).sort(wSort)[0] || null; }
+/** Номер тренировки набора в заголовке: FREE – 1–3, NY6 – «2 · неделя 3». */
+function tplNum(w) { if (isN6Set(w.cid)) { var k = Number(String(w.date).slice(-2)) || 1; return ((k - 1) % 3 + 1) + ' · неделя ' + (Math.floor((k - 1) / 3) + 1); } return Number(String(w.date).slice(-1)) || 1; }
+function fsSeg() { var k = S.fsk || 'free'; return '<div class="seg" style="max-width:380px;margin:0 0 14px"><button class="' + (k === 'free' ? 'on' : '') + '" data-act="fsk" data-v="free">FREE · 3 тренировки</button><button class="' + (k === 'ny6' ? 'on' : '') + '" data-act="fsk" data-v="ny6">NY6 · 6 недель</button></div>'; }
+function viewN6() {
+  var set = S.n6k || 'n6gw', h = fsSeg() + '<h1 class="hello">Наборы NY6</h1><p class="lead-p">Программа «6 недель до Нового года» – по 3 тренировки в неделю для каждого варианта. Неделя 1 приходит клиенту сама после «Оплачено». ' +
+    'Недели 2–6 копируете клиенту кнопкой «Скопировать клиенту»: тренировки встают на даты недели потока (Пн/Ср/Пт) неопубликованными – поправьте под клиента и опубликуйте.</p>';
+  h += '<div class="seg" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">' + N6SETS.map(function (s) { return '<button class="' + (s[0] === set ? 'on' : '') + '" data-act="n6k" data-v="' + s[0] + '">' + esc(s[1]) + '</button>'; }).join('') + '</div><div class="fsg">';
+  for (var wk = 1; wk <= 6; wk++) {
+    var rows = '', have = 0;
+    for (var n = 1; n <= 3; n++) {
+      var w = n6Slot(set, (wk - 1) * 3 + n);
+      if (!w) { rows += '<div class="row lk"><span class="dt"><b class="num">' + n + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + n + ' – нет</b><small class="st-warn">набор ещё не записан</small></span></div>'; continue; }
+      have++;
+      rows += '<button class="row" data-act="n6View" data-id="' + esc(w.id) + '"><span class="dt"><b class="num">' + n + '</b><small>трен.</small></span><span class="mn"><b>Тренировка ' + n + '</b><small>' + exWord(w.n) + (NM[w.id] ? ' · ' + esc(NM[w.id].slice(0, 3).join(', ')) : '') + '</small></span><span class="chev">›</span></button>';
+    }
+    h += '<div class="card"><div class="fs-h"><h3>Неделя ' + wk + '</h3><span class="pill">' + esc(N6WK[wk - 1]) + '</span></div><div class="rows">' + rows + '</div>' +
+      (have ? '<button class="btn sec mt" data-act="n6CopyForm" data-set="' + set + '" data-wk="' + wk + '">' + IC.copy + 'Скопировать клиенту</button>' : '') + '</div>';
+  }
+  h += '</div><p class="note">Наборы NY6 меняет только Артём. Скопированные клиенту тренировки – уже его: правьте свободно, набор от этого не меняется.</p>';
+  var m = D.w.filter(function (w) { return w.cid === set && !NM[w.id]; }).length; if (m) nmNeed(set, '2099-03', m);
+  return h;
+}
+/** Тренировка набора NY6 – посмотреть, скопировать неделю клиенту, владельцу – изменить. */
+function n6View(id) {
+  var w = sumOf(id); if (!w) return;
+  var f = FULL[id] || null, k = Number(String(w.date).slice(-2)) || 1, wk = Math.floor((k - 1) / 3) + 1, n = (k - 1) % 3 + 1, ttl = setName(w.cid) + ' · неделя ' + wk + ' · тренировка ' + n;
+  var body = function (full) { return peekBody(w, full).replace(/<div class="pk-h">[\s\S]*?<\/small><\/div>/, '<div class="pk-h"><b>' + esc(ttl) + '</b><small>набор NY6</small></div>'); };
+  sheet('Набор NY6', '<div id="pkBox">' + body(f) + '</div><button class="btn pri" data-act="n6CopyForm" data-set="' + esc(w.cid) + '" data-wk="' + wk + '">Скопировать неделю ' + wk + ' клиенту</button>' +
+    (D.admin ? '<button class="btn sec mt" data-act="editW" data-id="' + esc(id) + '" data-from="fsets">Изменить эту тренировку набора</button><p class="note">Только для владельца: правка меняет набор NY6 у всех тренеров. Клиентам, которым неделя уже скопирована, ничего не меняется.</p>' : ''));
+  if (!f) peekLoad(id).then(function (full) { var b = document.getElementById('pkBox'); if (b && full) b.innerHTML = body(full); });
+}
+function n6Clients() { return D.clients.filter(function (c) { return !c.tpl && !c.arch && c.format === 'NY6' && shown(c); }).sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; }); }
+/** Окно «Неделя из набора NY6»: из набора (выбрать клиента) или из карточки клиента (выбрать набор и неделю). */
+function n6CopyForm(set, wk, cid) {
+  var cs = n6Clients(), c = cid ? clientOf(cid) : null;
+  S.n6c = { cid: cid || '', info: null };
+  var h = '<h2>Неделя из набора NY6</h2><p class="lead">Тренировки встанут на даты этой недели потока клиента (Пн/Ср/Пт) и <b style="color:var(--text)">не будут опубликованы</b> – клиент их не видит, пока Вы не проверите и не опубликуете.</p>';
+  if (c) h += '<p class="sub" style="margin:0 0 10px">Клиент: <b>' + esc(c.name) + '</b></p>';
+  else h += cs.length ? fs('n6Cid', 'Клиент', cs.map(function (x) { return [x.id, x.name]; }), '', 'data-f="n6"') : '<p class="ferr">У Вас пока нет клиентов NY6.</p>';
+  h += fs('n6Set', 'Набор', N6SETS.map(function (s) { return [s[0], s[1]]; }), set || 'n6gw', 'data-f="n6"') +
+    fs('n6Wk', 'Неделя', [1, 2, 3, 4, 5, 6].map(function (k) { return [k, 'Неделя ' + k + ' – ' + N6WK[k - 1].toLowerCase()]; }), wk || 2, 'data-f="n6"');
+  h += '<div class="tpk">' + [1, 2, 3].map(function (n) { return '<label class="chk"><input type="checkbox" id="n6n' + n + '" checked><span>Тренировка ' + n + '</span></label>'; }).join('') + '</div>';
+  h += '<p class="note" id="n6Hint" style="margin:0 0 10px"></p>' + fi('n6From', 'Своя дата первой тренировки (пусто – по сетке потока)', '', 'date') +
+    '<label class="chk" style="margin-top:10px"><input type="checkbox" id="n6Pub"><span>Сразу опубликовать</span></label>' +
+    '<p class="ferr" id="ferr" hidden></p><button class="btn pri" data-act="n6CopyGo"' + (!c && !cs.length ? ' disabled' : '') + '>Скопировать</button>';
+  sheet('Неделя из набора NY6', h);
+  n6Info();
+}
+/** Поток клиента и даты недель (op 'n6info') – подсказка под выбором недели; набор – по «Где и с чем». */
+function n6Info() {
+  var cid = S.n6c && (S.n6c.cid || val('n6Cid'));
+  if (!cid) return;
+  if (S.n6c.info && S.n6c.info.cid === cid) return n6HintPaint();
+  var hb = document.getElementById('n6Hint'); if (hb) hb.textContent = 'Смотрю даты потока…';
+  call('n6info', { cid: cid }, true).then(function (r) {
+    if (!S.n6c || (S.n6c.cid || val('n6Cid')) !== cid) return;
+    S.n6c.info = r && r.ok ? r : { none: 1 }; S.n6c.info.cid = cid;
+    if (r && r.ok && r.set && S.n6c.cid) { var sel = document.getElementById('n6Set'); if (sel) sel.value = r.set; }
+    n6HintPaint();
+  });
+}
+function n6HintPaint() {
+  var hb = document.getElementById('n6Hint'), i = S.n6c && S.n6c.info, wk = Number(val('n6Wk')) || 1; if (!hb) return;
+  if (!i || i.none || !i.weeks || !i.weeks.length) { hb.textContent = 'Поток клиента не найден – укажите дату первой тренировки ниже.'; return; }
+  var d = i.weeks[wk - 1] || [];
+  hb.innerHTML = 'Поток ' + esc(i.stream) + ' · ' + dm(i.start) + '–' + dm(i.end) + '. Неделя ' + wk + ': ' + d.map(dm).join(', ') + (d.length && d[0] < TODAY ? ' – уже прошли, встанут на ближайшие Пн/Ср/Пт' : '') + '.';
+}
 function myTpl(kind) { var c = D && D.clients.filter(function (x) { return x.tpl && !x.base && x.kind === kind; })[0]; return c ? c.id : ''; }
 function baseTpl(kind) { var c = D && D.clients.filter(function (x) { return x.tpl && x.base && x.kind === kind; })[0]; return c ? c.id : ''; }
 function altKind(k) { return ''; }   // 4.8: домашние наборы разные – запасного нет
@@ -1909,9 +1984,10 @@ function slotW(cid, n) { return cid ? D.w.filter(function (w) { return w.cid ===
 function isBaseW(w) { var c = w && clientOf(w.cid); return !!(c && c.tpl && c.base); }
 function tplOf(set) { return D.w.filter(function (w) { return w.cid === set; }).sort(wSort).slice(0, 3); }
 function tplReady(set) { return tplOf(set).length >= 3; }
-function setName(set) { var c = clientOf(set), k = (c && c.kind) || set, x = FSETS.filter(function (s) { return s[0] === k; })[0]; return x ? x[1] : set; }
+function setName(set) { var c = clientOf(set), k = (c && c.kind) || set, x = FSETS.concat(N6SETS).filter(function (s) { return s[0] === k; })[0]; return x ? x[1] : set; }
 function viewFsets() {
-  var h = '<h1 class="hello">Наборы FREE</h1><p class="lead-p">Новому клиенту FREE приходят 3 тренировки – по умолчанию из набора Lite Fit. Хотите свою – составьте её под нужным номером. ' +
+  if (S.fsk === 'ny6') return viewN6();                                   // 4.34
+  var h = fsSeg() + '<h1 class="hello">Наборы FREE</h1><p class="lead-p">Новому клиенту FREE приходят 3 тренировки – по умолчанию из набора Lite Fit. Хотите свою – составьте её под нужным номером. ' +
     'Под каждым номером кружком отметьте, какая тренировка приходит Вашим новым клиентам: своя или из набора Lite Fit. Тренировки набора Lite Fit не удаляются.</p><div class="fsg">';
   var row = function (w, act, n, t, on, pick) {
     var b = '<button class="row" data-act="' + act + '" data-id="' + esc(w.id) + '" data-from="fsets">' + (pick ? '' : '<span class="dt"><b class="num">' + n + '</b><small>трен.</small></span>') + '<span class="mn"><b>' + (pick ? '' : 'Тренировка ' + n + ' · ') + t + '</b><small>' +
@@ -2216,7 +2292,7 @@ function ny6CardW(c) {
   var s = ny6StartOf(c), l = wList(c.id);
   if (!s) return '';
   var h = '<div class="card"><div class="fs-h"><h3>NY6 · 6 недель</h3><span class="pill">' + dm(s) + ' – ' + dm(addDay(s, 41)) + '</span></div>' +
-    '<p class="sub" style="margin:4px 0 8px">Составили неделю – скопируйте её на следующую и поправьте. Копии не опубликованы, клиент их не видит, пока Вы не опубликуете.</p><div class="rows">';
+    '<p class="sub" style="margin:4px 0 8px">Неделю из программы NY6 – кнопкой «Неделя из набора NY6» внизу. Или скопируйте свою неделю на следующую. Копии не опубликованы, клиент их не видит, пока Вы не опубликуете.</p><div class="rows">';
   for (var k = 1; k <= 6; k++) {
     var a = addDay(s, 7 * (k - 1)), b = addDay(a, 6), wk = l.filter(function (w) { return w.date >= a && w.date <= b; });
     var nx = k < 6 ? l.filter(function (w) { return w.date >= addDay(a, 7) && w.date <= addDay(b, 7); }).length : 0;
@@ -2224,8 +2300,10 @@ function ny6CardW(c) {
     h += '<div class="row" style="align-items:center"><span class="mn"><b>Неделя ' + k + '</b><small>' + dm(a) + '–' + dm(b) + ' · ' + (wk.length ? 'тренировок ' + wk.length + (np ? ', не опубликовано ' + np : '') + (dn ? ', выполнено ' + dn : '') : 'тренировок нет') + '</small></span>' +
       (wk.length && k < 6 ? '<button class="btn sec" data-act="wCopy" data-from="' + a + '" data-k="' + k + '" data-busy="' + nx + '" style="width:auto;padding:0 12px;height:36px;font-size:13px">→ неделя ' + (k + 1) + (nx ? ' (там уже ' + nx + ')' : '') + '</button>' : '') + '</div>';
   }
-  return h + '</div></div>';
+  return h + '</div><button class="btn sec mt" data-act="n6CopyForm" data-cid="' + esc(c.id) + '" data-wk="' + n6NextWk(c, s) + '">' + IC.copy + 'Неделя из набора NY6</button></div>';   // 4.34
 }
+/** 4.34: первая неделя потока без тренировок (2–6) – по умолчанию в окне «Неделя из набора NY6». */
+function n6NextWk(c, s) { var l = wList(c.id); for (var k = 2; k <= 6; k++) { var a = addDay(s, 7 * (k - 1)), b = addDay(a, 6); if (!l.some(function (w) { return w.date >= a && w.date <= b; })) return k; } return 2; }
 function viewClient() {
   var c = clientOf(S.cid), l = wList(c.id).reverse(), dn = l.filter(function (w) { return w.done; }).length, a = accOf(c);
   var h = '<button class="back" data-act="home">' + IC.back + 'Клиенты</button><div class="nmrow"><h1 class="hello">' + esc(c.name) + '</h1>' + (c.tpl ? '' : pzSwHtml(c)) + '</div>' +
@@ -2532,7 +2610,7 @@ function suggHtml() {
 function viewEdit() {
   var w = S.draft, c = clientOf(w.cid), ac = access(w), nch = chgCount(w), RF = refParts(w), W = wide(), TP = isTpl(c);
   var s0 = S.isNew ? null : sumOf(w.id), NP = !!(s0 ? s0.np : w.np) && !w.done;   // 4.26: «Опубликовано / Не опубликовано»
-  var h = '<div class="ed' + (RF.panel && W ? ' has-ref' : '') + '"><div class="ed-m"><div class="ed-head">' + (S.isNew || TP || w.done ? '' : pubSw(NP)) + '<button class="back" data-act="editBack">' + IC.back + (S.ret === 'fsets' ? 'Наборы FREE' : S.ret === 'cal' ? 'Календарь' : S.ret === 'coms' ? 'Комментарии' : esc(c.name)) + '</button><h1 class="hello" id="wTitle">Тренировка ' + (TP ? (Number(String(w.date).slice(-1)) || 1) : numFor(w)) + '</h1>' +
+  var h = '<div class="ed' + (RF.panel && W ? ' has-ref' : '') + '"><div class="ed-m"><div class="ed-head">' + (S.isNew || TP || w.done ? '' : pubSw(NP)) + '<button class="back" data-act="editBack">' + IC.back + (S.ret === 'fsets' ? 'Наборы' : S.ret === 'cal' ? 'Календарь' : S.ret === 'coms' ? 'Комментарии' : esc(c.name)) + '</button><h1 class="hello" id="wTitle">Тренировка ' + (TP ? tplNum(w) : numFor(w)) + '</h1>' +
     '<div class="meta"><span class="pill">' + esc(c.name) + '</span><span class="pill">' + exWord(w.items.length) + '</span>' + (w.done ? '<span class="pill ok">выполнена ' + dm(w.doneAt || w.date) + '</span>' : '') +
     (nch.c ? '<span class="pill warn">клиент изменил: ' + nch.c + '</span>' : '') + (nch.m ? '<span class="pill warn">не выполнено: ' + nch.m + '</span>' : '') +
     runPill(w) + (TP ? '<span class="pill warn">' + (isBaseW(w) ? 'набор Lite Fit – для всех тренеров' : 'своя тренировка набора') + '</span>' : '<span class="pill' + (NP ? ' warn' : '') + '" id="accPill">' + (NP ? 'не опубликована – клиент не видит' : accTxt(ac)) + '</span>') + '</div>';
@@ -2540,7 +2618,7 @@ function viewEdit() {
   var lb = numFor(w);
   if (lb === 'сверх пакета') h += '<div class="banner warn">Эта тренировка сверх пакета: пакет закончился или все его тренировки уже выполнены. Новый пакет встанет сам, когда в кабинете тренера внесут оплату (вкладка «Оплаты»).</div>';
   h += comsTop(w);
-  h += '<div class="stack" style="margin-bottom:14px">' + (TP ? '<p class="note" style="margin:0">Тренировка ' + (Number(String(w.date).slice(-1)) || 1) + ' набора «' + esc(setName(w.cid)) + '». Клиенту даты ставятся сами.</p>' : fi('wDate', 'Дата тренировки', w.date, 'date', 'data-f="date"'));
+  h += '<div class="stack" style="margin-bottom:14px">' + (TP ? '<p class="note" style="margin:0">Тренировка ' + tplNum(w) + ' набора «' + esc(setName(w.cid)) + '». Клиенту даты ставятся сами.</p>' : fi('wDate', 'Дата тренировки', w.date, 'date', 'data-f="date"'));
   if (w.note || S.open.note) h += ft('wNote', 'Заметка клиенту ко всей тренировке', w.note, 2, 'maxlength="600" data-f="note"');
   else h += '<button class="txtb" data-act="openNote">' + IC.note + 'Добавить заметку ко всей тренировке</button>';
   h += RF.btn + '</div></div>' + (RF.panel && !W ? RF.panel : '') + '<div class="ed-grid">';
@@ -2555,7 +2633,7 @@ function viewEdit() {
   });
   h += '<div class="card" id="addCard"><h3>' + (w.items.length ? 'Следующее упражнение' : 'Первое упражнение') + '</h3><p class="sub">Выберите группу мышц или начните вводить название – подсказка появится по первым буквам.</p><div id="pickF">' + pickChips() + '</div>' +
     fi('exQ', 'Название упражнения', S.q, 'text', 'autocomplete="off" autocorrect="off" data-f="q"') + '<div class="sugg" id="sugg">' + suggHtml() + '</div></div></div></div>' + (RF.panel && W ? '<div class="ed-ref">' + RF.panel + '</div>' : '') + '</div>';
-  if (!S.isNew) h += '<div class="ed-acts"><button class="btn sec" data-act="copyW">' + IC.copy + 'Скопировать на другую дату или клиенту</button><button class="btn sec" data-act="tplPutForm" data-id="' + esc(w.id) + '">В мои наборы FREE…</button>' +
+  if (!S.isNew) h += '<div class="ed-acts"><button class="btn sec" data-act="copyW">' + IC.copy + 'Скопировать на другую дату или клиенту</button>' + (isN6Set(w.cid) ? '' : '<button class="btn sec" data-act="tplPutForm" data-id="' + esc(w.id) + '">В мои наборы FREE…</button>') +
     (isBaseW(w) ? '' : '<button class="btn danger" data-act="delW">' + (S.del ? (TP ? 'Точно удалить? Клиентам будет приходить тренировка набора Lite Fit' : 'Точно удалить? Нажмите ещё раз') : TP ? 'Удалить свою тренировку' : 'Удалить тренировку') + '</button>') + '</div>';
   return h;
 }
@@ -4442,6 +4520,22 @@ var ACT = {
   calDay: function (b) { S.calDay = b.getAttribute('data-d'); rerenderKeep(); },
   tplNew: function (b) { tplForm(b.getAttribute('data-set'), Number(b.getAttribute('data-n')) || 0, b.getAttribute('data-from') || ''); },
   tplView: function (b) { tplView(b.getAttribute('data-id')); },
+  fsk: function (b) { S.fsk = b.getAttribute('data-v'); rerenderKeep(); },                     // 4.34: наборы FREE · NY6
+  n6k: function (b) { S.n6k = b.getAttribute('data-v'); rerenderKeep(); },
+  n6View: function (b) { n6View(b.getAttribute('data-id')); },
+  n6CopyForm: function (b) { n6CopyForm(b.getAttribute('data-set') || '', Number(b.getAttribute('data-wk')) || 0, b.getAttribute('data-cid') || ''); },
+  n6CopyGo: function (b) {
+    var cid = (S.n6c && S.n6c.cid) || val('n6Cid'), ns = [1, 2, 3].filter(function (n) { var e = document.getElementById('n6n' + n); return e && e.checked; });
+    var pe = document.getElementById('n6Pub');
+    if (!cid) return ferr('Выберите клиента.');
+    if (!ns.length) return ferr('Отметьте хотя бы одну тренировку.');
+    b.disabled = true; b.textContent = 'Копирую…';
+    call('n6copy', { cid: cid, set: val('n6Set'), week: Number(val('n6Wk')), ns: ns, from: val('n6From'), pub: !!(pe && pe.checked) }).then(function (r) {
+      if (r.auth) return;
+      if (!r.ok) { b.disabled = false; b.textContent = 'Повторить'; ferr(errText(r)); return; }
+      closeSheet(); toast(r.msg || 'Готово'); loadList();
+    });
+  },
   botHelp: function () { sheet('Уведомления клиентам', botHelpHtml()); },
   botAll: function () { S.botAll = !S.botAll; botPaint(S.cid); },
   fuse: function (b) {
@@ -5181,6 +5275,7 @@ document.addEventListener('change', function (e) {
     prepTrImg(tf).then(function (d) { S.img = S.img || {}; S.img.d = d; S.img.del = false; imgPickPaint(); ferr(''); }).catch(function (x) { ferr(cap(x.message || 'фото не открылось')); });
     return;
   }
+  if (f === 'n6') { if (el.id === 'n6Cid') n6Info(); else n6HintPaint(); return; }   // 4.34
   if (f === 'comCid' && S.comCid !== el.value) { S.comCid = el.value; var cb = document.getElementById('comBox'); if (cb) cb.innerHTML = comsHtml(); return; }   // на случай браузера без события input у списка
   if (f === 'refId' && S.ref && S.ref.id !== el.value) { S.ref.id = el.value; S.ref.open = true; loadRef(); rerenderKeep(); return; }
   if (f === 'fwPlace') { var sb = document.getElementById('fwSexBox'), eb = document.getElementById('fwEqBox'); if (sb) sb.hidden = el.value !== 'зал'; if (eb) eb.hidden = el.value !== 'дом'; return; }   // 4.8
