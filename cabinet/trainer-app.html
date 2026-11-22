@@ -897,6 +897,9 @@ function planBody(x) {
  * 1.1 (09.10.2026). Скорость: список и карточки клиентов хранятся в памяти браузера на этом устройстве и показываются сразу;
  * сервер сообщает, какие карточки устарели, и перечитываются только они (до шести запросов одновременно). Внизу главной —
  * сколько секунд заняли список и карточки. Фото в памяти не хранятся. Закрыли доступ или сменили ПИН-код — память стирается.
+ * 3.3 (22.11.2026, сервер lite-fit-trainer 3.12.4). «Перевести на PRO» – как «Внести оплату»: «Стоимость пакета» по прайсу PRO
+ *   (срок × число тренировок), «Оплачено сейчас» 0 или первый взнос – пакет проводится, у клиента долг, дневник продлевается сразу;
+ *   напоминание об оплате – за 3 дня до конца пакета, пока долг не погашен.
  * 3.2 (20.11.2026). NY6 – финал: у выпускницы итог потока и «Зачёт и продолжение» (op 'ny6credit', lite-fit-ny6 1.0.24): цены оферты,
  *   с зачётом 3 900 ₽ при 3 и 6 месяцах, отметка один раз, клиенту – «Готово!».
  * 3.1 (20.11.2026). Вкладка «Free» – кнопка «📖 Как вести клиента FREE» (текст guide_free, лист «NY6 Тексты»).
@@ -910,7 +913,7 @@ function planBody(x) {
  * Сначала приходит список клиентов (быстро, без открытия их таблиц), карточки клиентов догружаются в фоне по три.
  * Любая запись уходит с номером jid: если ответ не дошёл, страница спрашивает результат по этому номеру, а не повторяет действие.
  */
-var VERSION = '3.2';
+var VERSION = '3.3';
 var PATCH = ' · правка 02.11';                  // правка страницы без смены версии сервера                  // правка страницы без смены версии сервера
 var API = String(window.LF_API || '').trim();
 var app = document.getElementById('app'), tabsEl = document.getElementById('tabs'), toastEl = document.getElementById('toast');
@@ -2569,6 +2572,8 @@ function tariff(c, days, sess) {
   return c.disc && c.disc.pct ? Math.round(pr * (100 - c.disc.pct) / 100) : pr;
 }
 /** 2.4: стоимость пакета по умолчанию – по прайсу, иначе как у прошлого пакета клиента с тем же сроком. */
+/** 3.3: тот же клиент, но тариф – PRO (окно «Перевести на PRO»). */
+function proC(c) { var o = Object.create(c); o.format = 'PRO'; return o; }
 function costDef(c, days, sess) {
   var t0 = tariff(c, days, sess); if (t0) return t0;
   var x = (c.pays || []).filter(function (p) { return p.k === 'pkg' && p.cost != null && String(p.days) === String(days); })[0]; return x ? x.cost : '';
@@ -3727,14 +3732,14 @@ var ACT = {
       fi('prFrom', 'Старт PRO', ymd(Math.max(T, dn(c.trial.from) + 1)), 'date', 'min="' + ymd(dn(c.trial.from) + 1) + '" max="' + ymd(T + 60) + '"') +
       '<p class="note" style="margin:0">От этой даты считаются оплаченный период, итоги месяца и фото для коллажа.</p>' +
       '<button type="button" class="row swrow" data-act="sw" data-show="prPayBox" id="prPay" aria-pressed="true"><span class="mn"><b>Внести оплату сейчас</b></span><span class="sw on"></span></button>' +
-      '<div id="prPayBox" class="frm">' + payFields('q', 30) + '</div>' +
+      '<div id="prPayBox" class="frm">' + payFields('y', 30, proC(c)) + '</div>' +   // 3.3: со стоимостью пакета – можно в долг
       '<p class="ferr" id="ferr"></p><button class="btn pri" data-act="proSave">Перевести на PRO</button>');
   },
   proSave: function () {
     var c = cur(), b = { id: c.id, start: val('prFrom') };
     if (!b.start) return ferr('Укажите дату старта PRO.');
     if (swOn('prPay')) {
-      var q = payRead('q');
+      var q = payRead('y');                                                 // 3.3
       if (q.err) return ferr(q.err);
       Object.keys(q).forEach(function (k) { b[k] = q[k]; });
     }
@@ -3742,7 +3747,8 @@ var ACT = {
       if (!r) return;
       S.sub = 'care'; render();
       resultSheet('Клиент на PRO', esc(r.msg || '') + (r.ext ? '. ' + esc(cap(r.ext)) : '') + '. Кабинет у клиента открылся полностью, заново ему ничего делать не нужно.', r,
-        (r.paid ? '' : '<div class="banner warn">Оплата PRO не внесена – дневник продлится после записи оплаты («Оплаты», «Внести оплату»).</div>') +
+        (r.debt > 0 ? '<div class="banner warn">Оплачено ' + fmt(r.paidSum || 0) + ' из ' + fmt(r.cost) + ' ₽ – долг <b>' + fmt(r.debt) + ' ₽</b>. Дневник продлён на весь пакет. Клиент видит в кабинете «оплатите до …», за 3 дня до конца пакета ему придёт напоминание – пока долг не погашен («Оплаты» → «Доплатить»).</div>'
+          : r.paid ? '' : '<div class="banner warn">Оплата PRO не внесена – дневник продлится после записи оплаты («Оплаты», «Внести оплату»).</div>') +   // 3.3
         '<p class="lead" style="margin-bottom:8px">Что настроить дальше: норму шагов и расчёт нормы – «Питание»; интервал замеров – «Замеры»; план – «План PRO»; гайды – «Ведение».</p>');
     });
   },
@@ -4082,6 +4088,7 @@ document.addEventListener('change', function (e) {
   }
   if (!c) return;
   if (k === 'payPkg' || k === 'paySess') {                                // 2.4: другой срок или число тренировок – другая стоимость по прайсу
+    if (document.getElementById('prFrom')) c = proC(c);                    // 3.3: перевод на PRO – прайс PRO
     var pv = val('yPkg'), sv = val('ySess'), cd2 = costDef(c, pv, sv), se = document.getElementById('ySum'), ce2 = document.getElementById('yCost'), tx = document.getElementById('yTariff');
     if (se) se.placeholder = cd2 !== '' ? fmt(cd2) : '';
     if (ce2 && val('yDMode') !== 'on') ce2.value = cd2 !== '' ? String(cd2) : '';
