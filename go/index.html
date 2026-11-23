@@ -18,6 +18,14 @@
           font-size:17px; padding:16px 20px; border-radius:14px; }
   small { display:block; margin-top:18px; color:#7d8a8a; font-size:13px; }
 </style>
+<script>
+  // счётчик Top@Mail.ru 3813680 (VK Реклама): просмотр страницы и выбор кнопки
+  var _tmr = window._tmr || (window._tmr = []);
+  _tmr.push({ id: '3813680', type: 'pageView', start: (new Date()).getTime() });
+  (function (d, w, id) { if (d.getElementById(id)) return; var ts = d.createElement('script'); ts.async = true; ts.id = id;
+    ts.src = 'https://top-fwz1.mail.ru/js/code.js'; var s = d.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ts, s); })(document, window, 'tmr-code');
+  function tmrGoal(g) { try { _tmr.push({ id: '3813680', type: 'reachGoal', goal: g }); } catch (e) {} }
+</script>
 </head>
 <body>
 <main>
@@ -41,8 +49,11 @@
       document.querySelector('p').textContent = '7 вопросов – и Вы узнаете, что мешает именно Вам и с чего начать до Нового года. Где удобнее пройти?';
       var go = document.getElementById('go');
       go.href = url; go.textContent = 'Пройти во ВКонтакте';
+      tmrGoal('ny_go_page');
+      go.addEventListener('click', function () { tmrGoal('ny_go_vk'); });
       var t = document.createElement('a'); t.className = 'btn'; t.href = tg; t.textContent = 'Пройти в Telegram';
       t.style.marginTop = '12px'; t.style.background = '#fff';
+      t.addEventListener('click', function () { tmrGoal('ny_go_tg'); });
       go.parentNode.insertBefore(t, go.nextSibling);
       document.querySelector('small').textContent = 'Во ВКонтакте после перехода нажмите «Начать». Бесплатно, без регистрации.';
       return;
