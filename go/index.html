@@ -32,11 +32,20 @@
     var out = new URLSearchParams();
     ['ref', 'ref_source'].forEach(function (k) { if (q.get(k)) out.set(k, q.get(k)); });
     if (!out.get('ref')) out.set('ref', 'go_site');
+    var ref = out.get('ref');
     var url = 'https://vk.me/lite_fit_online?' + out.toString();
-    if (/^ny[_-]/i.test(out.get('ref') || '')) {                       // NY6: «6 недель до Нового года» – тест в чате
-      document.title = 'Lite Fit – 6 недель до Нового года';
+    if (/^ny[_-]/i.test(ref)) {                                         // NY6: выбор, где пройти тест – без автоперехода
+      var tg = 'https://t.me/LiteFitClientBot?start=' + encodeURIComponent(ref.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64));
+      document.title = 'Lite Fit – тест за 2 минуты';
       document.querySelector('h1').innerHTML = '6 недель с тренером – <span>тест за 2 минуты</span>';
-      document.querySelector('p').textContent = 'Открываем чат Lite Fit во ВКонтакте – там 7 вопросов и Ваш результат.';
+      document.querySelector('p').textContent = '7 вопросов – и Вы узнаете, что мешает именно Вам и с чего начать до Нового года. Где удобнее пройти?';
+      var go = document.getElementById('go');
+      go.href = url; go.textContent = 'Пройти во ВКонтакте';
+      var t = document.createElement('a'); t.className = 'btn'; t.href = tg; t.textContent = 'Пройти в Telegram';
+      t.style.marginTop = '12px'; t.style.background = '#fff';
+      go.parentNode.insertBefore(t, go.nextSibling);
+      document.querySelector('small').textContent = 'Во ВКонтакте после перехода нажмите «Начать». Бесплатно, без регистрации.';
+      return;
     }
     document.getElementById('go').href = url;
     setTimeout(function () { location.replace(url); }, 300);
