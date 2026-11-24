@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Lite Fit – тест за 2 минуты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#05090b; --card:#0d1719; --line:#1b2c2f; --fg:#fff; --muted:#b9c4c4; --turq:#3ed6ce; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); font-family:Montserrat, Arial, sans-serif; }
+  main { max-width:480px; margin:0 auto; padding:20px 16px 36px; min-height:100vh; display:flex; flex-direction:column; }
+  .logo { font-weight:800; color:var(--turq); font-size:15px; letter-spacing:.02em; margin-bottom:18px; }
+  h1 { font-size:26px; line-height:1.2; margin:0 0 12px; font-weight:800; }
+  h1 span, h2 span { color:var(--turq); }
+  h2 { font-size:21px; line-height:1.25; margin:0 0 18px; font-weight:700; }
+  p { color:var(--muted); font-size:16px; line-height:1.5; margin:0 0 14px; white-space:pre-line; }
+  .hero { width:100%; border-radius:16px; display:block; margin:4px 0 18px; aspect-ratio:1/1; object-fit:cover; background:#111; }
+  .btn { display:block; width:100%; border:0; cursor:pointer; text-align:center; text-decoration:none; font:700 17px Montserrat, Arial, sans-serif;
+         padding:16px 18px; border-radius:14px; background:var(--turq); color:#05090b; margin-top:10px; }
+  .btn.alt { background:#fff; }
+  .opt { display:block; width:100%; text-align:left; font:600 16px Montserrat, Arial, sans-serif; color:var(--fg); background:var(--card);
+         border:1px solid var(--line); border-radius:14px; padding:16px; margin:0 0 10px; cursor:pointer; }
+  .opt:active { border-color:var(--turq); }
+  .bar { height:6px; background:var(--line); border-radius:9px; margin:0 0 22px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--turq); width:0; transition:width .25s; }
+  .step { color:var(--muted); font-size:13px; margin-bottom:8px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin:16px 0 6px; }
+  .card p { color:#dfe7e7; font-size:15px; }
+  .price { font-size:22px; font-weight:800; margin:6px 0 4px; }
+  small { display:block; margin-top:14px; color:#7d8a8a; font-size:13px; line-height:1.45; text-align:center; }
+  [hidden] { display:none !important; }
+</style>
+<script>
+  var _tmr = window._tmr || (window._tmr = []);
+  _tmr.push({ id: '3813680', type: 'pageView', start: (new Date()).getTime() });
+  (function (d, w, id) { if (d.getElementById(id)) return; var ts = d.createElement('script'); ts.async = true; ts.id = id;
+    ts.src = 'https://top-fwz1.mail.ru/js/code.js'; var s = d.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ts, s); })(document, window, 'tmr-code');
+  function tmrGoal(g) { try { _tmr.push({ id: '3813680', type: 'reachGoal', goal: g }); } catch (e) {} }
+</script>
+</head>
+<body>
+<main>
+  <div class="logo">Lite Fit</div>
+
+  <section id="intro">
+    <img class="hero" src="../m/ny6/offer_6_nedel.jpg" alt="Тренеры Lite Fit">
+    <h1>6 недель с тренером – <span>до Нового года</span></h1>
+    <p>7 вопросов, 2 минуты – и Вы узнаете, что мешает именно Вам и с чего начать. Прямо здесь, без регистрации.</p>
+    <button class="btn" id="start">Пройти тест</button>
+    <small>Занятия по 30–45 минут дома или в зале · Lite Fit, тренеры из Балашихи</small>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="step" id="step"></div>
+    <div class="bar"><i id="bar"></i></div>
+    <h2 id="q"></h2>
+    <div id="opts"></div>
+  </section>
+
+  <section id="result" hidden>
+    <img class="hero" id="rimg" alt="">
+    <h2 id="rhead"></h2>
+    <p id="rtext"></p>
+    <div class="card">
+      <h2 id="otitle" style="font-size:18px;margin-bottom:10px"></h2>
+      <p id="olist"></p>
+      <div class="price">3 900 ₽ за 6 недель</div>
+      <p style="margin:0">Это 217 ₽ за занятие с тренером. <span id="odeadline"></span></p>
+    </div>
+    <p style="margin-top:14px">Нажмите, где Вам удобнее, – тренер получит Ваш результат и поможет записаться в поток.</p>
+    <a class="btn" id="tovk">Хочу в поток – написать во ВКонтакте</a>
+    <a class="btn alt" id="totg">Хочу в поток – написать в Telegram</a>
+    <small>Дойдёте до конца – 16 из 18 занятий и финальные замеры – и продолжите в BASIC или PRO на 3 или 6 месяцев: все 3 900 ₽ вычтем из стоимости тарифа.</small>
+  </section>
+</main>
+<script>
+(function () {
+  var Q = [
+    ['Что хотите успеть к 31 декабря?', [['Убрать объём в талии',''],['Влезть в праздничное платье',''],['Вернуть лёгкость и энергию',''],['Снова почувствовать себя в форме','']]],
+    ['Тут нет неправильных ответов – так бывает почти у всех. Сколько раз за этот год Вы начинали «с понедельника»?', [['Ни разу',''],['1–2 раза','S1'],['3–5 раз','S2'],['Сбилась со счёта','S3']]],
+    ['Что чаще всего ломает план?', [['Работа и дом съедают время','T2'],['Срываюсь на еде, особенно вечером','E2'],['Через пару недель пропадает запал','S2'],['Боюсь навредить спине или коленям','B2']]],
+    ['Половина позади. Как Вы питаетесь сейчас?', [['Как придётся, много перекусов','E2'],['Ограничиваю себя, а вес стоит','E3'],['В целом нормально',''],['Не знаю, сколько на самом деле ем','E1']]],
+    ['Когда Вы в последний раз занимались регулярно?', [['Занимаюсь сейчас',''],['Полгода назад','B1'],['Больше года назад','B2'],['Никогда системно','S1 B1']]],
+    ['Осталось два вопроса – и покажу результат. Как Вы себя чувствуете к вечеру?', [['Бодро',''],['Устаю, но держусь','T1'],['Без сил, только до дивана','T2'],['Тело ноет, скованность','B2']]],
+    ['Сколько времени готовы выделять себе?', [['3 раза по 30 минут','T1'],['3 раза по 45 минут',''],['Могу и больше',''],['Пока не знаю','T1 S1']]]
+  ];
+  var R = {
+    S: ['Каждый раз заново', 'rezultat_S_kazhdyy_raz_zanovo.jpg', 'Ваша главная преграда – не лень и не характер. Вы начинаете на энтузиазме, а через пару недель план рассыпается: никто не видит, что занятие пропущено, и не подскажет, что делать, если неделя пошла не так.\n\nВам нужна не новая программа, а система, которая держит, когда запал закончился.\n\nЗа 6 недель: 3 занятия в неделю вместе с потоком, напоминания в боте, тренер разбирает Ваши отметки, а каждое воскресенье – всю Вашу неделю.'],
+    E: ['Еда решает за Вас', 'rezultat_E_eda.jpg', 'Вы стараетесь, но питание работает против Вас: то перекусы, то жёсткие ограничения, после которых срыв. Отсюда ощущение, что делаете всё, а результата нет.\n\nДело не в силе воли: Вы не знаете своей нормы, и никто не поправляет курс.\n\nЗа 6 недель: дневник питания с Вашей нормой, на 2-й неделе тренер поправит её по Вашим цифрам – без запретов и голода. Плюс 3 занятия в неделю.'],
+    T: ['Всё для других', 'rezultat_T_vse_dlya_drugih.jpg', 'Ваш день расписан под работу и семью, а на себя остаётся вечер без сил. Длинные тренировки в такой жизни не держатся – и это нормально.\n\nВам нужен формат, который встраивается в неделю, а не ломает её.\n\nЗа 6 недель: 3 занятия в неделю по 30–45 минут дома или в зале – в любое удобное время, тренер на связи до конца дня.'],
+    B: ['Тело отвыкло', 'rezultat_B_telo_otvyklo.jpg', 'Тело давно без регулярной нагрузки: появилась скованность, и страшно начать резко и навредить. Поэтому старт снова откладывается.\n\nВозвращаться нужно постепенно и с контролем техники – тогда тело откликается быстро.\n\nЗа 6 недель: мягкий вход с первой недели, видео техники к каждому упражнению, тренер разбирает Ваши отметки и подстраивает нагрузку.']
+  };
+  // потоки: название, старт, приём заявок до (включительно)
+  var F = [['6 недель до Нового года','25 ноября','2026-11-27','27 ноября'],['6 недель до Нового года','2 декабря','2026-12-04','4 декабря'],
+           ['6 недель: праздники без отката','9 декабря','2026-12-11','11 декабря'],['6 недель: праздники без отката','16 декабря','2026-12-18','18 декабря']];
+  var OL = '– 18 занятий дома или в зале, по 30–45 минут\n– дневник питания с Вашей нормой – тренер поправит её на 2-й неделе\n– замеры на старте, через 3 недели и в финале\n– звонок с тренером на старте и в финале\n– разбор Вашей недели от тренера каждое воскресенье\n– ответы на вопросы до конца дня и итоги недели всего потока\n– бонусы: «Праздничный стол без срыва» и «Занятие на 10 минут для каникул»';
+
+  var qs = new URLSearchParams(location.search);
+  var src = (qs.get('ref') || 'ny_web').replace(/[^A-Za-z0-9_]/g, '').replace(/^ny_?/, '').slice(0, 40) || 'web';
+  var score = { S: 0, E: 0, T: 0, B: 0 }, i = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  tmrGoal('ny_web_open');
+
+  $('start').onclick = function () { tmrGoal('ny_web_start'); $('intro').hidden = true; $('quiz').hidden = false; show(); window.scrollTo(0, 0); };
+
+  function show() {
+    $('step').textContent = 'Вопрос ' + (i + 1) + ' из ' + Q.length;
+    $('bar').style.width = (i / Q.length * 100) + '%';
+    $('q').textContent = Q[i][0];
+    var box = $('opts'); box.innerHTML = '';
+    Q[i][1].forEach(function (o) {
+      var b = document.createElement('button'); b.className = 'opt'; b.textContent = o[0];
+      b.onclick = function () {
+        (o[1] || '').split(' ').forEach(function (p) { if (p) score[p[0]] += +p.slice(1); });
+        i++; if (i === 4) tmrGoal('ny_web_q4');
+        if (i < Q.length) { show(); window.scrollTo(0, 0); } else finish();
+      };
+      box.appendChild(b);
+    });
+  }
+
+  function finish() {
+    var type = 'S', best = -1;
+    ['S', 'E', 'T', 'B'].forEach(function (k) { if (score[k] > best) { best = score[k]; type = k; } });
+    tmrGoal('ny_web_done');
+    var r = R[type];
+    $('quiz').hidden = true; $('result').hidden = false; window.scrollTo(0, 0);
+    $('rimg').src = '../m/ny6/' + r[1]; $('rimg').alt = r[0];
+    $('rhead').innerHTML = 'Ваш результат – <span>«' + r[0] + '»</span>';
+    $('rtext').textContent = r[2];
+    var now = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10), f = F[F.length - 1];
+    for (var k = 0; k < F.length; k++) { if (now <= F[k][2]) { f = F[k]; break; } }
+    $('otitle').textContent = f[0] + ' с тренером – старт ' + f[1];
+    $('olist').textContent = OL;
+    $('odeadline').textContent = 'Приём заявок до ' + f[3] + '.';
+    var ref = ('ny_web_' + type + '_' + src).slice(0, 64);
+    var vk = 'https://vk.me/lite_fit_online?ref=' + encodeURIComponent(ref) + '&ref_source=web_test';
+    var tg = 'https://t.me/LiteFitClientBot?start=' + ref;
+    go($('tovk'), vk, 'ny_web_vk'); go($('totg'), tg, 'ny_web_tg');
+  }
+  function go(a, url, goal) {
+    a.href = url;
+    a.onclick = function (e) { e.preventDefault(); tmrGoal(goal); setTimeout(function () { location.href = url; }, 350); };
+  }
+})();
+</script>
+</body>
+</html>

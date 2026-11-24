@@ -42,7 +42,12 @@
     if (!out.get('ref')) out.set('ref', 'go_site');
     var ref = out.get('ref');
     var url = 'https://vk.me/lite_fit_online?' + out.toString();
-    if (/^ny[_-]/i.test(ref)) {                                         // NY6: выбор, где пройти тест – без автоперехода
+    if (/^ny[_-]/i.test(ref) && q.get('choice') !== '1') {               // NY6 (с 24.11): тест прямо на странице
+      tmrGoal('ny_go_page');
+      location.replace('../test/?ref=' + encodeURIComponent(ref));
+      return;
+    }
+    if (/^ny[_-]/i.test(ref)) {                                         // NY6: старый экран выбора (?choice=1)
       var tg = 'https://t.me/LiteFitClientBot?start=' + encodeURIComponent(ref.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64));
       document.title = 'Lite Fit – тест за 2 минуты';
       document.querySelector('h1').innerHTML = '6 недель с тренером – <span>тест за 2 минуты</span>';
