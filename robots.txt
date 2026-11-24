@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /trening/
+Disallow: /trening-trainer/
+Disallow: /cabinet/
+Disallow: /trainer/
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&src&ref&from&yclid&fbclid
+
+Sitemap: https://www.litefitonline.ru/sitemap.xml
