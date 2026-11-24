@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>xfer</title>
+<script>
+(async()=>{const p=new URLSearchParams(location.search);const f=p.get('f');
+try{const b=await (await fetch(f,{cache:'no-store'})).arrayBuffer();
+ (window.opener||window.parent).postMessage({xfer:true,name:f.split('/').pop(),buf:b},'*',[b]);document.body.textContent='sent '+b.byteLength;}
+catch(e){document.body.textContent='err '+e;}})();
+</script>
