@@ -45,15 +45,11 @@
 <main>
   <div class="logo">Lite Fit</div>
 
-  <section id="intro">
-    <img class="hero" src="../m/ny6/offer_6_nedel.jpg" alt="Тренеры Lite Fit">
-    <h1>6 недель с тренером – <span>до Нового года</span></h1>
-    <p>7 вопросов, 2 минуты – и Вы узнаете, что мешает именно Вам и с чего начать. Прямо здесь, без регистрации.</p>
-    <button class="btn" id="start">Пройти тест</button>
-    <small>Занятия по 30–45 минут дома или в зале · Lite Fit, тренеры из Балашихи</small>
-  </section>
-
-  <section id="quiz" hidden>
+  <div id="lead" style="margin:-6px 0 16px">
+    <h1 style="font-size:22px;margin-bottom:6px">6 недель с тренером – <span>до Нового года</span></h1>
+    <p style="font-size:14px;margin:0">Тест за 2 минуты: 7 вопросов – и узнаете, что мешает именно Вам. Без регистрации.</p>
+  </div>
+  <section id="quiz">
     <div class="step" id="step"></div>
     <div class="bar"><i id="bar"></i></div>
     <h2 id="q"></h2>
@@ -104,7 +100,8 @@
   var $ = function (id) { return document.getElementById(id); };
   tmrGoal('ny_web_open');
 
-  $('start').onclick = function () { tmrGoal('ny_web_start'); $('intro').hidden = true; $('quiz').hidden = false; show(); window.scrollTo(0, 0); };
+  var started = false;
+  show();
 
   function show() {
     $('step').textContent = 'Вопрос ' + (i + 1) + ' из ' + Q.length;
@@ -115,6 +112,7 @@
       var b = document.createElement('button'); b.className = 'opt'; b.textContent = o[0];
       b.onclick = function () {
         (o[1] || '').split(' ').forEach(function (p) { if (p) score[p[0]] += +p.slice(1); });
+        if (!started) { started = true; tmrGoal('ny_web_start'); }
         i++; if (i === 4) tmrGoal('ny_web_q4');
         if (i < Q.length) { show(); window.scrollTo(0, 0); } else finish();
       };
@@ -127,7 +125,7 @@
     ['S', 'E', 'T', 'B'].forEach(function (k) { if (score[k] > best) { best = score[k]; type = k; } });
     tmrGoal('ny_web_done');
     var r = R[type];
-    $('quiz').hidden = true; $('result').hidden = false; window.scrollTo(0, 0);
+    $('quiz').hidden = true; $('lead').hidden = true; $('result').hidden = false; window.scrollTo(0, 0);
     $('rimg').src = '../m/ny6/' + r[1]; $('rimg').alt = r[0];
     $('rhead').innerHTML = 'Ваш результат – <span>«' + r[0] + '»</span>';
     $('rtext').textContent = r[2];
